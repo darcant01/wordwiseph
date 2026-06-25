@@ -775,27 +775,79 @@ async function loadProfile() {
 
 // ── PRICING & PAYMENT ─────────────────────────────
 function choosePlan(plan,price) {
-  if(!CU){ navTo('login'); return; }
+  if(!CU){ 
+    // Save plan selection then redirect to login
+    selectedPlan=plan; selectedPlanPrice=price;
+    alert('Please login or create an account first to subscribe!');
+    navTo('login'); 
+    return; 
+  }
   if(CU.role==='admin'){ alert('Admin accounts do not need a subscription.'); return; }
-  selectedPlan=plan; selectedPlanPrice=price;
+  selectedPlan=plan; 
+  selectedPlanPrice=price;
   document.getElementById('pay-hero-sub').textContent=(plan==='basic'?'Basic Plan — ₱99':'Premium Plan — ₱199')+'/month';
   document.getElementById('gcash-ref').value='';
-  document.getElementById('pay-err').style.display='none';
+  document.getElementById('pay-err').classList.remove('show');
   navTo('payment');
 }
 async function submitPayment() {
-  const ref=document.getElementById('gcash-ref').value.trim();
-  const e=document.getElementById('pay-err');
-  e.classList.remove('show');
-  if(!CU){navTo('login');return;}
-  if(!ref||ref.length<6){e.textContent='Please enter a valid GCash reference number (min 6 digits)!';e.classList.add('show');return;}
-  if(!selectedPlan){e.textContent='Please select a plan first!';e.classList.add('show');return;}
-  showLoader('Submitting payment...');
-  const res=await api({action:'submitPayment',username:CU.username,name:CU.name,plan:selectedPlan,price:selectedPlanPrice,reference:ref,date:new Date().toLocaleDateString()});
+  const ref = document.getElementById('gcash-ref').value.trim();
+  const errEl = document.getElementById('pay-err');
+  
+  // Reset error
+  errEl.classList.remove('show');
+  errEl.style.display = '';
+  
+  // Validation checks
+  if(!CU) {
+    errEl.textContent = 'Please login first to submit a payment!';
+    errEl.classList.add('show');
+    return;
+  }
+  if(!ref || ref.length < 6) {
+    errEl.textContent = 'Please enter your GCash reference number (min 6 digits)!';
+    errEl.classList.add('show');
+    return;
+  }
+  if(!selectedPlan) {
+    errEl.textContent = 'No plan selected. Please go back and choose a plan!';
+    errEl.classList.add('show');
+    return;
+  }
+
+  showLoader('Submitting payment... please wait');
+  
+  const payload = {
+    action: 'submitPayment',
+    username: CU.username,
+    name: CU.name,
+    plan: selectedPlan,
+    price: selectedPlanPrice,
+    reference: ref,
+    date: new Date().toLocaleDateString('en-PH')
+  };
+  
+  console.log('Submitting payment:', payload);
+  
+  const res = await api(payload);
   hideLoader();
-  if(!res.success){e.textContent=res.error||'Submission failed. Please try again.';e.classList.add('show');return;}
-  CU.subscription='pending'; buildHeader();
-  alert('✅ Payment submitted! Our admin will verify within 24 hours. Thank you!');
+  
+  console.log('Payment response:', res);
+  
+  if(!res.success) {
+    errEl.textContent = res.error || 'Submission failed. Please check your connection and try again.';
+    errEl.classList.add('show');
+    return;
+  }
+  
+  // Success
+  CU.subscription = 'pending';
+  buildHeader();
+  document.getElementById('gcash-ref').value = '';
+  selectedPlan = null;
+  selectedPlanPrice = 0;
+  
+  alert('✅ Payment submitted successfully!\n\nOur admin will verify your GCash payment within 24 hours and activate your plan.\n\nThank you for subscribing to WordWise PH!');
   navTo('profile');
 }
 
