@@ -60,6 +60,31 @@ function setup() {
   return "Setup complete! All 5 sheets created.";
 }
 
+// ── EMAIL CONFIG ───────────────────────────────────────────
+const ADMIN_EMAIL = "darcant01@gmail.com"; // Your email here
+
+function sendAdminEmail(subject, body) {
+  try {
+    MailApp.sendEmail({
+      to: ADMIN_EMAIL,
+      subject: "WordWise PH | " + subject,
+      htmlBody: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+          <div style="background:#1D2B55;padding:20px;border-radius:12px 12px 0 0;text-align:center">
+            <h2 style="color:#FAC775;margin:0">WordWise PH</h2>
+            <p style="color:#B5D4F4;margin:4px 0 0">Admin Notification</p>
+          </div>
+          <div style="background:#fff;padding:24px;border:1px solid #F4C0D1;border-top:none;border-radius:0 0 12px 12px">
+            ${body}
+          </div>
+          <p style="text-align:center;color:#888780;font-size:12px;margin-top:12px">WordWise PH · darcant01.github.io/wordwiseph</p>
+        </div>`
+    });
+  } catch(e) {
+    Logger.log("Email error: " + e.toString());
+  }
+}
+
 // ── MAIN ROUTER ────────────────────────────────────────────
 function doPost(e) {
   try {
@@ -126,6 +151,17 @@ function register(data) {
   const joined = new Date().toLocaleDateString();
   sheet.appendRow([newId, data.name, data.username, data.password, data.type, "user", joined, 0, 0, "free"]);
   logActivity({message: data.name + " created an account (" + data.type + ")"});
+  // Notify admin of new registration
+  sendAdminEmail(
+    "👤 New User Registered",
+    `<h3 style="color:#1D2B55">New Account Created</h3>
+    <table style="width:100%;border-collapse:collapse">
+      <tr><td style="padding:8px;font-weight:bold;color:#888">Name</td><td style="padding:8px">${data.name}</td></tr>
+      <tr style="background:#FFF8F0"><td style="padding:8px;font-weight:bold;color:#888">Username</td><td style="padding:8px">@${data.username}</td></tr>
+      <tr><td style="padding:8px;font-weight:bold;color:#888">Type</td><td style="padding:8px">${data.type}</td></tr>
+      <tr style="background:#FFF8F0"><td style="padding:8px;font-weight:bold;color:#888">Joined</td><td style="padding:8px">${new Date().toLocaleDateString()}</td></tr>
+    </table>`
+  );
   return {
     success: true,
     user: {id:newId, name:data.name, username:data.username, type:data.type, role:"user", joined, rounds:0, best:0, subscription:"free"}
@@ -207,6 +243,24 @@ function submitPayment(data) {
   const id = sheet.getLastRow();
   sheet.appendRow([id, data.name, data.username, data.plan, data.price, data.reference, data.date, "pending"]);
   logActivity({message: data.name + " submitted " + data.plan + " payment (ref: " + data.reference + ")"});
+  // Send email to admin
+  sendAdminEmail(
+    "💳 New Payment Submitted!",
+    `<h3 style="color:#1D2B55">New Payment Request</h3>
+    <table style="width:100%;border-collapse:collapse">
+      <tr><td style="padding:8px;font-weight:bold;color:#888">Name</td><td style="padding:8px;color:#1D2B55">${data.name}</td></tr>
+      <tr style="background:#FFF8F0"><td style="padding:8px;font-weight:bold;color:#888">Username</td><td style="padding:8px;color:#1D2B55">@${data.username}</td></tr>
+      <tr><td style="padding:8px;font-weight:bold;color:#888">Plan</td><td style="padding:8px;color:#D4537E;font-weight:bold">${data.plan.toUpperCase()} — ₱${data.price}/month</td></tr>
+      <tr style="background:#FFF8F0"><td style="padding:8px;font-weight:bold;color:#888">GCash Ref #</td><td style="padding:8px;color:#FAC775;font-weight:bold;font-size:18px">${data.reference}</td></tr>
+      <tr><td style="padding:8px;font-weight:bold;color:#888">Date</td><td style="padding:8px;color:#1D2B55">${data.date}</td></tr>
+    </table>
+    <div style="margin-top:16px;padding:14px;background:#FAEEDA;border-radius:8px;border-left:4px solid #BA7517">
+      <strong>⚡ Action Required:</strong> Log in to the Admin Panel to approve or reject this payment.
+    </div>
+    <div style="margin-top:14px;text-align:center">
+      <a href="https://darcant01.github.io/wordwiseph/" style="background:#D4537E;color:#fff;padding:12px 28px;border-radius:99px;text-decoration:none;font-weight:bold;display:inline-block">Open Admin Panel</a>
+    </div>`
+  );
   // Update user subscription to pending
   const users = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_USERS);
   const uRows = users.getDataRange().getValues();
@@ -259,6 +313,18 @@ function approvePayment(data) {
 
   const action = data.approve ? "approved" : "rejected";
   logActivity({message: "Admin " + action + " " + data.plan + " payment for @" + data.username});
+  // Notify user via email (if we had their email — log for now)
+  // Send confirmation to admin
+  sendAdminEmail(
+    data.approve ? "✅ Payment Approved" : "❌ Payment Rejected",
+    `<h3 style="color:#1D2B55">Payment ${data.approve ? 'Approved' : 'Rejected'}</h3>
+    <p>You have ${data.approve ? '<strong style="color:#1D9E75">approved</strong>' : '<strong style="color:#E24B4A">rejected</strong>'} the payment for:</p>
+    <table style="width:100%;border-collapse:collapse;margin-top:10px">
+      <tr><td style="padding:8px;font-weight:bold;color:#888">Username</td><td style="padding:8px">@${data.username}</td></tr>
+      <tr style="background:#FFF8F0"><td style="padding:8px;font-weight:bold;color:#888">Plan</td><td style="padding:8px">${data.plan}</td></tr>
+      <tr><td style="padding:8px;font-weight:bold;color:#888">Reference</td><td style="padding:8px">${data.reference}</td></tr>
+    </table>`
+  );
   return {success:true};
 }
 
