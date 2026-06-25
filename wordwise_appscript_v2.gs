@@ -88,29 +88,34 @@ function sendAdminEmail(subject, body) {
 // ── MAIN ROUTER ────────────────────────────────────────────
 function doPost(e) {
   try {
-    const data = JSON.parse(e.postData.contents);
+    const raw = e.postData ? e.postData.contents : '{}';
+    const data = JSON.parse(raw);
     const action = data.action;
     let result;
     switch(action){
-      case "login":            result = login(data); break;
-      case "register":         result = register(data); break;
-      case "saveScore":        result = saveScore(data); break;
-      case "getScores":        result = getScores(data); break;
-      case "getProfile":       result = getProfile(data); break;
-      case "logActivity":      result = logActivity(data); break;
-      case "adminData":        result = getAdminData(); break;
-      case "clearActivity":    result = clearActivity(); break;
-      case "submitPayment":    result = submitPayment(data); break;
+      case "login":              result = login(data); break;
+      case "register":           result = register(data); break;
+      case "saveScore":          result = saveScore(data); break;
+      case "getScores":          result = getScores(data); break;
+      case "getProfile":         result = getProfile(data); break;
+      case "logActivity":        result = logActivity(data); break;
+      case "adminData":          result = getAdminData(); break;
+      case "clearActivity":      result = clearActivity(); break;
+      case "submitPayment":      result = submitPayment(data); break;
       case "getPendingPayments": result = getPendingPayments(); break;
-      case "approvePayment":   result = approvePayment(data); break;
-      case "addChild":         result = addChild(data); break;
-      case "getChildren":      result = getChildren(data); break;
+      case "approvePayment":     result = approvePayment(data); break;
+      case "addChild":           result = addChild(data); break;
+      case "getChildren":        result = getChildren(data); break;
       default: result = {success:false, error:"Unknown action: "+action};
     }
     return respond(result);
   } catch(err) {
-    return respond({success:false, error:err.toString()});
+    return respond({success:false, error:"Server error: "+err.toString()});
   }
+}
+
+function doOptions(e) {
+  return respond({success:true, message:"OK"});
 }
 
 function doGet(e) {
@@ -234,11 +239,18 @@ function clearActivity() {
 
 // ── PAYMENTS: SUBMIT ────────────────────────────────────────
 function submitPayment(data) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_PAYMENTS);
-  const rows  = sheet.getDataRange().getValues();
+  // Auto-create Payments sheet if it doesn't exist
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(SHEET_PAYMENTS);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_PAYMENTS);
+    sheet.appendRow(["ID","Name","Username","Plan","Price","Reference","Date","Status"]);
+    sheet.setFrozenRows(1);
+  }
+  const rows = sheet.getDataRange().getValues();
   // Check for duplicate reference number
   for (let i = 1; i < rows.length; i++) {
-    if (rows[i][5] === data.reference) return {success:false, error:"This reference number has already been submitted!"};
+    if (String(rows[i][5]) === String(data.reference)) return {success:false, error:"This reference number has already been submitted!"};
   }
   const id = sheet.getLastRow();
   sheet.appendRow([id, data.name, data.username, data.plan, data.price, data.reference, data.date, "pending"]);
