@@ -249,7 +249,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div class="divider">or</div>
       <button class="btn btn-out btn-block" onclick="navTo('register')" style="margin-bottom:14px">Create an Account</button>
       <div style="text-align:center"><button class="lnk" onclick="guestPlay()">Continue as Guest</button></div>
-      <div style="text-align:center;margin-top:12px;font-size:12px;color:#888780">Admin: <b>admin</b> / <b>wordwise2024</b></div>
+
     </div>
   </div>
 </div>
@@ -449,8 +449,8 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <input type="text" id="child-uname" placeholder="Child's username" style="width:100%;font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;padding:12px 14px;border-radius:12px;border:2px solid var(--lp);background:#FFF8F0;color:var(--navy);outline:none"/>
       </div>
       <button class="btn btn-pink" onclick="addChild()">Link Account</button>
-      <div class="err" id="child-err" style="margin-top:10px;display:none"></div>
-      <div class="okmsg" id="child-ok" style="margin-top:10px;display:none"></div>
+      <div class="err" id="child-err" style="margin-top:10px"></div>
+      <div class="okmsg" id="child-ok" style="margin-top:10px"></div>
     </div>
   </div>
 </div>
@@ -509,9 +509,19 @@ let aCtx = null;
 // ── API ──────────────────────────────────────────
 async function api(data) {
   try {
-    const r = await fetch(GAS, {method:'POST', body:JSON.stringify(data), headers:{'Content-Type':'application/json'}});
-    return await r.json();
-  } catch(e) { return {success:false, error:e.toString()}; }
+    // Google Apps Script requires redirect:follow for POST requests
+    const r = await fetch(GAS, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {'Content-Type': 'text/plain'},
+      redirect: 'follow'
+    });
+    const text = await r.text();
+    try { return JSON.parse(text); }
+    catch(pe) { return {success:false, error:'Invalid response: '+text.slice(0,100)}; }
+  } catch(e) {
+    return {success:false, error:'Network error: '+e.toString()};
+  }
 }
 
 // ── LOADER ───────────────────────────────────────
@@ -582,12 +592,12 @@ async function doLogin() {
   const u = document.getElementById('luser').value.trim();
   const p = document.getElementById('lpass').value;
   const e = document.getElementById('lerr');
-  e.style.display = 'none';
-  if (!u||!p) { e.textContent='Please fill in both fields!'; e.style.display='block'; return; }
+  e.classList.remove('show');
+  if (!u||!p) { e.textContent='Please fill in both fields!'; e.classList.add('show'); return; }
   showLoader('Logging in...');
   const res = await api({action:'login', username:u, password:p});
   hideLoader();
-  if (!res.success) { e.textContent = res.error||'Wrong username or password!'; e.style.display='block'; return; }
+  if (!res.success) { e.textContent = res.error||'Wrong username or password!'; e.classList.add('show'); return; }
   CU = res.user;
   api({action:'logActivity', message:CU.name+' logged in'});
   buildHeader();
@@ -600,14 +610,14 @@ async function doReg() {
   const pass = document.getElementById('rpass').value;
   const type = document.getElementById('rtype').value;
   const e = document.getElementById('rerr'), ok = document.getElementById('rok');
-  e.style.display='none'; ok.style.display='none';
-  if (!name||!user||!pass) { e.textContent='Please fill in all fields!'; e.style.display='block'; return; }
-  if (pass.length < 4) { e.textContent='Password must be at least 4 characters!'; e.style.display='block'; return; }
+  e.classList.remove('show'); ok.classList.remove('show');
+  if (!name||!user||!pass) { e.textContent='Please fill in all fields!'; e.classList.add('show'); return; }
+  if (pass.length < 4) { e.textContent='Password must be at least 4 characters!'; e.classList.add('show'); return; }
   showLoader('Creating account...');
   const res = await api({action:'register', name, username:user, password:pass, type});
   hideLoader();
-  if (!res.success) { e.textContent = res.error||'Registration failed!'; e.style.display='block'; return; }
-  ok.textContent = '✅ Account created! You can now login.'; ok.style.display='block';
+  if (!res.success) { e.textContent = res.error||'Registration failed!'; e.classList.add('show'); return; }
+  ok.textContent = '✅ Account created! You can now login.'; ok.classList.add('show');
   setTimeout(() => navTo('login'), 1400);
 }
 
@@ -776,14 +786,14 @@ function choosePlan(plan,price) {
 async function submitPayment() {
   const ref=document.getElementById('gcash-ref').value.trim();
   const e=document.getElementById('pay-err');
-  e.style.display='none';
+  e.classList.remove('show');
   if(!CU){navTo('login');return;}
-  if(!ref||ref.length<6){e.textContent='Please enter a valid GCash reference number (min 6 digits)!';e.style.display='block';return;}
-  if(!selectedPlan){e.textContent='Please select a plan first!';e.style.display='block';return;}
+  if(!ref||ref.length<6){e.textContent='Please enter a valid GCash reference number (min 6 digits)!';e.classList.add('show');return;}
+  if(!selectedPlan){e.textContent='Please select a plan first!';e.classList.add('show');return;}
   showLoader('Submitting payment...');
   const res=await api({action:'submitPayment',username:CU.username,name:CU.name,plan:selectedPlan,price:selectedPlanPrice,reference:ref,date:new Date().toLocaleDateString()});
   hideLoader();
-  if(!res.success){e.textContent=res.error||'Submission failed. Please try again.';e.style.display='block';return;}
+  if(!res.success){e.textContent=res.error||'Submission failed. Please try again.';e.classList.add('show');return;}
   CU.subscription='pending'; buildHeader();
   alert('✅ Payment submitted! Our admin will verify within 24 hours. Thank you!');
   navTo('profile');
@@ -838,13 +848,13 @@ async function loadParent() {
 async function addChild() {
   const uname=document.getElementById('child-uname').value.trim();
   const e=document.getElementById('child-err'), ok=document.getElementById('child-ok');
-  e.style.display='none'; ok.style.display='none';
-  if(!uname){e.textContent='Please enter a username!';e.style.display='block';return;}
+  e.classList.remove('show'); ok.classList.remove('show');
+  if(!uname){e.textContent='Please enter a username!';e.classList.add('show');return;}
   showLoader('Linking child account...');
   const res=await api({action:'addChild',parentUsername:CU.username,childUsername:uname});
   hideLoader();
-  if(!res.success){e.textContent=res.error||'Could not link. Check the username!';e.style.display='block';return;}
-  ok.textContent='✅ Child account linked!'; ok.style.display='block';
+  if(!res.success){e.textContent=res.error||'Could not link. Check the username!';e.classList.add('show');return;}
+  ok.textContent='✅ Child account linked!'; ok.classList.add('show');
   document.getElementById('child-uname').value='';
   setTimeout(()=>loadParent(),1000);
 }
