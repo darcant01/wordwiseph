@@ -301,6 +301,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <button class="atab" onclick="aTab('us',this)">Users</button>
       <button class="atab" onclick="aTab('sc',this)">All Scores</button>
       <button class="atab" onclick="aTab('ac',this)">Activity Log</button>
+      <button class="atab" onclick="aTab('pay',this)">💳 Payments</button>
     </div>
     <div id="a-ov">
       <div class="sgrid" id="astats"></div>
@@ -321,6 +322,137 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div class="sectitle">Activity Log</div>
       <div class="card" id="alog"></div>
       <button class="clrbtn" onclick="clearAct()">Clear activity log</button>
+    </div>
+    <div id="a-pay" style="display:none">
+      <div class="sectitle">Payment Requests</div>
+      <div style="font-size:13px;color:#5F5E5A;font-weight:700;margin-bottom:12px">Review and approve or reject GCash payment submissions below.</div>
+      <div style="overflow-x:auto"><table class="atable"><thead><tr><th>#</th><th>Name</th><th>Username</th><th>Plan</th><th>Amount</th><th>GCash Ref</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody id="pay-tbody"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- PRICING -->
+<div id="sc-pricing" class="screen">
+  <div class="hero"><div class="htitle">Choose Your <span>Plan</span></div><div class="hsub">Unlock unlimited learning for your child!</div></div>
+  <div class="wrap">
+    <div class="plan-grid">
+      <div class="plan-card">
+        <div class="plan-icon">🌱</div>
+        <div class="plan-name">Free</div>
+        <div class="plan-price">₱0 <span>/mo</span></div>
+        <div class="plan-period">Forever free</div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="plan-feat"><span class="pf-icon">✅</span>5 questions per round</div>
+          <div class="plan-feat"><span class="pf-icon">✅</span>Easy level only</div>
+          <div class="plan-feat"><span class="pf-icon">✅</span>Public leaderboard</div>
+          <div class="plan-feat no"><span class="pf-icon">❌</span>Parent dashboard</div>
+          <div class="plan-feat no"><span class="pf-icon">❌</span>Progress tracking</div>
+          <div class="plan-feat no"><span class="pf-icon">❌</span>All difficulty levels</div>
+          <div class="plan-feat no"><span class="pf-icon">❌</span>Score history</div>
+        </div>
+        <button class="btn btn-outline btn-block" onclick="SS('start')">Continue Free</button>
+      </div>
+      <div class="plan-card popular">
+        <div class="plan-badge">⭐ MOST POPULAR</div>
+        <div class="plan-icon">⚡</div>
+        <div class="plan-name">Basic</div>
+        <div class="plan-price">₱99 <span>/mo</span></div>
+        <div class="plan-period">Per child account</div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="plan-feat"><span class="pf-icon">✅</span>1,045 questions (all levels)</div>
+          <div class="plan-feat"><span class="pf-icon">✅</span>Easy, Medium & Hard levels</div>
+          <div class="plan-feat"><span class="pf-icon">✅</span>Full score history</div>
+          <div class="plan-feat"><span class="pf-icon">✅</span>Parent dashboard (1 child)</div>
+          <div class="plan-feat"><span class="pf-icon">✅</span>Progress tracking</div>
+          <div class="plan-feat"><span class="pf-icon">✅</span>Public leaderboard</div>
+          <div class="plan-feat no"><span class="pf-icon">❌</span>Multiple children</div>
+        </div>
+        <button class="btn btn-pink btn-block" onclick="selectPlan('basic',99)">Get Basic — ₱99/mo</button>
+      </div>
+      <div class="plan-card">
+        <div class="plan-icon">🔥</div>
+        <div class="plan-name">Premium</div>
+        <div class="plan-price">₱199 <span>/mo</span></div>
+        <div class="plan-period">Up to 5 children</div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="plan-feat"><span class="pf-icon">✅</span>Everything in Basic</div>
+          <div class="plan-feat"><span class="pf-icon">✅</span>Up to 5 child accounts</div>
+          <div class="plan-feat"><span class="pf-icon">✅</span>Advanced parent dashboard</div>
+          <div class="plan-feat"><span class="pf-icon">✅</span>Detailed progress reports</div>
+          <div class="plan-feat"><span class="pf-icon">✅</span>Priority support</div>
+          <div class="plan-feat"><span class="pf-icon">✅</span>Early access to new features</div>
+          <div class="plan-feat"><span class="pf-icon">✅</span>Ad-free experience</div>
+        </div>
+        <button class="btn btn-navy btn-block" onclick="selectPlan('premium',199)">Get Premium — ₱199/mo</button>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780;margin-top:4px">
+      🔒 Secure payment via GCash · Cancel anytime · No hidden fees
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT -->
+<div id="sc-payment" class="screen">
+  <div class="hero"><div class="htitle">Complete <span>Payment</span></div><div class="hsub" id="pay-hero-sub">Basic Plan — ₱99/month</div></div>
+  <div class="wrap" style="max-width:500px">
+    <div class="pay-step">
+      <div class="pay-step-title"><span class="pay-step-num">1</span>Send payment via GCash</div>
+      <div class="qr-box">
+        <div style="font-size:13px;color:var(--blue);font-weight:700;margin-bottom:6px">Send to this GCash number:</div>
+        <div class="qr-number">09XX-XXX-XXXX</div>
+        <div class="qr-name">WordWise PH / Darcant</div>
+        <div style="margin-top:10px;font-size:clamp(28px,8vw,48px)">📱</div>
+        <div style="font-size:11px;color:var(--blue);margin-top:6px;font-weight:700">Take a screenshot of your receipt!</div>
+      </div>
+      <div style="background:#EEEDFE;border-radius:10px;padding:10px 14px;font-size:13px;color:#3C3489;font-weight:700;margin-top:10px">
+        💡 In GCash, set the <strong>Note/Message</strong> to your <strong>username</strong> so we can identify your payment quickly!
+      </div>
+    </div>
+    <div class="pay-step">
+      <div class="pay-step-title"><span class="pay-step-num">2</span>Enter your GCash reference number</div>
+      <input class="ref-input" id="gcash-ref" type="text" placeholder="e.g. 1234567890" maxlength="20"/>
+      <div style="font-size:12px;color:#888780;font-weight:700;margin-top:6px">Found in your GCash SMS or app notification</div>
+    </div>
+    <div class="pay-step">
+      <div class="pay-step-title"><span class="pay-step-num">3</span>Submit for verification</div>
+      <div style="font-size:13px;color:#5F5E5A;font-weight:700;margin-bottom:12px;line-height:1.6">Our admin will verify your payment within <strong>24 hours</strong> and activate your plan. You'll be able to see your status in your profile.</div>
+      <div class="err" id="pay-err"></div>
+      <button class="btn btn-pink btn-block" onclick="submitPayment()">Submit Payment</button>
+    </div>
+    <div style="text-align:center;margin-top:8px">
+      <button class="lnk" onclick="SS('pricing')">← Back to plans</button>
+    </div>
+
+    <div style="margin-top:20px;background:var(--n2);border-radius:14px;padding:16px;text-align:center">
+      <div style="font-size:13px;font-weight:800;color:var(--gold);margin-bottom:6px">🚀 Coming Soon: Auto-pay with PayMongo</div>
+      <div style="font-size:12px;color:var(--blue);font-weight:700;line-height:1.6">We are setting up PayMongo for automatic GCash, Maya, and card payments. Once live, your plan will auto-renew every month with zero hassle!</div>
+    </div>
+  </div>
+</div>
+
+<!-- PARENT DASHBOARD -->
+<div id="sc-parent" class="screen">
+  <div class="hero"><div class="htitle">Parent <span>Dashboard</span></div><div class="hsub" id="parent-sub">Monitor your child's progress</div></div>
+  <div class="wrap">
+    <div class="card" id="parent-sub-status"></div>
+    <div class="slbl">Your Children's Progress</div>
+    <div id="children-list"></div>
+    <div class="card" style="text-align:center" id="add-child-card">
+      <div style="font-size:32px;margin-bottom:8px">👶</div>
+      <div class="ctitle">Add a Child Account</div>
+      <div class="csub">Link your child's username to monitor their progress here.</div>
+      <div class="field" style="max-width:300px;margin:0 auto 14px">
+        <label>Child's Username</label>
+        <input type="text" id="child-username" placeholder="Enter child's username" style="width:100%;font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;padding:12px 14px;border-radius:12px;border:2px solid var(--lp);background:#FFF8F0;color:var(--navy);outline:none"/>
+      </div>
+      <button class="btn btn-pink" onclick="addChild()">Link Child Account</button>
+      <div class="err" id="child-err" style="margin-top:10px"></div>
+      <div class="okmsg" id="child-ok" style="margin-top:10px"></div>
     </div>
   </div>
 </div>
@@ -354,7 +486,59 @@ function showLoader(msg='Loading...'){
     el = document.createElement('div');
     el.id = 'loader-overlay';
     el.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(29,43,85,0.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
-    el.innerHTML='<div style="width:50px;height:50px;border:5px solid #B5D4F4;border-top-color:#FAC775;border-radius:50%;animation:spin 0.8s linear infinite"></div><div id="loader-msg" style="color:#F4C0D1;font-family:Nunito,sans-serif;font-size:18px;font-weight:800"></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+    el.innerHTML='<div style="width:50px;height:50px;border:5px solid #B5D4F4;border-top-color:#FAC775;border-radius:50%;animation:spin 0.8s linear infinite"></div><div id="loader-msg" style="color:#F4C0D1;font-family:Nunito,sans-serif;font-size:18px;font-weight:800"></div><style>@keyframes spin{to{transform:rotate(360deg)}}
+/* ── SUBSCRIPTION PLANS ── */
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:clamp(10px,2vw,18px);margin-bottom:20px}
+.plan-card{border-radius:clamp(14px,3vw,20px);border:2.5px solid var(--lp);background:#fff;padding:clamp(16px,3vw,26px);text-align:center;position:relative;transition:all 0.2s}
+.plan-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(29,43,85,0.12)}
+.plan-card.popular{border-color:var(--pink);box-shadow:0 0 0 3px rgba(212,83,126,0.15)}
+.plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--pink);color:#fff;font-size:11px;font-weight:800;padding:4px 14px;border-radius:99px;white-space:nowrap;letter-spacing:1px}
+.plan-icon{font-size:clamp(28px,6vw,40px);margin-bottom:8px}
+.plan-name{font-size:clamp(16px,4vw,22px);font-weight:900;color:var(--navy);margin-bottom:4px}
+.plan-price{font-size:clamp(26px,6vw,38px);font-weight:900;color:var(--pink);margin:8px 0 2px}
+.plan-price span{font-size:clamp(12px,3vw,15px);font-weight:700;color:#888780}
+.plan-period{font-size:clamp(11px,2.5vw,13px);color:#888780;font-weight:700;margin-bottom:14px}
+.plan-features{text-align:left;margin-bottom:18px}
+.plan-feat{display:flex;align-items:flex-start;gap:8px;font-size:clamp(12px,3vw,14px);color:var(--navy);font-weight:700;margin-bottom:8px;line-height:1.4}
+.plan-feat .pf-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.plan-feat.no{color:#B4B2A9}
+.plan-divider{height:1.5px;background:var(--lp);border-radius:1px;margin:14px 0}
+/* PAYMENT */
+.pay-step{background:#fff;border-radius:clamp(12px,3vw,18px);border:2px solid var(--lp);padding:clamp(14px,3vw,22px);margin-bottom:14px}
+.pay-step-num{width:28px;height:28px;border-radius:50%;background:var(--pink);color:#fff;font-size:13px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;margin-right:8px;flex-shrink:0}
+.pay-step-title{font-size:clamp(14px,3.5vw,17px);font-weight:900;color:var(--navy);display:flex;align-items:center;margin-bottom:10px}
+.qr-box{background:var(--n2);border-radius:14px;padding:16px;text-align:center;margin:10px 0}
+.qr-number{font-size:clamp(18px,5vw,28px);font-weight:900;color:var(--gold);letter-spacing:2px;margin:8px 0}
+.qr-name{font-size:clamp(12px,3vw,14px);color:var(--blue);font-weight:700}
+.ref-input{width:100%;font-family:'Nunito',sans-serif;font-size:clamp(14px,3.5vw,17px);font-weight:700;padding:clamp(11px,2.5vw,14px) clamp(12px,3vw,16px);border-radius:12px;border:2px solid var(--lp);background:#FFF8F0;color:var(--navy);outline:none;transition:border 0.2s;margin-top:6px}
+.ref-input:focus{border-color:var(--pink)}
+.pending-box{background:#FAEEDA;border:1.5px solid var(--amber);border-radius:12px;padding:12px 16px;font-size:13px;font-weight:700;color:#412402;margin-top:10px}
+.active-box{background:#E1F5EE;border:1.5px solid var(--green);border-radius:12px;padding:12px 16px;font-size:13px;font-weight:700;color:#085041;margin-top:10px}
+/* PARENT DASHBOARD */
+.child-card{background:#fff;border-radius:clamp(12px,3vw,18px);border:2px solid var(--lp);padding:clamp(14px,3vw,20px);margin-bottom:12px;transition:all 0.2s}
+.child-card:hover{border-color:var(--pink)}
+.child-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.child-av{width:clamp(36px,8vw,48px);height:clamp(36px,8vw,48px);border-radius:50%;background:var(--pink);display:flex;align-items:center;justify-content:center;font-size:clamp(14px,3vw,20px);font-weight:900;color:#fff;flex-shrink:0}
+.child-info{flex:1}
+.child-name{font-size:clamp(14px,3.5vw,18px);font-weight:900;color:var(--navy)}
+.child-meta{font-size:clamp(11px,2.5vw,13px);color:#888780;font-weight:700}
+.child-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.cs-box{background:var(--bg);border-radius:10px;padding:8px;text-align:center;border:1.5px solid var(--lp)}
+.cs-num{font-size:clamp(18px,4vw,24px);font-weight:900;color:var(--pink)}
+.cs-lbl{font-size:clamp(9px,2vw,11px);font-weight:700;color:#888780;text-transform:uppercase;letter-spacing:0.5px}
+.progress-mini{background:#F4C0D1;border-radius:99px;height:8px;margin:4px 0;overflow:hidden}
+.progress-mini-bar{height:8px;border-radius:99px;background:var(--green);transition:width 0.5s}
+.sub-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px}
+.sub-status.active{background:#E1F5EE;color:#085041}
+.sub-status.pending{background:#FAEEDA;color:#412402}
+.sub-status.free{background:#F1EFE8;color:#444441}
+.sub-status.expired{background:#FCEBEB;color:#791F1F}
+/* ADMIN PAYMENT TABLE */
+.pay-approve-btn{font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;padding:4px 12px;border-radius:99px;border:none;cursor:pointer;transition:all 0.2s}
+.pay-approve-btn.approve{background:var(--green);color:#fff}
+.pay-approve-btn.reject{background:var(--red);color:#fff}
+.pay-approve-btn:hover{opacity:0.85;transform:scale(1.05)}
+</style>';
     document.body.appendChild(el);
   }
   document.getElementById('loader-msg').textContent = msg;
@@ -398,12 +582,15 @@ function updateHdr(){
   const sndB=`<button class="hbtn" id="sndbtn" onclick="toggleSound()">Sound ON</button>`;
   const play=`<button class="hbtn" onclick="SS('start')">Play</button>`;
   const sc=`<button class="hbtn" onclick="SS('lb')">Scores</button>`;
+  const pricing=`<button class="hbtn" onclick="SS('pricing')">Plans</button>`;
   if(CU){
     const ini=CU.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    const adm=CU.role==='admin'?`<button class="hbtn" onclick="SS('admin')">Admin Panel</button>`:'';
-    r.innerHTML=`${sndB}${play}${sc}${adm}<div class="upill" onclick="SS('profile')"><div class="uav">${ini}</div><div class="uname">${CU.name.split(' ')[0]}</div></div>`;
+    const adm=CU.role==='admin'?`<button class="hbtn" onclick="SS('admin')">Admin</button>`:'';
+    const par=(CU.type==='adult'&&CU.role!=='admin')?`<button class="hbtn" onclick="SS('parent')">My Children</button>`:'';
+    const subLbl=CU.subscription==='basic'?'⚡ Basic':CU.subscription==='premium'?'🔥 Premium':'🌱 Free';
+    r.innerHTML=`${sndB}${play}${sc}${adm}${par}<div class="upill" onclick="SS('profile')"><div class="uav">${ini}</div><div class="uname">${CU.name.split(' ')[0]} <span style="font-size:10px;opacity:0.8">${subLbl}</span></div></div>`;
   }else{
-    r.innerHTML=`${sndB}${play}${sc}<button class="hbtn" onclick="SS('login')">Login</button>`;
+    r.innerHTML=`${sndB}${play}${sc}${pricing}<button class="hbtn" onclick="SS('login')">Login</button>`;
   }
 }
 
@@ -722,6 +909,181 @@ async function clearAct(){
 }
 
 function retryQuiz(){round++;buildQuiz();window.scrollTo({top:0,behavior:'smooth'});}
+
+// ── SUBSCRIPTION & PLAN ──
+let selectedPlan = null;
+let selectedPlanPrice = 0;
+
+function selectPlan(plan, price){
+  if(!CU){ SS('login'); return; }
+  if(CU.role==='admin'){ alert('Admin accounts do not need a subscription.'); return; }
+  selectedPlan = plan;
+  selectedPlanPrice = price;
+  document.getElementById('pay-hero-sub').textContent = (plan==='basic'?'Basic Plan — ₱99':'Premium Plan — ₱199') + '/month';
+  document.getElementById('gcash-ref').value = '';
+  document.getElementById('pay-err').classList.remove('show');
+  SS('payment');
+}
+
+async function submitPayment(){
+  const ref = document.getElementById('gcash-ref').value.trim();
+  const e = document.getElementById('pay-err');
+  e.classList.remove('show');
+  if(!CU){ SS('login'); return; }
+  if(!ref || ref.length < 6){ e.textContent='Please enter a valid GCash reference number (min 6 digits)!'; e.classList.add('show'); return; }
+  if(!selectedPlan){ e.textContent='Please select a plan first!'; e.classList.add('show'); return; }
+  showLoader('Submitting payment...');
+  const res = await api({
+    action: 'submitPayment',
+    username: CU.username,
+    name: CU.name,
+    plan: selectedPlan,
+    price: selectedPlanPrice,
+    reference: ref,
+    date: td()
+  });
+  hideLoader();
+  if(!res.success){ e.textContent = res.error || 'Submission failed. Please try again.'; e.classList.add('show'); return; }
+  CU.subscription = 'pending';
+  updateHdr();
+  alert('✅ Payment submitted! Our admin will verify within 24 hours and activate your plan. Thank you!');
+  SS('profile');
+}
+
+// ── PARENT DASHBOARD ──
+async function renderParent(){
+  if(!CU){ SS('login'); return; }
+  document.getElementById('parent-sub').textContent = 'Welcome, '+CU.name+'!';
+  const subStatus = CU.subscription || 'free';
+  const statusMap = {free:'🌱 Free Plan',basic:'⚡ Basic Plan',premium:'🔥 Premium Plan',pending:'⏳ Payment Pending'};
+  const canAdd = subStatus==='basic'||subStatus==='premium';
+  const maxChildren = subStatus==='premium'?5:subStatus==='basic'?1:0;
+
+  document.getElementById('parent-sub-status').innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <div class="ctitle">Subscription Status</div>
+        <div style="margin-top:6px"><span class="sub-status ${subStatus==='pending'?'pending':subStatus==='free'?'free':subStatus==='expired'?'expired':'active'}">${statusMap[subStatus]||'🌱 Free Plan'}</span></div>
+      </div>
+      <button class="btn btn-pink btn-sm" onclick="SS('pricing')">${subStatus==='free'||subStatus==='expired'?'Upgrade Plan':'Manage Plan'}</button>
+    </div>
+    ${subStatus==='pending'?'<div class="pending-box" style="margin-top:10px">⏳ Your payment is being verified. We'll activate your plan within 24 hours!</div>':''}
+    ${subStatus==='basic'||subStatus==='premium'?'<div class="active-box" style="margin-top:10px">✅ Active — You can monitor up to <strong>'+maxChildren+'</strong> child account'+(maxChildren>1?'s':'')+'.</div>':''}`;
+
+  document.getElementById('add-child-card').style.display = canAdd ? 'block' : 'none';
+  if(!canAdd){
+    document.getElementById('children-list').innerHTML=`<div class="card" style="text-align:center;padding:24px"><div style="font-size:32px;margin-bottom:8px">🔒</div><div class="ctitle">Parent Dashboard Locked</div><div class="csub">Upgrade to Basic or Premium to monitor your children's progress!</div><button class="btn btn-pink" onclick="SS('pricing')">View Plans</button></div>`;
+    return;
+  }
+  showLoader('Loading children...');
+  const res = await api({action:'getChildren', parentUsername: CU.username});
+  hideLoader();
+  const children = res.success ? res.children : [];
+  if(!children.length){
+    document.getElementById('children-list').innerHTML='<div style="text-align:center;padding:16px;color:#888780;font-weight:700">No children linked yet. Add your child's username below!</div>';
+    return;
+  }
+  document.getElementById('children-list').innerHTML = children.map(c => {
+    const best = c.scores && c.scores.length ? Math.max(...c.scores.map(s=>s.score)) : 0;
+    const total = c.scores ? c.scores.length : 0;
+    const perfect = c.scores ? c.scores.filter(s=>s.score===5).length : 0;
+    const recent = c.scores ? c.scores.slice(0,5) : [];
+    const avgScore = total ? (c.scores.reduce((s,x)=>s+x.score,0)/total).toFixed(1) : '0.0';
+    const ini = c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    return `<div class="child-card">
+      <div class="child-header">
+        <div class="child-av">${ini}</div>
+        <div class="child-info">
+          <div class="child-name">${c.name}</div>
+          <div class="child-meta">@${c.username} · ${c.type}</div>
+        </div>
+        <span class="sub-status active" style="font-size:10px">Active</span>
+      </div>
+      <div class="child-stats">
+        <div class="cs-box"><div class="cs-num">${total}</div><div class="cs-lbl">Games</div></div>
+        <div class="cs-box"><div class="cs-num">${best}/5</div><div class="cs-lbl">Best</div></div>
+        <div class="cs-box"><div class="cs-num">${perfect}</div><div class="cs-lbl">Perfect</div></div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:#888780;margin-bottom:4px">Average Score: ${avgScore}/5</div>
+      <div class="progress-mini"><div class="progress-mini-bar" style="width:${Math.round(Number(avgScore)/5*100)}%"></div></div>
+      ${recent.length?`<div style="margin-top:10px"><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--pink);margin-bottom:6px">Recent Games</div>${recent.map(s=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #F4C0D1;font-size:12px;font-weight:700"><div style="flex:1;color:var(--navy)">${s.stars}</div><div style="color:#888780">${s.diff}</div><div style="color:var(--pink);font-weight:900">${s.score}/5</div></div>`).join('')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+async function addChild(){
+  const uname = document.getElementById('child-username').value.trim();
+  const e = document.getElementById('child-err');
+  const ok = document.getElementById('child-ok');
+  e.classList.remove('show'); ok.classList.remove('show');
+  if(!uname){ e.textContent='Please enter a username!'; e.classList.add('show'); return; }
+  showLoader('Linking child account...');
+  const res = await api({action:'addChild', parentUsername: CU.username, childUsername: uname});
+  hideLoader();
+  if(!res.success){ e.textContent = res.error || 'Could not link account. Check the username!'; e.classList.add('show'); return; }
+  ok.textContent = '✅ Child account linked successfully!'; ok.classList.add('show');
+  document.getElementById('child-username').value = '';
+  renderParent();
+}
+
+// ── ADMIN PAYMENT APPROVAL ──
+async function renderAdminPayments(){
+  showLoader('Loading payments...');
+  const res = await api({action:'getPendingPayments'});
+  hideLoader();
+  const payments = res.success ? res.payments : [];
+  const tbody = document.getElementById('pay-tbody');
+  if(!tbody) return;
+  tbody.innerHTML = payments.length
+    ? payments.map((p,i)=>`<tr>
+        <td>${i+1}</td>
+        <td>${p.name}</td>
+        <td>@${p.username}</td>
+        <td><span class="dc2 ${p.plan}">${p.plan}</span></td>
+        <td style="font-weight:900;color:var(--pink)">₱${p.price}</td>
+        <td style="font-weight:800;color:var(--gold)">${p.reference}</td>
+        <td>${p.date}</td>
+        <td><span class="sub-status ${p.status==='pending'?'pending':p.status==='approved'?'active':'expired'}">${p.status}</span></td>
+        <td>${p.status==='pending'?`<button class="pay-approve-btn approve" onclick="approvePayment('${p.username}','${p.plan}','${p.reference}','approve')">✅ Approve</button> <button class="pay-approve-btn reject" onclick="approvePayment('${p.username}','${p.plan}','${p.reference}','reject')">❌ Reject</button>`:'—'}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="9" style="text-align:center;color:#888780;padding:16px">No pending payments.</td></tr>';
+}
+
+async function approvePayment(username, plan, reference, action){
+  if(!confirm((action==='approve'?'Approve':'Reject')+' payment for @'+username+'?')) return;
+  showLoader(action==='approve'?'Activating plan...':'Rejecting payment...');
+  const res = await api({action:'approvePayment', username, plan, reference, approve: action==='approve'});
+  hideLoader();
+  if(res.success){
+    alert(action==='approve'?'✅ Plan activated for @'+username+'!':'❌ Payment rejected for @'+username+'.');
+    renderAdminPayments();
+  } else {
+    alert('Error: '+res.error);
+  }
+}
+
+// ── OVERRIDE renderAdmin to add Payments tab ──
+const _origATab = window.aTab || function(){};
+function aTab(n,el){
+  document.querySelectorAll('.atab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
+  ['ov','us','sc','ac','pay'].forEach(x=>{const d=document.getElementById('a-'+x);if(d)d.style.display='none';});
+  document.getElementById('a-'+n).style.display='block';
+  if(n==='pay') renderAdminPayments();
+  else renderAdmin();
+}
+
+// ── OVERRIDE SS to call renderParent ──
+const _origSS = SS;
+function SS(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el = document.getElementById('sc-'+n);
+  if(el) el.classList.add('active');
+  if(n==='lb') renderLB(aLB);
+  if(n==='profile') renderProfile();
+  if(n==='admin') renderAdmin();
+  if(n==='parent') renderParent();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 
 // ── INIT ──
 updateHdr();
