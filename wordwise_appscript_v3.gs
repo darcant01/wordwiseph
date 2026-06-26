@@ -44,7 +44,136 @@ function addExpiryColumns() {
   Logger.log("✅ Done! SubStart = col 11, SubExpiry = col 12");
 }
 
-// ── SETUP: create all sheets ──────────────────────────────────
+// ── AUTO-EXPIRE: run daily via trigger ──────────────────────────
+// Checks ALL users and expires any subscriptions past their subExpiry date
+// Set up a daily trigger by running installDailyTrigger() once
+
+function checkAllExpiries() {
+  const users  = getSheet(SHEET_USERS);
+  const rows   = users.getDataRange().getValues();
+  const today  = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  let expired = 0;
+  let notified = 0;
+  let expiringSoon = [];
+
+  for (let i = 1; i < rows.length; i++) {
+    const sub      = rows[i][9]  || "free";
+    const subExpiry= rows[i][11] || "";
+    const username = rows[i][2];
+    const name     = rows[i][1];
+
+    if ((sub === "basic" || sub === "premium") && subExpiry) {
+      const expDate = new Date(subExpiry);
+      expDate.setHours(0, 0, 0, 0);
+      const daysLeft = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+
+      if (daysLeft <= 0) {
+        // ── EXPIRED: reset to free ──
+        users.getRange(i+1, 10).setValue("free");
+        logActivity({message: "@" + username + " subscription expired (was " + sub + ")"});
+        
+        // Email admin about expiry
+        sendAdminEmail(
+          "❌ Subscription Expired — @" + username,
+          `<h3 style="color:#1D2B55">Subscription Expired</h3>
+           <table style="width:100%;border-collapse:collapse;font-family:Arial">
+             <tr><td style="padding:8px;color:#888;font-weight:bold">User</td><td style="padding:8px">${name} (@${username})</td></tr>
+             <tr style="background:#f9f9f9"><td style="padding:8px;color:#888;font-weight:bold">Plan</td><td style="padding:8px">${sub}</td></tr>
+             <tr><td style="padding:8px;color:#888;font-weight:bold">Expired On</td><td style="padding:8px;color:#E24B4A;font-weight:bold">${subExpiry}</td></tr>
+           </table>
+           <div style="margin-top:14px;padding:12px;background:#FCEBEB;border-radius:8px;color:#791F1F;font-weight:bold">
+             Their account has been automatically set to Free plan.
+           </div>
+           <div style="margin-top:12px;text-align:center">
+             <a href="https://darcant01.github.io/wordwiseph/" style="background:#D4537E;color:#fff;padding:10px 24px;border-radius:99px;text-decoration:none;font-weight:bold">Open Admin Panel</a>
+           </div>`
+        );
+        expired++;
+
+      } else if (daysLeft <= 7) {
+        // ── EXPIRING SOON: collect for summary email ──
+        expiringSoon.push({name, username, sub, subExpiry, daysLeft});
+      }
+    }
+  }
+
+  // Send expiring-soon summary to admin
+  if (expiringSoon.length > 0) {
+    const rows_html = expiringSoon.map(u =>
+      `<tr>
+        <td style="padding:8px">${u.name}</td>
+        <td style="padding:8px">@${u.username}</td>
+        <td style="padding:8px">${u.sub}</td>
+        <td style="padding:8px;color:#BA7517;font-weight:bold">${u.daysLeft} day${u.daysLeft===1?'':'s'}</td>
+        <td style="padding:8px">${u.subExpiry}</td>
+      </tr>`
+    ).join('');
+
+    sendAdminEmail(
+      "⚠️ " + expiringSoon.length + " Subscription(s) Expiring Soon",
+      `<h3 style="color:#1D2B55">Subscriptions Expiring Within 7 Days</h3>
+       <table style="width:100%;border-collapse:collapse;font-family:Arial;border:1px solid #eee">
+         <thead><tr style="background:#1D2B55;color:#FAC775">
+           <th style="padding:8px;text-align:left">Name</th>
+           <th style="padding:8px;text-align:left">Username</th>
+           <th style="padding:8px;text-align:left">Plan</th>
+           <th style="padding:8px;text-align:left">Days Left</th>
+           <th style="padding:8px;text-align:left">Expires</th>
+         </tr></thead>
+         <tbody>${rows_html}</tbody>
+       </table>
+       <div style="margin-top:14px;padding:12px;background:#FAEEDA;border-radius:8px;color:#412402;font-weight:bold">
+         💡 Consider reaching out to these subscribers to offer renewal!
+       </div>
+       <div style="margin-top:12px;text-align:center">
+         <a href="https://darcant01.github.io/wordwiseph/" style="background:#D4537E;color:#fff;padding:10px 24px;border-radius:99px;text-decoration:none;font-weight:bold">Open Admin Panel</a>
+       </div>`
+    );
+    notified = expiringSoon.length;
+  }
+
+  const summary = "checkAllExpiries: " + expired + " expired, " + notified + " expiring-soon notified";
+  Logger.log("✅ " + summary);
+  logActivity({message: "Daily check: " + expired + " expired, " + notified + " expiring soon"});
+  return {success: true, expired, expiringSoon: notified};
+}
+
+// ── INSTALL DAILY TRIGGER ──────────────────────────────────────
+// Run this ONCE to set up automatic daily expiry checks
+function installDailyTrigger() {
+  // Remove existing triggers to avoid duplicates
+  ScriptApp.getProjectTriggers().forEach(t => {
+    if (t.getHandlerFunction() === 'checkAllExpiries') {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+  
+  // Create new daily trigger at 1:00 AM Philippine time
+  ScriptApp.newTrigger('checkAllExpiries')
+    .timeBased()
+    .everyDays(1)
+    .atHour(1)
+    .create();
+  
+  Logger.log("✅ Daily trigger installed — checkAllExpiries will run every day at 1:00 AM");
+  return "Daily trigger installed!";
+}
+
+// ── REMOVE DAILY TRIGGER ────────────────────────────────────────
+function removeDailyTrigger() {
+  let removed = 0;
+  ScriptApp.getProjectTriggers().forEach(t => {
+    if (t.getHandlerFunction() === 'checkAllExpiries') {
+      ScriptApp.deleteTrigger(t);
+      removed++;
+    }
+  });
+  Logger.log("Removed " + removed + " trigger(s)");
+}
+
+// ── SETUP: create all sheets ──────────────────────────────────────────────────────────
 function setup() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
@@ -195,6 +324,22 @@ function login(p) {
     if (String(rows[i][2]).trim() === String(p.username).trim() &&
         String(rows[i][3]).trim() === String(p.password).trim()) {
       logActivity({message: rows[i][1] + " logged in"});
+      // Auto-expire check on login
+      let sub      = rows[i][9]  || "free";
+      const subStart  = rows[i][10] || "";
+      const subExpiry = rows[i][11] || "";
+
+      if ((sub === "basic" || sub === "premium") && subExpiry) {
+        const expDate = new Date(subExpiry);
+        const today   = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (expDate < today) {
+          sub = "expired";
+          sheet.getRange(i+1, 10).setValue("expired");
+          logActivity({message: rows[i][1] + " subscription expired on login"});
+        }
+      }
+
       return {
         success: true,
         user: {
@@ -206,9 +351,9 @@ function login(p) {
           joined:       rows[i][6],
           rounds:       Number(rows[i][7]) || 0,
           best:         Number(rows[i][8]) || 0,
-          subscription: rows[i][9]  || "free",
-          subStart:     rows[i][10] || "",
-          subExpiry:    rows[i][11] || ""
+          subscription: sub,
+          subStart,
+          subExpiry
         }
       };
     }
