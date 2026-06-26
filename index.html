@@ -420,7 +420,18 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div style="font-size:12px;color:#888780;font-weight:700;margin-top:6px">Found in your GCash SMS or app notification</div>
     </div>
     <div class="pay-step">
-      <div class="pay-title"><span class="pay-num">3</span>Submit for verification</div>
+      <div class="pay-title"><span class="pay-num">3</span>Upload your receipt screenshot</div>
+      <div class="upload-box" id="upload-box" onclick="document.getElementById('receipt-file').click()">
+        <input type="file" id="receipt-file" accept="image/*" style="display:none" onchange="previewReceipt(this)"/>
+        <div class="upload-icon">📸</div>
+        <div class="upload-label">Tap to upload receipt</div>
+        <div class="upload-sub">JPG, PNG, or screenshot from your GCash app</div>
+        <img id="receipt-preview" class="upload-preview" alt="Receipt preview"/>
+      </div>
+      <div style="font-size:12px;color:#888780;font-weight:700;margin-top:8px;text-align:center">Optional but helps us verify faster!</div>
+    </div>
+    <div class="pay-step">
+      <div class="pay-title"><span class="pay-num">4</span>Submit for verification</div>
       <div style="font-size:13px;color:#5F5E5A;font-weight:700;margin-bottom:12px;line-height:1.6">Our admin verifies within <strong>24 hours</strong> and activates your plan.</div>
       <div class="err" id="pay-err"></div>
       <button class="btn btn-pink btn-block" onclick="submitPayment()">Submit Payment</button>
@@ -533,7 +544,29 @@ function showLoader(msg='Loading...') {
     el = document.createElement('div');
     el.id = 'ww-loader';
     el.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(29,43,85,0.93);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px';
-    el.innerHTML = '<div style="width:50px;height:50px;border:5px solid #B5D4F4;border-top-color:#FAC775;border-radius:50%;animation:wwspin 0.8s linear infinite"></div><div id="ww-loader-msg" style="color:#F4C0D1;font-family:Nunito,sans-serif;font-size:18px;font-weight:800;text-align:center;padding:0 20px"></div><style>@keyframes wwspin{to{transform:rotate(360deg)}}</style>';
+    el.innerHTML = '<div style="width:50px;height:50px;border:5px solid #B5D4F4;border-top-color:#FAC775;border-radius:50%;animation:wwspin 0.8s linear infinite"></div><div id="ww-loader-msg" style="color:#F4C0D1;font-family:Nunito,sans-serif;font-size:18px;font-weight:800;text-align:center;padding:0 20px"></div><style>@keyframes wwspin{to{transform:rotate(360deg)}}
+/* ── SCREENSHOT UPLOAD ── */
+.upload-box{border:2.5px dashed var(--lp);border-radius:14px;padding:clamp(16px,3vw,24px);text-align:center;cursor:pointer;transition:all 0.2s;background:#FFF8F0;position:relative;margin-top:8px}
+.upload-box:hover{border-color:var(--pink);background:#FBEAF0}
+.upload-box.has-file{border-color:var(--green);background:#F0FBF6}
+.upload-icon{font-size:clamp(28px,6vw,40px);margin-bottom:8px}
+.upload-label{font-size:clamp(13px,3vw,15px);font-weight:800;color:var(--navy);margin-bottom:4px}
+.upload-sub{font-size:clamp(11px,2.5vw,13px);color:#888780;font-weight:700}
+.upload-preview{max-width:100%;max-height:200px;border-radius:10px;margin-top:10px;display:none}
+.upload-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+/* ── GUEST LIMIT MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(29,43,85,0.92);z-index:8888;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal-box{background:#fff;border-radius:clamp(16px,4vw,24px);padding:clamp(20px,5vw,36px);max-width:440px;width:100%;text-align:center;animation:modalPop 0.25s ease}
+@keyframes modalPop{from{transform:scale(0.85);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-icon{font-size:clamp(40px,10vw,60px);margin-bottom:10px}
+.modal-title{font-size:clamp(18px,5vw,26px);font-weight:900;color:var(--navy);margin-bottom:8px}
+.modal-sub{font-size:clamp(13px,3vw,15px);color:#5F5E5A;font-weight:700;line-height:1.6;margin-bottom:18px}
+.modal-btns{display:flex;flex-direction:column;gap:10px}
+.modal-rounds{display:flex;justify-content:center;gap:6px;margin-bottom:16px}
+.modal-round-dot{width:clamp(10px,2.5vw,14px);height:clamp(10px,2.5vw,14px);border-radius:50%;background:var(--green)}
+.modal-round-dot.used{background:#F4C0D1}
+</style>';
     document.body.appendChild(el);
   }
   document.getElementById('ww-loader-msg').textContent = msg;
@@ -638,7 +671,16 @@ const BANK={"easy": [{"q": "She ___ to school every day.", "correct": "walks", "
 
 function shuf(a) { return [...a].sort(()=>Math.random()-0.5); }
 
-function startQuiz(d) { diff=d; navTo('quiz'); buildQuiz(); }
+function startQuiz(d) {
+  // Guest limit check
+  if(!CU && round > 5) {
+    showGuestModal();
+    return;
+  }
+  diff=d;
+  navTo('quiz');
+  buildQuiz();
+}
 
 function buildQuiz() {
   cQs = shuf(BANK[diff]).slice(0,5);
@@ -732,7 +774,53 @@ async function showResult() {
   document.getElementById('sbtn').disabled=true;
   setTimeout(()=>document.getElementById('result').scrollIntoView({behavior:'smooth'}),100);
 }
-function retryQuiz() { round++; buildQuiz(); window.scrollTo({top:0,behavior:'smooth'}); }
+function retryQuiz() {
+  round++;
+  // Guest limit: 5 rounds max
+  if(!CU && round > 5) {
+    showGuestModal();
+    return;
+  }
+  buildQuiz();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showGuestModal() {
+  // Build round dots display
+  const dots = document.getElementById('modal-rounds-display');
+  if(dots) {
+    dots.innerHTML = '';
+    for(let i=0;i<5;i++) {
+      const d = document.createElement('div');
+      d.className = 'modal-round-dot used';
+      dots.appendChild(d);
+    }
+  }
+  document.getElementById('guest-modal').classList.add('show');
+}
+
+function closeGuestModal(dest) {
+  document.getElementById('guest-modal').classList.remove('show');
+  round = 1; // reset round counter
+  if(dest) navTo(dest);
+}
+
+function previewReceipt(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const preview = document.getElementById('receipt-preview');
+  const box = document.getElementById('upload-box');
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+    box.classList.add('has-file');
+    box.querySelector('.upload-icon').textContent = '✅';
+    box.querySelector('.upload-label').textContent = 'Receipt uploaded!';
+    box.querySelector('.upload-sub').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+}
 
 // ── LEADERBOARD ──────────────────────────────────
 function switchLB(d, el) {
@@ -819,6 +907,20 @@ async function submitPayment() {
 
   showLoader('Submitting payment... please wait');
   
+  // Get receipt image if uploaded
+  const fileInput = document.getElementById('receipt-file');
+  let receiptBase64 = '';
+  
+  if(fileInput && fileInput.files[0]) {
+    showLoader('Uploading receipt...');
+    receiptBase64 = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = () => resolve('');
+      reader.readAsDataURL(fileInput.files[0]);
+    });
+  }
+
   const payload = {
     action: 'submitPayment',
     username: CU.username,
@@ -826,15 +928,35 @@ async function submitPayment() {
     plan: selectedPlan,
     price: selectedPlanPrice,
     reference: ref,
+    hasReceipt: receiptBase64 ? 'yes' : 'no',
     date: new Date().toLocaleDateString('en-PH')
   };
   
-  console.log('Submitting payment:', payload);
+  showLoader('Submitting payment... please wait');
   
-  const res = await api(payload);
+  // For the receipt image, we send it separately via email through the script
+  // We pass it as a separate param to avoid URL length limits
+  let res;
+  if(receiptBase64) {
+    // Send as POST for large receipt data
+    try {
+      const r = await fetch(GAS, {
+        method: 'POST',
+        body: JSON.stringify({...payload, receipt: receiptBase64}),
+        headers: {'Content-Type': 'text/plain'},
+        redirect: 'follow'
+      });
+      const text = await r.text();
+      try { res = JSON.parse(text); } 
+      catch(e) { res = await api(payload); } // fallback without image
+    } catch(e) {
+      res = await api(payload); // fallback without image
+    }
+  } else {
+    res = await api(payload);
+  }
+  
   hideLoader();
-  
-  console.log('Payment response:', res);
   
   if(!res.success) {
     errEl.textContent = res.error || 'Submission failed. Please check your connection and try again.';
@@ -842,14 +964,24 @@ async function submitPayment() {
     return;
   }
   
-  // Success
+  // Success — reset form
   CU.subscription = 'pending';
   buildHeader();
   document.getElementById('gcash-ref').value = '';
+  if(fileInput) { fileInput.value = ''; }
+  const preview = document.getElementById('receipt-preview');
+  if(preview) { preview.style.display='none'; preview.src=''; }
+  const box = document.getElementById('upload-box');
+  if(box) { 
+    box.classList.remove('has-file');
+    box.querySelector('.upload-icon').textContent='📸';
+    box.querySelector('.upload-label').textContent='Tap to upload receipt';
+    box.querySelector('.upload-sub').textContent='JPG, PNG, or screenshot from your GCash app';
+  }
   selectedPlan = null;
   selectedPlanPrice = 0;
   
-  alert('✅ Payment submitted successfully!\n\nOur admin will verify your GCash payment within 24 hours and activate your plan.\n\nThank you for subscribing to WordWise PH!');
+  alert('✅ Payment submitted successfully!' + (receiptBase64 ? '\n📸 Receipt uploaded!' : '') + '\n\nOur admin will verify within 24 hours and activate your plan.\n\nThank you for subscribing to WordWise PH!');
   navTo('profile');
 }
 
@@ -1003,5 +1135,24 @@ async function clearActivity() {
 buildHeader();
 loadLeaderboard('easy');
 </script>
+
+<!-- ── GUEST LIMIT MODAL ── -->
+<div class="modal-overlay" id="guest-modal">
+  <div class="modal-box">
+    <div class="modal-icon">🔒</div>
+    <div class="modal-title">You've used your 5 free rounds!</div>
+    <div class="modal-rounds" id="modal-rounds-display"></div>
+    <div class="modal-sub">
+      Guest players can play <strong>5 rounds for free</strong>.<br>
+      Subscribe to unlock <strong>unlimited rounds</strong>, all difficulty levels, score history, and more!
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-pink btn-block" onclick="closeGuestModal('pricing')">View Subscription Plans</button>
+      <button class="btn btn-navy btn-block" onclick="closeGuestModal('register')">Create Free Account</button>
+      <button class="lnk" onclick="closeGuestModal('login')" style="margin-top:4px">Already have an account? Login</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
