@@ -87,9 +87,33 @@ function doGet(e) {
   }
 }
 
-// Keep doPost as fallback
+// doPost handles receipt image uploads (large data via POST body)
 function doPost(e) {
-  return doGet(e);
+  try {
+    const raw  = e.postData ? e.postData.contents : '{}';
+    const data = JSON.parse(raw);
+    const action = data.action || "";
+
+    if(action === "submitPayment") {
+      // Handle receipt image if included
+      const receipt = data.receipt || null;
+      const p = {
+        username:  data.username,
+        name:      data.name,
+        plan:      data.plan,
+        price:     data.price,
+        reference: data.reference,
+        date:      data.date,
+        hasReceipt: data.hasReceipt || 'no'
+      };
+      return respond(submitPaymentWithReceipt(p, receipt));
+    }
+
+    // Fallback to GET handler for all other actions
+    return doGet(e);
+  } catch(err) {
+    return respond({success:false, error:"Server error: "+err.toString()});
+  }
 }
 
 // ── HELPER: get sheet safely ───────────────────────────────
@@ -289,6 +313,61 @@ function submitPayment(p) {
      </div>`);
   
   return {success:true, message:"Payment submitted successfully!"};
+}
+
+// ── SUBMIT PAYMENT WITH RECEIPT ────────────────────────────────────
+function submitPaymentWithReceipt(p, receiptBase64) {
+  // Run normal submitPayment logic
+  const result = submitPayment(p);
+  if(!result.success) return result;
+
+  // Send email with receipt image attached
+  if(receiptBase64 && receiptBase64.startsWith('data:image')) {
+    try {
+      const matches = receiptBase64.match(/^data:([^;]+);base64,(.+)$/);
+      if(matches) {
+        const mimeType = matches[1];
+        const base64Data = matches[2];
+        const blob = Utilities.newBlob(
+          Utilities.base64Decode(base64Data),
+          mimeType,
+          'gcash_receipt_' + p.username + '.jpg'
+        );
+        const date = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "MM/dd/yyyy");
+        MailApp.sendEmail({
+          to: ADMIN_EMAIL,
+          subject: "WordWise PH | 📸 Receipt for @" + p.username + " — " + p.plan.toUpperCase(),
+          htmlBody: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+            <div style="background:#1D2B55;padding:20px;border-radius:12px 12px 0 0;text-align:center">
+              <h2 style="color:#FAC775;margin:0">WordWise PH</h2>
+              <p style="color:#B5D4F4;margin:4px 0 0">GCash Receipt Submitted</p>
+            </div>
+            <div style="background:#fff;padding:24px;border:1px solid #F4C0D1;border-top:none;border-radius:0 0 12px 12px">
+              <h3 style="color:#1D2B55">Payment Receipt from @${p.username}</h3>
+              <table style="width:100%;border-collapse:collapse;font-family:Arial">
+                <tr><td style="padding:8px;color:#888;font-weight:bold">Name</td><td style="padding:8px">${p.name}</td></tr>
+                <tr style="background:#f9f9f9"><td style="padding:8px;color:#888;font-weight:bold">Username</td><td style="padding:8px">@${p.username}</td></tr>
+                <tr><td style="padding:8px;color:#888;font-weight:bold">Plan</td><td style="padding:8px;color:#D4537E;font-weight:bold">${p.plan.toUpperCase()} — ₱${p.price}/mo</td></tr>
+                <tr style="background:#f9f9f9"><td style="padding:8px;color:#888;font-weight:bold">GCash Ref #</td><td style="padding:8px;font-size:20px;font-weight:bold;color:#BA7517">${p.reference}</td></tr>
+                <tr><td style="padding:8px;color:#888;font-weight:bold">Date</td><td style="padding:8px">${date}</td></tr>
+              </table>
+              <div style="margin-top:16px;padding:14px;background:#E1F5EE;border-radius:8px;border-left:4px solid #1D9E75">
+                <b>📸 Receipt screenshot is attached to this email.</b>
+              </div>
+              <div style="margin-top:14px;text-align:center">
+                <a href="https://darcant01.github.io/wordwiseph/" style="background:#D4537E;color:#fff;padding:12px 28px;border-radius:99px;text-decoration:none;font-weight:bold">Open Admin Panel to Approve</a>
+              </div>
+            </div>
+          </div>`,
+          attachments: [blob]
+        });
+      }
+    } catch(imgErr) {
+      Logger.log("Receipt email error: " + imgErr.toString());
+    }
+  }
+
+  return result;
 }
 
 // ── GET PENDING PAYMENTS ────────────────────────────────────
