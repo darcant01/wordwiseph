@@ -260,6 +260,15 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 .game-desc{font-size:clamp(11px,2.5vw,13px);color:#888780;font-weight:700}
 .game-badge{position:absolute;top:-10px;right:10px;background:var(--pink);color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:99px;letter-spacing:1px}
 .game-lock-badge{position:absolute;top:-10px;left:10px;background:#FAEEDA;color:#412402;font-size:10px;font-weight:800;padding:3px 10px;border-radius:99px}
+
+/* ── MULTI-GAME LEADERBOARD ── */
+.lb-game-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center}
+.lb-gtab{font-family:'Nunito',sans-serif;font-size:clamp(12px,3vw,15px);font-weight:800;padding:clamp(8px,2vw,11px) clamp(12px,3vw,18px);border-radius:99px;border:2.5px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.lb-gtab:hover{border-color:var(--pink);background:#FFF0F5}
+.lb-gtab.on{background:var(--navy);color:#FAC775;border-color:var(--navy)}
+.lb-game-panel{display:block}
+.lb-list{margin-top:4px}
+.lb-score-display{font-size:clamp(14px,3.5vw,18px);font-weight:900;color:var(--pink)}
 </style>
 </head>
 <body>
@@ -381,7 +390,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div class="rbtns">
         <button class="btn btn-gold" onclick="retrySpell()">Play Again!</button>
         <button class="btn btn-navy" onclick="navTo('games')">All Games</button>
-        <button class="btn btn-out" onclick="navTo('lb')">Top Scores</button>
+        <button class="btn btn-out" onclick="navTo('lb')">🏆 Leaderboard</button>
       </div>
     </div>
   </div>
@@ -482,7 +491,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div class="rbtns">
         <button class="btn btn-gold" onclick="retryQuiz()">New Round!</button>
         <button class="btn btn-navy" onclick="navTo('start')">Change Level</button>
-        <button class="btn btn-out" onclick="navTo('lb')">Top Scores</button>
+        <button class="btn btn-out" onclick="navTo('lb')">🏆 Leaderboard</button>
       </div>
       <div class="rnote">New random questions every round!</div>
     </div>
@@ -491,15 +500,57 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 
 <!-- ══ LEADERBOARD ══ -->
 <div id="sc-lb" class="screen">
-  <div class="hero"><div class="htitle">Top <span>Players</span></div><div class="hsub">Public scores — visible to everyone!</div></div>
+  <div class="hero"><div class="htitle">🏆 <span>Leaderboards</span></div><div class="hsub">Top players across all games!</div></div>
   <div class="wrap">
-    <div class="slbl">Leaderboard</div>
-    <div class="lbtabs">
-      <button class="lbt easy on" onclick="switchLB('easy',this)">🌱 Easy</button>
-      <button class="lbt medium" onclick="switchLB('medium',this)">⚡ Medium</button>
-      <button class="lbt hard" onclick="switchLB('hard',this)">🔥 Hard</button>
+
+    <!-- Game Selector Tabs -->
+    <div class="lb-game-tabs">
+      <button class="lb-gtab on" onclick="switchLBGame('grammar',this)">📝 Grammar</button>
+      <button class="lb-gtab" onclick="switchLBGame('spell',this)">🔤 Spelling</button>
+      <button class="lb-gtab" onclick="switchLBGame('shark',this)">🦈 Shark</button>
+      <button class="lb-gtab" onclick="switchLBGame('odd',this)">🎯 Odd One</button>
     </div>
-    <div id="lblist"></div>
+
+    <!-- Grammar Quiz LB -->
+    <div id="lb-grammar" class="lb-game-panel">
+      <div class="lbtabs">
+        <button class="lbt easy on" onclick="switchLBDiff('grammar','easy',this)">🌱 Easy</button>
+        <button class="lbt medium" onclick="switchLBDiff('grammar','medium',this)">⚡ Medium</button>
+        <button class="lbt hard" onclick="switchLBDiff('grammar','hard',this)">🔥 Hard</button>
+      </div>
+      <div id="lb-grammar-list" class="lb-list"></div>
+    </div>
+
+    <!-- Spell It Right LB -->
+    <div id="lb-spell" class="lb-game-panel" style="display:none">
+      <div class="lbtabs">
+        <button class="lbt easy on" onclick="switchLBDiff('spell','easy',this)">🌱 Easy</button>
+        <button class="lbt medium" onclick="switchLBDiff('spell','medium',this)">⚡ Medium</button>
+        <button class="lbt hard" onclick="switchLBDiff('spell','hard',this)">🔥 Hard</button>
+      </div>
+      <div id="lb-spell-list" class="lb-list"></div>
+    </div>
+
+    <!-- Shark Typing LB -->
+    <div id="lb-shark" class="lb-game-panel" style="display:none">
+      <div class="lbtabs">
+        <button class="lbt easy on" onclick="switchLBDiff('shark','easy',this)">🌱 Easy</button>
+        <button class="lbt medium" onclick="switchLBDiff('shark','medium',this)">⚡ Medium</button>
+        <button class="lbt hard" onclick="switchLBDiff('shark','hard',this)">🔥 Hard</button>
+      </div>
+      <div id="lb-shark-list" class="lb-list"></div>
+    </div>
+
+    <!-- Odd One Out LB -->
+    <div id="lb-odd" class="lb-game-panel" style="display:none">
+      <div class="lbtabs">
+        <button class="lbt easy on" onclick="switchLBDiff('odd','easy',this)">🌱 Easy</button>
+        <button class="lbt medium" onclick="switchLBDiff('odd','medium',this)">⚡ Medium</button>
+        <button class="lbt hard" onclick="switchLBDiff('odd','hard',this)">🔥 Hard</button>
+      </div>
+      <div id="lb-odd-list" class="lb-list"></div>
+    </div>
+
   </div>
 </div>
 
@@ -812,7 +863,7 @@ function navTo(s){
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   const el=document.getElementById('sc-'+s);
   if(el)el.classList.add('active');
-  if(s==='lb')   loadLB(aLB);
+  if(s==='lb')   { loadLBGame('grammar','easy'); }
   if(s==='profile') loadProfile();
   if(s==='admin'){
     loadAdmin('ov');
@@ -1109,25 +1160,71 @@ function retryQuiz(){
 }
 
 // ── LEADERBOARD ───────────────────────────────────────────────
-function switchLB(d,el){
-  aLB=d;
-  document.querySelectorAll('.lbt').forEach(t=>t.classList.remove('on'));
+// ── MULTI-GAME LEADERBOARD ──────────────────────────────────────
+let lbCurrentGame = 'grammar';
+let lbCurrentDiff = {grammar:'easy', spell:'easy', shark:'easy', odd:'easy'};
+
+function switchLBGame(game, el){
+  lbCurrentGame = game;
+  // Switch game tabs
+  document.querySelectorAll('.lb-gtab').forEach(t=>t.classList.remove('on'));
   if(el)el.classList.add('on');
-  loadLB(d);
+  // Show correct panel
+  ['grammar','spell','shark','odd'].forEach(g=>{
+    const p=document.getElementById('lb-'+g);
+    if(p)p.style.display=(g===game?'block':'none');
+  });
+  loadLBGame(game, lbCurrentDiff[game]);
 }
+
+function switchLBDiff(game, diff, el){
+  lbCurrentDiff[game] = diff;
+  // Update diff tabs within this game panel
+  const panel = document.getElementById('lb-'+game);
+  if(panel) panel.querySelectorAll('.lbt').forEach(t=>t.classList.remove('on'));
+  if(el)el.classList.add('on');
+  loadLBGame(game, diff);
+}
+
+async function loadLBGame(game, diff){
+  // Build the diff key used when saving scores
+  const diffKey = game==='grammar' ? diff : game+'-'+diff;
+  const listEl = document.getElementById('lb-'+game+'-list');
+  if(!listEl)return;
+  listEl.innerHTML='<div class="lb-empty">Loading scores...</div>';
+
+  const res = await api({action:'getScores', diff:diffKey});
+  if(!res.success||!res.scores?.length){
+    listEl.innerHTML='<div class="lb-empty">No scores yet for this level!<br>Be the first to play! 🚀</div>';
+    return;
+  }
+
+  const medals=['🥇','🥈','🥉'], cls=['gold','silver','bronze'];
+  const gameLabels={grammar:'Grammar Quiz',spell:'Spell It Right',shark:'Shark Typing',odd:'Odd One Out'};
+
+  listEl.innerHTML = res.scores.map((e,i)=>{
+    const scoreDisplay = game==='shark'
+      ? `<span class="lb-score-display">${e.score} words</span>`
+      : `<span class="lb-score-display">${e.score}/${e.total||5}</span>`;
+    return `<div class="lbrow ${cls[i]||''}">
+      <div class="lbmedal">${medals[i]||'#'+(i+1)}</div>
+      <div class="lbinfo">
+        <div class="lbname">${e.name}<span class="lbbdg ${e.type}">${e.type==='kid'?'Kid':e.type==='adult'?'Adult':'Guest'}</span></div>
+        <div class="lbstars">${e.stars}</div>
+      </div>
+      <div class="lbright">${scoreDisplay}<div class="lbdate">${e.date}</div></div>
+    </div>`;
+  }).join('');
+}
+
+// Keep old loadLB for compatibility (called from navTo)
 async function loadLB(d){
-  aLB=d;
-  const list=document.getElementById('lblist');
-  if(!list)return;
-  list.innerHTML='<div class="lb-empty">Loading scores...</div>';
-  const res=await api({action:'getScores',diff:d});
-  if(!res.success||!res.scores?.length){list.innerHTML='<div class="lb-empty">No scores yet!<br>Be the first to play!</div>';return;}
-  const medals=['🥇','🥈','🥉'],cls=['gold','silver','bronze'];
-  list.innerHTML=res.scores.map((e,i)=>`<div class="lbrow ${cls[i]||''}">
-    <div class="lbmedal">${medals[i]||'#'+(i+1)}</div>
-    <div class="lbinfo"><div class="lbname">${e.name}<span class="lbbdg ${e.type}">${e.type==='kid'?'Kid':e.type==='adult'?'Adult':'Guest'}</span></div><div class="lbstars">${e.stars}</div></div>
-    <div class="lbright"><div class="lbsco">${e.score}/5</div><div class="lbdate">${e.date}</div></div>
-  </div>`).join('');
+  // Default: load grammar leaderboard
+  switchLBGame('grammar', document.querySelector('.lb-gtab'));
+}
+
+function switchLB(d,el){
+  switchLBDiff('grammar', d, el);
 }
 
 // ── PROFILE ───────────────────────────────────────────────────
