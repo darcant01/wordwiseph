@@ -509,17 +509,19 @@ let aCtx = null;
 // ── API ──────────────────────────────────────────
 async function api(data) {
   try {
-    // Google Apps Script requires redirect:follow for POST requests
-    const r = await fetch(GAS, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {'Content-Type': 'text/plain'},
-      redirect: 'follow'
-    });
+    // Use GET with URL params — avoids ALL CORS/preflight issues with Google Apps Script
+    const params = new URLSearchParams();
+    Object.keys(data).forEach(k => params.append(k, data[k]));
+    const url = GAS + '?' + params.toString();
+    const r = await fetch(url, {method:'GET', redirect:'follow'});
     const text = await r.text();
     try { return JSON.parse(text); }
-    catch(pe) { return {success:false, error:'Invalid response: '+text.slice(0,100)}; }
+    catch(pe) { 
+      console.error('Parse error:', text.slice(0,200));
+      return {success:false, error:'Server response error. Check Apps Script deployment.'}; 
+    }
   } catch(e) {
+    console.error('API error:', e);
     return {success:false, error:'Network error: '+e.toString()};
   }
 }
