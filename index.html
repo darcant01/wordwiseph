@@ -1497,14 +1497,14 @@ async function loadProfile(){
   const pst=document.getElementById('pstats');if(pst)pst.innerHTML='<div class="scard"><div class="snum">...</div><div class="slbll">Loading</div></div>';
   const res=await api({action:'getProfile',username:CU.username});
   const my=res.success?res.scores:[];
-  // Use API response first, fall back to CU object
+  // Always use fresh API response — overwrite CU with latest sheet data
   const sub=res.subscription||CU.subscription||'free';
-  const subStart=res.subStart||CU.subStart||'';
-  const subExpiry=res.subExpiry||CU.subExpiry||'';
-  // Update CU with latest data
+  const subStart=res.subStart||'';
+  const subExpiry=res.subExpiry||'';
+  // Always update CU with latest data from sheet
   CU.subscription=sub;
-  if(subStart) CU.subStart=subStart;
-  if(subExpiry) CU.subExpiry=subExpiry;
+  CU.subStart=subStart;
+  CU.subExpiry=subExpiry;
 
   // Subscription card
   const sc=document.getElementById('psub-card');
@@ -1791,29 +1791,38 @@ async function loadAdminPayments(){
     :'<tr><td colspan="9" style="text-align:center;color:#888780;padding:16px">No payment requests yet.</td></tr>';
 }
 async function adminSetExpiry(username, plan){
-  const days = prompt('Set subscription for @'+username+'\nHow many days from today?\n(e.g. 30 for one month)', '30');
+  const days = prompt('Set subscription for @'+username+'\nHow many days from today?\n(default: 30)', '30');
   if(!days || isNaN(days)) return;
+  const n    = parseInt(days);
   const start  = new Date();
   const expiry = new Date();
-  expiry.setDate(expiry.getDate() + parseInt(days));
-  const pad = n => String(n).padStart(2,'0');
-  const fmtDate = d => pad(d.getMonth()+1)+'/'+pad(d.getDate())+'/'+d.getFullYear();
+  expiry.setDate(expiry.getDate() + n);
+  const pad = x => String(x).padStart(2,'0');
+  const fmtD = d => pad(d.getMonth()+1)+'/'+pad(d.getDate())+'/'+d.getFullYear();
 
   showLoader('Setting expiry...');
 
-  // Use approvePayment with a manual reference — it sets SubStart+SubExpiry automatically
+  // Step 1: submit a dummy payment so approvePayment can find the reference
   const ref = 'MANUAL-'+Date.now();
-  // First submit a dummy payment record
-  await api({action:'submitPayment', username, name:username, plan, price:0, reference:ref, date:fmtDate(new Date())});
-  // Then approve it — this sets subStart and subExpiry in the sheet
+  await api({action:'submitPayment', username, name:username, plan, price:0, reference:ref});
+
+  // Step 2: approve it (this writes plan+subStart+subExpiry based on 30 days)
   const res = await api({action:'approvePayment', username, plan, reference:ref, approve:'true'});
+
   hideLoader();
 
   if(res.success){
-    alert('✅ Expiry set for @'+username+'\nPlan: '+plan.toUpperCase()+'\nExpires: '+fmtDate(expiry)+' ('+days+' days from today)');
+    // Show success — customer will see it next time they open Profile
+    alert(
+      '✅ Subscription set for @'+username+'!\n\n'+
+      '📋 Plan: '+plan.toUpperCase()+'\n'+
+      '📅 Start: '+fmtD(start)+'\n'+
+      '⏰ Expires: '+fmtD(expiry)+' ('+n+' days)\n\n'+
+      'The customer will see their expiry date when they open their Profile.'
+    );
     loadAdmin('us');
   } else {
-    alert('Error: '+res.error);
+    alert('Error: '+(res.error||'Unknown error'));
   }
 }
 
