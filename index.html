@@ -266,6 +266,9 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 
 </head>
 <body>
+
+</head>
+<body>
 </head>
 <body>
 </head>
@@ -319,20 +322,26 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
   <div class="hero"><div class="htitle">Brainy <span>Games!</span></div><div class="hsub">Challenge yourself with fun English games!</div></div>
   <div class="wrap">
     <div class="games-grid">
-      <div class="game-card" onclick="navTo('quiz')">
-        <div class="game-badge">GRAMMAR</div>
+      <div class="game-card" onclick="navTo('start')">
+        <div class="game-badge" style="background:var(--navy)">GRAMMAR</div>
         <div class="game-icon">📝</div>
         <div class="game-title">Grammar Quiz</div>
-        <div class="game-desc">Test your grammar skills across 3 levels</div>
+        <div class="game-desc">Test your grammar skills · Easy, Medium & Hard</div>
       </div>
       <div class="game-card" onclick="startSpell()">
-        <div class="game-badge">NEW!</div>
+        <div class="game-badge">SPELLING</div>
         <div class="game-icon">🔤</div>
         <div class="game-title">Spell It Right</div>
-        <div class="game-desc">Choose the correctly spelled word</div>
+        <div class="game-desc">Pick the correctly spelled word against the clock</div>
+      </div>
+      <div class="game-card" onclick="startShark()">
+        <div class="game-badge" style="background:#1D9E75">TYPING</div>
+        <div class="game-icon">🦈</div>
+        <div class="game-title">Shark Typing</div>
+        <div class="game-desc">Type fast before the shark catches you!</div>
       </div>
     </div>
-    <div style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780">More games coming soon!</div>
+    <div style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780;margin-top:8px">More games coming soon! 🚀</div>
   </div>
 </div>
 
@@ -735,7 +744,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 
 <script>
 // ================================================================
-// BLOCK 1 — CORE FUNCTIONS (api, nav, auth, quiz, admin, payment)
+// BLOCK 1 — CORE: API, Navigation, Auth, Grammar Quiz, Admin
 // ================================================================
 
 // ================================================================
@@ -1433,7 +1442,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <script>
 // ================================================================
-// BLOCK 2 — SPELL IT RIGHT GAME
+// BLOCK 2A — SPELL IT RIGHT GAME
 // ================================================================
 // ================================================================
 // SPELL IT RIGHT GAME
@@ -1751,7 +1760,383 @@ function retrySpell(){
 
 <script>
 // ================================================================
-// BLOCK 3 — QUESTION BANK (loaded last so UI is never blocked)
+// BLOCK 2B — SHARK TYPING GAME
+// ================================================================
+// ================================================================
+// SHARK TYPING GAME
+// ================================================================
+const SHARK_TL = {easy:8, medium:6, hard:4};
+
+const SHARK_WORDS = {
+  easy: [
+    {word:"apple",hint:"A red or green fruit"},
+    {word:"water",hint:"We drink this every day"},
+    {word:"house",hint:"Where people live"},
+    {word:"happy",hint:"Feeling joy"},
+    {word:"green",hint:"The color of grass"},
+    {word:"chair",hint:"You sit on this"},
+    {word:"table",hint:"Furniture with a flat top"},
+    {word:"smile",hint:"Show your teeth in joy"},
+    {word:"bread",hint:"We eat this with butter"},
+    {word:"sleep",hint:"Rest your eyes at night"},
+    {word:"music",hint:"Sounds that make you feel"},
+    {word:"dance",hint:"Move your body to music"},
+    {word:"light",hint:"Makes the room bright"},
+    {word:"plant",hint:"A living green thing"},
+    {word:"cloud",hint:"White fluffy thing in sky"},
+    {word:"fish",hint:"Lives in the water"},
+    {word:"bird",hint:"An animal that flies"},
+    {word:"book",hint:"You read this"},
+    {word:"road",hint:"Cars drive on this"},
+    {word:"rain",hint:"Water falling from clouds"},
+    {word:"cake",hint:"A sweet birthday treat"},
+    {word:"star",hint:"Shines in the night sky"},
+    {word:"moon",hint:"Glows in the dark sky"},
+    {word:"fire",hint:"Hot and gives light"},
+    {word:"tree",hint:"Has leaves and a trunk"},
+    {word:"door",hint:"You open this to enter"},
+    {word:"shoe",hint:"Wear this on your foot"},
+    {word:"hand",hint:"Part of your arm"},
+    {word:"jump",hint:"Leap into the air"},
+    {word:"love",hint:"A strong warm feeling"},
+    {word:"fast",hint:"Moving quickly"},
+    {word:"slow",hint:"Not moving quickly"},
+    {word:"warm",hint:"Not hot, not cold"},
+    {word:"cold",hint:"Low temperature"},
+    {word:"blue",hint:"Color of the sky"},
+    {word:"play",hint:"Have fun with toys or games"},
+    {word:"work",hint:"Do a task or job"},
+    {word:"talk",hint:"Speak words to someone"},
+    {word:"walk",hint:"Move on your feet"},
+    {word:"open",hint:"Not closed"},
+    {word:"food",hint:"We eat this"},
+    {word:"milk",hint:"White drink from cows"},
+    {word:"baby",hint:"A very young child"},
+    {word:"king",hint:"Rules a kingdom"},
+    {word:"gold",hint:"Precious shiny metal"},
+    {word:"dark",hint:"Without light"},
+    {word:"nose",hint:"You smell with this"},
+    {word:"eyes",hint:"You see with these"},
+    {word:"ears",hint:"You hear with these"},
+    {word:"song",hint:"Music with words"},
+  ],
+  medium: [
+    {word:"jungle",hint:"Dense tropical forest"},
+    {word:"bridge",hint:"Connects two sides"},
+    {word:"bottle",hint:"Container for liquids"},
+    {word:"mother",hint:"Female parent"},
+    {word:"father",hint:"Male parent"},
+    {word:"butter",hint:"Spread on bread"},
+    {word:"winter",hint:"Cold season"},
+    {word:"summer",hint:"Hot season"},
+    {word:"flower",hint:"Pretty part of a plant"},
+    {word:"mirror",hint:"Reflects your image"},
+    {word:"window",hint:"Glass in a wall"},
+    {word:"garden",hint:"Where plants grow"},
+    {word:"market",hint:"Where you buy things"},
+    {word:"planet",hint:"Earth is one of these"},
+    {word:"finger",hint:"Part of your hand"},
+    {word:"purple",hint:"Mix of red and blue"},
+    {word:"yellow",hint:"Color of the sun"},
+    {word:"orange",hint:"Citrus fruit or color"},
+    {word:"silver",hint:"Shiny grey metal"},
+    {word:"castle",hint:"Where kings and queens live"},
+    {word:"animal",hint:"A living creature"},
+    {word:"forest",hint:"Many trees together"},
+    {word:"desert",hint:"Very hot and dry land"},
+    {word:"island",hint:"Land surrounded by water"},
+    {word:"camera",hint:"Takes photographs"},
+    {word:"danger",hint:"Something risky or unsafe"},
+    {word:"energy",hint:"Power to do work"},
+    {word:"family",hint:"People related to you"},
+    {word:"gentle",hint:"Soft and kind"},
+    {word:"honest",hint:"Tells the truth"},
+    {word:"insect",hint:"Small 6-legged creature"},
+    {word:"joyful",hint:"Very happy"},
+    {word:"knight",hint:"A warrior in armor"},
+    {word:"ladder",hint:"Used to climb up"},
+    {word:"magnet",hint:"Attracts metal"},
+    {word:"needle",hint:"Used for sewing"},
+    {word:"oyster",hint:"Shellfish from the sea"},
+    {word:"parrot",hint:"A colorful talking bird"},
+    {word:"puzzle",hint:"A game you put together"},
+    {word:"rabbit",hint:"Hops and has long ears"},
+    {word:"rocket",hint:"Goes to outer space"},
+    {word:"saddle",hint:"Sit on a horse with this"},
+    {word:"talent",hint:"Natural skill or ability"},
+    {word:"turtle",hint:"Slow reptile with a shell"},
+    {word:"unique",hint:"One of a kind"},
+    {word:"violin",hint:"A stringed instrument"},
+    {word:"wallet",hint:"Holds your money"},
+    {word:"zipper",hint:"Closes your jacket"},
+    {word:"goblin",hint:"A mischievous creature"},
+    {word:"donkey",hint:"Grey animal that brays"},
+  ],
+  hard: [
+    {word:"abstract",hint:"Existing as an idea, not physical"},
+    {word:"balance",hint:"Equal weight on both sides"},
+    {word:"careful",hint:"Giving attention to avoid mistakes"},
+    {word:"diamond",hint:"Hardest natural substance"},
+    {word:"elegant",hint:"Graceful and stylish"},
+    {word:"freedom",hint:"The state of being free"},
+    {word:"gravity",hint:"Force that pulls things down"},
+    {word:"harvest",hint:"Gathering crops from fields"},
+    {word:"imagine",hint:"To form a mental picture"},
+    {word:"journey",hint:"A long trip or travel"},
+    {word:"kingdom",hint:"Land ruled by a king"},
+    {word:"lantern",hint:"Portable light source"},
+    {word:"mystery",hint:"Something unknown or secret"},
+    {word:"network",hint:"Connected system or group"},
+    {word:"optical",hint:"Related to sight or light"},
+    {word:"passion",hint:"Strong feeling or enthusiasm"},
+    {word:"quantum",hint:"The smallest unit of energy"},
+    {word:"rainbow",hint:"Colorful arc after rain"},
+    {word:"silence",hint:"Complete absence of sound"},
+    {word:"thunder",hint:"Loud sound during a storm"},
+    {word:"uniform",hint:"Same in all parts; clothing"},
+    {word:"victory",hint:"Winning a contest"},
+    {word:"warrior",hint:"A skilled fighter"},
+    {word:"xternal",hint:"On the outside"},
+    {word:"youthful",hint:"Young or seeming young"},
+    {word:"zealous",hint:"Enthusiastically devoted"},
+    {word:"awkward",hint:"Clumsy or embarrassing"},
+    {word:"beneath",hint:"Under or below something"},
+    {word:"climate",hint:"Typical weather of a region"},
+    {word:"drought",hint:"Long period without rain"},
+    {word:"emperor",hint:"Ruler of an empire"},
+    {word:"feather",hint:"Light covering of a bird"},
+    {word:"genuine",hint:"Real and authentic"},
+    {word:"horizon",hint:"Where sky meets earth"},
+    {word:"impulse",hint:"Sudden urge to do something"},
+    {word:"justice",hint:"Fair treatment for all"},
+    {word:"ketchup",hint:"Red tomato sauce"},
+    {word:"leopard",hint:"Spotted wild cat"},
+    {word:"mineral",hint:"Natural substance from earth"},
+    {word:"neutral",hint:"Not taking sides"},
+    {word:"ominous",hint:"Threatening or alarming"},
+    {word:"penguin",hint:"Bird that can't fly but swims"},
+    {word:"quality",hint:"How good something is"},
+    {word:"routine",hint:"Regular set of activities"},
+    {word:"scholar",hint:"A person of great learning"},
+    {word:"tragedy",hint:"A terrible sad event"},
+    {word:"uttered",hint:"Spoken or expressed"},
+    {word:"village",hint:"A small community"},
+    {word:"whisper",hint:"Speak very softly"},
+    {word:"yielded",hint:"Gave way or produced"},
+  ]
+};
+
+let sharkDiff='easy', sharkScore=0, sharkLives=3, sharkStreak=0;
+let sharkTimeLeft=60, sharkWordTime=8, sharkTInt=null, sharkWInt=null;
+let sharkCurrentWords=[], sharkWordIdx=0, sharkRunning=false;
+let sharkTotalTime=60;
+
+function startShark(){
+  updateSharkLocks();
+  navTo('shark');
+}
+
+function updateSharkLocks(){
+  const sub=CU?.subscription||'free';
+  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  ['medium','hard'].forEach(d=>{
+    const lock=document.getElementById('shark-lock-'+d);
+    const card=document.querySelector('#sc-shark .dc.'+d);
+    if(lock)lock.style.display=hasAccess?'none':'block';
+    if(card)card.style.opacity=hasAccess?'1':'0.65';
+  });
+}
+
+function checkSharkAccess(d){
+  const sub=CU?.subscription||'free';
+  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  if(!hasAccess){
+    if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
+    else{if(confirm('Upgrade to Basic or Premium to unlock!\nView plans?'))navTo('pricing');}
+    return;
+  }
+  launchShark(d);
+}
+
+function launchShark(d){
+  sharkDiff=d;
+  sharkWordTime=SHARK_TL[d];
+  document.getElementById('shark-start').style.display='none';
+  document.getElementById('shark-over').style.display='none';
+  document.getElementById('shark-game').style.display='block';
+  const dlbl=document.getElementById('shark-diff-lbl');
+  if(dlbl)dlbl.textContent={easy:'Easy — Common words · 8 sec each',medium:'Medium — Harder words · 6 sec each',hard:'Hard — Tricky words · 4 sec each'}[d];
+  initShark();
+}
+
+function initShark(){
+  sharkScore=0; sharkLives=3; sharkStreak=0; sharkWordIdx=0;
+  sharkTimeLeft=60; sharkRunning=true;
+  sharkCurrentWords=shuf([...SHARK_WORDS[sharkDiff]]);
+  updateSharkLivesUI();
+  document.getElementById('shark-score').textContent='0';
+  document.getElementById('shark-streak').textContent='0';
+  document.getElementById('shark-time').textContent='60';
+  document.getElementById('shark-danger-bar').style.width='0%';
+  document.getElementById('shark-danger-bar').style.background='#E24B4A';
+  positionShark(10);
+  const inp=document.getElementById('shark-input');if(inp){inp.value='';inp.disabled=false;inp.style.borderColor='var(--lp)';inp.focus();}
+  clearInterval(sharkTInt);
+  clearInterval(sharkWInt);
+  // Global countdown
+  sharkTInt=setInterval(()=>{
+    sharkTimeLeft--;
+    const el=document.getElementById('shark-time');if(el)el.textContent=sharkTimeLeft;
+    if(sharkTimeLeft<=10){if(el)el.style.color='#E24B4A';}
+    if(sharkTimeLeft<=0){clearInterval(sharkTInt);clearInterval(sharkWInt);endShark();}
+  },1000);
+  nextSharkWord();
+}
+
+function positionShark(pct){
+  const shark=document.getElementById('shark-character');
+  if(shark)shark.style.left=pct+'%';
+}
+
+function updateSharkLivesUI(){
+  const el=document.getElementById('shark-lives');
+  if(el)el.innerHTML='❤️'.repeat(Math.max(0,sharkLives));
+}
+
+let sharkWordTimer=null, sharkWordStart=0;
+
+function nextSharkWord(){
+  clearInterval(sharkWordTimer);
+  if(sharkWordIdx>=sharkCurrentWords.length)sharkCurrentWords=[...shuf([...SHARK_WORDS[sharkDiff]])];
+  const q=sharkCurrentWords[sharkWordIdx%sharkCurrentWords.length];
+  sharkWordIdx++;
+  const wd=document.getElementById('shark-word-display');
+  const ht=document.getElementById('shark-hint');
+  if(wd)wd.textContent=q.word;
+  if(ht)ht.textContent='💡 '+q.hint;
+  const inp=document.getElementById('shark-input');if(inp){inp.value='';inp.style.borderColor='var(--lp)';inp.style.background='#FFF8F0';}
+  // Reset danger bar
+  const bar=document.getElementById('shark-danger-bar');
+  if(bar){bar.style.width='0%';bar.style.transition='none';}
+  const fish=document.getElementById('shark-fish');if(fish){fish.textContent='🐟';fish.style.filter='drop-shadow(0 2px 6px rgba(0,0,0,0.3))';}
+  positionShark(10);
+  sharkWordStart=Date.now();
+  // Animate danger bar
+  setTimeout(()=>{
+    if(bar){bar.style.transition=`width ${sharkWordTime}s linear`;bar.style.width='100%';}
+  },50);
+  // Word timer
+  let tLeft=sharkWordTime;
+  sharkWordTimer=setInterval(()=>{
+    tLeft--;
+    // Move shark closer
+    const pct=10+Math.round((sharkWordTime-tLeft)/sharkWordTime*70);
+    positionShark(pct);
+    if(tLeft<=0){
+      clearInterval(sharkWordTimer);
+      sharkWrongWord(q.word);
+    }
+  },1000);
+}
+
+function checkSharkInput(val,enter=false){
+  if(!sharkRunning)return;
+  const q=sharkCurrentWords[(sharkWordIdx-1)%sharkCurrentWords.length];
+  const inp=document.getElementById('shark-input');
+  // Highlight as user types
+  if(q.word.startsWith(val.toLowerCase())&&val.length>0){
+    if(inp)inp.style.borderColor='var(--green)';
+  } else if(val.length>0){
+    if(inp)inp.style.borderColor='var(--red)';
+  } else {
+    if(inp)inp.style.borderColor='var(--lp)';
+  }
+  if(val.toLowerCase()===q.word||enter){
+    if(val.toLowerCase()===q.word){
+      sharkCorrectWord();
+    } else if(enter && val.toLowerCase()!==q.word){
+      sharkWrongWord(q.word, true);
+    }
+  }
+}
+
+function sharkCorrectWord(){
+  clearInterval(sharkWordTimer);
+  const fish=document.getElementById('shark-fish');
+  if(fish){fish.textContent='🎉';setTimeout(()=>{fish.textContent='🐟';},400);}
+  const bar=document.getElementById('shark-danger-bar');
+  if(bar){bar.style.transition='none';bar.style.width='0%';}
+  sharkScore++;sharkStreak++;
+  const ss=document.getElementById('shark-score');if(ss)ss.textContent=sharkScore;
+  const st=document.getElementById('shark-streak');if(st)st.textContent=sharkStreak;
+  const inp=document.getElementById('shark-input');
+  if(inp){inp.style.borderColor='var(--green)';inp.style.background='#E1F5EE';}
+  sOk();
+  setTimeout(()=>nextSharkWord(),400);
+}
+
+function sharkWrongWord(correct, typed=false){
+  clearInterval(sharkWordTimer);
+  sharkLives--;sharkStreak=0;
+  const st=document.getElementById('shark-streak');if(st)st.textContent='0';
+  updateSharkLivesUI();
+  const fish=document.getElementById('shark-fish');
+  if(fish){fish.textContent='💀';fish.style.filter='none';}
+  const inp=document.getElementById('shark-input');
+  if(inp){inp.style.borderColor='var(--red)';inp.style.background='#FCEBEB';inp.value='Correct: '+correct;}
+  const bar=document.getElementById('shark-danger-bar');
+  if(bar){bar.style.transition='none';bar.style.width='0%';}
+  sBad();
+  if(sharkLives<=0){
+    setTimeout(()=>endShark(),600);
+    return;
+  }
+  setTimeout(()=>{
+    const inp2=document.getElementById('shark-input');
+    if(inp2){inp2.value='';inp2.style.borderColor='var(--lp)';inp2.style.background='#FFF8F0';}
+    nextSharkWord();
+  },1000);
+}
+
+async function endShark(){
+  sharkRunning=false;
+  clearInterval(sharkTInt);
+  clearInterval(sharkWordTimer);
+  const game=document.getElementById('shark-game');if(game)game.style.display='none';
+  const over=document.getElementById('shark-over');if(over)over.style.display='block';
+  const fs=document.getElementById('shark-final-score');if(fs)fs.textContent=sharkScore;
+  let stars='',msg='',icon='🦈';
+  if(sharkScore>=30){stars='⭐⭐⭐⭐⭐';msg='Incredible! You outswam the shark!';icon='🏆';sWin();}
+  else if(sharkScore>=20){stars='⭐⭐⭐⭐💫';msg='Amazing speed! The shark couldn\'t catch you!';icon='🎉';sWin();}
+  else if(sharkScore>=12){stars='⭐⭐⭐💫💫';msg='Great typing! Keep practicing!';}
+  else if(sharkScore>=6){stars='⭐⭐💫💫💫';msg='Good effort! The shark was hungry today!';}
+  else{stars='⭐💫💫💫💫';msg='Practice makes perfect! Try again!';icon='😅';}
+  const si=document.getElementById('shark-over-icon');if(si)si.textContent=icon;
+  const sr=document.getElementById('shark-stars');if(sr)sr.textContent=stars;
+  const sm=document.getElementById('shark-msg');if(sm)sm.textContent=msg;
+  // Save score
+  const entry={name:CU?CU.name:'Guest',username:CU?CU.username:'guest',type:CU?CU.type:'guest',score:sharkScore,total:60,diff:'shark-'+sharkDiff,stars,date:new Date().toLocaleDateString()};
+  showLoader('Saving score...');
+  await api({action:'saveScore',...entry});
+  hideLoader();
+  const sa=document.getElementById('shark-save-area');
+  if(sa)sa.innerHTML=CU
+    ?`<div style="font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:14px">✅ Score saved! ${sharkScore} words typed!</div>`
+    :`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:10px">Login to save your score!</p><div style="display:flex;gap:8px;justify-content:center"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up</button></div></div>`;
+  setTimeout(()=>over.scrollIntoView({behavior:'smooth'}),100);
+}
+
+function restartShark(){
+  document.getElementById('shark-over').style.display='none';
+  document.getElementById('shark-game').style.display='block';
+  initShark();
+}
+
+</script>
+
+<script>
+// ================================================================
+// BLOCK 3 — QUESTION BANK (loaded last — never blocks UI)
 // ================================================================
 
 // QUESTION BANK — loaded last so it never blocks the UI
