@@ -664,7 +664,30 @@ async function doLogin(){
   CU=res.user;
   round=1;
   buildHdr();
+  // Fetch fresh profile to get subStart/subExpiry immediately after login
+  const profileRes = await api({action:'getProfile', username:CU.username});
+  if(profileRes.success){
+    CU.subscription = profileRes.subscription || CU.subscription;
+    CU.subStart     = profileRes.subStart || '';
+    CU.subExpiry    = profileRes.subExpiry || '';
+    buildHdr();
+  }
   navTo(CU.role==='admin'?'admin':'start');
+}
+
+// Helper: calculate expiry string from CU data
+function getExpiryInfo(){
+  const sub = CU?.subscription||'free';
+  const subExpiry = CU?.subExpiry||'';
+  const subStart = CU?.subStart||'';
+  if((sub==='basic'||sub==='premium')&&subExpiry){
+    const expDate=new Date(subExpiry);
+    const today=new Date();today.setHours(0,0,0,0);
+    const daysLeft=Math.ceil((expDate-today)/(1000*60*60*24));
+    const expiryStr=expDate.toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
+    return {isActive:true, daysLeft, expiryStr, subStart};
+  }
+  return {isActive:false, daysLeft:null, expiryStr:'', subStart};
 }
 
 async function doReg(){
@@ -849,10 +872,14 @@ async function loadProfile(){
   const pst=document.getElementById('pstats');if(pst)pst.innerHTML='<div class="scard"><div class="snum">...</div><div class="slbll">Loading</div></div>';
   const res=await api({action:'getProfile',username:CU.username});
   const my=res.success?res.scores:[];
+  // Use API response first, fall back to CU object
   const sub=res.subscription||CU.subscription||'free';
-  const subStart=res.subStart||'';
-  const subExpiry=res.subExpiry||'';
+  const subStart=res.subStart||CU.subStart||'';
+  const subExpiry=res.subExpiry||CU.subExpiry||'';
+  // Update CU with latest data
   CU.subscription=sub;
+  if(subStart) CU.subStart=subStart;
+  if(subExpiry) CU.subExpiry=subExpiry;
 
   // Subscription card
   const sc=document.getElementById('psub-card');
@@ -1126,7 +1153,16 @@ async function handlePayment(username,plan,reference,approve){
   const res=await api({action:'approvePayment',username,plan,reference,approve:String(approve)});
   hideLoader();
   if(res.success){
-    alert(approve?'✅ Plan activated for @'+username+'!\n30-day subscription starts today.':'❌ Payment rejected for @'+username+'.');
+    if(approve){
+      // Calculate 30-day expiry and show it to admin
+      const start = new Date();
+      const expiry = new Date();
+      expiry.setDate(expiry.getDate()+30);
+      const fmt = d => d.toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
+      alert('✅ Plan activated for @'+username+'!\n\n📅 Subscription: '+plan.toUpperCase()+'\n🗓️ Start: '+fmt(start)+'\n⏰ Expires: '+fmt(expiry)+'\n\nThe expiry date has been saved in Google Sheets.');
+    } else {
+      alert('❌ Payment rejected for @'+username+'.');
+    }
     loadAdminPayments();
     loadAdmin('ov');
   }else{alert('Error: '+res.error);}
