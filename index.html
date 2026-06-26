@@ -543,14 +543,201 @@ let aCtx=null, BANK=null;
 function getBank(){return BANK;}
 
 // ── API ──────────────────────────────────────────────────────
+// ── LOCAL STORAGE DATABASE ───────────────────────────────────
+const DB = {
+  get(key){ try{return JSON.parse(localStorage.getItem('ww_'+key)||'null');}catch(e){return null;} },
+  set(key,val){ try{localStorage.setItem('ww_'+key,JSON.stringify(val));}catch(e){} },
+  del(key){ try{localStorage.removeItem('ww_'+key);}catch(e){} }
+};
+
+function dbInit(){
+  if(!DB.get('users')){
+    DB.set('users',[{id:1,name:'Admin',username:'admin',password:'wordwise2024',type:'adult',role:'admin',joined:fmtDate(new Date()),rounds:0,best:0,subscription:'premium',subStart:'',subExpiry:''}]);
+  }
+  if(!DB.get('scores'))  DB.set('scores',[]);
+  if(!DB.get('payments'))DB.set('payments',[]);
+  if(!DB.get('activity'))DB.set('activity',[]);
+  if(!DB.get('children'))DB.set('children',[]);
+}
+
+function fmtDate(d){ return (d||new Date()).toLocaleDateString('en-PH',{month:'2-digit',day:'2-digit',year:'numeric'}); }
+function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function logAct(msg){ const a=DB.get('activity')||[]; a.unshift({m:msg,t:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),d:fmtDate(new Date())}); DB.set('activity',a.slice(0,100)); }
+
+// ── API — localStorage first, GAS sync in background ─────────
 async function api(data){
-  try{
-    const p=new URLSearchParams(data);
-    const r=await fetch(GAS+'?'+p.toString(),{redirect:'follow'});
-    const t=await r.text();
-    try{return JSON.parse(t);}
-    catch(e){console.error('API parse error:',t.slice(0,200));return{success:false,error:'Parse error'};}
-  }catch(e){console.error('API fetch error:',e);return{success:false,error:'Network error: '+e.message};}
+  // Handle locally
+  const res = handleLocal(data);
+  // Fire-and-forget sync to GAS (don't await, don't block)
+  if(GAS && data.action !== 'ping'){
+    try{
+      const p=new URLSearchParams(data);
+      fetch(GAS+'?'+p.toString(),{redirect:'follow'}).catch(()=>{});
+    }catch(e){}
+  }
+  return res;
+}
+
+function handleLocal(data){
+  switch(data.action){
+    case 'login':            return localLogin(data);
+    case 'register':         return localRegister(data);
+    case 'saveScore':        return localSaveScore(data);
+    case 'getScores':        return localGetScores(data);
+    case 'getProfile':       return localGetProfile(data);
+    case 'logActivity':      { logAct(data.message); return {success:true}; }
+    case 'adminData':        return localAdminData();
+    case 'clearActivity':    { DB.set('activity',[]); return {success:true}; }
+    case 'submitPayment':    return localSubmitPayment(data);
+    case 'getPendingPayments': return localGetPayments();
+    case 'approvePayment':   return localApprovePayment(data);
+    case 'addChild':         return localAddChild(data);
+    case 'getChildren':      return localGetChildren(data);
+    case 'ping':             return {success:true,message:'WordWise PH running (local mode)'};
+    default:                 return {success:false,error:'Unknown action: '+data.action};
+  }
+}
+
+// ── LOCAL AUTH ────────────────────────────────────────────────
+function localLogin(d){
+  const users=DB.get('users')||[];
+  const u=users.find(x=>x.username===d.username&&x.password===d.password);
+  if(!u)return{success:false,error:'Wrong username or password!'};
+  logAct(u.name+' logged in');
+  return{success:true,user:{...u}};
+}
+
+function localRegister(d){
+  if(!d.name||!d.username||!d.password)return{success:false,error:'Please fill in all fields!'};
+  if(d.password.length<4)return{success:false,error:'Password must be at least 4 characters!'};
+  const users=DB.get('users')||[];
+  if(users.find(x=>x.username.toLowerCase()===d.username.toLowerCase()))return{success:false,error:'Username already taken!'};
+  const newUser={id:Date.now(),name:d.name,username:d.username,password:d.password,type:d.type||'kid',role:'user',joined:fmtDate(new Date()),rounds:0,best:0,subscription:'free',subStart:'',subExpiry:''};
+  users.push(newUser);
+  DB.set('users',users);
+  logAct(d.name+' created an account ('+d.type+')');
+  return{success:true,user:{...newUser}};
+}
+
+// ── LOCAL SCORES ──────────────────────────────────────────────
+function localSaveScore(d){
+  const scores=DB.get('scores')||[];
+  scores.push({id:Date.now(),name:d.name,username:d.username,type:d.type,score:Number(d.score),diff:d.diff,stars:d.stars,date:fmtDate(new Date())});
+  DB.set('scores',scores);
+  // Update user rounds/best
+  const users=DB.get('users')||[];
+  const idx=users.findIndex(x=>x.username===d.username);
+  if(idx>=0){users[idx].rounds=(users[idx].rounds||0)+1;users[idx].best=Math.max(users[idx].best||0,Number(d.score));DB.set('users',users);}
+  logAct((d.name||'Guest')+' scored '+d.score+'/5 on '+d.diff);
+  return{success:true};
+}
+
+function localGetScores(d){
+  const scores=DB.get('scores')||[];
+  let filtered=scores.filter(s=>!d.diff||s.diff===d.diff);
+  filtered.sort((a,b)=>b.score-a.score);
+  return{success:true,scores:filtered.slice(0,10)};
+}
+
+function localGetProfile(d){
+  const scores=DB.get('scores')||[];
+  const users=DB.get('users')||[];
+  const mine=scores.filter(s=>s.username===d.username).reverse();
+  const u=users.find(x=>x.username===d.username)||{};
+  // Check expiry
+  let sub=u.subscription||'free';
+  const subExpiry=u.subExpiry||'';
+  const subStart=u.subStart||'';
+  if((sub==='basic'||sub==='premium')&&subExpiry){
+    const exp=new Date(subExpiry); const today=new Date(); today.setHours(0,0,0,0);
+    if(exp<today){
+      sub='expired';
+      const users2=DB.get('users')||[];
+      const idx2=users2.findIndex(x=>x.username===d.username);
+      if(idx2>=0){users2[idx2].subscription='expired';DB.set('users',users2);}
+    }
+  }
+  return{success:true,scores:mine,subscription:sub,subStart,subExpiry};
+}
+
+// ── LOCAL PAYMENTS ─────────────────────────────────────────────
+function localSubmitPayment(d){
+  if(!d.username)return{success:false,error:'Not logged in!'};
+  if(!d.reference)return{success:false,error:'GCash reference number required!'};
+  if(!d.plan)return{success:false,error:'No plan selected!'};
+  const payments=DB.get('payments')||[];
+  if(payments.find(p=>p.reference===d.reference))return{success:false,error:'This GCash reference number was already submitted!'};
+  payments.push({id:Date.now(),name:d.name,username:d.username,plan:d.plan,price:Number(d.price),reference:d.reference,date:fmtDate(new Date()),status:'pending',hasReceipt:d.hasReceipt||'no'});
+  DB.set('payments',payments);
+  const users=DB.get('users')||[];
+  const idx=users.findIndex(x=>x.username===d.username);
+  if(idx>=0){users[idx].subscription='pending';DB.set('users',users);}
+  logAct(d.name+' submitted '+d.plan+' payment (ref: '+d.reference+')');
+  return{success:true,message:'Payment submitted!'};
+}
+
+function localGetPayments(){
+  const payments=DB.get('payments')||[];
+  return{success:true,payments:[...payments].reverse()};
+}
+
+function localApprovePayment(d){
+  const approve=d.approve==='true'||d.approve===true;
+  const payments=DB.get('payments')||[];
+  const idx=payments.findIndex(p=>p.username===d.username&&p.reference===d.reference);
+  if(idx>=0)payments[idx].status=approve?'approved':'rejected';
+  DB.set('payments',payments);
+  const users=DB.get('users')||[];
+  const uidx=users.findIndex(x=>x.username===d.username);
+  if(uidx>=0){
+    if(approve){
+      const start=new Date();
+      const expiry=addDays(start,30);
+      users[uidx].subscription=d.plan;
+      users[uidx].subStart=fmtDate(start);
+      users[uidx].subExpiry=fmtDate(expiry);
+    }else{
+      users[uidx].subscription='free';
+      users[uidx].subStart='';
+      users[uidx].subExpiry='';
+    }
+    DB.set('users',users);
+  }
+  logAct('Admin '+(approve?'approved':'rejected')+' '+d.plan+' for @'+d.username);
+  return{success:true};
+}
+
+// ── LOCAL CHILDREN ─────────────────────────────────────────────
+function localAddChild(d){
+  const users=DB.get('users')||[];
+  if(!users.find(x=>x.username===d.childUsername))return{success:false,error:'Username not found. Make sure your child has registered first!'};
+  const children=DB.get('children')||[];
+  if(children.find(c=>c.parent===d.parentUsername&&c.child===d.childUsername))return{success:false,error:'This child is already linked to your account!'};
+  children.push({parent:d.parentUsername,child:d.childUsername,date:fmtDate(new Date())});
+  DB.set('children',children);
+  logAct('@'+d.parentUsername+' linked child @'+d.childUsername);
+  return{success:true};
+}
+
+function localGetChildren(d){
+  const children=DB.get('children')||[];
+  const users=DB.get('users')||[];
+  const scores=DB.get('scores')||[];
+  const myKids=children.filter(c=>c.parent===d.parentUsername);
+  const result=myKids.map(c=>{
+    const u=users.find(x=>x.username===c.child)||{name:c.child,username:c.child,type:'kid'};
+    const myScores=scores.filter(s=>s.username===c.child).reverse();
+    return{name:u.name,username:u.username,type:u.type,scores:myScores};
+  });
+  return{success:true,children:result};
+}
+
+// ── LOCAL ADMIN DATA ───────────────────────────────────────────
+function localAdminData(){
+  const users=(DB.get('users')||[]).map(u=>{const{password,...rest}=u;return rest;});
+  const scores=DB.get('scores')||[];
+  const activity=DB.get('activity')||[];
+  return{success:true,users,scores,activity};
 }
 
 // ── LOADER ───────────────────────────────────────────────────
@@ -1160,6 +1347,7 @@ async function clearActivity(){
 
 // ── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',function(){
+  dbInit();
   buildHdr();
   loadLB('easy');
 });
