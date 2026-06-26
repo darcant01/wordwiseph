@@ -25,7 +25,7 @@ function setup() {
     return s;
   }
 
-  makeSheet(SHEET_USERS,    ["ID","Name","Username","Password","Type","Role","Joined","Rounds","BestScore","Subscription"]);
+  makeSheet(SHEET_USERS,    ["ID","Name","Username","Password","Type","Role","Joined","Rounds","BestScore","Subscription","SubStart","SubExpiry"]);
   makeSheet(SHEET_SCORES,   ["ID","Name","Username","Type","Score","Difficulty","Stars","Date"]);
   makeSheet(SHEET_ACTIVITY, ["ID","Message","Time","Date"]);
   makeSheet(SHEET_PAYMENTS, ["ID","Name","Username","Plan","Price","Reference","Date","Status"]);
@@ -147,11 +147,14 @@ function login(p) {
     if (String(username).trim() === String(p.username).trim() && 
         String(password).trim() === String(p.password).trim()) {
       logActivity({message: name + " logged in"});
+      const [,,,,,,,,,sub,subStart,subExpiry] = rows[i];
       return {
         success: true,
         user: {id, name, username, type, role, joined, 
                rounds:Number(rounds)||0, best:Number(best)||0, 
-               subscription: subscription||"free"}
+               subscription: subscription||"free",
+               subStart: subStart||"",
+               subExpiry: subExpiry||""}
       };
     }
   }
@@ -234,16 +237,50 @@ function getScores(p) {
 
 // ── GET PROFILE ─────────────────────────────────────────────
 function getProfile(p) {
-  const sheet = getSheet(SHEET_SCORES);
-  const rows  = sheet.getDataRange().getValues();
-  let scores  = [];
-  for (let i = 1; i < rows.length; i++) {
-    const [id,name,username,type,score,diff,stars,date] = rows[i];
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // Get scores
+  const scoreSheet = getSheet(SHEET_SCORES);
+  const sRows = scoreSheet.getDataRange().getValues();
+  let scores = [];
+  for (let i = 1; i < sRows.length; i++) {
+    const [id,name,username,type,score,diff,stars,date] = sRows[i];
     if (username === p.username) {
       scores.push({score:Number(score)||0, diff, stars, date});
     }
   }
-  return {success:true, scores: scores.reverse()};
+
+  // Get subscription info from Users sheet
+  let subscription = "free", subStart = "", subExpiry = "";
+  const userSheet = getSheet(SHEET_USERS);
+  const uRows = userSheet.getDataRange().getValues();
+  for (let i = 1; i < uRows.length; i++) {
+    if (uRows[i][2] === p.username) {
+      subscription = uRows[i][9] || "free";
+      subStart     = uRows[i][10] || "";
+      subExpiry    = uRows[i][11] || "";
+      break;
+    }
+  }
+
+  // Check if subscription has expired
+  if ((subscription === "basic" || subscription === "premium") && subExpiry) {
+    const expDate = new Date(subExpiry);
+    const today   = new Date();
+    today.setHours(0,0,0,0);
+    if (expDate < today) {
+      subscription = "expired";
+      // Update user sheet
+      for (let i = 1; i < uRows.length; i++) {
+        if (uRows[i][2] === p.username) {
+          userSheet.getRange(i+1, 10).setValue("expired");
+          break;
+        }
+      }
+    }
+  }
+
+  return {success:true, scores:scores.reverse(), subscription, subStart, subExpiry};
 }
 
 // ── LOG ACTIVITY ────────────────────────────────────────────
@@ -400,7 +437,19 @@ function approvePayment(p) {
   const uRows = users.getDataRange().getValues();
   for (let i = 1; i < uRows.length; i++) {
     if (uRows[i][2] === p.username) {
-      users.getRange(i+1, 10).setValue(approve ? p.plan : "free");
+      if (approve) {
+        const startDate = new Date();
+        const expDate   = new Date();
+        expDate.setDate(expDate.getDate() + 30); // 30-day subscription
+        const fmt = d => Utilities.formatDate(d, Session.getScriptTimeZone(), "MM/dd/yyyy");
+        users.getRange(i+1, 10).setValue(p.plan);       // Subscription
+        users.getRange(i+1, 11).setValue(fmt(startDate)); // SubStart
+        users.getRange(i+1, 12).setValue(fmt(expDate));   // SubExpiry
+      } else {
+        users.getRange(i+1, 10).setValue("free");
+        users.getRange(i+1, 11).setValue("");
+        users.getRange(i+1, 12).setValue("");
+      }
       break;
     }
   }
@@ -483,9 +532,11 @@ function getAdminData() {
   
   const users = [];
   for (let i = 1; i < uRows.length; i++) {
-    const [id,name,username,,type,role,joined,rounds,best,subscription] = uRows[i];
+    const [id,name,username,,type,role,joined,rounds,best,subscription,subStart,subExpiry] = uRows[i];
     users.push({id, name, username, type, role, joined, 
-                rounds:Number(rounds)||0, best:Number(best)||0, subscription:subscription||"free"});
+                rounds:Number(rounds)||0, best:Number(best)||0, 
+                subscription:subscription||"free",
+                subStart:subStart||"", subExpiry:subExpiry||""});
   }
   
   const scores = [];
