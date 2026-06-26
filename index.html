@@ -859,7 +859,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 // ================================================================
 // WORDWISE PH — GAS-ONLY BACKEND (no localStorage)
 // ================================================================
-const GAS = "https://script.google.com/macros/s/AKfycbzNMeyMc5iWsiX5eWac6ClpiT5hawZPclLRIYlqNJgVN8eGGT9NFLvRRXsgIB_bXUeSYg/exec";
+const GAS = "https://script.google.com/macros/s/AKfycbxmJzbOkbqkPU8Li5WJiBvA0ZooqKxxfxpLdsBl18pDSJwSHfni8p5tBpyMQPMVnVUzBw/exec";
 let CU=null, snd=true, round=1, diff='easy';
 let selPlan=null, selPrice=0, aLB='easy';
 const TL={easy:30,medium:20,hard:10};
@@ -1507,31 +1507,45 @@ async function loadProfile(){
     sc.style.display='block';
     sc.innerHTML=`
       <div class="sectitle">My Subscription</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:${isActive&&subExpiry?'14px':'0'}">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px">
         <div>
           <span class="sub-status ${sub==='pending'?'pending':isActive?'active':sub==='expired'?'expired':'free'}" style="font-size:14px;padding:6px 14px">${subMap[sub]||'🌱 Free Plan'}</span>
           ${subStart?`<div style="font-size:12px;color:#888780;font-weight:700;margin-top:6px">Started: ${subStart}</div>`:''}
         </div>
         <button class="btn btn-pink btn-sm" onclick="navTo('pricing')">${isActive?'Renew / Upgrade':'Upgrade Plan'}</button>
       </div>
+
       ${isActive&&subExpiry?`
         <div style="background:var(--bg);border-radius:12px;border:2px solid var(--lp);padding:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <div style="font-size:36px">📅</div>
           <div style="flex:1">
             <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888780;margin-bottom:4px">Subscription Expires</div>
             <div style="font-size:clamp(16px,4vw,22px);font-weight:900;color:var(--navy);${urgentClass}">${expiryStr}</div>
-            <div style="font-size:13px;font-weight:700;margin-top:4px;${urgentClass}">${daysLeft>0?`<strong>${daysLeft} day${daysLeft===1?'':'s'}</strong> remaining`:'<strong>Expired</strong>'}</div>
+            <div style="font-size:13px;font-weight:700;margin-top:4px;${urgentClass}">
+              ${daysLeft>0?`<strong>${daysLeft} day${daysLeft===1?'':'s'}</strong> remaining`:'<strong>Expired</strong>'}
+            </div>
           </div>
-          <div style="text-align:center">
-            <div style="font-size:clamp(28px,7vw,42px);font-weight:900;${daysLeft>14?'color:var(--green)':daysLeft>7?'color:var(--amber)':'color:var(--red)'}">${Math.max(0,daysLeft)}</div>
+          <div style="text-align:center;background:${daysLeft>14?'#E1F5EE':daysLeft>7?'#FAEEDA':'#FCEBEB'};border-radius:12px;padding:10px 16px">
+            <div style="font-size:clamp(28px,7vw,42px);font-weight:900;${daysLeft>14?'color:#085041':daysLeft>7?'color:#412402':'color:#791F1F'}">${Math.max(0,daysLeft)}</div>
             <div style="font-size:11px;font-weight:800;color:#888780;text-transform:uppercase">days left</div>
           </div>
         </div>
         ${renewMsg}
       `:''}
+
+      ${isActive&&!subExpiry?`
+        <div style="background:#EEEDFE;border:1.5px solid #7F77DD;border-radius:12px;padding:14px;margin-top:4px">
+          <div style="font-size:14px;font-weight:800;color:#3C3489;margin-bottom:6px">📅 Expiry date not set yet</div>
+          <div style="font-size:13px;color:#534AB7;font-weight:700;line-height:1.6">
+            Your plan is active! The admin needs to add your expiry date in the Google Sheet.<br>
+            Contact admin at <strong>darcant01@gmail.com</strong> to set your expiry date.
+          </div>
+        </div>
+      `:''}
+
       ${sub==='pending'?'<div class="pending-box" style="margin-top:10px">⏳ Payment pending — admin will verify within 24 hours.</div>':''}
       ${sub==='free'?'<div style="font-size:13px;color:#888780;font-weight:700;margin-top:8px">Upgrade to Basic or Premium for unlimited access!</div>':''}
-      ${sub==='expired'?'<div style="background:#FCEBEB;border:1.5px solid #E24B4A;border-radius:10px;padding:12px;margin-top:10px;font-size:13px;font-weight:700;color:#791F1F">❌ Your plan expired. Renew to restore full access to all levels!</div>':''}
+      ${sub==='expired'?'<div style="background:#FCEBEB;border:1.5px solid #E24B4A;border-radius:10px;padding:12px;margin-top:10px;font-size:13px;font-weight:700;color:#791F1F">❌ Your plan expired. Renew to restore full access!</div>':''}
     `;
   }
 
@@ -1724,7 +1738,10 @@ async function loadAdmin(sec){
       let expDisplay='—';
       if(isActive&&u.subExpiry){
         const days=Math.ceil((new Date(u.subExpiry)-new Date())/(1000*60*60*24));
-        expDisplay=u.subExpiry+(days<=7?` <span style="color:#E24B4A;font-weight:900">(${days}d)</span>`:` <span style="color:#888780">(${days}d)</span>`);
+        const color=days<=7?'#E24B4A':days<=14?'#BA7517':'#888780';
+        expDisplay=`<div style="font-size:11px">${u.subExpiry}</div><span style="color:${color};font-weight:900;font-size:11px">${days>0?days+'d left':'EXPIRED'}</span>`;
+      } else if(isActive&&!u.subExpiry){
+        expDisplay=`<button class="pay-approve-btn approve" style="font-size:10px;padding:3px 8px" onclick="adminSetExpiry('${u.username}','${u.subscription}')">📅 Set</button>`;
       }
       return `<tr><td>${i+1}</td><td>${u.name}</td><td>@${u.username}</td><td>${u.type}</td><td><span class="rbdg ${u.role}">${u.role}</span></td><td><span class="sub-status ${isActive?'active':u.subscription==='pending'?'pending':'free'}">${u.subscription||'free'}</span></td><td style="font-size:12px">${expDisplay}</td><td>${u.rounds}</td><td>${u.best}/5</td><td>${u.joined}</td></tr>`;
     }).join('')||'<tr><td colspan="10" style="text-align:center;color:#888780">No users.</td></tr>';
@@ -1757,6 +1774,30 @@ async function loadAdminPayments(){
       </tr>`).join('')
     :'<tr><td colspan="9" style="text-align:center;color:#888780;padding:16px">No payment requests yet.</td></tr>';
 }
+async function adminSetExpiry(username, plan){
+  const days = prompt('Set subscription for @'+username+'\nHow many days from today?\n(e.g. 30 for one month)', '30');
+  if(!days || isNaN(days)) return;
+  const start  = new Date();
+  const expiry = new Date();
+  expiry.setDate(expiry.getDate() + parseInt(days));
+  const fmt = d => (d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getDate().toString().padStart(2,'0')+'/'+d.getFullYear();
+  showLoader('Setting expiry...');
+  const res = await api({
+    action:'setExpiry',
+    username,
+    plan,
+    subStart:  fmt(start),
+    subExpiry: fmt(expiry)
+  });
+  hideLoader();
+  if(res.success){
+    alert('✅ Expiry set for @'+username+'\nPlan: '+plan+'\nExpires: '+fmt(expiry)+' ('+days+' days)');
+    loadAdmin('us');
+  } else {
+    alert('Error: '+res.error);
+  }
+}
+
 async function handlePayment(username,plan,reference,approve){
   if(!confirm((approve?'Approve':'Reject')+' payment for @'+username+'?'))return;
   showLoader(approve?'Activating plan...':'Rejecting...');
