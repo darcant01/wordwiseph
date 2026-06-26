@@ -31,10 +31,18 @@ function setup() {
   makeSheet(SHEET_PAYMENTS, ["ID","Name","Username","Plan","Price","Reference","Date","Status"]);
   makeSheet(SHEET_CHILDREN, ["ID","ParentUsername","ChildUsername","DateLinked"]);
 
-  // Add default admin if Users sheet is empty
+  // Add SubStart and SubExpiry columns to existing Users sheet if missing
   const users = ss.getSheetByName(SHEET_USERS);
+  const headerRow = users.getRange(1, 1, 1, users.getLastColumn()).getValues()[0];
+  if (!headerRow.includes("SubStart")) {
+    users.getRange(1, 11).setValue("SubStart");
+    users.getRange(1, 12).setValue("SubExpiry");
+    Logger.log("Added SubStart and SubExpiry columns to Users sheet");
+  }
+
+  // Add default admin if Users sheet is empty
   if (users.getLastRow() < 2) {
-    users.appendRow([1,"Admin","admin","wordwise2024","adult","admin",new Date().toLocaleDateString(),0,0,"premium"]);
+    users.appendRow([1,"Admin","admin","wordwise2024","adult","admin",new Date().toLocaleDateString(),0,0,"premium","",""]);
   }
 
   return "✅ Setup complete! All 5 sheets ready.";
@@ -79,6 +87,7 @@ function doGet(e) {
       case "addChild":           result = addChild(p); break;
       case "getChildren":        result = getChildren(p); break;
       case "ping":               result = {success:true, message:"WordWise PH API v3 is running!"}; break;
+      case "setExpiry":          result = setExpiry(p); break;
       default:                   result = {success:false, error:"Unknown action: "+action};
     }
     return respond(result);
@@ -147,14 +156,17 @@ function login(p) {
     if (String(username).trim() === String(p.username).trim() && 
         String(password).trim() === String(p.password).trim()) {
       logActivity({message: name + " logged in"});
-      const [,,,,,,,,,sub,subStart,subExpiry] = rows[i];
+      // Safely read columns — handle sheets that may not have SubStart/SubExpiry yet
+      const sub2       = rows[i][9]  || "free";
+      const subStart2  = rows[i][10] || "";
+      const subExpiry2 = rows[i][11] || "";
       return {
         success: true,
         user: {id, name, username, type, role, joined, 
                rounds:Number(rounds)||0, best:Number(best)||0, 
-               subscription: subscription||"free",
-               subStart: subStart||"",
-               subExpiry: subExpiry||""}
+               subscription: sub2,
+               subStart: subStart2,
+               subExpiry: subExpiry2}
       };
     }
   }
@@ -460,6 +472,21 @@ function approvePayment(p) {
     `<p>You have <b>${action}</b> the ${p.plan} payment for <b>@${p.username}</b>.<br>Reference: ${p.reference}</p>`);
   
   return {success:true};
+}
+
+// ── SET EXPIRY (manual admin override) ─────────────────────
+function setExpiry(p) {
+  const users = getSheet(SHEET_USERS);
+  const uRows = users.getDataRange().getValues();
+  for (let i = 1; i < uRows.length; i++) {
+    if (uRows[i][2] === p.username) {
+      if (p.subExpiry) users.getRange(i+1, 12).setValue(p.subExpiry);
+      if (p.subStart)  users.getRange(i+1, 11).setValue(p.subStart);
+      if (p.plan)      users.getRange(i+1, 10).setValue(p.plan);
+      return {success:true, message:"Expiry updated for @"+p.username};
+    }
+  }
+  return {success:false, error:"User not found"};
 }
 
 // ── ADD CHILD ───────────────────────────────────────────────
