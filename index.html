@@ -823,10 +823,12 @@ async function loadProfile(){
 
   // Load profile data (scores + subscription info)
   const res=await api({action:'getProfile',username:CU.username});
+  console.log('Profile API response:', res); // debug
   const my=res.success?res.scores:[];
   const sub=res.subscription||CU.subscription||'free';
   const subStart=res.subStart||null;
   const subExpiry=res.subExpiry||null;
+  console.log('Subscription:', sub, '| Start:', subStart, '| Expiry:', subExpiry); // debug
 
   // Update CU with latest subscription info
   CU.subscription=sub;
@@ -1135,8 +1137,17 @@ async function handlePayment(username,plan,reference,approve){
   showLoader(approve?'Activating plan...':'Rejecting...');
   const res=await api({action:'approvePayment',username,plan,reference,approve:String(approve)});
   hideLoader();
-  alert(res.success?(approve?'✅ Plan activated for @'+username:'❌ Payment rejected'):'Error: '+res.error);
-  if(res.success)loadAdminPayments();
+  if(res.success){
+    const msg=approve
+      ?'✅ Plan activated for @'+username+'!\n\nSubscription set for 30 days.\nExpiry date has been recorded.'
+      :'❌ Payment rejected for @'+username+'.';
+    alert(msg);
+    loadAdminPayments();
+    // Reload admin overview to refresh stats
+    loadAdmin('ov');
+  } else {
+    alert('Error: '+res.error);
+  }
 }
 
 async function clearActivity(){
