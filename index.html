@@ -233,6 +233,34 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 @keyframes pulse{from{box-shadow:0 4px 20px rgba(226,75,74,0.3);}to{box-shadow:0 4px 30px rgba(226,75,74,0.7);}}
 #ft-num{font-size:clamp(16px,4vw,22px);font-weight:900;color:var(--gold);line-height:1;}
 #ft-lbl{font-size:9px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:0.5px;margin-top:1px;}
+
+/* ── SPELL IT RIGHT ── */
+.spell-word{font-size:clamp(28px,8vw,52px);font-weight:900;color:var(--navy);letter-spacing:3px;text-align:center;margin:20px 0 6px;line-height:1.2}
+.spell-hint{font-size:clamp(12px,3vw,15px);color:#888780;font-weight:700;text-align:center;margin-bottom:20px}
+.spell-choices{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,2vw,14px);margin-bottom:16px}
+.spell-btn{padding:clamp(14px,3vw,20px) 12px;border-radius:clamp(12px,3vw,16px);border:2.5px solid var(--lp);background:#FFF8F0;font-family:'Nunito',sans-serif;font-size:clamp(15px,3.5vw,20px);font-weight:800;color:var(--navy);cursor:pointer;transition:all 0.2s;text-align:center;letter-spacing:1px;min-height:clamp(56px,12vw,70px);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.spell-btn:hover:not(:disabled){background:#FBEAF0;border-color:var(--pink);transform:translateY(-2px)}
+.spell-btn.correct{background:#E1F5EE;border-color:var(--green);color:#085041}
+.spell-btn.wrong{background:#FCEBEB;border-color:var(--red);color:#791F1F}
+.spell-btn:disabled{cursor:default;transform:none}
+.spell-progress{display:flex;gap:6px;justify-content:center;margin-bottom:16px;flex-wrap:wrap}
+.sp-dot{width:clamp(10px,2.5vw,14px);height:clamp(10px,2.5vw,14px);border-radius:50%;background:var(--lp);transition:all 0.3s;flex-shrink:0}
+.sp-dot.correct{background:var(--green)}
+.sp-dot.wrong{background:var(--red)}
+.sp-dot.active{background:var(--pink);transform:scale(1.3)}
+.spell-category{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;background:#EEEDFE;color:#3C3489;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase}
+.spell-definition{font-size:clamp(13px,3vw,16px);color:#5F5E5A;font-weight:700;line-height:1.6;text-align:center;margin-bottom:8px;padding:0 8px}
+.spell-streak{font-size:clamp(13px,3vw,16px);font-weight:900;color:var(--gold)}
+.games-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,2vw,16px);margin-bottom:16px}
+.game-card{border-radius:clamp(14px,3vw,20px);border:2.5px solid var(--lp);background:#fff;padding:clamp(16px,3vw,24px);text-align:center;cursor:pointer;transition:all 0.2s;position:relative}
+.game-card:hover{transform:translateY(-4px);border-color:var(--pink)}
+.game-card.active{border-color:var(--pink);background:#FFF0F5}
+.game-card.locked{opacity:0.6}
+.game-icon{font-size:clamp(28px,6vw,42px);margin-bottom:8px}
+.game-title{font-size:clamp(14px,3.5vw,18px);font-weight:900;color:var(--navy);margin-bottom:4px}
+.game-desc{font-size:clamp(11px,2.5vw,13px);color:#888780;font-weight:700}
+.game-badge{position:absolute;top:-10px;right:10px;background:var(--pink);color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:99px;letter-spacing:1px}
+.game-lock-badge{position:absolute;top:-10px;left:10px;background:#FAEEDA;color:#412402;font-size:10px;font-weight:800;padding:3px 10px;border-radius:99px}
 </style>
 </head>
 <body>
@@ -275,8 +303,94 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
           <div class="dc-lock" id="lock-hard" style="display:none;margin-top:6px;font-size:11px;background:#FCEBEB;color:#791F1F;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
         </div>
       </div>
+      <div style="text-align:center;margin-top:8px">
+        <button class="btn btn-navy" style="width:100%;max-width:300px;margin-bottom:10px" onclick="navTo('games')">🎮 All Brainy Games</button>
+      </div>
       <p style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780">Login to save your scores · <button class="lnk" onclick="navTo('pricing')">See subscription plans</button></p>
     </div>
+  </div>
+</div>
+
+
+<!-- ══ GAMES HUB ══ -->
+<div id="sc-games" class="screen">
+  <div class="hero"><div class="htitle">Brainy <span>Games!</span></div><div class="hsub">Challenge yourself with fun English games!</div></div>
+  <div class="wrap">
+    <div class="games-grid">
+      <div class="game-card" onclick="navTo('quiz')">
+        <div class="game-badge">GRAMMAR</div>
+        <div class="game-icon">📝</div>
+        <div class="game-title">Grammar Quiz</div>
+        <div class="game-desc">Test your grammar skills across 3 levels</div>
+      </div>
+      <div class="game-card" onclick="startSpell()">
+        <div class="game-badge">NEW!</div>
+        <div class="game-icon">🔤</div>
+        <div class="game-title">Spell It Right</div>
+        <div class="game-desc">Choose the correctly spelled word</div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780">More games coming soon!</div>
+  </div>
+</div>
+
+<!-- ══ SPELL IT RIGHT ══ -->
+<div id="sc-spell" class="screen">
+  <div class="hero">
+    <div class="rpill" id="spell-round-pill">Round 1</div>
+    <div class="strow" id="spell-stars"></div>
+    <div class="htitle" style="font-size:clamp(18px,4vw,26px)">Spell It <span>Right!</span></div>
+    <div class="hsub" id="spell-diff-lbl">Easy — 10 words</div>
+    <div class="pbar-w"><div class="pbar" id="spell-pbar"></div></div>
+    <div class="plbl" id="spell-plbl">0 of 10 answered</div>
+    <div class="tw">
+      <div class="tc"><svg viewBox="0 0 64 64"><circle class="ttr" cx="32" cy="32" r="26"/><circle class="tri" id="spell-tri" cx="32" cy="32" r="26"/></svg><div class="tnum" id="spell-tnum">15</div></div>
+      <div class="tlbl">seconds<br>left</div>
+    </div>
+  </div>
+  <div class="qmain">
+    <div class="slbl">Which spelling is correct?</div>
+    <div id="spell-container"></div>
+    <div class="sw"><button class="sbtn" id="spell-sbtn" onclick="showSpellResult()" disabled>See My Score!</button></div>
+    <div class="result" id="spell-result">
+      <div class="rlbl">Your score</div>
+      <div class="rsco" id="spell-rsco"></div>
+      <div class="rstr" id="spell-rstr"></div>
+      <div class="rmsg" id="spell-rmsg"></div>
+      <div id="spell-save-area"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="retrySpell()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('games')">All Games</button>
+        <button class="btn btn-out" onclick="navTo('lb')">Top Scores</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SPELL DIFFICULTY PICKER ══ -->
+<div id="sc-spell-pick" class="screen">
+  <div class="hero"><div class="htitle">Spell It <span>Right!</span></div><div class="hsub">Choose your difficulty level</div></div>
+  <div class="wrap">
+    <div class="diff-grid">
+      <div class="dc easy" onclick="launchSpell('easy')">
+        <div class="di">🌱</div>
+        <div class="dt">Easy</div>
+        <div class="ds">10 words · 15 sec each</div>
+      </div>
+      <div class="dc medium" onclick="checkSpellAccess('medium')">
+        <div class="di">⚡</div>
+        <div class="dt">Medium</div>
+        <div class="ds">20 words · 12 sec each</div>
+        <div id="spell-lock-medium" style="display:none;margin-top:6px;font-size:11px;background:#FAEEDA;color:#412402;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
+      </div>
+      <div class="dc hard" onclick="checkSpellAccess('hard')">
+        <div class="di">🔥</div>
+        <div class="dt">Hard</div>
+        <div class="ds">30 words · 8 sec each</div>
+        <div id="spell-lock-hard" style="display:none;margin-top:6px;font-size:11px;background:#FCEBEB;color:#791F1F;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:4px"><button class="lnk" onclick="navTo('games')">← Back to Games</button></div>
   </div>
 </div>
 
@@ -659,7 +773,7 @@ function navTo(s){
   if(s==='start')  updateDiffCards();
   // Show/hide floating timer
   const ft=document.getElementById('floating-timer');
-  if(ft) ft.style.display=(s==='quiz')?'flex':'none';
+  if(ft) ft.style.display=(s==='quiz'||s==='spell')?'flex':'none';
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -668,7 +782,7 @@ function buildHdr(){
   const r=document.getElementById('hdr-right');
   if(!r)return;
   const sb=`<button class="hbtn" id="sndbtn" onclick="toggleSound()">Sound ON</button>`;
-  const play=`<button class="hbtn" onclick="navTo('start')">Play</button>`;
+  const play=`<button class="hbtn" onclick="navTo('games')">🎮 Games</button>`;
   const lb=`<button class="hbtn" onclick="navTo('lb')">Scores</button>`;
   if(CU){
     const ini=CU.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
@@ -1282,6 +1396,320 @@ document.addEventListener('DOMContentLoaded',function(){
   loadLB('easy');
 });
 </script>
+
+// ================================================================
+// SPELL IT RIGHT GAME
+// ================================================================
+const SPELL_TL = {easy:15, medium:12, hard:8};
+const SPELL_QL = {easy:10, medium:20, hard:30};
+
+// ── MASSIVE SPELLING BANK ──────────────────────────────────────
+const SPELL_BANK = {
+  easy: [
+    {word:"beautiful",choices:["beautifull","beautiful","beutiful","beautyful"],correct:"beautiful",hint:"Something that looks very nice",category:"Adjective"},
+    {word:"because",choices:["becaus","becuase","because","beacuse"],correct:"because",hint:"Used to give a reason",category:"Conjunction"},
+    {word:"believe",choices:["beleive","believe","belive","beleeve"],correct:"believe",hint:"To think something is true",category:"Verb"},
+    {word:"friend",choices:["freind","frend","friend","frind"],correct:"friend",hint:"Someone you like and trust",category:"Noun"},
+    {word:"family",choices:["familly","family","famely","familey"],correct:"family",hint:"People related to you",category:"Noun"},
+    {word:"school",choices:["scool","school","sckool","schol"],correct:"school",hint:"Where you go to study",category:"Noun"},
+    {word:"teacher",choices:["teecher","teachr","teacher","techer"],correct:"teacher",hint:"A person who teaches",category:"Noun"},
+    {word:"answer",choices:["anser","answer","answar","anwer"],correct:"answer",hint:"A response to a question",category:"Noun"},
+    {word:"always",choices:["allways","alwayz","always","alweys"],correct:"always",hint:"At all times",category:"Adverb"},
+    {word:"people",choices:["pepole","poeple","peaple","people"],correct:"people",hint:"More than one person",category:"Noun"},
+    {word:"different",choices:["diffrent","diferent","different","diferrent"],correct:"different",hint:"Not the same",category:"Adjective"},
+    {word:"between",choices:["betwean","betwen","between","beetween"],correct:"between",hint:"In the middle of two things",category:"Preposition"},
+    {word:"important",choices:["importent","inportant","importint","important"],correct:"important",hint:"Having great value or meaning",category:"Adjective"},
+    {word:"favorite",choices:["favorit","favrite","favorete","favorite"],correct:"favorite",hint:"The one you like best",category:"Adjective"},
+    {word:"birthday",choices:["birthady","brithday","birthday","birtday"],correct:"birthday",hint:"The day you were born",category:"Noun"},
+    {word:"together",choices:["togeather","togther","together","toogether"],correct:"together",hint:"With each other",category:"Adverb"},
+    {word:"outside",choices:["outsied","outsyde","ouside","outside"],correct:"outside",hint:"Not inside a building",category:"Adverb"},
+    {word:"morning",choices:["mourning","mornin","morining","morning"],correct:"morning",hint:"The early part of the day",category:"Noun"},
+    {word:"evening",choices:["evenning","evning","eveing","evening"],correct:"evening",hint:"The later part of the day",category:"Noun"},
+    {word:"library",choices:["libary","liberry","library","librery"],correct:"library",hint:"A place where you borrow books",category:"Noun"},
+    {word:"hospital",choices:["hospitel","hospital","hosptal","hospitall"],correct:"hospital",hint:"A place where sick people go",category:"Noun"},
+    {word:"probably",choices:["probaly","probibly","probably","probebly"],correct:"probably",hint:"Very likely to happen",category:"Adverb"},
+    {word:"surprise",choices:["suprise","surprize","surprise","surpris"],correct:"surprise",hint:"Something unexpected",category:"Noun"},
+    {word:"through",choices:["threw","thruogh","through","throug"],correct:"through",hint:"Moving from one side to another",category:"Preposition"},
+    {word:"around",choices:["arond","arownd","arround","around"],correct:"around",hint:"On every side of something",category:"Preposition"},
+    {word:"before",choices:["befour","befor","before","before"],correct:"before",hint:"Earlier than something else",category:"Preposition"},
+    {word:"country",choices:["cuntry","contry","country","coutry"],correct:"country",hint:"A nation with its own government",category:"Noun"},
+    {word:"happen",choices:["hapin","happin","happen","happan"],correct:"happen",hint:"To take place or occur",category:"Verb"},
+    {word:"student",choices:["studant","stoodent","sudent","student"],correct:"student",hint:"Someone who studies",category:"Noun"},
+    {word:"quarter",choices:["quater","quartar","quarter","quorter"],correct:"quarter",hint:"One fourth of something",category:"Noun"},
+  ],
+  medium: [
+    {word:"acknowledge",choices:["aknowledge","acknowledje","acknowledge","acknowlege"],correct:"acknowledge",hint:"To admit or recognize something",category:"Verb"},
+    {word:"aggressive",choices:["agressive","aggresive","aggressive","aggressiv"],correct:"aggressive",hint:"Ready to attack or confront",category:"Adjective"},
+    {word:"approximately",choices:["aproximately","approximatly","approximately","aproximatly"],correct:"approximately",hint:"Almost but not exactly",category:"Adverb"},
+    {word:"argument",choices:["arguement","argument","argunment","arguemnt"],correct:"argument",hint:"A disagreement between people",category:"Noun"},
+    {word:"beginning",choices:["beggining","begining","beginning","beginig"],correct:"beginning",hint:"The start of something",category:"Noun"},
+    {word:"calendar",choices:["calender","calander","calandar","calendar"],correct:"calendar",hint:"A chart showing days and months",category:"Noun"},
+    {word:"cemetery",choices:["cemetary","cemetry","cemetery","semetery"],correct:"cemetery",hint:"A place where people are buried",category:"Noun"},
+    {word:"committee",choices:["commitee","comittee","committee","committe"],correct:"committee",hint:"A group appointed to do a task",category:"Noun"},
+    {word:"conscience",choices:["concience","consience","conscience","conscence"],correct:"conscience",hint:"Your sense of right and wrong",category:"Noun"},
+    {word:"definitely",choices:["definately","definitly","definetly","definitely"],correct:"definitely",hint:"Without any doubt",category:"Adverb"},
+    {word:"embarrass",choices:["embarass","embarrass","embarras","embarest"],correct:"embarrass",hint:"To make someone feel awkward",category:"Verb"},
+    {word:"environment",choices:["enviroment","envirionment","environment","enviornment"],correct:"environment",hint:"The natural world around us",category:"Noun"},
+    {word:"exaggerate",choices:["exagerate","exaggerate","exaggarate","exgagerate"],correct:"exaggerate",hint:"To make something seem bigger than it is",category:"Verb"},
+    {word:"fascinate",choices:["fasinate","fascinate","fascenate","facsinate"],correct:"fascinate",hint:"To attract and hold interest",category:"Verb"},
+    {word:"government",choices:["goverment","governmant","government","govenment"],correct:"government",hint:"The group that rules a country",category:"Noun"},
+    {word:"guarantee",choices:["guarentee","garantee","guarantee","guarrantee"],correct:"guarantee",hint:"A promise that something will happen",category:"Noun"},
+    {word:"immediately",choices:["imediately","immediatly","immediatley","immediately"],correct:"immediately",hint:"Right now, without delay",category:"Adverb"},
+    {word:"independent",choices:["independant","independint","independent","independend"],correct:"independent",hint:"Free from outside control",category:"Adjective"},
+    {word:"intelligence",choices:["inteligence","intelligense","intelligence","inteligense"],correct:"intelligence",hint:"The ability to learn and understand",category:"Noun"},
+    {word:"necessary",choices:["neccessary","neccesary","necessary","necesary"],correct:"necessary",hint:"Needed or required",category:"Adjective"},
+    {word:"occasion",choices:["ocassion","ocasion","occassion","occasion"],correct:"occasion",hint:"A particular time or event",category:"Noun"},
+    {word:"occurrence",choices:["occurence","occurance","occurrence","ocurrence"],correct:"occurrence",hint:"Something that happens",category:"Noun"},
+    {word:"parliament",choices:["parliment","parlaiment","parliament","parliement"],correct:"parliament",hint:"A legislative body of government",category:"Noun"},
+    {word:"persistent",choices:["persistant","persisent","persistent","persistend"],correct:"persistent",hint:"Continuing despite obstacles",category:"Adjective"},
+    {word:"privilege",choices:["privelege","priviledge","privilege","privlege"],correct:"privilege",hint:"A special right or advantage",category:"Noun"},
+    {word:"pronunciation",choices:["pronounciation","prononciation","pronunciation","prononcation"],correct:"pronunciation",hint:"The way a word is spoken",category:"Noun"},
+    {word:"relevant",choices:["relevent","relavant","relevint","relevant"],correct:"relevant",hint:"Connected to the matter at hand",category:"Adjective"},
+    {word:"restaurant",choices:["resturant","restarant","restaraunt","restaurant"],correct:"restaurant",hint:"A place where you eat meals",category:"Noun"},
+    {word:"separate",choices:["seperate","separete","seprate","separate"],correct:"separate",hint:"To divide or set apart",category:"Verb"},
+    {word:"threshold",choices:["threshhold","treshhold","threshold","treshhold"],correct:"threshold",hint:"The point of beginning or entering",category:"Noun"},
+    {word:"sufficient",choices:["sufficent","sufficeint","suficient","sufficient"],correct:"sufficient",hint:"Enough for a purpose",category:"Adjective"},
+    {word:"temperature",choices:["temprature","temperture","temperature","tempurature"],correct:"temperature",hint:"The degree of heat or cold",category:"Noun"},
+    {word:"vocabulary",choices:["vocabualry","vocabulery","vocabulary","vocablary"],correct:"vocabulary",hint:"All the words a person knows",category:"Noun"},
+    {word:"Wednesday",choices:["Wensday","Wendsday","Wedensday","Wednesday"],correct:"Wednesday",hint:"The fourth day of the week",category:"Noun"},
+    {word:"possession",choices:["posession","possesion","posesion","possession"],correct:"possession",hint:"Something that belongs to you",category:"Noun"},
+  ],
+  hard: [
+    {word:"accommodation",choices:["accomodation","acommodation","accomodattion","accommodation"],correct:"accommodation",hint:"A place where you stay or live",category:"Noun"},
+    {word:"accumulate",choices:["acumulate","accumalate","accummulate","accumulate"],correct:"accumulate",hint:"To gather or collect over time",category:"Verb"},
+    {word:"acquaintance",choices:["aquaintance","acquaintence","acquiantance","acquaintance"],correct:"acquaintance",hint:"Someone you know slightly",category:"Noun"},
+    {word:"ambiguous",choices:["ambigious","ambigous","ambiguous","ambiguious"],correct:"ambiguous",hint:"Having more than one meaning",category:"Adjective"},
+    {word:"annihilate",choices:["anihilate","annihilate","anihillate","annihiliate"],correct:"annihilate",hint:"To destroy completely",category:"Verb"},
+    {word:"bureaucracy",choices:["bureacracy","buracracy","beaurocracy","bureaucracy"],correct:"bureaucracy",hint:"A system of complex rules and procedures",category:"Noun"},
+    {word:"camouflage",choices:["camoflage","camoflauge","camouflague","camouflage"],correct:"camouflage",hint:"Disguise using colors or patterns",category:"Noun"},
+    {word:"catastrophe",choices:["catastrofe","catastrophy","catastraphe","catastrophe"],correct:"catastrophe",hint:"A sudden great disaster",category:"Noun"},
+    {word:"caricature",choices:["caricuture","carricature","caricature","caricature"],correct:"caricature",hint:"An exaggerated picture or description",category:"Noun"},
+    {word:"conscientious",choices:["consciencious","conscentious","conscientious","concientious"],correct:"conscientious",hint:"Taking great care to do things correctly",category:"Adjective"},
+    {word:"connoisseur",choices:["conoisseur","connoiseur","connaisseur","connoisseur"],correct:"connoisseur",hint:"An expert judge in matters of taste",category:"Noun"},
+    {word:"desiccate",choices:["dessicate","dessiccate","desiccate","desicate"],correct:"desiccate",hint:"To remove moisture, to dry out",category:"Verb"},
+    {word:"dilapidated",choices:["dillipidated","dilapidated","delapidated","dillapidated"],correct:"dilapidated",hint:"In a state of disrepair",category:"Adjective"},
+    {word:"discrepancy",choices:["discrepency","discrepancy","discrpancy","descrepancy"],correct:"discrepancy",hint:"A difference or inconsistency",category:"Noun"},
+    {word:"euphemism",choices:["eufemism","euphemism","euphimism","eufemism"],correct:"euphemism",hint:"A mild word used instead of a harsh one",category:"Noun"},
+    {word:"exacerbate",choices:["exaserbate","exaccerbate","exaserbate","exacerbate"],correct:"exacerbate",hint:"To make a problem worse",category:"Verb"},
+    {word:"exhilarate",choices:["exhilerate","exhilarate","exhillarate","exilarate"],correct:"exhilarate",hint:"To make someone feel very happy",category:"Verb"},
+    {word:"fluorescent",choices:["flourescent","fluorescent","florescent","fluoresent"],correct:"fluorescent",hint:"Emitting bright light",category:"Adjective"},
+    {word:"idiosyncratic",choices:["idiosyncratic","idyosincratic","ideosyncratic","idiosincratic"],correct:"idiosyncratic",hint:"Peculiar to an individual",category:"Adjective"},
+    {word:"indispensable",choices:["indispensible","indispensable","indispenseable","indispensabel"],correct:"indispensable",hint:"Absolutely necessary",category:"Adjective"},
+    {word:"irresistible",choices:["irresistable","irresistible","iresistible","irresistbile"],correct:"irresistible",hint:"Too attractive or powerful to resist",category:"Adjective"},
+    {word:"juxtaposition",choices:["juxtaposision","juxtoposition","juxtaposition","juxaposition"],correct:"juxtaposition",hint:"Placing things side by side for contrast",category:"Noun"},
+    {word:"knowledgeable",choices:["knowledgable","knowledgeable","knowledgible","knowlegeable"],correct:"knowledgeable",hint:"Having a lot of knowledge",category:"Adjective"},
+    {word:"labyrinthine",choices:["laberinthine","labyrinthine","labrinthine","labirinthine"],correct:"labyrinthine",hint:"Like a labyrinth; complicated",category:"Adjective"},
+    {word:"liaison",choices:["liason","liaison","liaisone","liaision"],correct:"liaison",hint:"Communication between groups",category:"Noun"},
+    {word:"mnemonic",choices:["nemonic","mnemonic","memonnic","mnemonik"],correct:"mnemonic",hint:"A memory aid or device",category:"Noun"},
+    {word:"nomenclature",choices:["nomeclature","nomenclature","nommenclature","nomenclatuer"],correct:"nomenclature",hint:"A system of names used in a field",category:"Noun"},
+    {word:"onomatopoeia",choices:["onomatopeia","onomatopoeia","onomatopia","onomotopoeia"],correct:"onomatopoeia",hint:"Words that imitate sounds (buzz, hiss)",category:"Noun"},
+    {word:"paraphernalia",choices:["parafernalia","paraphernalia","paraphernelia","paraphenalia"],correct:"paraphernalia",hint:"Miscellaneous articles or equipment",category:"Noun"},
+    {word:"pharmaceutical",choices:["farmaceutical","pharmaceutical","pharmiceutical","pharmaceuticle"],correct:"pharmaceutical",hint:"Relating to medicinal drugs",category:"Adjective"},
+    {word:"conscientious",choices:["conscentious","conscientious","consciencious","concientious"],correct:"conscientious",hint:"Very careful and thorough",category:"Adjective"},
+    {word:"perpendicular",choices:["perpendicolar","perpendiclar","perpendicular","perpindicular"],correct:"perpendicular",hint:"At a right angle (90°)",category:"Adjective"},
+    {word:"reconnaissance",choices:["reconaissance","reconnaisance","reconnaissance","reconaisance"],correct:"reconnaissance",hint:"Military observation of an area",category:"Noun"},
+    {word:"rheumatism",choices:["rhumatism","rheumatism","reumatism","rheumatizm"],correct:"rheumatism",hint:"Painful conditions of joints and muscles",category:"Noun"},
+    {word:"silhouette",choices:["silouhette","silhouette","silouette","silhouhette"],correct:"silhouette",hint:"A dark outline against a light background",category:"Noun"},
+    {word:"supersede",choices:["supercede","supersede","superceed","superseed"],correct:"supersede",hint:"To take the place of something",category:"Verb"},
+    {word:"ubiquitous",choices:["ubiquitious","ubiquitous","ubiqutious","ubiqitous"],correct:"ubiquitous",hint:"Found everywhere",category:"Adjective"},
+    {word:"unnecessarily",choices:["unecesarily","unnecessarily","unneccessarily","unnecessaraly"],correct:"unnecessarily",hint:"More than is needed",category:"Adverb"},
+    {word:"vaccinate",choices:["vacinate","vacinnate","vaccinate","vaccinnate"],correct:"vaccinate",hint:"To give a vaccine to prevent disease",category:"Verb"},
+    {word:"withhold",choices:["withold","withould","withhould","withhold"],correct:"withhold",hint:"To refuse to give something",category:"Verb"},
+  ]
+};
+
+let spellDiff='easy', spellRound=1;
+let spellQs=[], spellAns=[], spellAnswered=0;
+let spellTInt=null, spellTLeft=15, spellTTotal=15, spellCQ=0, spellLastSco=0;
+
+function startSpell(){
+  updateSpellLocks();
+  navTo('spell-pick');
+}
+
+function updateSpellLocks(){
+  const sub=CU?.subscription||'free';
+  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  ['medium','hard'].forEach(d=>{
+    const lock=document.getElementById('spell-lock-'+d);
+    const card=document.querySelector('#sc-spell-pick .dc.'+d);
+    if(lock) lock.style.display=hasAccess?'none':'block';
+    if(card){card.style.opacity=hasAccess?'1':'0.65';}
+  });
+}
+
+function checkSpellAccess(d){
+  const sub=CU?.subscription||'free';
+  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  if(!hasAccess){
+    if(!CU){
+      if(confirm('Medium and Hard levels require a subscription.\nLogin or create an account to subscribe!\n\nGo to Login?')) navTo('login');
+    } else {
+      if(confirm('Medium and Hard require Basic or Premium plan.\nUpgrade now?')) navTo('pricing');
+    }
+    return;
+  }
+  launchSpell(d);
+}
+
+function launchSpell(d){
+  spellDiff=d;
+  navTo('spell');
+  buildSpell();
+}
+
+function buildSpell(){
+  const total=SPELL_QL[spellDiff];
+  spellQs=shuf(SPELL_BANK[spellDiff]).slice(0,total);
+  spellAns=new Array(total).fill(null);
+  spellAnswered=0; spellCQ=0;
+  spellTTotal=SPELL_TL[spellDiff]; spellTLeft=spellTTotal;
+
+  const diffLabel={easy:`Easy — ${SPELL_QL.easy} words · 15 sec each`,medium:`Medium — ${SPELL_QL.medium} words · 12 sec each`,hard:`Hard — ${SPELL_QL.hard} words · 8 sec each`};
+  const dlbl=document.getElementById('spell-diff-lbl');if(dlbl)dlbl.textContent=diffLabel[spellDiff];
+  const pill=document.getElementById('spell-round-pill');if(pill)pill.textContent='Round '+spellRound;
+  const pbar=document.getElementById('spell-pbar');if(pbar)pbar.style.width='0%';
+  const plbl=document.getElementById('spell-plbl');if(plbl)plbl.textContent='0 of '+total+' answered';
+  const sbtn=document.getElementById('spell-sbtn');if(sbtn)sbtn.disabled=true;
+  const res=document.getElementById('spell-result');if(res)res.classList.remove('show');
+
+  // Build star dots
+  const sr=document.getElementById('spell-stars');
+  if(sr){
+    sr.innerHTML='';
+    const shown=Math.min(total,15);
+    for(let i=0;i<shown;i++){const s=document.createElement('span');s.className='star';s.id='ssp'+i;s.style.fontSize='clamp(10px,2vw,16px)';s.textContent='⭐';sr.appendChild(s);}
+  }
+
+  // Build question container
+  const con=document.getElementById('spell-container');
+  if(!con)return;
+  con.innerHTML='';
+
+  spellQs.forEach((q,i)=>{
+    const sh=shuf(q.choices);
+    const btns=sh.map(c=>{
+      const cs=c.replace(/'/g,"\'");
+      const cr=q.correct.replace(/'/g,"\'");
+      return `<button class="spell-btn" onclick="ansSpell(${i},this,'${cs}','${cr}')">${c}</button>`;
+    }).join('');
+    con.innerHTML+=`<div class="qcard" id="sqc${i}" style="${i>0?'opacity:0.4;pointer-events:none':''}">
+      <div style="text-align:center;margin-bottom:6px"><span class="spell-category">${q.category}</span></div>
+      <div class="spell-definition">${q.hint}</div>
+      <div class="spell-word">_ _ _ _ _</div>
+      <div style="text-align:center;font-size:clamp(12px,3vw,14px);color:#888780;font-weight:700;margin-bottom:14px">Which spelling is correct?</div>
+      <div class="spell-choices" id="sch${i}">${btns}</div>
+      <div class="fb" id="sfb${i}"></div>
+    </div>`;
+  });
+
+  startSpellTimer();
+}
+
+function startSpellTimer(){
+  clearInterval(spellTInt);
+  spellTLeft=spellTTotal; updSpellT();
+  spellTInt=setInterval(()=>{
+    spellTLeft--;updSpellT();
+    if(spellTLeft<=5&&spellTLeft>0)sUrg();
+    if(spellTLeft<=0){clearInterval(spellTInt);sTU();autoAnsSpell();}
+  },1000);
+}
+
+function updSpellT(){
+  const n=document.getElementById('spell-tnum');if(n)n.textContent=spellTLeft;
+  const r=document.getElementById('spell-tri');if(r){
+    r.style.strokeDashoffset=163*(1-spellTLeft/spellTTotal);
+    r.style.stroke=spellTLeft<=5?'#E24B4A':spellTLeft<=Math.floor(spellTTotal*0.4)?'#EF9F27':'#FAC775';
+  }
+  // Sync floating timer
+  const ft=document.getElementById('floating-timer');
+  const fn=document.getElementById('ft-num');
+  if(ft&&fn){
+    fn.textContent=spellTLeft;
+    fn.style.color=spellTLeft<=5?'#E24B4A':spellTLeft<=Math.floor(spellTTotal*0.4)?'#EF9F27':'#FAC775';
+    if(spellTLeft<=5)ft.classList.add('urgent');
+    else ft.classList.remove('urgent');
+  }
+}
+
+function autoAnsSpell(){
+  const total=SPELL_QL[spellDiff];
+  const btns=document.getElementById('sch'+spellCQ)?.querySelectorAll('.spell-btn');
+  if(!btns||btns[0]?.disabled)return;
+  btns.forEach(b=>{b.disabled=true;if(b.textContent.trim()===spellQs[spellCQ].correct)b.classList.add('correct');});
+  const fb=document.getElementById('sfb'+spellCQ);
+  document.getElementById('sqc'+spellCQ)?.classList.add('wrong');
+  if(fb){fb.textContent="⏰ Time's up! Correct: "+spellQs[spellCQ].correct;fb.className='fb show wrong';}
+  spellAns[spellCQ]=false; spellAnswered++; updSpellP();
+  const st=document.getElementById('ssp'+Math.min(spellAnswered-1,14));if(st)st.textContent='💫';
+  if(spellAnswered<total){spellCQ++;unlockSpellN();startSpellTimer();}
+  else{const sb=document.getElementById('spell-sbtn');if(sb)sb.disabled=false;}
+}
+
+function ansSpell(q,btn,chosen,correct){
+  const btns=document.getElementById('sch'+q)?.querySelectorAll('.spell-btn');
+  if(!btns||btns[0]?.disabled)return;
+  clearInterval(spellTInt);
+  btns.forEach(b=>{b.disabled=true;if(b.textContent.trim()===correct)b.classList.add('correct');});
+  const ok=chosen===correct;spellAns[q]=ok;
+  const fb=document.getElementById('sfb'+q),card=document.getElementById('sqc'+q);
+  if(ok){card?.classList.add('correct');if(fb){fb.textContent='✓ Correct!';fb.className='fb show correct';}sOk();sCr();}
+  else{card?.classList.add('wrong');if(fb){fb.textContent='✗ The correct spelling is: '+correct;fb.className='fb show wrong';}sBad();btn.classList.add('wrong');}
+  spellAnswered++;updSpellP();
+  const total=SPELL_QL[spellDiff];
+  const st=document.getElementById('ssp'+Math.min(spellAnswered-1,14));if(st)st.textContent=ok?'⭐':'💫';
+  if(spellAnswered<total){spellCQ++;unlockSpellN();startSpellTimer();}
+  else{const sb=document.getElementById('spell-sbtn');if(sb)sb.disabled=false;}
+}
+
+function unlockSpellN(){
+  const c=document.getElementById('sqc'+spellCQ);
+  if(c){c.style.opacity='1';c.style.pointerEvents='auto';setTimeout(()=>c.scrollIntoView({behavior:'smooth',block:'center'}),100);}
+}
+
+function updSpellP(){
+  const total=SPELL_QL[spellDiff];
+  const pb=document.getElementById('spell-pbar');if(pb)pb.style.width=Math.round(spellAnswered/total*100)+'%';
+  const pl=document.getElementById('spell-plbl');if(pl)pl.textContent=spellAnswered+' of '+total+' answered';
+}
+
+async function showSpellResult(){
+  clearInterval(spellTInt);
+  const total=SPELL_QL[spellDiff];
+  spellLastSco=spellAns.filter(a=>a).length;
+  const pct=Math.round(spellLastSco/total*100);
+  const rsco=document.getElementById('spell-rsco');if(rsco)rsco.textContent=spellLastSco+'/'+total;
+  let stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect Speller! Amazing! 🏆';sWin();}
+  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great job! Almost perfect!';sWin();}
+  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good effort! Keep practicing!';}
+  else if(pct>=40){stars='⭐⭐💫💫💫';msg='Keep going! Spelling takes practice!';}
+  else{stars='⭐💫💫💫💫';msg="Don't give up! Every mistake is a lesson!";}
+  const rstr=document.getElementById('spell-rstr');if(rstr)rstr.textContent=stars;
+  const rmsg=document.getElementById('spell-rmsg');if(rmsg)rmsg.textContent=msg;
+
+  // Save score
+  const entry={name:CU?CU.name:'Guest',username:CU?CU.username:'guest',type:CU?CU.type:'guest',score:spellLastSco,total,diff:'spell-'+spellDiff,stars,date:new Date().toLocaleDateString()};
+  showLoader('Saving score...');
+  await api({action:'saveScore',...entry});
+  hideLoader();
+
+  const sa=document.getElementById('spell-save-area');
+  if(sa)sa.innerHTML=CU
+    ?`<div style="font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:14px">✅ Score saved! ${spellLastSco}/${total} (${pct}%)</div>`
+    :`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:10px">Login to save your score!</p><div style="display:flex;gap:8px;justify-content:center"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up</button></div></div>`;
+
+  const res=document.getElementById('spell-result');if(res)res.classList.add('show');
+  const sb=document.getElementById('spell-sbtn');if(sb)sb.disabled=true;
+  setTimeout(()=>document.getElementById('spell-result')?.scrollIntoView({behavior:'smooth'}),100);
+}
+
+function retrySpell(){
+  spellRound++;
+  buildSpell();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 
 <script>
 // QUESTION BANK — loaded last so it never blocks the UI
