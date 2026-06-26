@@ -334,6 +334,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 <div id="sc-profile" class="screen">
   <div class="hero"><div class="htitle">My <span>Profile</span></div><div class="hsub" id="psub"></div></div>
   <div class="wrap">
+    <div class="card" id="psub-card" style="display:none"></div>
     <div class="card"><div class="sgrid" id="pstats"></div></div>
     <div class="card">
       <div class="sectitle">My Score History</div>
@@ -491,7 +492,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
     </div>
     <div id="a-us" style="display:none">
       <div class="sectitle">All Users</div>
-      <div style="overflow-x:auto"><table class="atable"><thead><tr><th>#</th><th>Name</th><th>Username</th><th>Type</th><th>Role</th><th>Sub</th><th>Rounds</th><th>Best</th><th>Joined</th></tr></thead><tbody id="utbody"></tbody></table></div>
+      <div style="overflow-x:auto"><table class="atable"><thead><tr><th>#</th><th>Name</th><th>Username</th><th>Type</th><th>Role</th><th>Sub</th><th>Expires</th><th>Rounds</th><th>Best</th><th>Joined</th></tr></thead><tbody id="utbody"></tbody></table></div>
     </div>
     <div id="a-sc" style="display:none">
       <div class="sectitle">All Scores</div>
@@ -819,18 +820,91 @@ async function loadProfile(){
   if(!CU){navTo('login');return;}
   const ps=document.getElementById('psub');if(ps)ps.textContent='Welcome back, '+CU.name+'!';
   const pst=document.getElementById('pstats');if(pst)pst.innerHTML='<div class="scard"><div class="snum">...</div><div class="slbll">Loading</div></div>';
+
+  // Load profile data (scores + subscription info)
   const res=await api({action:'getProfile',username:CU.username});
   const my=res.success?res.scores:[];
+  const sub=res.subscription||CU.subscription||'free';
+  const subStart=res.subStart||null;
+  const subExpiry=res.subExpiry||null;
+
+  // Update CU with latest subscription info
+  CU.subscription=sub;
+
+  // ── Subscription card ──────────────────────────────────
+  const sc=document.getElementById('psub-card');
+  if(sc){
+    const subMap={free:'🌱 Free Plan',basic:'⚡ Basic Plan',premium:'🔥 Premium Plan',pending:'⏳ Payment Pending',expired:'❌ Expired'};
+    const statusCls={free:'free',basic:'active',premium:'active',pending:'pending',expired:'expired'};
+    const isActive=sub==='basic'||sub==='premium';
+    
+    // Calculate days remaining
+    let daysLeft=null, expiryStr='', urgentClass='', renewMsg='';
+    if(isActive&&subExpiry){
+      const expDate=new Date(subExpiry);
+      const today=new Date();
+      today.setHours(0,0,0,0);
+      daysLeft=Math.ceil((expDate-today)/(1000*60*60*24));
+      expiryStr=expDate.toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
+      if(daysLeft<=0){
+        urgentClass='color:#E24B4A;';
+        renewMsg='<div style="background:#FCEBEB;border:1.5px solid #E24B4A;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:700;color:#791F1F">❌ Your plan has expired. Renew now to continue!</div>';
+      }else if(daysLeft<=7){
+        urgentClass='color:#E24B4A;';
+        renewMsg=`<div style="background:#FCEBEB;border:1.5px solid #E24B4A;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:700;color:#791F1F">⚠️ Expiring in <strong>${daysLeft} day${daysLeft===1?'':'s'}</strong>! Renew now to avoid interruption.</div>`;
+      }else if(daysLeft<=14){
+        urgentClass='color:#BA7517;';
+        renewMsg=`<div style="background:#FAEEDA;border:1.5px solid #BA7517;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:700;color:#412402">📅 Expiring in <strong>${daysLeft} days</strong>. Consider renewing soon!</div>`;
+      }
+    }
+
+    sc.style.display='block';
+    sc.innerHTML=`
+      <div class="sectitle">My Subscription</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:${isActive?'14px':'0'}">
+        <div>
+          <span class="sub-status ${statusCls[sub]||'free'}" style="font-size:14px;padding:6px 14px">${subMap[sub]||'🌱 Free Plan'}</span>
+          ${subStart?`<div style="font-size:12px;color:#888780;font-weight:700;margin-top:6px">Started: ${subStart}</div>`:''}
+        </div>
+        <button class="btn btn-pink btn-sm" onclick="navTo('pricing')">${isActive?'Renew / Upgrade':'Upgrade Plan'}</button>
+      </div>
+      ${isActive&&subExpiry?`
+        <div style="background:var(--bg);border-radius:12px;border:2px solid var(--lp);padding:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <div style="font-size:36px">📅</div>
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888780;margin-bottom:4px">Subscription Expires</div>
+            <div style="font-size:clamp(16px,4vw,22px);font-weight:900;color:var(--navy);${urgentClass}">${expiryStr}</div>
+            <div style="font-size:13px;font-weight:700;margin-top:4px;${urgentClass}">
+              ${daysLeft>0?`<strong>${daysLeft} day${daysLeft===1?'':'s'}</strong> remaining`:'<strong>Expired</strong>'}
+            </div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:clamp(28px,7vw,42px);font-weight:900;${daysLeft>14?'color:var(--green)':daysLeft>7?'color:var(--amber)':'color:var(--red)'}">${Math.max(0,daysLeft)}</div>
+            <div style="font-size:11px;font-weight:800;color:#888780;text-transform:uppercase">days left</div>
+          </div>
+        </div>
+        ${renewMsg}
+      `:''}
+      ${sub==='pending'?'<div class="pending-box" style="margin-top:10px">⏳ Payment pending — admin will verify within 24 hours.</div>':''}
+      ${sub==='free'?'<div style="font-size:13px;color:#888780;font-weight:700;margin-top:8px">Upgrade to Basic or Premium for unlimited access!</div>':''}
+    `;
+  }
+
+  // ── Stats ───────────────────────────────────────────────
   const best=my.reduce((m,s)=>s.score>m?s.score:m,0);
   const perfect=my.filter(s=>s.score===5).length;
   if(pst)pst.innerHTML=`
     <div class="scard"><div class="snum">${my.length}</div><div class="slbll">Rounds Played</div></div>
     <div class="scard"><div class="snum">${best}/5</div><div class="slbll">Best Score</div></div>
     <div class="scard"><div class="snum">${perfect}</div><div class="slbll">Perfect Scores</div></div>`;
+
+  // ── Score history ───────────────────────────────────────
   const ph=document.getElementById('phist');
   if(ph)ph.innerHTML=my.length
     ?my.slice(0,10).map(s=>`<div class="arow"><div class="adot" style="background:${s.score>=4?'var(--green)':s.score>=3?'var(--amber)':'var(--red)'}"></div><div class="atxt">${s.stars} — ${s.diff}</div><div class="atime">${s.score}/5 · ${s.date}</div></div>`).join('')
     :'<div style="text-align:center;padding:24px;color:#888780;font-weight:700">No games yet. Start playing!</div>';
+
+  buildHdr(); // refresh header with updated subscription
 }
 
 // ── PRICING & PAYMENT ──────────────────────────────────────────
@@ -1012,7 +1086,19 @@ async function loadAdmin(sec){
     if(ar)ar.innerHTML=activity.slice(0,8).map(a=>`<div class="arow"><div class="adot" style="background:var(--pink)"></div><div class="atxt">${a.m}</div><div class="atime">${a.t}</div></div>`).join('')||'<div style="padding:14px;text-align:center;color:#888780">No activity yet.</div>';
   }else if(sec==='us'){
     const ub=document.getElementById('utbody');
-    if(ub)ub.innerHTML=users.map((u,i)=>`<tr><td>${i+1}</td><td>${u.name}</td><td>@${u.username}</td><td>${u.type}</td><td><span class="rbdg ${u.role}">${u.role}</span></td><td><span class="sub-status ${u.subscription==='basic'||u.subscription==='premium'?'active':u.subscription==='pending'?'pending':'free'}">${u.subscription||'free'}</span></td><td>${u.rounds}</td><td>${u.best}/5</td><td>${u.joined}</td></tr>`).join('')||'<tr><td colspan="9" style="text-align:center;color:#888780">No users.</td></tr>';
+    if(ub)ub.innerHTML=users.map((u,i)=>{
+      const isActive=u.subscription==='basic'||u.subscription==='premium';
+      let expiryDisplay='—';
+      let expCls='';
+      if(isActive&&u.subExpiry){
+        const expDate=new Date(u.subExpiry);
+        const today=new Date();today.setHours(0,0,0,0);
+        const days=Math.ceil((expDate-today)/(1000*60*60*24));
+        expiryDisplay=u.subExpiry+(days<=7?` <span style="color:#E24B4A;font-weight:900">(${days}d)</span>`:days<=14?` <span style="color:#BA7517">(${days}d)</span>`:` <span style="color:#888780">(${days}d)</span>`);
+        if(days<=0)expCls='background:#FCEBEB';
+      }
+      return `<tr style="${expCls}"><td>${i+1}</td><td>${u.name}</td><td>@${u.username}</td><td>${u.type}</td><td><span class="rbdg ${u.role}">${u.role}</span></td><td><span class="sub-status ${isActive?'active':u.subscription==='pending'?'pending':'free'}">${u.subscription||'free'}</span></td><td style="font-size:12px">${expiryDisplay}</td><td>${u.rounds}</td><td>${u.best}/5</td><td>${u.joined}</td></tr>`;
+    }).join('')||'<tr><td colspan="10" style="text-align:center;color:#888780">No users.</td></tr>';
   }else if(sec==='sc'){
     const sb=document.getElementById('stbody');
     if(sb)sb.innerHTML=scores.slice().reverse().map((s,i)=>`<tr><td>${i+1}</td><td>${s.name}</td><td>${s.score}/5</td><td><span class="dc2 ${s.diff}">${s.diff}</span></td><td>${s.stars}</td><td>${s.date}</td></tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:#888780">No scores.</td></tr>';
