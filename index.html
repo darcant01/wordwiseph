@@ -860,6 +860,7 @@ function hideLoader(){
 
 // ── NAVIGATION ───────────────────────────────────────────────
 function navTo(s){
+  sClick();
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   const el=document.getElementById('sc-'+s);
   if(el)el.classList.add('active');
@@ -883,7 +884,7 @@ function navTo(s){
 function buildHdr(){
   const r=document.getElementById('hdr-right');
   if(!r)return;
-  const sb=`<button class="hbtn" id="sndbtn" onclick="toggleSound()">Sound ON</button>`;
+  const sb=`<button class="hbtn" id="sndbtn" onclick="toggleSound()" style="min-width:110px">🔊 Sound ON</button>`;
   const play=`<button class="hbtn" onclick="navTo('games')">🎮 Games</button>`;
   const lb=`<button class="hbtn" onclick="navTo('lb')">Scores</button>`;
   if(CU){
@@ -898,16 +899,195 @@ function buildHdr(){
   }
 }
 
-// ── SOUND ────────────────────────────────────────────────────
-function toggleSound(){snd=!snd;const b=document.getElementById('sndbtn');if(b)b.textContent='Sound '+(snd?'ON':'OFF');}
+// ── SOUND ENGINE ─────────────────────────────────────────────
+function toggleSound(){
+  snd=!snd;
+  const b=document.getElementById('sndbtn');
+  if(b){b.textContent=snd?'🔊 Sound ON':'🔇 Sound OFF'; b.style.background=snd?'':'rgba(255,255,255,0.1)';}
+  if(snd) sClick(); // play click sound to confirm sound is on
+}
 function gA(){if(!aCtx)aCtx=new(window.AudioContext||window.webkitAudioContext)();return aCtx;}
-function tone(f,d,t,v){t=t||'sine';v=v||0.3;if(!snd)return;try{const c=gA(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=t;o.frequency.setValueAtTime(f,c.currentTime);g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);o.start();o.stop(c.currentTime+d);}catch(e){}}
-function sOk(){[523,659,784].forEach((f,i)=>setTimeout(()=>tone(f,0.15),i*80));}
-function sBad(){[300,250].forEach((f,i)=>setTimeout(()=>tone(f,0.2,'sawtooth'),i*120));}
-function sUrg(){tone(1000,0.08,'square',0.2);}
-function sTU(){[400,300,200].forEach((f,i)=>setTimeout(()=>tone(f,0.25,'sawtooth',0.4),i*150));}
-function sWin(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,0.2,'sine',0.5),i*100));}
-function sCr(){if(!snd)return;try{const c=gA(),b=c.sampleRate*0.4,buf=c.createBuffer(1,b,c.sampleRate),d=buf.getChannelData(0);for(let i=0;i<b;i++)d[i]=(Math.random()*2-1)*0.15;const s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();f.type='bandpass';f.frequency.value=800;g.gain.setValueAtTime(0.4,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.4);s.buffer=buf;s.connect(f);f.connect(g);g.connect(c.destination);s.start();}catch(e){}}
+
+// Core tone generator
+function tone(f,d,t,v,delay){
+  if(!snd)return;
+  t=t||'sine';v=v||0.3;delay=delay||0;
+  try{
+    const c=gA();
+    const o=c.createOscillator();
+    const g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    o.type=t;
+    o.frequency.setValueAtTime(f,c.currentTime+delay);
+    g.gain.setValueAtTime(0,c.currentTime+delay);
+    g.gain.linearRampToValueAtTime(v,c.currentTime+delay+0.01);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+delay+d);
+    o.start(c.currentTime+delay);
+    o.stop(c.currentTime+delay+d);
+  }catch(e){}
+}
+
+// Noise burst generator
+function noise(d,freq,v,delay){
+  if(!snd)return;
+  delay=delay||0;
+  try{
+    const c=gA();
+    const sr=c.sampleRate;
+    const buf=c.createBuffer(1,sr*d,sr);
+    const data=buf.getChannelData(0);
+    for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1);
+    const s=c.createBufferSource();
+    const f=c.createBiquadFilter();
+    const g=c.createGain();
+    f.type='bandpass';f.frequency.value=freq||800;f.Q.value=1;
+    g.gain.setValueAtTime(v||0.3,c.currentTime+delay);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+delay+d);
+    s.buffer=buf;s.connect(f);f.connect(g);g.connect(c.destination);
+    s.start(c.currentTime+delay);
+  }catch(e){}
+}
+
+// ── UNIVERSAL SOUNDS (all games) ──────────────────────────────
+
+// ✅ Correct answer — cheerful ascending ding
+function sOk(){
+  if(!snd)return;
+  [523,659,784,880].forEach((f,i)=>tone(f,0.12,'sine',0.35,i*0.07));
+  noise(0.08,2000,0.08,0.05);
+}
+
+// ❌ Wrong answer — descending buzz
+function sBad(){
+  if(!snd)return;
+  tone(350,0.15,'sawtooth',0.3);
+  tone(280,0.15,'sawtooth',0.25,0.12);
+  noise(0.1,200,0.15,0.05);
+}
+
+// ⏰ Urgent tick (last 5 seconds)
+function sUrg(){
+  if(!snd)return;
+  tone(880,0.05,'square',0.2);
+  noise(0.03,3000,0.1);
+}
+
+// ⏳ Time's up — dramatic fail
+function sTU(){
+  if(!snd)return;
+  [400,350,300,250,200].forEach((f,i)=>tone(f,0.15,'sawtooth',0.3,i*0.1));
+  noise(0.3,150,0.2,0.1);
+}
+
+// 🏆 Win / Perfect score — fanfare
+function sWin(){
+  if(!snd)return;
+  // Triumphant fanfare
+  const notes=[523,523,523,659,523,659,784];
+  const times=[0,0.15,0.3,0.45,0.6,0.7,0.8];
+  notes.forEach((f,i)=>tone(f,0.25,'sine',0.5,times[i]));
+  // Add harmonics
+  [1047,1319].forEach((f,i)=>tone(f,0.4,'sine',0.2,0.8+i*0.1));
+  noise(0.15,1500,0.1,0.85);
+}
+
+// 🎵 Confetti crunch (correct + special effect)
+function sCr(){
+  if(!snd)return;
+  noise(0.12,1200,0.15);
+  noise(0.08,2400,0.1,0.05);
+}
+
+// 🖱️ Button click
+function sClick(){
+  if(!snd)return;
+  tone(800,0.05,'sine',0.15);
+  noise(0.04,3000,0.06);
+}
+
+// 🎮 Game start jingle
+function sStart(){
+  if(!snd)return;
+  [392,523,659,784].forEach((f,i)=>tone(f,0.15,'sine',0.4,i*0.1));
+  noise(0.1,1000,0.08,0.35);
+}
+
+// ⭐ Streak sound (shark typing consecutive)
+function sStreak(count){
+  if(!snd)return;
+  const base=440+count*40;
+  tone(base,0.1,'sine',0.4);
+  tone(base*1.5,0.08,'sine',0.2,0.08);
+  if(count>=5) noise(0.06,2000,0.1,0.1);
+}
+
+// 🦈 Shark chomp
+function sChomp(){
+  if(!snd)return;
+  tone(150,0.15,'sawtooth',0.5);
+  tone(120,0.2,'sawtooth',0.4,0.05);
+  noise(0.15,300,0.3,0.02);
+}
+
+// 🐟 Fish escape (correct in shark)
+function sSwim(){
+  if(!snd)return;
+  [659,784,880,1047].forEach((f,i)=>tone(f,0.08,'sine',0.3,i*0.05));
+  noise(0.06,800,0.08,0.15);
+}
+
+// 🎯 Odd one found — spotlight sound
+function sSpot(){
+  if(!snd)return;
+  tone(440,0.05,'sine',0.2);
+  tone(880,0.05,'sine',0.3,0.06);
+  tone(1320,0.12,'sine',0.4,0.12);
+  noise(0.08,2000,0.1,0.18);
+}
+
+// 🔤 Correct spelling — typewriter + ding
+function sSpell(){
+  if(!snd)return;
+  // Typewriter clicks
+  [1,2,3].forEach(i=>noise(0.04,4000,0.12,i*0.04));
+  // Ding at end
+  tone(1047,0.15,'sine',0.4,0.15);
+}
+
+// ⚡ Level up / round complete
+function sLevelUp(){
+  if(!snd)return;
+  [523,659,784,1047,1319].forEach((f,i)=>tone(f,0.2,'sine',0.45,i*0.08));
+  noise(0.2,1500,0.12,0.4);
+}
+
+// 💥 Combo / streak bonus
+function sCombo(){
+  if(!snd)return;
+  [880,1047,1319].forEach((f,i)=>tone(f,0.1,'square',0.2,i*0.06));
+  noise(0.1,2500,0.12,0.15);
+}
+
+// 🎪 Game over - dramatic
+function sGameOver(){
+  if(!snd)return;
+  [392,370,349,330,311,294].forEach((f,i)=>tone(f,0.2,'sawtooth',0.35,i*0.12));
+  noise(0.4,100,0.3,0.5);
+}
+
+// 🔔 Notification ping
+function sPing(){
+  if(!snd)return;
+  tone(1047,0.08,'sine',0.3);
+  tone(1319,0.12,'sine',0.25,0.08);
+}
+
+// 💧 Countdown drip (timer ticking)
+function sDrip(){
+  if(!snd)return;
+  tone(600,0.04,'sine',0.15);
+  noise(0.03,1500,0.05,0.01);
+}
 
 // ── ERROR HELPERS ─────────────────────────────────────────────
 function showErr(id,msg){const e=document.getElementById(id);if(e){e.textContent=msg;e.classList.add('show');}}
@@ -1072,12 +1252,13 @@ function buildQuiz(){
     </div>`;
   });
   startTimer();
+  sStart();
   if(CU)api({action:'logActivity',message:CU.name+' started '+diff+' round'});
 }
 
 function startTimer(){
   clearInterval(tInt);tLeft=tTotal;updT();
-  tInt=setInterval(()=>{tLeft--;updT();if(tLeft<=5&&tLeft>0)sUrg();if(tLeft<=0){clearInterval(tInt);sTU();autoAns();}},1000);
+  tInt=setInterval(()=>{tLeft--;updT();if(tLeft<=5&&tLeft>0){sUrg();sDrip();}if(tLeft<=0){clearInterval(tInt);sTU();autoAns();}},1000);
 }
 function updT(){
   const n=document.getElementById('tnum');if(n)n.textContent=tLeft;
@@ -1134,11 +1315,11 @@ async function showResult(){
   lastSco=ans.filter(a=>a).length;
   const qTotal=QL[diff]||5;document.getElementById('rsco').textContent=lastSco+'/'+qTotal;
   let stars='',msg='';
-  if(lastSco===5){stars='⭐⭐⭐⭐⭐';msg='Perfect! Grammar Superstar!';sWin();}
-  else if(lastSco>=4){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost perfect!';sWin();}
-  else if(lastSco>=3){stars='⭐⭐⭐💫💫';msg='Good job! Keep practicing!';}
-  else if(lastSco>=2){stars='⭐⭐💫💫💫';msg='Nice try! Review and try again!';}
-  else{stars='⭐💫💫💫💫';msg="Don't give up! Practice makes perfect!";}
+  if(lastSco===qTotal){stars='⭐⭐⭐⭐⭐';msg='Perfect! Grammar Superstar! 🏆';sWin();setTimeout(sLevelUp,900);}
+  else if(lastSco>=Math.ceil(qTotal*0.8)){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost perfect!';sWin();}
+  else if(lastSco>=Math.ceil(qTotal*0.6)){stars='⭐⭐⭐💫💫';msg='Good job! Keep practicing!';sLevelUp();}
+  else if(lastSco>=Math.ceil(qTotal*0.4)){stars='⭐⭐💫💫💫';msg='Nice try! Review and try again!';sTU();}
+  else{stars='⭐💫💫💫💫';msg="Don't give up! Practice makes perfect!";sGameOver();}
   document.getElementById('rstr').textContent=stars;
   document.getElementById('rmsg').textContent=msg;
   const total=QL[diff]||5;const entry={name:CU?CU.name:'Guest',username:CU?CU.username:'guest',type:CU?CU.type:'guest',score:lastSco,total,diff,stars,date:new Date().toLocaleDateString()};
@@ -1756,6 +1937,7 @@ function buildSpell(){
   });
 
   startSpellTimer();
+  sStart();
 }
 
 function startSpellTimer(){
@@ -1806,7 +1988,7 @@ function ansSpell(q,btn,chosen,correct){
   btns.forEach(b=>{b.disabled=true;if(b.textContent.trim()===correct)b.classList.add('correct');});
   const ok=chosen===correct;spellAns[q]=ok;
   const fb=document.getElementById('sfb'+q),card=document.getElementById('sqc'+q);
-  if(ok){card?.classList.add('correct');if(fb){fb.textContent='✓ Correct!';fb.className='fb show correct';}sOk();sCr();}
+  if(ok){card?.classList.add('correct');if(fb){fb.textContent='✓ Correct! Well spelled! ✨';fb.className='fb show correct';}sSpell();sCr();}
   else{card?.classList.add('wrong');if(fb){fb.textContent='✗ The correct spelling is: '+correct;fb.className='fb show wrong';}sBad();btn.classList.add('wrong');}
   spellAnswered++;updSpellP();
   const total=SPELL_QL[spellDiff];
@@ -1833,7 +2015,7 @@ async function showSpellResult(){
   const pct=Math.round(spellLastSco/total*100);
   const rsco=document.getElementById('spell-rsco');if(rsco)rsco.textContent=spellLastSco+'/'+total;
   let stars='',msg='';
-  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect Speller! Amazing! 🏆';sWin();}
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect Speller! Amazing! 🏆';sWin();setTimeout(sLevelUp,900);}
   else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great job! Almost perfect!';sWin();}
   else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good effort! Keep practicing!';}
   else if(pct>=40){stars='⭐⭐💫💫💫';msg='Keep going! Spelling takes practice!';}
@@ -2126,6 +2308,7 @@ function nextSharkWord(){
   if(bar){bar.style.width='0%';bar.style.transition='none';}
   const fish=document.getElementById('shark-fish');if(fish){fish.textContent='🐟';fish.style.filter='drop-shadow(0 2px 6px rgba(0,0,0,0.3))';}
   positionShark(10);
+  sStart();
   sharkWordStart=Date.now();
   // Animate danger bar
   setTimeout(()=>{
@@ -2177,7 +2360,10 @@ function sharkCorrectWord(){
   const st=document.getElementById('shark-streak');if(st)st.textContent=sharkStreak;
   const inp=document.getElementById('shark-input');
   if(inp){inp.style.borderColor='var(--green)';inp.style.background='#E1F5EE';}
-  sOk();
+  // Richer sounds based on streak
+  if(sharkStreak>=5&&sharkStreak%5===0){sCombo();} // combo every 5 streak
+  else{sSwim();}
+  if(sharkStreak===3||sharkStreak===10||sharkStreak===20)sStreak(sharkStreak);
   setTimeout(()=>nextSharkWord(),400);
 }
 
@@ -2192,7 +2378,7 @@ function sharkWrongWord(correct, typed=false){
   if(inp){inp.style.borderColor='var(--red)';inp.style.background='#FCEBEB';inp.value='Correct: '+correct;}
   const bar=document.getElementById('shark-danger-bar');
   if(bar){bar.style.transition='none';bar.style.width='0%';}
-  sBad();
+  sChomp();
   if(sharkLives<=0){
     setTimeout(()=>endShark(),600);
     return;
@@ -2208,11 +2394,12 @@ async function endShark(){
   sharkRunning=false;
   clearInterval(sharkTInt);
   clearInterval(sharkWordTimer);
+  sGameOver();
   const game=document.getElementById('shark-game');if(game)game.style.display='none';
   const over=document.getElementById('shark-over');if(over)over.style.display='block';
   const fs=document.getElementById('shark-final-score');if(fs)fs.textContent=sharkScore;
   let stars='',msg='',icon='🦈';
-  if(sharkScore>=30){stars='⭐⭐⭐⭐⭐';msg='Incredible! You outswam the shark!';icon='🏆';sWin();}
+  if(sharkScore>=30){stars='⭐⭐⭐⭐⭐';msg='Incredible! You outswam the shark!';icon='🏆';sWin();setTimeout(sLevelUp,900);}
   else if(sharkScore>=20){stars='⭐⭐⭐⭐💫';msg='Amazing speed! The shark couldn\'t catch you!';icon='🎉';sWin();}
   else if(sharkScore>=12){stars='⭐⭐⭐💫💫';msg='Great typing! Keep practicing!';}
   else if(sharkScore>=6){stars='⭐⭐💫💫💫';msg='Good effort! The shark was hungry today!';}
@@ -2444,6 +2631,7 @@ function buildOdd(){
   });
 
   startOddTimer();
+  sStart();
 }
 
 function startOddTimer(){
@@ -2501,7 +2689,7 @@ function ansOdd(q,btn,chosen,odd){
   if(ok){
     card?.classList.add('correct');
     if(fb){fb.textContent='✓ Correct! '+oddQs[q].explanation;fb.className='fb show correct';}
-    sOk();sCr();
+    sSpot();sCr();
   }else{
     card?.classList.add('wrong');
     if(fb){fb.textContent='✗ The odd one is "'+odd+'" — '+oddQs[q].explanation;fb.className='fb show wrong';}
@@ -2532,7 +2720,7 @@ async function showOddResult(){
   const pct=Math.round(oddLastSco/total*100);
   const rsco=document.getElementById('odd-rsco');if(rsco)rsco.textContent=oddLastSco+'/'+total;
   let stars='',msg='';
-  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You found every odd one out!';sWin();}
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You found every odd one out! 🎯';sWin();setTimeout(sLevelUp,900);}
   else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Excellent! Sharp vocabulary skills!';sWin();}
   else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good work! Keep expanding your vocab!';}
   else if(pct>=40){stars='⭐⭐💫💫💫';msg='Nice try! Review the categories and try again!';}
