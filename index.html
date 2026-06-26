@@ -269,6 +269,55 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 .lb-game-panel{display:block}
 .lb-list{margin-top:4px}
 .lb-score-display{font-size:clamp(14px,3.5vw,18px);font-weight:900;color:var(--pink)}
+
+/* ── LIVE SCORE TICKER ── */
+#score-ticker{
+  position:fixed;
+  left:0;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:400;
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  width:clamp(44px,10vw,54px);
+  pointer-events:none;
+  transition:opacity 0.3s;
+}
+#score-ticker.hidden{opacity:0;pointer-events:none}
+.tick-item{
+  background:var(--navy);
+  color:#fff;
+  font-family:'Nunito',sans-serif;
+  font-size:9px;
+  font-weight:800;
+  padding:6px 4px;
+  text-align:center;
+  line-height:1.3;
+  border-radius:0 8px 8px 0;
+  margin-bottom:4px;
+  transform:translateX(-100%);
+  transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275),opacity 0.3s;
+  opacity:0;
+  pointer-events:none;
+  border-left:3px solid var(--pink);
+  word-break:break-word;
+}
+.tick-item.show{transform:translateX(0);opacity:1}
+.tick-item.slide-out{transform:translateX(-110%);opacity:0}
+.tick-item.grammar{border-color:#B5D4F4}
+.tick-item.spell{border-color:#F4C0D1}
+.tick-item.shark{border-color:#1D9E75}
+.tick-item.odd{border-color:#7F77DD}
+.tick-icon{font-size:14px;display:block;margin-bottom:2px}
+.tick-score{font-size:11px;font-weight:900;color:#FAC775}
+.tick-name{font-size:8px;color:#B5D4F4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:46px}
+.tick-diff{font-size:7px;color:#888780;text-transform:uppercase;letter-spacing:0.5px}
+@media(max-width:480px){
+  #score-ticker{width:38px}
+  .tick-item{font-size:8px;padding:5px 3px}
+  .tick-name{max-width:34px}
+}
 </style>
 </head>
 <body>
@@ -876,7 +925,11 @@ function navTo(s){
   if(s==='start')  updateDiffCards();
   // Show/hide floating timer
   const ft=document.getElementById('floating-timer');
-  if(ft) ft.style.display=(s==='quiz'||s==='spell'||s==='odd')?'flex':'none';
+  const gameScreens=['quiz','spell','odd','shark'];
+  if(ft) ft.style.display=gameScreens.includes(s)?'flex':'none';
+  // Show ticker on non-game screens
+  TICKER.setVisible(!gameScreens.includes(s));
+  if(!gameScreens.includes(s)) TICKER.resume();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -1253,6 +1306,8 @@ function buildQuiz(){
   });
   startTimer();
   sStart();
+  TICKER.pause();
+  TICKER.setVisible(false);
   if(CU)api({action:'logActivity',message:CU.name+' started '+diff+' round'});
 }
 
@@ -1326,6 +1381,8 @@ async function showResult(){
   showLoader('Saving score...');
   await api({action:'saveScore',...entry});
   hideLoader();
+  TICKER.notifyLocal(entry);
+  TICKER.resume();
   const sa=document.getElementById('save-area');
   if(sa)sa.innerHTML=CU
     ?`<div style="font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:14px">✅ Score saved!</div>`
@@ -1718,11 +1775,160 @@ async function clearActivity(){
   loadAdmin('ac');
 }
 
+// ── LIVE SCORE TICKER ────────────────────────────────────────
+// Lightweight: polls GAS every 15 sec ONLY when not actively playing
+// Zero impact on game performance - uses requestIdleCallback
+
+const TICKER = {
+  queue: [],          // pending notifications to show
+  showing: false,     // currently animating
+  pollInterval: null, // setInterval ref
+  lastScores: {},     // track latest scores per diff to detect new ones
+  paused: false,      // pause during active gameplay
+  maxItems: 5,        // max items visible at once
+  
+  // Game icon + color mapping
+  gameInfo(diff){
+    if(diff.startsWith('shark')) return {icon:'🦈',cls:'shark',label:'Shark'};
+    if(diff.startsWith('spell')) return {icon:'🔤',cls:'spell',label:'Spell'};
+    if(diff.startsWith('odd'))   return {icon:'🎯',cls:'odd',label:'Odd'};
+    return {icon:'📝',cls:'grammar',label:'Quiz'};
+  },
+
+  // Add a score notification to queue
+  push(entry){
+    const info = this.gameInfo(entry.diff||'easy');
+    const firstName = (entry.name||'Someone').split(' ')[0];
+    this.queue.push({
+      icon: info.icon,
+      cls: info.cls,
+      name: firstName,
+      score: entry.score,
+      total: entry.total||5,
+      stars: entry.stars||'⭐',
+      diff: entry.diff||'',
+      label: info.label
+    });
+    this.flush();
+  },
+
+  // Show next item in queue
+  flush(){
+    if(this.showing || this.queue.length===0) return;
+    if(this.paused) return;
+    const ticker = document.getElementById('score-ticker');
+    if(!ticker) return;
+
+    // Limit visible items
+    const existing = ticker.querySelectorAll('.tick-item');
+    if(existing.length >= this.maxItems){
+      // Slide out the oldest
+      const oldest = existing[0];
+      oldest.classList.add('slide-out');
+      setTimeout(()=>oldest.remove(),350);
+    }
+
+    const item = this.queue.shift();
+    this.showing = true;
+
+    const el = document.createElement('div');
+    el.className = 'tick-item ' + item.cls;
+    el.innerHTML = 
+      '<span class="tick-icon">' + item.icon + '</span>' +
+      '<div class="tick-score">' + item.score + '/' + item.total + '</div>' +
+      '<div class="tick-name">' + item.name + '</div>' +
+      '<div class="tick-diff">' + item.label + '</div>';
+    ticker.appendChild(el);
+
+    // Animate in
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        el.classList.add('show');
+      });
+    });
+
+    // Auto remove after 6 seconds
+    setTimeout(()=>{
+      el.classList.add('slide-out');
+      setTimeout(()=>{
+        if(el.parentNode) el.remove();
+      },400);
+    },6000);
+
+    this.showing = false;
+
+    // Show next item after short delay
+    if(this.queue.length > 0){
+      setTimeout(()=>this.flush(), 800);
+    }
+  },
+
+  // Poll GAS for new scores (only when not playing)
+  async poll(){
+    if(this.paused) return;
+    // Use requestIdleCallback so it never blocks UI
+    const doFetch = async () => {
+      try{
+        const diffs = ['easy','medium','hard','spell-easy','spell-medium','spell-hard',
+                       'shark-easy','shark-medium','shark-hard','odd-easy','odd-medium','odd-hard'];
+        // Only fetch 'easy' diff each cycle (rotate through diffs to reduce load)
+        const idx = Math.floor(Date.now()/15000) % diffs.length;
+        const diff = diffs[idx];
+        const res = await api({action:'getScores', diff});
+        if(!res.success || !res.scores?.length) return;
+        const latest = res.scores[0];
+        const key = diff + '_' + latest.username + '_' + latest.date + '_' + latest.score;
+        if(this.lastScores[diff] && this.lastScores[diff] !== key){
+          // New score detected!
+          this.push({...latest, diff, total: latest.total||5});
+        }
+        this.lastScores[diff] = key;
+      }catch(e){
+        // Silent fail — ticker is non-critical
+      }
+    };
+    if(window.requestIdleCallback){
+      requestIdleCallback(doFetch, {timeout:5000});
+    } else {
+      setTimeout(doFetch, 100);
+    }
+  },
+
+  // Show ticker notification immediately after saving a score
+  notifyLocal(entry){
+    this.push(entry);
+  },
+
+  // Pause ticker during active gameplay (set on game start, resume on result)
+  pause(){ this.paused = true; },
+  resume(){ this.paused = false; this.flush(); },
+
+  // Start polling
+  start(){
+    if(this.pollInterval) return;
+    // Initial poll after 3 seconds
+    setTimeout(()=>this.poll(), 3000);
+    // Then every 15 seconds
+    this.pollInterval = setInterval(()=>this.poll(), 15000);
+  },
+
+  // Show on home/lb screens, hide during games
+  setVisible(show){
+    const el = document.getElementById('score-ticker');
+    if(el) el.classList.toggle('hidden', !show);
+  }
+};
+
+// Hook into saveScore calls to show ticker immediately
+const _origSaveScore = window._saveScoreHook;
+
 // ── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',function(){
   buildHdr();
   updateDiffCards();
-  loadLB('easy');
+  loadLBGame('grammar','easy');
+  // Start ticker after page fully loaded
+  setTimeout(()=>TICKER.start(), 2000);
 });
 
 </script>
@@ -1938,6 +2144,8 @@ function buildSpell(){
 
   startSpellTimer();
   sStart();
+  TICKER.pause();
+  TICKER.setVisible(false);
 }
 
 function startSpellTimer(){
@@ -2028,6 +2236,8 @@ async function showSpellResult(){
   showLoader('Saving score...');
   await api({action:'saveScore',...entry});
   hideLoader();
+  TICKER.notifyLocal(entry);
+  TICKER.resume();
 
   const sa=document.getElementById('spell-save-area');
   if(sa)sa.innerHTML=CU
@@ -2309,6 +2519,8 @@ function nextSharkWord(){
   const fish=document.getElementById('shark-fish');if(fish){fish.textContent='🐟';fish.style.filter='drop-shadow(0 2px 6px rgba(0,0,0,0.3))';}
   positionShark(10);
   sStart();
+  TICKER.pause();
+  TICKER.setVisible(false);
   sharkWordStart=Date.now();
   // Animate danger bar
   setTimeout(()=>{
@@ -2412,6 +2624,8 @@ async function endShark(){
   showLoader('Saving score...');
   await api({action:'saveScore',...entry});
   hideLoader();
+  TICKER.notifyLocal(entry);
+  TICKER.resume();
   const sa=document.getElementById('shark-save-area');
   if(sa)sa.innerHTML=CU
     ?`<div style="font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:14px">✅ Score saved! ${sharkScore} words typed!</div>`
@@ -2632,6 +2846,8 @@ function buildOdd(){
 
   startOddTimer();
   sStart();
+  TICKER.pause();
+  TICKER.setVisible(false);
 }
 
 function startOddTimer(){
@@ -2736,6 +2952,8 @@ async function showOddResult(){
   showLoader('Saving score...');
   await api({action:'saveScore',...entry});
   hideLoader();
+  TICKER.notifyLocal(entry);
+  TICKER.resume();
 
   const sa=document.getElementById('odd-save-area');
   if(sa)sa.innerHTML=CU
@@ -2871,5 +3089,9 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
     <div style="text-align:center;margin-top:4px"><button class="lnk" onclick="navTo('games')">← Back to Games</button></div>
   </div>
 </div>
+
+<!-- LIVE SCORE TICKER -->
+<div id="score-ticker"></div>
+
 </body>
 </html>
