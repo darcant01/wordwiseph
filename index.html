@@ -269,6 +269,9 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 
 </head>
 <body>
+
+</head>
+<body>
 </head>
 <body>
 </head>
@@ -339,6 +342,12 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <div class="game-icon">🦈</div>
         <div class="game-title">Shark Typing</div>
         <div class="game-desc">Type fast before the shark catches you!</div>
+      </div>
+      <div class="game-card" onclick="startOdd()">
+        <div class="game-badge" style="background:#7F77DD">VOCAB</div>
+        <div class="game-icon">🎯</div>
+        <div class="game-title">Odd One Out</div>
+        <div class="game-desc">Find the word that doesn't belong!</div>
       </div>
     </div>
     <div style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780;margin-top:8px">More games coming soon! 🚀</div>
@@ -815,7 +824,7 @@ function navTo(s){
   if(s==='start')  updateDiffCards();
   // Show/hide floating timer
   const ft=document.getElementById('floating-timer');
-  if(ft) ft.style.display=(s==='quiz'||s==='spell')?'flex':'none';
+  if(ft) ft.style.display=(s==='quiz'||s==='spell'||s==='odd')?'flex':'none';
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -1442,7 +1451,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <script>
 // ================================================================
-// BLOCK 2A — SPELL IT RIGHT GAME
+// BLOCK 2A — SPELL IT RIGHT
 // ================================================================
 // ================================================================
 // SPELL IT RIGHT GAME
@@ -1760,7 +1769,7 @@ function retrySpell(){
 
 <script>
 // ================================================================
-// BLOCK 2B — SHARK TYPING GAME
+// BLOCK 2B — SHARK TYPING
 // ================================================================
 // ================================================================
 // SHARK TYPING GAME
@@ -2136,7 +2145,334 @@ function restartShark(){
 
 <script>
 // ================================================================
-// BLOCK 3 — QUESTION BANK (loaded last — never blocks UI)
+// BLOCK 2C — ODD ONE OUT
+// ================================================================
+// ================================================================
+// ODD ONE OUT GAME
+// ================================================================
+const ODD_TL = {easy:15, medium:12, hard:8};
+const ODD_QL = {easy:10, medium:15, hard:20};
+
+const ODD_BANK = {
+  easy: [
+    {category:"Animals",words:["cat","dog","bird","apple"],odd:"apple",explanation:"Apple is a fruit, not an animal!"},
+    {category:"Colors",words:["red","blue","happy","green"],odd:"happy",explanation:"Happy is an emotion, not a color!"},
+    {category:"Fruits",words:["mango","banana","carrot","orange"],odd:"carrot",explanation:"Carrot is a vegetable, not a fruit!"},
+    {category:"Body Parts",words:["nose","ear","shoe","eye"],odd:"shoe",explanation:"Shoe is clothing, not a body part!"},
+    {category:"Numbers",words:["one","two","big","three"],odd:"big",explanation:"Big is an adjective, not a number!"},
+    {category:"Days of the Week",words:["Monday","Tuesday","March","Friday"],odd:"March",explanation:"March is a month, not a day of the week!"},
+    {category:"Vegetables",words:["tomato","broccoli","spinach","strawberry"],odd:"strawberry",explanation:"Strawberry is a fruit, not a vegetable!"},
+    {category:"Weather",words:["sunny","rainy","cloudy","hungry"],odd:"hungry",explanation:"Hungry describes a feeling, not weather!"},
+    {category:"School Supplies",words:["pencil","eraser","ruler","pillow"],odd:"pillow",explanation:"Pillow belongs in a bedroom, not a classroom!"},
+    {category:"Shapes",words:["circle","square","triangle","purple"],odd:"purple",explanation:"Purple is a color, not a shape!"},
+    {category:"Clothes",words:["shirt","pants","socks","spoon"],odd:"spoon",explanation:"Spoon is a utensil, not clothing!"},
+    {category:"Sports",words:["football","basketball","swimming","singing"],odd:"singing",explanation:"Singing is a musical activity, not a sport!"},
+    {category:"Months",words:["January","February","Sunday","April"],odd:"Sunday",explanation:"Sunday is a day of the week, not a month!"},
+    {category:"Transport",words:["car","bus","train","table"],odd:"table",explanation:"Table is furniture, not a form of transport!"},
+    {category:"Kitchen Items",words:["pot","pan","plate","notebook"],odd:"notebook",explanation:"Notebook belongs in school, not the kitchen!"},
+    {category:"Things in a Bedroom",words:["bed","pillow","blanket","frying pan"],odd:"frying pan",explanation:"Frying pan belongs in the kitchen!"},
+    {category:"Insects",words:["butterfly","bee","ant","whale"],odd:"whale",explanation:"Whale is a sea mammal, not an insect!"},
+    {category:"Musical Instruments",words:["guitar","piano","violin","hammer"],odd:"hammer",explanation:"Hammer is a tool, not a musical instrument!"},
+    {category:"Things You Drink",words:["water","juice","milk","bread"],odd:"bread",explanation:"Bread is food you eat, not a drink!"},
+    {category:"Ocean Animals",words:["shark","dolphin","turtle","eagle"],odd:"eagle",explanation:"Eagle is a bird that lives on land!"},
+    {category:"Things in a Library",words:["book","shelf","magazine","sofa"],odd:"sofa",explanation:"Sofa is furniture from a living room, not a library!"},
+    {category:"Cold Things",words:["ice","snow","fire","freezer"],odd:"fire",explanation:"Fire is hot, not cold!"},
+    {category:"Sweet Foods",words:["cake","candy","chocolate","salt"],odd:"salt",explanation:"Salt is not sweet — it's salty!"},
+    {category:"Things with Wings",words:["bird","butterfly","airplane","fish"],odd:"fish",explanation:"Fish lives underwater and has no wings!"},
+    {category:"Things You Read",words:["book","newspaper","magazine","hammer"],odd:"hammer",explanation:"Hammer is a tool, not something you read!"},
+    {category:"Outdoor Activities",words:["hiking","swimming","cycling","sleeping"],odd:"sleeping",explanation:"Sleeping is done indoors, not as an outdoor activity!"},
+    {category:"Planets",words:["Earth","Mars","Jupiter","Pacific"],odd:"Pacific",explanation:"Pacific is an ocean on Earth, not a planet!"},
+    {category:"Flowers",words:["rose","tulip","daisy","oak"],odd:"oak",explanation:"Oak is a tree, not a flower!"},
+    {category:"Baby Animals",words:["kitten","puppy","calf","adult"],odd:"adult",explanation:"Adult is a grown-up, not a baby animal!"},
+    {category:"Things That Fly",words:["plane","helicopter","kite","submarine"],odd:"submarine",explanation:"Submarine travels underwater, not through the air!"},
+  ],
+  medium: [
+    {category:"Programming Languages",words:["Python","Java","HTML","English"],odd:"English",explanation:"English is a human language, not a programming language!"},
+    {category:"Adjectives",words:["beautiful","happy","run","angry"],odd:"run",explanation:"Run is a verb (action), not an adjective!"},
+    {category:"Nouns",words:["teacher","school","jump","hospital"],odd:"jump",explanation:"Jump is a verb, not a noun!"},
+    {category:"Verbs",words:["swim","dance","bright","laugh"],odd:"bright",explanation:"Bright is an adjective, not a verb!"},
+    {category:"Adverbs",words:["quickly","slowly","carefully","red"],odd:"red",explanation:"Red is a color (adjective), not an adverb!"},
+    {category:"Continents",words:["Asia","Africa","Europe","Atlantic"],odd:"Atlantic",explanation:"Atlantic is an ocean, not a continent!"},
+    {category:"Mammals",words:["dog","whale","eagle","elephant"],odd:"eagle",explanation:"Eagle is a bird, not a mammal!"},
+    {category:"Reptiles",words:["snake","lizard","crocodile","frog"],odd:"frog",explanation:"Frog is an amphibian, not a reptile!"},
+    {category:"Prime Numbers",words:["2","3","4","7"],odd:"4",explanation:"4 is not prime — it can be divided by 2!"},
+    {category:"Synonyms of Happy",words:["joyful","cheerful","elated","gloomy"],odd:"gloomy",explanation:"Gloomy means sad — opposite of happy!"},
+    {category:"Things that float",words:["boat","wood","leaf","stone"],odd:"stone",explanation:"Stones sink, they don't float!"},
+    {category:"Shakespeare Plays",words:["Hamlet","Macbeth","Romeo","Python"],odd:"Python",explanation:"Python is a snake or coding language, not a Shakespeare play!"},
+    {category:"Prepositions",words:["on","in","at","run"],odd:"run",explanation:"Run is a verb, not a preposition!"},
+    {category:"Pronouns",words:["he","she","it","but"],odd:"but",explanation:"But is a conjunction, not a pronoun!"},
+    {category:"Things in a Sentence",words:["noun","verb","adjective","paragraph"],odd:"paragraph",explanation:"Paragraph is a writing unit, not a part of speech!"},
+    {category:"Words meaning Big",words:["huge","enormous","gigantic","tiny"],odd:"tiny",explanation:"Tiny means small — the opposite of big!"},
+    {category:"Asian Countries",words:["Japan","Thailand","Brazil","India"],odd:"Brazil",explanation:"Brazil is in South America, not Asia!"},
+    {category:"Things with a Screen",words:["phone","TV","laptop","chair"],odd:"chair",explanation:"Chair is furniture with no screen!"},
+    {category:"Abstract Nouns",words:["love","freedom","happiness","mountain"],odd:"mountain",explanation:"Mountain is a physical thing — love, freedom, happiness are abstract!"},
+    {category:"Things in a Hospital",words:["nurse","doctor","stethoscope","paintbrush"],odd:"paintbrush",explanation:"Paintbrush belongs in an art class, not a hospital!"},
+    {category:"Natural Disasters",words:["earthquake","tsunami","tornado","sunshine"],odd:"sunshine",explanation:"Sunshine is pleasant weather, not a disaster!"},
+    {category:"Literary Devices",words:["simile","metaphor","alliteration","equation"],odd:"equation",explanation:"Equation is a math term, not a literary device!"},
+    {category:"Collective Nouns",words:["flock","herd","swarm","single"],odd:"single",explanation:"Single describes one thing — flock, herd, swarm describe groups!"},
+    {category:"Antonyms of Brave",words:["cowardly","fearful","timid","bold"],odd:"bold",explanation:"Bold means brave — it's a synonym, not an antonym!"},
+    {category:"Things that can be Plural",words:["cats","books","children","always"],odd:"always",explanation:"Always is an adverb — it doesn't have a plural form!"},
+    {category:"Past Tense Verbs",words:["ran","ate","swam","go"],odd:"go",explanation:"Go is present tense — ran, ate, swam are all past tense!"},
+    {category:"Olympic Sports",words:["swimming","gymnastics","cycling","chess"],odd:"chess",explanation:"Chess is a board game, not an Olympic sport (traditionally)!"},
+    {category:"Things that are Transparent",words:["glass","water","air","wood"],odd:"wood",explanation:"Wood is opaque — you cannot see through it!"},
+    {category:"Words ending in -tion",words:["action","nation","station","person"],odd:"person",explanation:"Person ends in -on, not -tion!"},
+    {category:"Things with Teeth",words:["shark","comb","saw","spoon"],odd:"spoon",explanation:"Spoon is smooth with no teeth!"},
+  ],
+  hard: [
+    {category:"Figures of Speech",words:["hyperbole","onomatopoeia","alliteration","photosynthesis"],odd:"photosynthesis",explanation:"Photosynthesis is a biological process, not a figure of speech!"},
+    {category:"Homophones of there",words:["their","there","they're","where"],odd:"where",explanation:"Where sounds different — their/there/they're are all homophones!"},
+    {category:"Irregular Past Tense",words:["went","saw","thought","walked"],odd:"walked",explanation:"Walked is a regular past tense (-ed), the others are irregular!"},
+    {category:"Words with Silent Letters",words:["knife","know","write","bake"],odd:"bake",explanation:"Bake has no silent letters — knife(k), know(k), write(w) do!"},
+    {category:"Subjunctive Mood",words:["If I were","I suggest that he be","She demanded that he go","She is going"],odd:"She is going",explanation:"She is going is indicative mood, not subjunctive!"},
+    {category:"Compound Nouns",words:["sunflower","bedroom","basketball","running"],odd:"running",explanation:"Running is a gerund/verb form, not a compound noun!"},
+    {category:"Oxymora",words:["deafening silence","bitter sweet","open secret","loud music"],odd:"loud music",explanation:"Loud music is not an oxymoron — deafening silence, bitter sweet, open secret are!"},
+    {category:"Synonyms of Verbose",words:["wordy","loquacious","garrulous","taciturn"],odd:"taciturn",explanation:"Taciturn means quiet/reserved — the opposite of verbose!"},
+    {category:"Modal Verbs",words:["can","should","might","because"],odd:"because",explanation:"Because is a conjunction, not a modal verb!"},
+    {category:"Conjunctive Adverbs",words:["however","therefore","furthermore","although"],odd:"although",explanation:"Although is a subordinating conjunction, not a conjunctive adverb!"},
+    {category:"Words from Latin",words:["agenda","alumni","via","bonjour"],odd:"bonjour",explanation:"Bonjour is French — agenda, alumni, via are Latin words!"},
+    {category:"Palindromes",words:["level","radar","civic","table"],odd:"table",explanation:"Table is not a palindrome — level, radar, civic read the same backwards!"},
+    {category:"Collective Nouns for Birds",words:["flock","murder","parliament","pod"],odd:"pod",explanation:"Pod is used for whales or dolphins, not birds!"},
+    {category:"Parts of a Sentence",words:["subject","predicate","object","stanza"],odd:"stanza",explanation:"Stanza is a part of a poem, not a sentence!"},
+    {category:"Rhetorical Devices",words:["anaphora","epistrophe","chiasmus","photosynthesis"],odd:"photosynthesis",explanation:"Photosynthesis is a biological process, not a rhetorical device!"},
+    {category:"Words meaning Ephemeral",words:["fleeting","transient","momentary","eternal"],odd:"eternal",explanation:"Eternal means lasting forever — the opposite of ephemeral!"},
+    {category:"Gerunds",words:["swimming","running","dancing","swam"],odd:"swam",explanation:"Swam is past tense — swimming, running, dancing are gerunds!"},
+    {category:"Prepositions of Time",words:["at","on","in","between"],odd:"between",explanation:"Between is a preposition of place/position, not typically time!"},
+    {category:"Antonyms of Verbose",words:["concise","laconic","succinct","loquacious"],odd:"loquacious",explanation:"Loquacious means very talkative — same as verbose, not its antonym!"},
+    {category:"Words with Greek Origins",words:["telephone","photography","democracy","restaurant"],odd:"restaurant",explanation:"Restaurant comes from French — telephone, photography, democracy are from Greek!"},
+    {category:"Suffix -ology means",words:["biology","geology","psychology","technology"],odd:"technology",explanation:"Technology (-logy from Greek) is actually valid, BUT it means application of science, unlike the others which are pure study fields! Actually the odd one is: the suffix -ology in technology has a different meaning."},
+    {category:"Passive Voice Examples",words:["The cake was eaten","The door was opened","She was singing","The letter was written"],odd:"She was singing",explanation:"She was singing is past continuous active voice, not passive!"},
+    {category:"Subordinating Conjunctions",words:["because","although","unless","however"],odd:"however",explanation:"However is a conjunctive adverb — because, although, unless are subordinating conjunctions!"},
+    {category:"Words meaning Benevolent",words:["kind","generous","charitable","malevolent"],odd:"malevolent",explanation:"Malevolent means wishing harm — the opposite of benevolent!"},
+    {category:"Portmanteau Words",words:["brunch","smog","internet","goodbye"],odd:"goodbye",explanation:"Goodbye is a contraction of 'God be with ye' — brunch, smog, internet are portmanteau words!"},
+    {category:"Perfect Tense Structures",words:["has eaten","had gone","will have finished","is eating"],odd:"is eating",explanation:"Is eating is present continuous — the others are perfect tense structures!"},
+    {category:"Words with Double Letters",words:["success","committee","aggressive","beautiful"],odd:"beautiful",explanation:"Beautiful has no double letters — success(cc,ss), committee(mm,tt,ee), aggressive(gg,ss) do!"},
+    {category:"Antonyms of Loquacious",words:["quiet","taciturn","reserved","verbose"],odd:"verbose",explanation:"Verbose means very talkative — same as loquacious, not its antonym!"},
+    {category:"Types of Clause",words:["independent","dependent","relative","paragraph"],odd:"paragraph",explanation:"Paragraph is a text unit, not a type of clause!"},
+    {category:"Transition Words showing Contrast",words:["however","nevertheless","although","furthermore"],odd:"furthermore",explanation:"Furthermore adds information — however, nevertheless, although show contrast!"},
+  ]
+};
+
+let oddDiff='easy', oddRound=1;
+let oddQs=[], oddAns=[], oddAnswered=0;
+let oddTInt=null, oddTLeft=15, oddTTotal=15, oddCQ=0, oddLastSco=0;
+
+function startOdd(){
+  updateOddLocks();
+  navTo('odd-pick');
+}
+
+function updateOddLocks(){
+  const sub=CU?.subscription||'free';
+  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  ['medium','hard'].forEach(d=>{
+    const lock=document.getElementById('odd-lock-'+d);
+    const card=document.querySelector('#sc-odd-pick .dc.'+d);
+    if(lock)lock.style.display=hasAccess?'none':'block';
+    if(card)card.style.opacity=hasAccess?'1':'0.65';
+  });
+}
+
+function checkOddAccess(d){
+  const sub=CU?.subscription||'free';
+  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  if(!hasAccess){
+    if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
+    else{if(confirm('Upgrade to Basic or Premium to unlock!\nView plans?'))navTo('pricing');}
+    return;
+  }
+  launchOdd(d);
+}
+
+function launchOdd(d){
+  oddDiff=d;
+  navTo('odd');
+  buildOdd();
+}
+
+function buildOdd(){
+  const total=ODD_QL[oddDiff];
+  oddQs=shuf(ODD_BANK[oddDiff]).slice(0,total);
+  oddAns=new Array(total).fill(null);
+  oddAnswered=0; oddCQ=0;
+  oddTTotal=ODD_TL[oddDiff]; oddTLeft=oddTTotal;
+
+  const dlbl=document.getElementById('odd-diff-lbl');
+  if(dlbl)dlbl.textContent={
+    easy:`Easy — ${ODD_QL.easy} rounds · 15 sec each`,
+    medium:`Medium — ${ODD_QL.medium} rounds · 12 sec each`,
+    hard:`Hard — ${ODD_QL.hard} rounds · 8 sec each`
+  }[oddDiff];
+
+  const pill=document.getElementById('odd-pill');if(pill)pill.textContent='Round '+oddRound;
+  const pbar=document.getElementById('odd-pbar');if(pbar)pbar.style.width='0%';
+  const plbl=document.getElementById('odd-plbl');if(plbl)plbl.textContent='0 of '+total+' answered';
+  const sbtn=document.getElementById('odd-sbtn');if(sbtn)sbtn.disabled=true;
+  const res=document.getElementById('odd-result');if(res)res.classList.remove('show');
+
+  // Build stars
+  const sr=document.getElementById('odd-stars');
+  if(sr){
+    sr.innerHTML='';
+    const shown=Math.min(total,15);
+    for(let i=0;i<shown;i++){
+      const s=document.createElement('span');
+      s.className='star';s.id='ost'+i;
+      s.style.fontSize='clamp(10px,2vw,14px)';
+      s.textContent='⭐';sr.appendChild(s);
+    }
+  }
+
+  const con=document.getElementById('odd-container');
+  if(!con)return;
+  con.innerHTML='';
+
+  oddQs.forEach((q,i)=>{
+    const sh=shuf([...q.words]);
+    const btns=sh.map(w=>{
+      const ws=w.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      const odds=q.odd.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      return `<button class="spell-btn" style="font-size:clamp(14px,3.5vw,19px);letter-spacing:0" onclick="ansOdd(${i},this,'${ws}','${odds}')">${w}</button>`;
+    }).join('');
+
+    con.innerHTML+=`<div class="qcard" id="oqc${i}" style="${i>0?'opacity:0.4;pointer-events:none':''}">
+      <div style="text-align:center;margin-bottom:8px">
+        <span class="spell-category" style="background:#EEEDFE;color:#3C3489">${q.category}</span>
+      </div>
+      <div style="text-align:center;font-size:clamp(14px,3vw,17px);font-weight:700;color:#5F5E5A;margin-bottom:16px">
+        Which word does <strong style="color:var(--red)">NOT</strong> belong to <strong style="color:var(--navy)">${q.category}</strong>?
+      </div>
+      <div class="spell-choices" id="och${i}">${btns}</div>
+      <div class="fb" id="ofb${i}"></div>
+    </div>`;
+  });
+
+  startOddTimer();
+}
+
+function startOddTimer(){
+  clearInterval(oddTInt);
+  oddTLeft=oddTTotal; updOddT();
+  oddTInt=setInterval(()=>{
+    oddTLeft--;updOddT();
+    if(oddTLeft<=5&&oddTLeft>0)sUrg();
+    if(oddTLeft<=0){clearInterval(oddTInt);sTU();autoAnsOdd();}
+  },1000);
+}
+
+function updOddT(){
+  const n=document.getElementById('odd-tnum');if(n)n.textContent=oddTLeft;
+  const r=document.getElementById('odd-tri');if(r){
+    r.style.strokeDashoffset=163*(1-oddTLeft/oddTTotal);
+    r.style.stroke=oddTLeft<=5?'#E24B4A':oddTLeft<=Math.floor(oddTTotal*0.4)?'#EF9F27':'#FAC775';
+  }
+  // Sync floating timer
+  const ft=document.getElementById('floating-timer');
+  const fn=document.getElementById('ft-num');
+  if(ft&&fn){
+    fn.textContent=oddTLeft;
+    fn.style.color=oddTLeft<=5?'#E24B4A':oddTLeft<=Math.floor(oddTTotal*0.4)?'#EF9F27':'#FAC775';
+    if(oddTLeft<=5)ft.classList.add('urgent');
+    else ft.classList.remove('urgent');
+  }
+}
+
+function autoAnsOdd(){
+  const total=ODD_QL[oddDiff];
+  const btns=document.getElementById('och'+oddCQ)?.querySelectorAll('.spell-btn');
+  if(!btns||btns[0]?.disabled)return;
+  btns.forEach(b=>{b.disabled=true;if(b.textContent.trim()===oddQs[oddCQ].odd)b.classList.add('correct');});
+  const fb=document.getElementById('ofb'+oddCQ);
+  document.getElementById('oqc'+oddCQ)?.classList.add('wrong');
+  if(fb){
+    fb.textContent="⏰ Time's up! Odd one out: "+oddQs[oddCQ].odd+" — "+oddQs[oddCQ].explanation;
+    fb.className='fb show wrong';
+  }
+  oddAns[oddCQ]=false; oddAnswered++; updOddP();
+  const st=document.getElementById('ost'+Math.min(oddAnswered-1,14));if(st)st.textContent='💫';
+  if(oddAnswered<total){oddCQ++;unlockOddN();startOddTimer();}
+  else{const sb=document.getElementById('odd-sbtn');if(sb)sb.disabled=false;}
+}
+
+function ansOdd(q,btn,chosen,odd){
+  const btns=document.getElementById('och'+q)?.querySelectorAll('.spell-btn');
+  if(!btns||btns[0]?.disabled)return;
+  clearInterval(oddTInt);
+  btns.forEach(b=>{b.disabled=true;if(b.textContent.trim()===odd)b.classList.add('correct');});
+  const ok=chosen===odd;
+  oddAns[q]=ok;
+  const fb=document.getElementById('ofb'+q),card=document.getElementById('oqc'+q);
+  if(ok){
+    card?.classList.add('correct');
+    if(fb){fb.textContent='✓ Correct! '+oddQs[q].explanation;fb.className='fb show correct';}
+    sOk();sCr();
+  }else{
+    card?.classList.add('wrong');
+    if(fb){fb.textContent='✗ The odd one is "'+odd+'" — '+oddQs[q].explanation;fb.className='fb show wrong';}
+    sBad();btn.classList.add('wrong');
+  }
+  oddAnswered++;updOddP();
+  const total=ODD_QL[oddDiff];
+  const st=document.getElementById('ost'+Math.min(oddAnswered-1,14));if(st)st.textContent=ok?'⭐':'💫';
+  if(oddAnswered<total){oddCQ++;unlockOddN();startOddTimer();}
+  else{const sb=document.getElementById('odd-sbtn');if(sb)sb.disabled=false;}
+}
+
+function unlockOddN(){
+  const c=document.getElementById('oqc'+oddCQ);
+  if(c){c.style.opacity='1';c.style.pointerEvents='auto';setTimeout(()=>c.scrollIntoView({behavior:'smooth',block:'center'}),100);}
+}
+
+function updOddP(){
+  const total=ODD_QL[oddDiff];
+  const pb=document.getElementById('odd-pbar');if(pb)pb.style.width=Math.round(oddAnswered/total*100)+'%';
+  const pl=document.getElementById('odd-plbl');if(pl)pl.textContent=oddAnswered+' of '+total+' answered';
+}
+
+async function showOddResult(){
+  clearInterval(oddTInt);
+  const total=ODD_QL[oddDiff];
+  oddLastSco=oddAns.filter(a=>a).length;
+  const pct=Math.round(oddLastSco/total*100);
+  const rsco=document.getElementById('odd-rsco');if(rsco)rsco.textContent=oddLastSco+'/'+total;
+  let stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You found every odd one out!';sWin();}
+  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Excellent! Sharp vocabulary skills!';sWin();}
+  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good work! Keep expanding your vocab!';}
+  else if(pct>=40){stars='⭐⭐💫💫💫';msg='Nice try! Review the categories and try again!';}
+  else{stars='⭐💫💫💫💫';msg="Don't give up! Every round makes you smarter!";}
+  const rstr=document.getElementById('odd-rstr');if(rstr)rstr.textContent=stars;
+  const rmsg=document.getElementById('odd-rmsg');if(rmsg)rmsg.textContent=msg;
+
+  const entry={
+    name:CU?CU.name:'Guest',username:CU?CU.username:'guest',
+    type:CU?CU.type:'guest',score:oddLastSco,total,
+    diff:'odd-'+oddDiff,stars,date:new Date().toLocaleDateString()
+  };
+  showLoader('Saving score...');
+  await api({action:'saveScore',...entry});
+  hideLoader();
+
+  const sa=document.getElementById('odd-save-area');
+  if(sa)sa.innerHTML=CU
+    ?`<div style="font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:14px">✅ Score saved! ${oddLastSco}/${total} (${pct}%)</div>`
+    :`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:10px">Login to save your score!</p><div style="display:flex;gap:8px;justify-content:center"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up</button></div></div>`;
+
+  const res=document.getElementById('odd-result');if(res)res.classList.add('show');
+  const sb=document.getElementById('odd-sbtn');if(sb)sb.disabled=true;
+  setTimeout(()=>document.getElementById('odd-result')?.scrollIntoView({behavior:'smooth'}),100);
+}
+
+function retryOdd(){
+  oddRound++;
+  buildOdd();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+</script>
+
+<script>
+// ================================================================
+// BLOCK 3 — QUESTION BANK (loaded last)
 // ================================================================
 
 // QUESTION BANK — loaded last so it never blocks the UI
@@ -2145,70 +2481,6 @@ BANK = JSON.parse(BANK_DATA);
 console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.length,0), 'questions loaded');
 
 </script>
-
-
-<!-- ══ SHARK TYPING ══ -->
-<div id="sc-shark" class="screen">
-  <div class="hero">
-    <div class="rpill" id="shark-pill">Get Ready!</div>
-    <div class="htitle" style="font-size:clamp(20px,5vw,32px)">Shark <span>Typing!</span> 🦈</div>
-    <div class="hsub" id="shark-diff-lbl">Type the word before the shark attacks!</div>
-  </div>
-  <div class="qmain" style="padding-top:0">
-    <div id="shark-game" style="display:none">
-      <div style="position:relative;background:linear-gradient(180deg,#1D2B55 0%,#0B4F6C 60%,#0E7490 100%);border-radius:clamp(16px,3vw,24px);overflow:hidden;margin-bottom:16px;height:clamp(160px,35vw,220px)">
-        <div style="position:absolute;bottom:0;left:0;right:0;height:60%;background:linear-gradient(180deg,transparent,rgba(14,116,144,0.6));border-radius:0 0 24px 24px"></div>
-        <div style="position:absolute;top:12px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:center">
-          <div style="background:rgba(0,0,0,0.4);border-radius:99px;padding:6px 14px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="shark-score">0</span></div>
-          <div id="shark-lives" style="display:flex;gap:6px"></div>
-          <div style="background:rgba(0,0,0,0.4);border-radius:99px;padding:6px 14px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#F4C0D1">⏱ <span id="shark-time">60</span>s</div>
-        </div>
-        <div id="shark-character" style="position:absolute;bottom:20px;left:10%;font-size:clamp(32px,7vw,52px);transition:left 2s linear;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4))">🦈</div>
-        <div id="shark-fish" style="position:absolute;bottom:22px;right:12%;font-size:clamp(20px,4vw,30px);transition:all 0.5s;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">🐟</div>
-        <div style="position:absolute;bottom:0;left:0;right:0;height:6px;background:rgba(0,0,0,0.3)">
-          <div id="shark-danger-bar" style="height:6px;background:#E24B4A;width:0%;transition:width 0.3s;border-radius:3px"></div>
-        </div>
-      </div>
-      <div id="shark-word-display" style="text-align:center;font-size:clamp(22px,6vw,42px);font-weight:900;color:var(--navy);letter-spacing:3px;margin-bottom:6px;min-height:60px;display:flex;align-items:center;justify-content:center"></div>
-      <div id="shark-hint" style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780;font-weight:700;margin-bottom:12px;min-height:20px"></div>
-      <div style="position:relative;margin-bottom:12px">
-        <input id="shark-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-          placeholder="Type the word here..."
-          style="width:100%;font-family:'Nunito',sans-serif;font-size:clamp(16px,4vw,22px);font-weight:800;padding:clamp(14px,3vw,18px) 60px clamp(14px,3vw,18px) clamp(14px,3vw,18px);border-radius:14px;border:3px solid var(--lp);background:#FFF8F0;color:var(--navy);outline:none;text-align:center;box-sizing:border-box"
-          oninput="checkSharkInput(this.value)"
-          onkeydown="if(event.key==='Enter')checkSharkInput(this.value,true)"/>
-        <div style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:24px">⌨️</div>
-      </div>
-      <div style="text-align:center;font-size:clamp(13px,3vw,16px);font-weight:800;color:var(--gold)">🔥 Streak: <span id="shark-streak">0</span></div>
-    </div>
-    <div id="shark-start" style="text-align:center;padding:16px 0">
-      <div style="font-size:clamp(40px,10vw,70px);margin-bottom:12px">🦈</div>
-      <div style="font-size:clamp(16px,4vw,22px);font-weight:900;color:var(--navy);margin-bottom:8px">Type fast to escape the shark!</div>
-      <div style="font-size:clamp(13px,3vw,15px);color:#5F5E5A;font-weight:700;line-height:1.7;margin-bottom:20px">
-        A word appears — type it correctly before the shark catches the fish!<br>Each correct word = 1 point. Wrong or slow = shark eats the fish! 🐟
-      </div>
-      <div class="diff-grid" style="margin-bottom:16px">
-        <div class="dc easy" onclick="launchShark('easy')"><div class="di">🌱</div><div class="dt">Easy</div><div class="ds">Common words · 8 sec</div></div>
-        <div class="dc medium" onclick="checkSharkAccess('medium')"><div class="di">⚡</div><div class="dt">Medium</div><div class="ds">Harder words · 6 sec</div><div id="shark-lock-medium" style="display:none;margin-top:6px;font-size:11px;background:#FAEEDA;color:#412402;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div></div>
-        <div class="dc hard" onclick="checkSharkAccess('hard')"><div class="di">🔥</div><div class="dt">Hard</div><div class="ds">Tricky words · 4 sec</div><div id="shark-lock-hard" style="display:none;margin-top:6px;font-size:11px;background:#FCEBEB;color:#791F1F;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div></div>
-      </div>
-      <button class="lnk" onclick="navTo('games')">← Back to Games</button>
-    </div>
-    <div id="shark-over" class="result" style="display:none">
-      <div id="shark-over-icon" style="font-size:56px;margin-bottom:8px">🦈</div>
-      <div class="rlbl">Final Score</div>
-      <div class="rsco" id="shark-final-score">0</div>
-      <div class="rstr" id="shark-stars"></div>
-      <div class="rmsg" id="shark-msg"></div>
-      <div id="shark-save-area"></div>
-      <div class="rbtns">
-        <button class="btn btn-gold" onclick="restartShark()">Play Again!</button>
-        <button class="btn btn-navy" onclick="navTo('games')">All Games</button>
-        <button class="btn btn-out" onclick="navTo('lb')">Leaderboard</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>
