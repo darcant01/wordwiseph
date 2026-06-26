@@ -263,7 +263,7 @@ function getScores(p) {
       scores.push({name,username,type,score:Number(score)||0,diff,stars,date});
   }
   scores.sort((a,b)=>b.score-a.score);
-  return {success:true, scores:scores.slice(0,10)};
+  return {success:true, scores:scores.slice(0,10).map(s=>({...s, total:s.total||5}))};
 }
 
 // ── GET PROFILE ──────────────────────────────────────────────
