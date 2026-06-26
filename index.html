@@ -318,6 +318,12 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
   .tick-item{font-size:8px;padding:5px 3px}
   .tick-name{max-width:34px}
 }
+
+/* ── PASSWORD EYE TOGGLE ── */
+.pw-wrap{position:relative;display:flex;align-items:center}
+.pw-wrap input{flex:1;padding-right:46px!important}
+.pw-eye{position:absolute;right:14px;background:none;border:none;cursor:pointer;padding:4px;color:#888780;font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:color 0.2s}
+.pw-eye:hover{color:var(--pink)}
 </style>
 </head>
 <body>
@@ -480,7 +486,12 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div class="ctitle">Login</div>
       <div class="err" id="lerr"></div>
       <div class="field"><label>Username</label><input type="text" id="luser" placeholder="Your username"/></div>
-      <div class="field"><label>Password</label><input type="password" id="lpass" placeholder="Your password"/></div>
+      <div class="field"><label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="lpass" placeholder="Your password"/>
+          <button class="pw-eye" onclick="togglePw('lpass',this)" type="button" tabindex="-1" aria-label="Show password">👁️</button>
+        </div>
+      </div>
       <button class="btn btn-pink btn-block" onclick="doLogin()" style="margin-bottom:14px">Login</button>
       <div class="divider">or</div>
       <button class="btn btn-out btn-block" onclick="navTo('register')" style="margin-bottom:14px">Create an Account</button>
@@ -500,7 +511,12 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div class="okmsg" id="rok"></div>
       <div class="field"><label>Full Name</label><input type="text" id="rname" placeholder="Your full name"/></div>
       <div class="field"><label>Username</label><input type="text" id="ruser" placeholder="Choose a username"/></div>
-      <div class="field"><label>Password</label><input type="password" id="rpass" placeholder="Min. 4 characters"/></div>
+      <div class="field"><label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="rpass" placeholder="Min. 4 characters"/>
+          <button class="pw-eye" onclick="togglePw('rpass',this)" type="button" tabindex="-1" aria-label="Show password">👁️</button>
+        </div>
+      </div>
       <div class="field"><label>I am a...</label>
         <select id="rtype" style="width:100%;font-family:'Nunito',sans-serif;font-size:clamp(14px,3.5vw,16px);font-weight:700;padding:clamp(11px,2.5vw,14px) clamp(12px,3vw,16px);border-radius:12px;border:2px solid var(--lp);background:#FFF8F0;color:var(--navy);outline:none;-webkit-appearance:auto">
           <option value="kid">Kid / Student</option>
@@ -859,7 +875,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 // ================================================================
 // WORDWISE PH — GAS-ONLY BACKEND (no localStorage)
 // ================================================================
-const GAS = "https://script.google.com/macros/s/AKfycbzKjd-A_LiZRZwPaPnH79J7833WMrT7auZEhuHihLII7I8hJJx9dDUfABBrqdmYUOhKYQ/exec";
+const GAS = "https://script.google.com/macros/s/AKfycbxmJzbOkbqkPU8Li5WJiBvA0ZooqKxxfxpLdsBl18pDSJwSHfni8p5tBpyMQPMVnVUzBw/exec";
 let CU=null, snd=true, round=1, diff='easy';
 let selPlan=null, selPrice=0, aLB='easy';
 const TL={easy:30,medium:20,hard:10};
@@ -1972,6 +1988,17 @@ const TICKER = {
 
 // Hook into saveScore calls to show ticker immediately
 const _origSaveScore = window._saveScoreHook;
+
+// ── PASSWORD TOGGLE ──────────────────────────────────────────
+function togglePw(id, btn){
+  const inp = document.getElementById(id);
+  if(!inp) return;
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  btn.textContent = show ? '🙈' : '👁️';
+  btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  inp.focus();
+}
 
 // ── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',function(){
