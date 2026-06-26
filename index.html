@@ -942,7 +942,7 @@ function buildHdr(){
   const lb=`<button class="hbtn" onclick="navTo('lb')">Scores</button>`;
   if(CU){
     const ini=CU.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    const sub=CU.subscription==='premium'?'🔥':CU.subscription==='basic'?'⚡':CU.subscription==='pending'?'⏳':'🌱';
+    const sub=CU.subscription==='premium'?'🔥':CU.subscription==='basic'?'⚡':CU.subscription==='pending'?'⏳':CU.subscription==='expired'?'❌':'🌱';
     const adm=CU.role==='admin'?`<button class="hbtn" onclick="navTo('admin')">Admin</button>`:'';
     const par=(CU.type==='adult'&&CU.role!=='admin')?`<button class="hbtn" onclick="navTo('parent')">My Children</button>`:'';
     const pln=CU.role!=='admin'?`<button class="hbtn" onclick="navTo('pricing')">Plans</button>`:'';
@@ -1165,10 +1165,19 @@ async function doLogin(){
   // Fetch fresh profile to get subStart/subExpiry immediately after login
   const profileRes = await api({action:'getProfile', username:CU.username});
   if(profileRes.success){
+    const prevSub = CU.subscription;
     CU.subscription = profileRes.subscription || CU.subscription;
     CU.subStart     = profileRes.subStart || '';
     CU.subExpiry    = profileRes.subExpiry || '';
     buildHdr();
+    updateDiffCards();
+    // Notify user if their subscription just expired
+    if(prevSub !== 'expired' && CU.subscription === 'expired'){
+      setTimeout(()=>{
+        alert('⚠️ Your subscription has expired.\n\nYour account has been switched to the Free plan.\nVisit Plans to renew and keep your full access!');
+        navTo('pricing');
+      }, 1500);
+    }
   }
   navTo(CU.role==='admin'?'admin':'start');
 }
@@ -1226,10 +1235,10 @@ function guestModalGo(dest){
 function shuf(a){return[...a].sort(()=>Math.random()-0.5);}
 
 function checkAccess(d){
-  // Medium and Hard require subscription
+  // Medium and Hard require active subscription
   if(d==='medium'||d==='hard'){
     const sub=CU?.subscription||'free';
-    const hasAccess=sub==='basic'||sub==='premium';
+    const hasAccess=sub==='basic'||sub==='premium'; // expired = no access
     if(!hasAccess){
       if(!CU){
         if(confirm('Medium and Hard levels require a subscription.\n\nCreate a free account and subscribe to unlock all levels!\n\nGo to Login now?')){
@@ -1253,7 +1262,7 @@ function startQuiz(d){
 
 function updateDiffCards(){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'); // expired counts as free
   ['medium','hard'].forEach(d=>{
     const card=document.getElementById('dc-'+d);
     const lock=document.getElementById('lock-'+d);
@@ -1484,7 +1493,7 @@ async function loadProfile(){
   // Subscription card
   const sc=document.getElementById('psub-card');
   if(sc){
-    const subMap={free:'🌱 Free Plan',basic:'⚡ Basic Plan',premium:'🔥 Premium Plan',pending:'⏳ Payment Pending',expired:'❌ Expired'};
+    const subMap={free:'🌱 Free Plan',basic:'⚡ Basic Plan',premium:'🔥 Premium Plan',pending:'⏳ Payment Pending',expired:'❌ Plan Expired'};
     const isActive=sub==='basic'||sub==='premium';
     let daysLeft=null,expiryStr='',urgentClass='',renewMsg='';
     if(isActive&&subExpiry){
@@ -1522,6 +1531,7 @@ async function loadProfile(){
       `:''}
       ${sub==='pending'?'<div class="pending-box" style="margin-top:10px">⏳ Payment pending — admin will verify within 24 hours.</div>':''}
       ${sub==='free'?'<div style="font-size:13px;color:#888780;font-weight:700;margin-top:8px">Upgrade to Basic or Premium for unlimited access!</div>':''}
+      ${sub==='expired'?'<div style="background:#FCEBEB;border:1.5px solid #E24B4A;border-radius:10px;padding:12px;margin-top:10px;font-size:13px;font-weight:700;color:#791F1F">❌ Your plan expired. Renew to restore full access to all levels!</div>':''}
     `;
   }
 
