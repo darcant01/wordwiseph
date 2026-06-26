@@ -210,6 +210,29 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 .pay-approve-btn.approve{background:var(--green);color:#fff}
 .pay-approve-btn.reject{background:var(--red);color:#fff}
 .pay-approve-btn:hover{opacity:0.85;transform:scale(1.05)}
+
+/* ── FLOATING TIMER ── */
+#floating-timer{
+  position:fixed;
+  top:clamp(60px,12vw,80px);
+  right:clamp(10px,3vw,20px);
+  z-index:500;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  background:var(--navy);
+  border-radius:50%;
+  width:clamp(54px,13vw,70px);
+  height:clamp(54px,13vw,70px);
+  box-shadow:0 4px 20px rgba(29,43,85,0.4);
+  border:3px solid var(--n2);
+  justify-content:center;
+  transition:border-color 0.3s;
+}
+#floating-timer.urgent{border-color:#E24B4A;animation:pulse 0.5s ease infinite alternate;}
+@keyframes pulse{from{box-shadow:0 4px 20px rgba(226,75,74,0.3);}to{box-shadow:0 4px 30px rgba(226,75,74,0.7);}}
+#ft-num{font-size:clamp(16px,4vw,22px);font-weight:900;color:var(--gold);line-height:1;}
+#ft-lbl{font-size:9px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:0.5px;margin-top:1px;}
 </style>
 </head>
 <body>
@@ -232,11 +255,25 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
   <div class="wrap">
     <div class="card">
       <div class="ctitle">Pick your level</div>
-      <div class="csub">5 random grammar questions each round. Answer before time runs out!</div>
+      <div class="csub">Easy: 5 questions · Medium: 15 questions · Hard: 30 questions</div>
       <div class="diff-grid">
-        <div class="dc easy" onclick="startQuiz('easy')"><div class="di">🌱</div><div class="dt">Easy</div><div class="ds">30 sec each</div></div>
-        <div class="dc medium" onclick="startQuiz('medium')"><div class="di">⚡</div><div class="dt">Medium</div><div class="ds">20 sec each</div></div>
-        <div class="dc hard" onclick="startQuiz('hard')"><div class="di">🔥</div><div class="dt">Hard</div><div class="ds">10 sec each</div></div>
+        <div class="dc easy" onclick="startQuiz('easy')">
+          <div class="di">🌱</div>
+          <div class="dt">Easy</div>
+          <div class="ds">5 questions · 30 sec each</div>
+        </div>
+        <div class="dc medium" id="dc-medium" onclick="checkAccess('medium')">
+          <div class="di">⚡</div>
+          <div class="dt">Medium</div>
+          <div class="ds">15 questions · 20 sec each</div>
+          <div class="dc-lock" id="lock-medium" style="display:none;margin-top:6px;font-size:11px;background:#FAEEDA;color:#412402;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
+        </div>
+        <div class="dc hard" id="dc-hard" onclick="checkAccess('hard')">
+          <div class="di">🔥</div>
+          <div class="dt">Hard</div>
+          <div class="ds">30 questions · 10 sec each</div>
+          <div class="dc-lock" id="lock-hard" style="display:none;margin-top:6px;font-size:11px;background:#FCEBEB;color:#791F1F;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
+        </div>
       </div>
       <p style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780">Login to save your scores · <button class="lnk" onclick="navTo('pricing')">See subscription plans</button></p>
     </div>
@@ -547,6 +584,12 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
   </div>
 </div>
 
+<!-- FLOATING TIMER -->
+<div id="floating-timer">
+  <div id="ft-num">30</div>
+  <div id="ft-lbl">sec</div>
+</div>
+
 <script>
 // ================================================================
 // WORDWISE PH — GAS-ONLY BACKEND (no localStorage)
@@ -555,6 +598,7 @@ const GAS = "https://script.google.com/macros/s/AKfycbxmJzbOkbqkPU8Li5WJiBvA0Zoo
 let CU=null, snd=true, round=1, diff='easy';
 let selPlan=null, selPrice=0, aLB='easy';
 const TL={easy:30,medium:20,hard:10};
+const QL={easy:5,medium:15,hard:30}; // questions per round
 let cQs=[], ans=[], answered=0, tInt=null, tLeft=30, tTotal=30, cQ=0, lastSco=0;
 let aCtx=null, BANK=null;
 
@@ -612,6 +656,10 @@ function navTo(s){
     if(first)first.classList.add('on');
   }
   if(s==='parent') loadParent();
+  if(s==='start')  updateDiffCards();
+  // Show/hide floating timer
+  const ft=document.getElementById('floating-timer');
+  if(ft) ft.style.display=(s==='quiz')?'flex':'none';
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -664,6 +712,7 @@ async function doLogin(){
   CU=res.user;
   round=1;
   buildHdr();
+  updateDiffCards();
   // Fetch fresh profile to get subStart/subExpiry immediately after login
   const profileRes = await api({action:'getProfile', username:CU.username});
   if(profileRes.success){
@@ -708,10 +757,10 @@ async function doReg(){
 
 async function doLogout(){
   if(CU)api({action:'logActivity',message:CU.name+' logged out'});
-  CU=null; round=1; buildHdr(); navTo('start');
+  CU=null; round=1; buildHdr(); updateDiffCards(); navTo('start');
 }
 
-function guestPlay(){CU=null; round=1; buildHdr(); navTo('start');}
+function guestPlay(){CU=null; round=1; buildHdr(); updateDiffCards(); navTo('start');}
 
 // ── GUEST LIMIT ───────────────────────────────────────────────
 function showGuestModal(){
@@ -727,17 +776,58 @@ function guestModalGo(dest){
 // ── QUIZ ─────────────────────────────────────────────────────
 function shuf(a){return[...a].sort(()=>Math.random()-0.5);}
 
+function checkAccess(d){
+  // Medium and Hard require subscription
+  if(d==='medium'||d==='hard'){
+    const sub=CU?.subscription||'free';
+    const hasAccess=sub==='basic'||sub==='premium';
+    if(!hasAccess){
+      if(!CU){
+        if(confirm('Medium and Hard levels require a subscription.\n\nCreate a free account and subscribe to unlock all levels!\n\nGo to Login now?')){
+          navTo('login');
+        }
+      } else {
+        if(confirm('Medium and Hard levels require a Basic or Premium subscription.\n\nUpgrade your plan to unlock all levels!\n\nView plans now?')){
+          navTo('pricing');
+        }
+      }
+      return;
+    }
+  }
+  startQuiz(d);
+}
+
 function startQuiz(d){
   if(!CU&&round>5){showGuestModal();return;}
   diff=d; navTo('quiz'); buildQuiz();
 }
 
+function updateDiffCards(){
+  const sub=CU?.subscription||'free';
+  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  ['medium','hard'].forEach(d=>{
+    const card=document.getElementById('dc-'+d);
+    const lock=document.getElementById('lock-'+d);
+    if(card){
+      if(hasAccess){
+        card.style.opacity='1';
+        card.style.cursor='pointer';
+        if(lock)lock.style.display='none';
+      } else {
+        card.style.opacity='0.6';
+        card.style.cursor='pointer';
+        if(lock)lock.style.display='block';
+      }
+    }
+  });
+}
+
 function buildQuiz(){
   if(!BANK){showErr('dlbl','Questions loading... please tap Play again!');return;}
-  cQs=shuf(BANK[diff]).slice(0,5);
+  cQs=shuf(BANK[diff]).slice(0,QL[diff]||5);
   ans=new Array(5).fill(null);
   answered=0;cQ=0;tTotal=TL[diff];tLeft=tTotal;
-  document.getElementById('dlbl').textContent={easy:'Easy — 30 sec',medium:'Medium — 20 sec',hard:'Hard — 10 sec'}[diff]+' per question';
+  document.getElementById('dlbl').textContent={easy:'Easy — 5 questions · 30 sec each',medium:'Medium — 15 questions · 20 sec each',hard:'Hard — 30 questions · 10 sec each'}[diff];
   document.getElementById('rpill').textContent='Round '+round;
   document.getElementById('pbar').style.width='0%';
   document.getElementById('plbl').textContent='0 of 5 answered';
@@ -745,7 +835,7 @@ function buildQuiz(){
   document.getElementById('result').classList.remove('show');
   const sr=document.getElementById('strow');
   sr.innerHTML='';
-  for(let i=0;i<5;i++){const s=document.createElement('span');s.className='star';s.id='st'+i;s.textContent='⭐';sr.appendChild(s);}
+  for(let i=0;i<(QL[diff]||5);i++){const s=document.createElement('span');s.className='star';s.id='st'+i;s.textContent='⭐';sr.appendChild(s);}
   const con=document.getElementById('qz');
   con.innerHTML='';
   cQs.forEach((q,i)=>{
@@ -775,9 +865,19 @@ function startTimer(){
 }
 function updT(){
   const n=document.getElementById('tnum');if(n)n.textContent=tLeft;
-  const r=document.getElementById('tri');if(!r)return;
-  r.style.strokeDashoffset=163*(1-tLeft/tTotal);
-  r.style.stroke=tLeft<=5?'#E24B4A':tLeft<=Math.floor(tTotal*0.4)?'#EF9F27':'#FAC775';
+  const r=document.getElementById('tri');if(r){
+    r.style.strokeDashoffset=163*(1-tLeft/tTotal);
+    r.style.stroke=tLeft<=5?'#E24B4A':tLeft<=Math.floor(tTotal*0.4)?'#EF9F27':'#FAC775';
+  }
+  // Sync floating timer
+  const ft=document.getElementById('floating-timer');
+  const fn=document.getElementById('ft-num');
+  if(ft&&fn){
+    fn.textContent=tLeft;
+    fn.style.color=tLeft<=5?'#E24B4A':tLeft<=Math.floor(tTotal*0.4)?'#EF9F27':'#FAC775';
+    if(tLeft<=5)ft.classList.add('urgent');
+    else ft.classList.remove('urgent');
+  }
 }
 function autoAns(){
   const btns=document.getElementById('ch'+cQ)?.querySelectorAll('.cbtn');
@@ -788,7 +888,7 @@ function autoAns(){
   if(fb){fb.textContent="⏰ Time's up! Correct: "+cQs[cQ].correct;fb.className='fb show wrong';}
   ans[cQ]=false;answered++;updP();
   const st=document.getElementById('st'+(answered-1));if(st)st.textContent='💫';
-  if(answered<5){cQ++;unlockN();startTimer();}
+  if(answered<(QL[diff]||5)){cQ++;unlockN();startTimer();}
   else document.getElementById('sbtn').disabled=false;
 }
 function ansQ(q,btn,chosen,correct){
@@ -802,7 +902,7 @@ function ansQ(q,btn,chosen,correct){
   else{card?.classList.add('wrong');if(fb){fb.textContent='✗ Not quite! Correct: '+correct;fb.className='fb show wrong';}sBad();btn.classList.add('no');}
   answered++;updP();
   const st=document.getElementById('st'+(answered-1));if(st)st.textContent=ok?'⭐':'💫';
-  if(answered<5){cQ++;unlockN();startTimer();}
+  if(answered<(QL[diff]||5)){cQ++;unlockN();startTimer();}
   else document.getElementById('sbtn').disabled=false;
 }
 function unlockN(){
@@ -810,13 +910,13 @@ function unlockN(){
   if(c){c.style.opacity='1';c.style.pointerEvents='auto';setTimeout(()=>c.scrollIntoView({behavior:'smooth',block:'center'}),100);}
 }
 function updP(){
-  const pb=document.getElementById('pbar');if(pb)pb.style.width=Math.round(answered/5*100)+'%';
-  const pl=document.getElementById('plbl');if(pl)pl.textContent=answered+' of 5 answered';
+  const pb=document.getElementById('pbar');if(pb)pb.style.width=Math.round(answered/(QL[diff]||5)*100)+'%';
+  const pl=document.getElementById('plbl');if(pl)pl.textContent=answered+' of '+(QL[diff]||5)+' answered';
 }
 async function showResult(){
   clearInterval(tInt);
   lastSco=ans.filter(a=>a).length;
-  document.getElementById('rsco').textContent=lastSco+'/5';
+  const qTotal=QL[diff]||5;document.getElementById('rsco').textContent=lastSco+'/'+qTotal;
   let stars='',msg='';
   if(lastSco===5){stars='⭐⭐⭐⭐⭐';msg='Perfect! Grammar Superstar!';sWin();}
   else if(lastSco>=4){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost perfect!';sWin();}
@@ -825,7 +925,7 @@ async function showResult(){
   else{stars='⭐💫💫💫💫';msg="Don't give up! Practice makes perfect!";}
   document.getElementById('rstr').textContent=stars;
   document.getElementById('rmsg').textContent=msg;
-  const entry={name:CU?CU.name:'Guest',username:CU?CU.username:'guest',type:CU?CU.type:'guest',score:lastSco,diff,stars,date:new Date().toLocaleDateString()};
+  const total=QL[diff]||5;const entry={name:CU?CU.name:'Guest',username:CU?CU.username:'guest',type:CU?CU.type:'guest',score:lastSco,total,diff,stars,date:new Date().toLocaleDateString()};
   showLoader('Saving score...');
   await api({action:'saveScore',...entry});
   hideLoader();
@@ -1178,6 +1278,7 @@ async function clearActivity(){
 // ── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',function(){
   buildHdr();
+  updateDiffCards();
   loadLB('easy');
 });
 </script>
