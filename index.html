@@ -4698,9 +4698,9 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
         <input id="sprint-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
           placeholder="Type a word..."
           style="width:100%;font-family:'Nunito',sans-serif;font-size:clamp(18px,5vw,24px);font-weight:800;padding:clamp(14px,3vw,18px) 64px clamp(14px,3vw,18px) clamp(14px,3vw,18px);border-radius:14px;border:3px solid var(--lp);background:#FFF8F0;color:var(--navy);outline:none;text-align:center;box-sizing:border-box"
-          oninput="sprintInputChange(this.value)"
-          onkeydown="if(event.key==='Enter')submitSprintWord()"/>
-        <button onclick="submitSprintWord()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:#8E44AD;border:none;border-radius:10px;width:46px;height:46px;font-size:20px;cursor:pointer;color:#fff;font-weight:900;-webkit-tap-highlight-color:transparent;touch-action:manipulation;display:flex;align-items:center;justify-content:center">→</button>
+          oninput="sprintCheck(this.value)"
+          onkeydown="if(event.key==='Enter')sprintSubmit()"/>
+        <button onclick="sprintSubmit()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:#8E44AD;border:none;border-radius:10px;width:46px;height:46px;font-size:20px;cursor:pointer;color:#fff;font-weight:900;-webkit-tap-highlight-color:transparent;touch-action:manipulation;display:flex;align-items:center;justify-content:center">→</button>
       </div>
 
       <!-- Feedback -->
