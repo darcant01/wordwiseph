@@ -434,74 +434,59 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 
 <!-- ══ GAMES HUB ══ -->
 <div id="sc-games" class="screen">
-  <div class="hero"><div class="htitle">Brainy <span>Games!</span></div><div class="hsub">Challenge yourself with fun English games!</div></div>
+  <div class="hero">
+    <div class="htitle">Brainy <span>Games!</span></div>
+    <div class="hsub">Challenge yourself with fun English games!</div>
+  </div>
   <div class="wrap">
     <div class="games-grid">
+
       <div class="game-card" onclick="navTo('start')">
         <div class="game-badge" style="background:var(--navy)">GRAMMAR</div>
         <div class="game-icon">📝</div>
         <div class="game-title">Grammar Quiz</div>
-        <div class="game-desc">Test your grammar skills · Easy, Medium & Hard</div>
+        <div class="game-desc">Test your grammar skills · Easy, Medium &amp; Hard</div>
       </div>
+
       <div class="game-card" onclick="startSpell()">
         <div class="game-badge">SPELLING</div>
         <div class="game-icon">🔤</div>
         <div class="game-title">Spell It Right</div>
         <div class="game-desc">Pick the correctly spelled word against the clock</div>
       </div>
+
       <div class="game-card" onclick="startShark()">
         <div class="game-badge" style="background:#1D9E75">TYPING</div>
         <div class="game-icon">🦈</div>
         <div class="game-title">Shark Typing</div>
         <div class="game-desc">Type fast before the shark catches you!</div>
       </div>
+
       <div class="game-card" onclick="startOdd()">
         <div class="game-badge" style="background:#7F77DD">VOCAB</div>
         <div class="game-icon">🎯</div>
         <div class="game-title">Odd One Out</div>
         <div class="game-desc">Find the word that doesn't belong!</div>
       </div>
-    </div>
+
       <div class="game-card" onclick="startScramble()">
         <div class="game-badge" style="background:#E07B39">SCRAMBLE</div>
         <div class="game-icon">🔀</div>
         <div class="game-title">Word Scramble</div>
         <div class="game-desc">Unscramble the letters to form the correct word!</div>
       </div>
-    </div>
+
       <div class="game-card" onclick="startChain()">
         <div class="game-badge" style="background:#C0392B">CHAIN</div>
         <div class="game-icon">🔗</div>
         <div class="game-title">Word Chain</div>
         <div class="game-desc">Each word must start with the last letter of the previous!</div>
       </div>
+
     </div>
     <div style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780;margin-top:8px">More games coming soon! 🚀</div>
-
-    <!-- Word Scramble LB -->
-    <div id="lb-scramble" class="lb-game-panel" style="display:none">
-      <div class="lbtabs">
-        <button class="lbt on" onclick="switchLBDiff('scramble','all',this)">🏆 All Time</button>
-        <button class="lbt easy" onclick="switchLBDiff('scramble','easy',this)">🌱 Easy</button>
-        <button class="lbt medium" onclick="switchLBDiff('scramble','medium',this)">⚡ Medium</button>
-        <button class="lbt hard" onclick="switchLBDiff('scramble','hard',this)">🔥 Hard</button>
-      </div>
-      <div id="lb-scramble-list" class="lb-list"></div>
-    </div>
-
   </div>
 </div>
-
-    <!-- Word Chain LB -->
-    <div id="lb-chain" class="lb-game-panel" style="display:none">
-      <div class="lbtabs">
-        <button class="lbt on" onclick="switchLBDiff('chain','all',this)">🏆 All Time</button>
-        <button class="lbt easy" onclick="switchLBDiff('chain','easy',this)">🌱 Easy</button>
-        <button class="lbt medium" onclick="switchLBDiff('chain','medium',this)">⚡ Medium</button>
-        <button class="lbt hard" onclick="switchLBDiff('chain','hard',this)">🔥 Hard</button>
-      </div>
-      <div id="lb-chain-list" class="lb-list"></div>
-    </div>
 
 <!-- ══ SPELL IT RIGHT ══ -->
 <div id="sc-spell" class="screen">
@@ -705,6 +690,28 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <button class="lbt hard" onclick="switchLBDiff('odd','hard',this)">🔥 Hard</button>
       </div>
       <div id="lb-odd-list" class="lb-list"></div>
+    </div>
+
+    <!-- Word Scramble LB -->
+    <div id="lb-scramble" class="lb-game-panel" style="display:none">
+      <div class="lbtabs">
+        <button class="lbt on" onclick="switchLBDiff('scramble','all',this)">🏆 All Time</button>
+        <button class="lbt easy" onclick="switchLBDiff('scramble','easy',this)">🌱 Easy</button>
+        <button class="lbt medium" onclick="switchLBDiff('scramble','medium',this)">⚡ Medium</button>
+        <button class="lbt hard" onclick="switchLBDiff('scramble','hard',this)">🔥 Hard</button>
+      </div>
+      <div id="lb-scramble-list" class="lb-list"></div>
+    </div>
+
+    <!-- Word Chain LB -->
+    <div id="lb-chain" class="lb-game-panel" style="display:none">
+      <div class="lbtabs">
+        <button class="lbt on" onclick="switchLBDiff('chain','all',this)">🏆 All Time</button>
+        <button class="lbt easy" onclick="switchLBDiff('chain','easy',this)">🌱 Easy</button>
+        <button class="lbt medium" onclick="switchLBDiff('chain','medium',this)">⚡ Medium</button>
+        <button class="lbt hard" onclick="switchLBDiff('chain','hard',this)">🔥 Hard</button>
+      </div>
+      <div id="lb-chain-list" class="lb-list"></div>
     </div>
 
   </div>
