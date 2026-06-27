@@ -1500,9 +1500,9 @@ async function loadProfile(){
   const sub=res.subscription||CU.subscription||'free';
   const subStart=res.subStart||CU.subStart||'';
   const subExpiry=res.subExpiry||CU.subExpiry||'';
-  // Update CU with latest data
+  // Always update CU with latest
   CU.subscription=sub;
-  if(subStart) CU.subStart=subStart;
+  CU.subStart=subStart;
   if(subExpiry) CU.subExpiry=subExpiry;
 
   // Subscription card
@@ -1549,11 +1549,11 @@ async function loadProfile(){
       `:''}
 
       ${isActive&&!subExpiry?`
-        <div style="background:#EEEDFE;border:1.5px solid #7F77DD;border-radius:12px;padding:14px;margin-top:4px">
-          <div style="font-size:14px;font-weight:800;color:#3C3489;margin-bottom:6px">📅 Expiry date not set yet</div>
-          <div style="font-size:13px;color:#534AB7;font-weight:700;line-height:1.6">
-            Your plan is active! The admin needs to add your expiry date in the Google Sheet.<br>
-            Contact admin at <strong>darcant01@gmail.com</strong> to set your expiry date.
+        <div style="background:#EEEDFE;border:1.5px solid #7F77DD;border-radius:12px;padding:14px;margin-top:4px;display:flex;gap:12px;align-items:flex-start">
+          <div style="font-size:28px">📅</div>
+          <div>
+            <div style="font-size:14px;font-weight:900;color:#3C3489;margin-bottom:4px">Expiry Date Pending</div>
+            <div style="font-size:13px;color:#534AB7;font-weight:700;line-height:1.6">Your <strong>${plan||sub}</strong> plan is active!<br>Admin will set your exact expiry date soon.<br>Contact: <strong>darcant01@gmail.com</strong></div>
           </div>
         </div>
       `:''}
@@ -1790,26 +1790,19 @@ async function loadAdminPayments(){
     :'<tr><td colspan="9" style="text-align:center;color:#888780;padding:16px">No payment requests yet.</td></tr>';
 }
 async function adminSetExpiry(username, plan){
-  const days = prompt('Set subscription for @'+username+'\nHow many days from today?\n(e.g. 30 for one month)', '30');
-  if(!days || isNaN(days)) return;
-  const start  = new Date();
-  const expiry = new Date();
-  expiry.setDate(expiry.getDate() + parseInt(days));
-  const fmt = d => (d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getDate().toString().padStart(2,'0')+'/'+d.getFullYear();
+  if(!confirm('Set 30-day subscription for @'+username+' ('+plan+')?')) return;
   showLoader('Setting expiry...');
-  const res = await api({
-    action:'setExpiry',
-    username,
-    plan,
-    subStart:  fmt(start),
-    subExpiry: fmt(expiry)
-  });
+  const ref = 'MANUAL-'+Date.now();
+  // Step 1: create a payment record
+  await api({action:'submitPayment',username,name:username,plan,price:0,reference:ref});
+  // Step 2: approve it — writes SubStart + SubExpiry to sheet
+  const res = await api({action:'approvePayment',username,plan,reference:ref,approve:'true'});
   hideLoader();
   if(res.success){
-    alert('✅ Expiry set for @'+username+'\nPlan: '+plan+'\nExpires: '+fmt(expiry)+' ('+days+' days)');
+    alert('✅ Subscription activated for @'+username+'!\nExpires in 30 days.\n\nAsk the subscriber to open their Profile to see the expiry date.');
     loadAdmin('us');
   } else {
-    alert('Error: '+res.error);
+    alert('Failed. Please set dates manually in Google Sheets:\nColumn K = SubStart (today)\nColumn L = SubExpiry (30 days from today)');
   }
 }
 
