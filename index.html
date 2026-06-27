@@ -6,6 +6,7 @@
 <title>WordWise PH</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
 <style>
+
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--navy:#1D2B55;--pink:#D4537E;--gold:#FAC775;--lp:#F4C0D1;--blue:#B5D4F4;--n2:#243366;--green:#1D9E75;--red:#E24B4A;--amber:#BA7517;--purple:#7F77DD}
 body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
@@ -324,7 +325,11 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 .pw-wrap input{flex:1;padding-right:46px!important}
 .pw-eye{position:absolute;right:14px;background:none;border:none;cursor:pointer;padding:4px;color:#888780;font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:color 0.2s}
 .pw-eye:hover{color:var(--pink)}
+
 </style>
+</head>
+<body>
+
 </head>
 <body>
 
@@ -863,8 +868,11 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
   <div style="font-size:9px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:0.5px;margin-top:1px">sec</div>
 </div>
 
-
 <script>
+// ================================================================
+// BLOCK 1 — CORE
+// ================================================================
+
 // ================================================================
 // BLOCK 1 — CORE: API, Navigation, Auth, Grammar Quiz, Admin
 // ================================================================
@@ -872,7 +880,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 // ================================================================
 // WORDWISE PH — GAS-ONLY BACKEND (no localStorage)
 // ================================================================
-const GAS = "https://script.google.com/macros/s/AKfycbxmJzbOkbqkPU8Li5WJiBvA0ZooqKxxfxpLdsBl18pDSJwSHfni8p5tBpyMQPMVnVUzBw/exec";
+const GAS = "https://script.google.com/macros/s/AKfycbzKjd-A_LiZRZwPaPnH79J7833WMrT7auZEhuHihLII7I8hJJx9dDUfABBrqdmYUOhKYQ/exec";
 let CU=null, snd=true, round=1, diff='easy';
 let selPlan=null, selPrice=0, aLB='easy';
 const TL={easy:30,medium:20,hard:10};
@@ -2021,9 +2029,14 @@ document.addEventListener('DOMContentLoaded',function(){
   setTimeout(()=>TICKER.start(), 2000);
 });
 
+
 </script>
 
 <script>
+// ================================================================
+// BLOCK 2 — SPELL IT RIGHT
+// ================================================================
+
 // ================================================================
 // BLOCK 2A — SPELL IT RIGHT
 // ================================================================
@@ -2344,9 +2357,14 @@ function retrySpell(){
   buildSpell();
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
 </script>
 
 <script>
+// ================================================================
+// BLOCK 3 — SHARK TYPING
+// ================================================================
+
 // ================================================================
 // BLOCK 2B — SHARK TYPING
 // ================================================================
@@ -2729,9 +2747,14 @@ function restartShark(){
   initShark();
 }
 
+
 </script>
 
 <script>
+// ================================================================
+// BLOCK 4 — ODD ONE OUT
+// ================================================================
+
 // ================================================================
 // BLOCK 2C — ODD ONE OUT
 // ================================================================
@@ -3061,9 +3084,14 @@ function retryOdd(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
+
 </script>
 
 <script>
+// ================================================================
+// BLOCK 5 — QUESTION BANK
+// ================================================================
+
 // ================================================================
 // BLOCK 3 — QUESTION BANK (loaded last)
 // ================================================================
@@ -3073,115 +3101,8 @@ const BANK_DATA = '{"easy":[{"q":"She ___ to school every day.","correct":"walks
 BANK = JSON.parse(BANK_DATA);
 console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.length,0), 'questions loaded');
 
+
 </script>
-
-
-<!-- ══ SHARK TYPING ══ -->
-<div id="sc-shark" class="screen">
-  <div class="hero">
-    <div class="rpill" id="shark-pill">Get Ready!</div>
-    <div class="htitle" style="font-size:clamp(20px,5vw,32px)">Shark <span>Typing!</span> 🦈</div>
-    <div class="hsub" id="shark-diff-lbl">Type the word before the shark attacks!</div>
-  </div>
-  <div class="qmain" style="padding-top:0">
-    <div id="shark-game" style="display:none">
-      <div style="position:relative;background:linear-gradient(180deg,#1D2B55 0%,#0B4F6C 60%,#0E7490 100%);border-radius:clamp(16px,3vw,24px);overflow:hidden;margin-bottom:16px;height:clamp(160px,35vw,220px)">
-        <div style="position:absolute;bottom:0;left:0;right:0;height:60%;background:linear-gradient(180deg,transparent,rgba(14,116,144,0.6));border-radius:0 0 24px 24px"></div>
-        <div style="position:absolute;top:12px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:center">
-          <div style="background:rgba(0,0,0,0.4);border-radius:99px;padding:6px 14px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="shark-score">0</span></div>
-          <div id="shark-lives" style="display:flex;gap:6px"></div>
-          <div style="background:rgba(0,0,0,0.4);border-radius:99px;padding:6px 14px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#F4C0D1">⏱ <span id="shark-time">60</span>s</div>
-        </div>
-        <div id="shark-character" style="position:absolute;bottom:20px;left:10%;font-size:clamp(32px,7vw,52px);transition:left 2s linear;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4))">🦈</div>
-        <div id="shark-fish" style="position:absolute;bottom:22px;right:12%;font-size:clamp(20px,4vw,30px);transition:all 0.5s;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">🐟</div>
-        <div style="position:absolute;bottom:0;left:0;right:0;height:6px;background:rgba(0,0,0,0.3)">
-          <div id="shark-danger-bar" style="height:6px;background:#E24B4A;width:0%;transition:width 0.3s;border-radius:3px"></div>
-        </div>
-      </div>
-      <div id="shark-word-display" style="text-align:center;font-size:clamp(22px,6vw,42px);font-weight:900;color:var(--navy);letter-spacing:3px;margin-bottom:6px;min-height:60px;display:flex;align-items:center;justify-content:center"></div>
-      <div id="shark-hint" style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780;font-weight:700;margin-bottom:12px;min-height:20px"></div>
-      <div style="position:relative;margin-bottom:12px">
-        <input id="shark-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Type the word here..."
-          style="width:100%;font-family:'Nunito',sans-serif;font-size:clamp(16px,4vw,22px);font-weight:800;padding:clamp(14px,3vw,18px) 60px clamp(14px,3vw,18px) clamp(14px,3vw,18px);border-radius:14px;border:3px solid var(--lp);background:#FFF8F0;color:var(--navy);outline:none;text-align:center;box-sizing:border-box"
-          oninput="checkSharkInput(this.value)" onkeydown="if(event.key==='Enter')checkSharkInput(this.value,true)"/>
-        <div style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:24px">⌨️</div>
-      </div>
-      <div style="text-align:center;font-size:clamp(13px,3vw,16px);font-weight:800;color:var(--gold)">🔥 Streak: <span id="shark-streak">0</span></div>
-    </div>
-    <div id="shark-start" style="text-align:center;padding:16px 0">
-      <div style="font-size:clamp(40px,10vw,70px);margin-bottom:12px">🦈</div>
-      <div style="font-size:clamp(16px,4vw,22px);font-weight:900;color:var(--navy);margin-bottom:8px">Type fast to escape the shark!</div>
-      <div style="font-size:clamp(13px,3vw,15px);color:#5F5E5A;font-weight:700;line-height:1.7;margin-bottom:20px">A word appears — type it correctly before the shark catches the fish!<br>Each correct word = 1 point. Wrong or slow = shark eats the fish! 🐟</div>
-      <div class="diff-grid" style="margin-bottom:16px">
-        <div class="dc easy" onclick="launchShark('easy')"><div class="di">🌱</div><div class="dt">Easy</div><div class="ds">Common words · 8 sec</div></div>
-        <div class="dc medium" onclick="checkSharkAccess('medium')"><div class="di">⚡</div><div class="dt">Medium</div><div class="ds">Harder words · 6 sec</div><div id="shark-lock-medium" style="display:none;margin-top:6px;font-size:11px;background:#FAEEDA;color:#412402;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div></div>
-        <div class="dc hard" onclick="checkSharkAccess('hard')"><div class="di">🔥</div><div class="dt">Hard</div><div class="ds">Tricky words · 4 sec</div><div id="shark-lock-hard" style="display:none;margin-top:6px;font-size:11px;background:#FCEBEB;color:#791F1F;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div></div>
-      </div>
-      <button class="lnk" onclick="navTo('games')">← Back to Games</button>
-    </div>
-    <div id="shark-over" class="result" style="display:none">
-      <div id="shark-over-icon" style="font-size:56px;margin-bottom:8px">🦈</div>
-      <div class="rlbl">Final Score</div>
-      <div class="rsco" id="shark-final-score">0</div>
-      <div class="rstr" id="shark-stars"></div>
-      <div class="rmsg" id="shark-msg"></div>
-      <div id="shark-save-area"></div>
-      <div class="rbtns">
-        <button class="btn btn-gold" onclick="restartShark()">Play Again!</button>
-        <button class="btn btn-navy" onclick="navTo('games')">All Games</button>
-        <button class="btn btn-out" onclick="navTo('lb')">Leaderboard</button>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- ══ ODD ONE OUT ══ -->
-<div id="sc-odd" class="screen">
-  <div class="hero">
-    <div class="rpill" id="odd-pill">Round 1</div>
-    <div class="strow" id="odd-stars"></div>
-    <div class="htitle" style="font-size:clamp(20px,5vw,32px)">Odd One <span>Out!</span> 🎯</div>
-    <div class="hsub" id="odd-diff-lbl">Find the word that doesn't belong!</div>
-    <div class="pbar-w"><div class="pbar" id="odd-pbar"></div></div>
-    <div class="plbl" id="odd-plbl">0 of 10 answered</div>
-    <div class="tw">
-      <div class="tc"><svg viewBox="0 0 64 64"><circle class="ttr" cx="32" cy="32" r="26"/><circle class="tri" id="odd-tri" cx="32" cy="32" r="26"/></svg><div class="tnum" id="odd-tnum">15</div></div>
-      <div class="tlbl">seconds<br>left</div>
-    </div>
-  </div>
-  <div class="qmain">
-    <div class="slbl">Which word does NOT belong?</div>
-    <div id="odd-container"></div>
-    <div class="sw"><button class="sbtn" id="odd-sbtn" onclick="showOddResult()" disabled>See My Score!</button></div>
-    <div class="result" id="odd-result">
-      <div class="rlbl">Your score</div>
-      <div class="rsco" id="odd-rsco"></div>
-      <div class="rstr" id="odd-rstr"></div>
-      <div class="rmsg" id="odd-rmsg"></div>
-      <div id="odd-save-area"></div>
-      <div class="rbtns">
-        <button class="btn btn-gold" onclick="retryOdd()">Play Again!</button>
-        <button class="btn btn-navy" onclick="navTo('games')">All Games</button>
-        <button class="btn btn-out" onclick="navTo('lb')">Leaderboard</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ ODD DIFFICULTY PICKER ══ -->
-<div id="sc-odd-pick" class="screen">
-  <div class="hero"><div class="htitle">Odd One <span>Out!</span></div><div class="hsub">Choose your difficulty level</div></div>
-  <div class="wrap">
-    <div class="diff-grid">
-      <div class="dc easy" onclick="launchOdd('easy')"><div class="di">🎯</div><div class="dt">Easy</div><div class="ds">10 rounds · 15 sec</div></div>
-      <div class="dc medium" onclick="checkOddAccess('medium')"><div class="di">⚡</div><div class="dt">Medium</div><div class="ds">15 rounds · 12 sec</div><div id="odd-lock-medium" style="display:none;margin-top:6px;font-size:11px;background:#FAEEDA;color:#412402;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div></div>
-      <div class="dc hard" onclick="checkOddAccess('hard')"><div class="di">🔥</div><div class="dt">Hard</div><div class="ds">20 rounds · 8 sec</div><div id="odd-lock-hard" style="display:none;margin-top:6px;font-size:11px;background:#FCEBEB;color:#791F1F;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div></div>
-    </div>
-    <div style="text-align:center;margin-top:4px"><button class="lnk" onclick="navTo('games')">← Back to Games</button></div>
-  </div>
-</div>
-
-<!-- LIVE SCORE TICKER -->
-<div id="score-ticker"></div>
 
 </body>
 </html>
