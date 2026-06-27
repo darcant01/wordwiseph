@@ -349,7 +349,11 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 <div class="hdr">
   <div class="logo" onclick="navTo('start')">WordWise<span>PH</span></div>
   <div class="hdr-right" id="hdr-right"></div>
+  <button id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </div>
+<div id="mobile-menu"></div>
 
 <!-- ══ START ══ -->
 <div id="sc-start" class="screen active">
@@ -970,9 +974,12 @@ function buildHdr(){
 // ── SOUND ENGINE ─────────────────────────────────────────────
 function toggleSound(){
   snd=!snd;
-  const b=document.getElementById('sndbtn');
-  if(b){b.textContent=snd?'🔊 Sound ON':'🔇 Sound OFF'; b.style.background=snd?'':'rgba(255,255,255,0.1)';}
-  if(snd) sClick(); // play click sound to confirm sound is on
+  const icon=snd?'🔊':'🔇';
+  ['sndbtn','sndbtn-m'].forEach(function(id){
+    const b=document.getElementById(id);
+    if(b) b.textContent=icon+' Sound';
+  });
+  if(snd) sClick();
 }
 function gA(){if(!aCtx)aCtx=new(window.AudioContext||window.webkitAudioContext)();return aCtx;}
 
