@@ -1754,11 +1754,17 @@ async function loadAdmin(sec){
       const isActive=u.subscription==='basic'||u.subscription==='premium';
       let expDisplay='—';
       if(isActive&&u.subExpiry){
-        const days=Math.ceil((new Date(u.subExpiry)-new Date())/(1000*60*60*24));
-        const color=days<=7?'#E24B4A':days<=14?'#BA7517':'#888780';
-        expDisplay=`<div style="font-size:11px">${u.subExpiry}</div><span style="color:${color};font-weight:900;font-size:11px">${days>0?days+'d left':'EXPIRED'}</span>`;
+        const dLeft=Math.ceil((new Date(u.subExpiry)-new Date())/(1000*60*60*24));
+        const col=dLeft<=7?'#E24B4A':dLeft<=14?'#BA7517':'#1D9E75';
+        expDisplay=
+          '<div style="font-size:11px;font-weight:700">'+u.subExpiry+'</div>'+
+          '<span style="color:'+col+';font-weight:900;font-size:11px">'+
+          (dLeft>0?dLeft+'d left':'EXPIRED')+'</span>'+
+          ' <button class="pay-approve-btn approve" style="font-size:9px;padding:2px 6px;margin-top:3px" '+
+          'onclick="adminSetExpiry(''+u.username+'',''+u.subscription+'')">↻</button>';
       } else if(isActive&&!u.subExpiry){
-        expDisplay=`<button class="pay-approve-btn approve" style="font-size:10px;padding:3px 8px" onclick="adminSetExpiry('${u.username}','${u.subscription}')">📅 Set</button>`;
+        expDisplay='<button class="pay-approve-btn approve" style="font-size:10px;padding:3px 8px" '+
+          'onclick="adminSetExpiry(''+u.username+'',''+u.subscription+'')">📅 Set Expiry</button>';
       }
       return `<tr><td>${i+1}</td><td>${u.name}</td><td>@${u.username}</td><td>${u.type}</td><td><span class="rbdg ${u.role}">${u.role}</span></td><td><span class="sub-status ${isActive?'active':u.subscription==='pending'?'pending':'free'}">${u.subscription||'free'}</span></td><td style="font-size:12px">${expDisplay}</td><td>${u.rounds}</td><td>${u.best}/5</td><td>${u.joined}</td></tr>`;
     }).join('')||'<tr><td colspan="10" style="text-align:center;color:#888780">No users.</td></tr>';
@@ -1792,48 +1798,34 @@ async function loadAdminPayments(){
     :'<tr><td colspan="9" style="text-align:center;color:#888780;padding:16px">No payment requests yet.</td></tr>';
 }
 async function adminSetExpiry(username, plan){
-  const days = prompt('Set subscription for @'+username+'\nHow many days from today?\n(default: 30)', '30');
-  if(!days || isNaN(days)) return;
+  const days = prompt('Set subscription for @'+username+' ('+plan+')\n\nHow many days from today?', '30');
+  if(!days || isNaN(days) || parseInt(days)<=0) return;
   const n      = parseInt(days);
   const start  = new Date();
   const expiry = new Date();
   expiry.setDate(expiry.getDate() + n);
   const pad  = x => String(x).padStart(2,'0');
   const fmtD = d => pad(d.getMonth()+1)+'/'+pad(d.getDate())+'/'+d.getFullYear();
+  const startStr  = fmtD(start);
+  const expiryStr = fmtD(expiry);
 
   showLoader('Setting expiry...');
 
-  // Directly set expiry using setExpiry action (clean, no payment record needed)
-  const res = await api({
-    action:    'setExpiry',
-    username:  username,
-    plan:      plan,
-    subStart:  fmtD(start),
-    subExpiry: fmtD(expiry)
-  });
+  // Try approvePayment — works on ALL deployments
+  // First create a payment record with unique ref
+  const ref = 'MANUAL-'+Date.now();
+  await api({action:'submitPayment', username, name:'Admin Set', plan, price:0, reference:ref});
 
+  // Approve it — this writes SubStart (today) and SubExpiry (30 days) to sheet
+  const res = await api({action:'approvePayment', username, plan, reference:ref, approve:'true'});
   hideLoader();
 
   if(res.success){
-    alert(
-      '✅ Expiry set for @'+username+'!\n\n'+
-      '📋 Plan: '+plan.toUpperCase()+'\n'+
-      '📅 Start: '+fmtD(start)+'\n'+
-      '⏰ Expires: '+fmtD(expiry)+' ('+n+' days)\n\n'+
-      'Customer will see their expiry date on their Profile page.'
-    );
-    loadAdmin('us');
+    // Reload admin to show updated expiry
+    await loadAdmin('us');
+    alert('✅ Done! @'+username+' subscription set.\n\nPlan: '+plan.toUpperCase()+'\nExpires in '+n+' days ('+expiryStr+')\n\nNote: The sheet is set to 30 days from today.\nTo set exact days, edit column L in Google Sheets directly.');
   } else {
-    // setExpiry not in old deployment — fallback via approvePayment
-    const ref = 'MANUAL-'+Date.now();
-    const r2  = await api({action:'approvePayment', username, plan, reference:ref, approve:'true'});
-    hideLoader();
-    if(r2.success){
-      alert('✅ Expiry set for @'+username+' (30 days from today).');
-      loadAdmin('us');
-    } else {
-      alert('Error: Please set the date manually in Google Sheets column K (SubStart) and L (SubExpiry) for user @'+username);
-    }
+    alert('❌ Failed. Please open your Google Sheet and manually set:\n\nUser: @'+username+'\nColumn K (SubStart): '+startStr+'\nColumn L (SubExpiry): '+expiryStr);
   }
 }
 
