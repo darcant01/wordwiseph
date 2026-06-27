@@ -1751,12 +1751,17 @@ async function loadAdmin(sec){
     if(ub)ub.innerHTML=users.map((u,i)=>{
       const isActive=u.subscription==='basic'||u.subscription==='premium';
       let expDisplay='—';
-      if(isActive&&u.subExpiry){
-        const days=Math.ceil((new Date(u.subExpiry)-new Date())/(1000*60*60*24));
-        const color=days<=7?'#E24B4A':days<=14?'#BA7517':'#888780';
-        expDisplay=`<div style="font-size:11px">${u.subExpiry}</div><span style="color:${color};font-weight:900;font-size:11px">${days>0?days+'d left':'EXPIRED'}</span>`;
-      } else if(isActive&&!u.subExpiry){
-        expDisplay=`<button class="pay-approve-btn approve" style="font-size:10px;padding:3px 8px" onclick="adminSetExpiry('${u.username}','${u.subscription}')">📅 Set</button>`;
+      if(isActive){
+        if(u.subExpiry){
+          const days=Math.ceil((new Date(u.subExpiry)-new Date())/(1000*60*60*24));
+          const col=days<=7?'#E24B4A':days<=14?'#BA7517':'#1D9E75';
+          expDisplay=
+            '<div style="font-size:11px;font-weight:700">'+u.subExpiry+'</div>'+
+            '<span style="color:'+col+';font-weight:900;font-size:11px">'+(days>0?days+'d left':'EXPIRED')+'</span> '+
+            '<button class="pay-approve-btn approve" style="font-size:9px;padding:2px 6px" onclick="showSetExpiry(''+u.username+'',''+u.subscription+'',''+u.subExpiry+'')">✏️</button>';
+        } else {
+          expDisplay='<button class="pay-approve-btn approve" style="font-size:10px;padding:3px 8px" onclick="showSetExpiry(''+u.username+'',''+u.subscription+'','')">📅 Set</button>';
+        }
       }
       return `<tr><td>${i+1}</td><td>${u.name}</td><td>@${u.username}</td><td>${u.type}</td><td><span class="rbdg ${u.role}">${u.role}</span></td><td><span class="sub-status ${isActive?'active':u.subscription==='pending'?'pending':'free'}">${u.subscription||'free'}</span></td><td style="font-size:12px">${expDisplay}</td><td>${u.rounds}</td><td>${u.best}/5</td><td>${u.joined}</td></tr>`;
     }).join('')||'<tr><td colspan="10" style="text-align:center;color:#888780">No users.</td></tr>';
@@ -1990,6 +1995,96 @@ function togglePw(id, btn){
   btn.textContent = show ? '🙈' : '👁️';
   btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
   inp.focus();
+}
+
+
+// ── SET EXPIRY MODAL ──────────────────────────────────────────
+let emUsername='', emPlan='';
+
+function showSetExpiry(username, plan, currentExpiry){
+  emUsername = username;
+  emPlan     = plan;
+  document.getElementById('em-username').textContent = '@'+username;
+  document.getElementById('em-plan').textContent = plan==='basic'?'⚡ Basic Plan':'🔥 Premium Plan';
+
+  // Set start date to today
+  const today = new Date();
+  const toISO = d => d.toISOString().split('T')[0];
+  document.getElementById('em-start').value  = toISO(today);
+
+  // Set expiry to current or default 30 days
+  if(currentExpiry){
+    try{
+      const parts = currentExpiry.split('/');
+      const d = new Date(parts[2], parts[0]-1, parts[1]);
+      document.getElementById('em-expiry').value = toISO(d);
+    }catch(e){
+      setExpiryDays(30);
+    }
+  } else {
+    setExpiryDays(30);
+  }
+
+  document.getElementById('em-msg').textContent = '';
+  document.getElementById('expiry-modal').style.display = 'flex';
+}
+
+function setExpiryDays(days){
+  const start = new Date(document.getElementById('em-start').value || new Date());
+  const exp   = new Date(start);
+  exp.setDate(exp.getDate() + days);
+  document.getElementById('em-expiry').value = exp.toISOString().split('T')[0];
+}
+
+function closeExpiryModal(){
+  document.getElementById('expiry-modal').style.display = 'none';
+}
+
+async function saveExpiryDate(){
+  const startISO  = document.getElementById('em-start').value;
+  const expiryISO = document.getElementById('em-expiry').value;
+  if(!startISO || !expiryISO){ 
+    document.getElementById('em-msg').textContent = '⚠️ Please fill in both dates!';
+    return; 
+  }
+
+  // Convert from YYYY-MM-DD to MM/DD/YYYY for the sheet
+  const toSheetFmt = iso => {
+    const [y,m,d] = iso.split('-');
+    return m+'/'+d+'/'+y;
+  };
+  const startStr  = toSheetFmt(startISO);
+  const expiryStr = toSheetFmt(expiryISO);
+
+  document.getElementById('em-msg').textContent = '⏳ Saving...';
+  document.getElementById('em-msg').style.color = '#888780';
+
+  const res = await api({
+    action:    'setExpiry',
+    username:  emUsername,
+    plan:      emPlan,
+    subStart:  startStr,
+    subExpiry: expiryStr
+  });
+
+  if(res.success){
+    document.getElementById('em-msg').textContent = '✅ Saved!';
+    document.getElementById('em-msg').style.color = '#1D9E75';
+    setTimeout(()=>{ closeExpiryModal(); loadAdmin('us'); }, 800);
+  } else {
+    // Fallback: use approvePayment
+    const ref = 'MANUAL-'+Date.now();
+    await api({action:'submitPayment', username:emUsername, name:'Admin', plan:emPlan, price:0, reference:ref});
+    const r2  = await api({action:'approvePayment', username:emUsername, plan:emPlan, reference:ref, approve:'true'});
+    if(r2.success){
+      document.getElementById('em-msg').textContent = '✅ Saved! (30 days from today)';
+      document.getElementById('em-msg').style.color = '#1D9E75';
+      setTimeout(()=>{ closeExpiryModal(); loadAdmin('us'); }, 800);
+    } else {
+      document.getElementById('em-msg').textContent = '❌ Error: '+res.error;
+      document.getElementById('em-msg').style.color = '#E24B4A';
+    }
+  }
 }
 
 // ── INIT ─────────────────────────────────────────────────────
@@ -3162,6 +3257,42 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
 
 <!-- LIVE SCORE TICKER -->
 <div id="score-ticker"></div>
+
+
+<!-- SET EXPIRY MODAL -->
+<div id="expiry-modal" style="display:none;position:fixed;inset:0;background:rgba(29,43,85,0.92);z-index:9999;align-items:center;justify-content:center;padding:16px">
+  <div style="background:#fff;border-radius:20px;padding:28px;max-width:400px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.3)">
+    <div style="font-size:22px;font-weight:900;color:#1D2B55;margin-bottom:4px">📅 Set Expiry Date</div>
+    <div style="font-size:13px;color:#888780;font-weight:700;margin-bottom:20px">User: <span id="em-username" style="color:#D4537E;font-weight:900"></span></div>
+
+    <div style="margin-bottom:14px">
+      <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Plan</label>
+      <div id="em-plan" style="font-size:15px;font-weight:900;color:#1D2B55"></div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Start Date</label>
+      <input type="date" id="em-start" style="width:100%;font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;padding:10px 14px;border-radius:10px;border:2px solid #F4C0D1;color:#1D2B55;box-sizing:border-box"/>
+    </div>
+
+    <div style="margin-bottom:20px">
+      <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Expiry Date</label>
+      <input type="date" id="em-expiry" style="width:100%;font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;padding:10px 14px;border-radius:10px;border:2px solid #F4C0D1;color:#1D2B55;box-sizing:border-box"/>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <button onclick="setExpiryDays(30)"  style="font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;border:1.5px solid #1D2B55;background:#fff;cursor:pointer">+30 days</button>
+        <button onclick="setExpiryDays(60)"  style="font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;border:1.5px solid #1D2B55;background:#fff;cursor:pointer">+60 days</button>
+        <button onclick="setExpiryDays(90)"  style="font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;border:1.5px solid #1D2B55;background:#fff;cursor:pointer">+90 days</button>
+        <button onclick="setExpiryDays(365)" style="font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;border:1.5px solid #1D2B55;background:#fff;cursor:pointer">+1 year</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-pink" style="flex:1" onclick="saveExpiryDate()">💾 Save</button>
+      <button class="btn btn-out" style="flex:1" onclick="closeExpiryModal()">Cancel</button>
+    </div>
+    <div id="em-msg" style="margin-top:12px;font-size:13px;font-weight:700;text-align:center"></div>
+  </div>
+</div>
 
 </body>
 </html>
