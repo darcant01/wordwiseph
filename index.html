@@ -483,6 +483,13 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <div class="game-desc">Each word must start with the last letter of the previous!</div>
       </div>
 
+      <div class="game-card" onclick="startSprint()">
+        <div class="game-badge" style="background:#8E44AD">SPRINT</div>
+        <div class="game-icon">🏃</div>
+        <div class="game-title">Word Sprint</div>
+        <div class="game-desc">Type as many words as you can from a category in 60 seconds!</div>
+      </div>
+
     </div>
     <div style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780;margin-top:8px">More games coming soon! 🚀</div>
   </div>
@@ -646,6 +653,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <button class="lb-gtab" onclick="switchLBGame('odd',this)">🎯 Odd One</button>
       <button class="lb-gtab" onclick="switchLBGame('scramble',this)">🔀 Scramble</button>
       <button class="lb-gtab" onclick="switchLBGame('chain',this)">🔗 Chain</button>
+      <button class="lb-gtab" onclick="switchLBGame('sprint',this)">🏃 Sprint</button>
     </div>
 
     <!-- Grammar Quiz LB -->
@@ -712,6 +720,17 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <button class="lbt hard" onclick="switchLBDiff('chain','hard',this)">🔥 Hard</button>
       </div>
       <div id="lb-chain-list" class="lb-list"></div>
+    </div>
+
+    <!-- Word Sprint LB -->
+    <div id="lb-sprint" class="lb-game-panel" style="display:none">
+      <div class="lbtabs">
+        <button class="lbt on" onclick="switchLBDiff('sprint','all',this)">🏆 All Time</button>
+        <button class="lbt easy" onclick="switchLBDiff('sprint','easy',this)">🌱 Easy</button>
+        <button class="lbt medium" onclick="switchLBDiff('sprint','medium',this)">⚡ Medium</button>
+        <button class="lbt hard" onclick="switchLBDiff('sprint','hard',this)">🔥 Hard</button>
+      </div>
+      <div id="lb-sprint-list" class="lb-list"></div>
     </div>
 
   </div>
@@ -1036,7 +1055,7 @@ function navTo(s){
   if(s==='start')  updateDiffCards();
   // Show/hide floating timer
   const ft=document.getElementById('floating-timer');
-  const gameScreens=['quiz','spell','odd','shark','scramble','chain'];
+  const gameScreens=['quiz','spell','odd','shark','scramble','chain','sprint'];
   if(ft) ft.style.display=gameScreens.includes(s)?'flex':'none';
   // Show ticker on ALL pages always
   TICKER.setVisible(true);
@@ -1525,7 +1544,7 @@ function switchLBGame(game, el){
   lbCurrentGame = game;
   document.querySelectorAll('.lb-gtab').forEach(t=>t.classList.remove('on'));
   if(el)el.classList.add('on');
-  ['grammar','spell','shark','odd','scramble','chain'].forEach(g=>{
+  ['grammar','spell','shark','odd','scramble','chain','sprint'].forEach(g=>{
     const p=document.getElementById('lb-'+g);
     if(p)p.style.display=(g===game?'block':'none');
   });
@@ -4093,6 +4112,259 @@ function restartChain(){
 
 <script>
 // ================================================================
+// BLOCK 8 — WORD SPRINT
+// ================================================================
+// ================================================================
+// WORD SPRINT GAME
+// ================================================================
+
+const SPRINT_CATEGORIES = {
+  easy: [
+    {name:"Animals",     emoji:"🐾", words:["cat","dog","bird","fish","lion","bear","deer","frog","wolf","duck","cow","pig","hen","ant","bee","bat","fox","owl","ape","elk","ram","yak","emu","gnu","hog","rat","cub","pup","kit","kid","calf","lamb","foal","chick","mouse","horse","sheep","goat","snake","tiger","zebra","whale","shark","eagle","camel","koala","panda","hippo","moose","rhino","bison"]},
+    {name:"Colors",      emoji:"🌈", words:["red","blue","pink","gold","gray","grey","lime","navy","rose","rust","sage","jade","aqua","teal","plum","cyan","amber","beige","black","brown","coral","cream","ebony","green","ivory","khaki","lilac","mauve","ochre","olive","peach","taupe","white","violet","yellow","indigo","maroon","orange","purple","salmon","scarlet","crimson","magenta","lavender","turquoise"]},
+    {name:"Fruits",      emoji:"🍎", words:["apple","mango","grape","peach","plum","lime","lemon","melon","guava","papaya","lychee","cherry","banana","orange","fig","date","kiwi","pear","berry","olive","coconut","apricot","avocado","passion","jackfruit","starfruit","blueberry","raspberry","strawberry","blackberry","pineapple","watermelon","grapefruit","pomegranate","cantaloupe","clementine","tangerine","nectarine","gooseberry","mulberry","cranberry","elderberry"]},
+    {name:"Vegetables",  emoji:"🥦", words:["pea","yam","corn","kale","leek","beet","bean","okra","taro","celery","carrot","garlic","ginger","potato","tomato","squash","turnip","radish","pepper","onion","broccoli","spinach","lettuce","cabbage","parsley","pumpkin","zucchini","cucumber","eggplant","mushroom","asparagus","artichoke","cauliflower","watercress","bittermelon"]},
+    {name:"Sports",      emoji:"⚽", words:["golf","polo","judo","yoga","swim","race","surf","ski","row","box","run","jump","kick","dive","bowl","dart","chess","rugby","tennis","soccer","hockey","karate","rowing","boxing","fencing","cycling","archery","cricket","netball","basketball","volleyball","badminton","gymnastics","wrestling","swimming","athletics","taekwondo","weightlifting"]},
+    {name:"Countries",   emoji:"🌍", words:["China","Japan","India","Italy","Spain","Egypt","Ghana","Kenya","Nepal","Qatar","Chile","Cuba","Peru","Laos","Oman","Iraq","Iran","Chad","Mali","Togo","Niger","Benin","Libya","Sudan","Syria","Yemen","Jordan","Greece","France","Brazil","Mexico","Canada","Russia","Turkey","Poland","Sweden","Norway","Finland","Denmark","Germany","Portugal","Thailand","Malaysia","Indonesia","Philippines","Singapore","Australia","Argentina","Colombia","Venezuela"]},
+    {name:"Body Parts",  emoji:"💪", words:["arm","leg","toe","ear","eye","hip","jaw","lip","rib","shin","back","chin","foot","hand","heel","knee","neck","nose","palm","shin","thumb","ankle","cheek","chest","elbow","finger","scalp","skull","spine","thigh","wrist","bicep","temple","tongue","forehead","shoulder","kneecap","eardrum","eyelid","nostril","toenail","fingernail"]},
+    {name:"School Items",emoji:"🎒", words:["pen","book","desk","ruler","chalk","eraser","pencil","marker","scissors","notebook","textbook","backpack","compass","calculator","dictionary","whiteboard","stapler","folder","binder","highlighter","protractor","sharpener","crayon","glue","tape","paper","envelope","clipboard"]},
+  ],
+  medium: [
+    {name:"Ocean Animals",  emoji:"🌊", words:["shark","whale","squid","coral","prawn","shrimp","lobster","dolphin","octopus","seahorse","starfish","jellyfish","swordfish","clownfish","barracuda","moray eel","sea turtle","manta ray","blue whale","great white","hammerhead","narwhal","manatee","walrus","dugong","beluga","orca","tuna","bass","trout","salmon","clam","oyster","mussel","crab","urchin"]},
+    {name:"Adjectives",     emoji:"✨", words:["big","tiny","tall","wide","fast","slow","loud","quiet","bright","sharp","smooth","rough","sweet","sour","bitter","spicy","heavy","light","thick","thin","short","round","flat","deep","high","rich","poor","brave","timid","clever","silly","honest","humble","gentle","fierce","fragile","sturdy","ancient","modern","famous","unique","elegant","graceful","cheerful","gloomy","anxious","serene","vibrant","dull"]},
+    {name:"Kitchen Items",  emoji:"🍳", words:["pan","pot","wok","bowl","fork","knife","spoon","plate","ladle","tongs","whisk","peeler","grater","colander","strainer","spatula","blender","toaster","kettle","pitcher","chopper","apron","oven","stove","fridge","microwave","dishwasher","measuring cup","cutting board","rolling pin","mixing bowl","baking tray","wooden spoon"]},
+    {name:"Emotions",       emoji:"😊", words:["joy","fear","rage","love","hate","envy","calm","hope","pride","shame","grief","guilt","shock","trust","disgust","wonder","relief","regret","anxiety","sadness","happiness","surprise","loneliness","nostalgia","excitement","confusion","frustration","contentment","embarrassment","compassion","enthusiasm","melancholy","euphoria","gratitude","resentment","admiration","boredom","curiosity"]},
+    {name:"Transport",      emoji:"🚗", words:["car","bus","van","cab","jet","boat","ship","tram","bike","truck","train","plane","yacht","ferry","barge","kayak","canoe","scooter","rocket","subway","helicopter","ambulance","motorcycle","submarine","skateboard","bicycle","monorail","hovercraft","gondola","airship","cable car","hot air balloon"]},
+    {name:"Musical Instruments",emoji:"🎵", words:["drum","harp","lute","fife","oboe","tuba","flute","cello","viola","banjo","piano","organ","sitar","tabla","bongo","bugle","trumpet","violin","ukulele","mandolin","clarinet","marimba","xylophone","accordion","harmonica","saxophone","trombone","tambourine","double bass","synthesizer","french horn","electric guitar","acoustic guitar"]},
+    {name:"Things in a City",emoji:"🏙️", words:["bank","park","mall","cafe","road","bridge","museum","library","hospital","school","hotel","church","temple","market","subway","traffic","skyscraper","apartment","restaurant","playground","police station","fire station","post office","bus stop","gas station","parking lot","cinema","theater","stadium","fountain","intersection","crosswalk"]},
+    {name:"Clothes",        emoji:"👗", words:["hat","cap","tie","vest","coat","sock","boot","shoe","belt","scarf","glove","jeans","shirt","skirt","dress","shorts","jacket","blouse","hoodie","sandal","sneaker","sweater","cardigan","leggings","raincoat","swimsuit","turtleneck","sweatshirt","waistcoat","overcoat","tracksuit","underwear","nightgown","bathrobe","flip flops"]},
+  ],
+  hard: [
+    {name:"Literary Terms",   emoji:"📚", words:["plot","tone","mood","theme","irony","allusion","metaphor","simile","symbol","imagery","diction","syntax","rhyme","meter","stanza","sonnet","haiku","elegy","satire","allegory","paradox","oxymoron","hyperbole","personification","foreshadowing","flashback","narrator","protagonist","antagonist","climax","resolution","denouement","soliloquy","monologue","dialogue","epilogue","prologue"]},
+    {name:"Science Terms",    emoji:"🔬", words:["atom","cell","gene","mass","wave","force","energy","matter","proton","neutron","electron","nucleus","molecule","compound","element","reaction","solution","pressure","velocity","frequency","amplitude","ecosystem","organism","photosynthesis","evaporation","condensation","acceleration","gravitational","electromagnetic","radioactive","chromosome","mitochondria","hypothesis","experiment","observation","conclusion","variable","catalyst"]},
+    {name:"Countries in Asia",emoji:"🌏", words:["China","Japan","India","Nepal","Qatar","Oman","Iraq","Iran","Laos","Myanmar","Vietnam","Cambodia","Thailand","Malaysia","Indonesia","Philippines","Singapore","Bangladesh","Pakistan","Afghanistan","Kazakhstan","Uzbekistan","Kyrgyzstan","Tajikistan","Turkmenistan","Azerbaijan","Armenia","Georgia","Mongolia","North Korea","South Korea","Taiwan","Sri Lanka","Maldives","Bhutan","Brunei","Timor","Yemen","Syria","Lebanon","Jordan","Israel","Palestine","Saudi Arabia","Kuwait","Bahrain","UAE"]},
+    {name:"Compound Words",   emoji:"🔗", words:["sunlight","moonbeam","rainfall","snowfall","starfish","seashell","seafood","rainbow","birthday","classroom","notebook","bookworm","doorbell","fireplace","keystone","lifetime","daydream","homeland","headache","backbone","eyelid","heartbeat","nighttime","bedroom","bathroom","hallway","footprint","thumbnail","fingertip","armchair","bookshelf","underground","overhaul","overlook","underline","overcome","outdoor","indoor","upstairs","downstairs","breakfast","afternoon","midnight","weekend","worldwide","somehow","everywhere","anything","something","nothing"]},
+    {name:"Abstract Nouns",   emoji:"💭", words:["love","hope","fear","faith","truth","peace","honor","pride","shame","grief","guilt","trust","beauty","wisdom","justice","freedom","loyalty","courage","dignity","harmony","patience","kindness","humility","strength","clarity","empathy","respect","passion","purpose","success","failure","progress","equality","morality","integrity","creativity","ambition","confidence","perseverance","determination","accountability","responsibility","compassion","gratitude","forgiveness","generosity","curiosity","resilience","authenticity"]},
+    {name:"Verbs of Movement", emoji:"🏃", words:["run","hop","skip","jump","leap","dash","race","sprint","march","crawl","creep","slide","glide","float","drift","swing","sway","roll","spin","twist","turn","bend","stretch","reach","grab","push","pull","carry","throw","catch","kick","hit","punch","stomp","stumble","wobble","stagger","shuffle","tiptoe","sneak","prowl","pounce","charge","chase","flee","dodge","duck","dive","plunge","soar","swoop","hover"]},
+    {name:"Words ending in -tion",emoji:"📖", words:["action","nation","notion","motion","potion","lotion","option","section","fiction","diction","suction","mention","tension","pension","passion","mission","vision","fusion","lesion","invasion","decision","revision","division","occasion","question","solution","evolution","revolution","pollution","education","population","celebration","communication","administration","observation","information","transportation","transformation","investigation","concentration","organization","recommendation","consideration","determination","discrimination","documentation","comprehension","contradiction","contribution","distribution","examination","explanation"]},
+    {name:"Geography Terms",  emoji:"🗺️", words:["bay","cape","gulf","isle","lake","peak","reef","vale","cove","mesa","atoll","basin","butte","canal","cliff","coast","delta","fjord","gorge","haven","inlet","islet","marsh","plain","ridge","shoal","steppe","strait","swamp","tundra","valley","volcano","wetland","plateau","lowland","highland","peninsula","archipelago","rainforest","savanna","grassland","tableland","watershed","estuary","tributary","floodplain","continental shelf","ocean trench"]},
+  ]
+};
+
+let sprintDiff='easy', sprintScore=0, sprintRunning=false;
+let sprintTLeft=60, sprintTInt=null;
+let sprintCategory=null, sprintUsed=[], sprintAccepted=[];
+
+function startSprint(){
+  updateSprintLocks();
+  navTo('sprint');
+}
+
+function updateSprintLocks(){
+  const sub=CU?.subscription||'free';
+  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  ['medium','hard'].forEach(d=>{
+    const lock=document.getElementById('sprint-lock-'+d);
+    const card=document.querySelector('#sc-sprint .dc.'+d);
+    if(lock)lock.style.display=hasAccess?'none':'block';
+    if(card)card.style.opacity=hasAccess?'1':'0.65';
+  });
+}
+
+function checkSprintAccess(d){
+  const sub=CU?.subscription||'free';
+  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  if(!hasAccess){
+    if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
+    else{if(confirm('Upgrade to unlock!\nView plans?'))navTo('pricing');}
+    return;
+  }
+  launchSprint(d);
+}
+
+function launchSprint(d){
+  sprintDiff=d;
+  sprintScore=0; sprintUsed=[]; sprintAccepted=[];
+  sprintTLeft=60; sprintRunning=true;
+
+  // Pick random category
+  const cats=SPRINT_CATEGORIES[d];
+  sprintCategory=cats[Math.floor(Math.random()*cats.length)];
+
+  document.getElementById('sprint-start').style.display='none';
+  document.getElementById('sprint-over').style.display='none';
+  document.getElementById('sprint-game').style.display='block';
+
+  // Set category display
+  document.getElementById('sprint-category').textContent=sprintCategory.name;
+  document.getElementById('sprint-cat-emoji').textContent=sprintCategory.emoji;
+  document.getElementById('sprint-score').textContent='0';
+  document.getElementById('sprint-time').textContent='60';
+  document.getElementById('sprint-timer-bar').style.width='100%';
+  document.getElementById('sprint-timer-bar').style.transition='width 1s linear';
+  document.getElementById('sprint-fb').textContent='';
+  document.getElementById('sprint-words').innerHTML='';
+
+  const dlbl=document.getElementById('sprint-diff-lbl');
+  if(dlbl)dlbl.textContent={
+    easy:'Easy — type as many '+sprintCategory.name+' as you can!',
+    medium:'Medium — type as many '+sprintCategory.name+' as you can!',
+    hard:'Hard — type as many '+sprintCategory.name+' as you can!'
+  }[d];
+
+  const inp=document.getElementById('sprint-input');
+  if(inp){inp.value='';inp.disabled=false;inp.style.borderColor='var(--lp)';inp.focus();}
+
+  sStart();
+  TICKER.pause();
+
+  // Start countdown
+  clearInterval(sprintTInt);
+  sprintTInt=setInterval(()=>{
+    sprintTLeft--;
+    const el=document.getElementById('sprint-time');
+    if(el)el.textContent=sprintTLeft;
+    const bar=document.getElementById('sprint-timer-bar');
+    if(bar)bar.style.width=(sprintTLeft/60*100)+'%';
+    // Float timer
+    const ft=document.getElementById('floating-timer');
+    const fn=document.getElementById('ft-num');
+    if(ft&&fn){
+      fn.textContent=sprintTLeft;
+      fn.style.color=sprintTLeft<=10?'#E24B4A':sprintTLeft<=20?'#EF9F27':'#FAC775';
+      if(sprintTLeft<=10)ft.classList.add('urgent');
+      else ft.classList.remove('urgent');
+    }
+    if(sprintTLeft<=10&&sprintTLeft>0)sUrg();
+    if(sprintTLeft<=0){clearInterval(sprintTInt);endSprint();}
+  },1000);
+}
+
+function sprintCheck(val){
+  const inp=document.getElementById('sprint-input');
+  if(!inp||!sprintRunning)return;
+  const v=val.toLowerCase().trim();
+  if(v.length>1){
+    const inCat=sprintCategory.words.some(w=>w.toLowerCase()===v);
+    if(inCat&&!sprintUsed.includes(v)){
+      inp.style.borderColor='var(--green)';
+    } else if(sprintUsed.includes(v)){
+      inp.style.borderColor='var(--amber,#EF9F27)';
+    } else {
+      inp.style.borderColor='var(--lp)';
+    }
+  } else {
+    inp.style.borderColor='var(--lp)';
+  }
+}
+
+function sprintSubmit(){
+  if(!sprintRunning)return;
+  const inp=document.getElementById('sprint-input');
+  if(!inp)return;
+  const word=inp.value.toLowerCase().trim();
+  const fb=document.getElementById('sprint-fb');
+
+  if(!word){return;}
+
+  // Check if already used
+  if(sprintUsed.includes(word)){
+    if(fb){fb.textContent='⚠️ Already used "'+word+'"!';fb.style.color='#BA7517';}
+    inp.value='';inp.style.borderColor='var(--lp)';
+    return;
+  }
+
+  // Check if valid for category
+  const valid=sprintCategory.words.some(w=>w.toLowerCase()===word);
+  if(valid){
+    sprintUsed.push(word);
+    sprintAccepted.push(word);
+    sprintScore++;
+    document.getElementById('sprint-score').textContent=sprintScore;
+    if(fb){fb.textContent='✅ "'+word+'" — great!';fb.style.color='#1D9E75';}
+    sOk();sCr();
+    // Add word chip
+    const words=document.getElementById('sprint-words');
+    if(words){
+      const chip=document.createElement('span');
+      chip.style.cssText='background:var(--navy);color:#FAC775;font-family:Nunito,sans-serif;font-size:clamp(11px,2.5vw,13px);font-weight:800;padding:5px 12px;border-radius:99px;display:inline-block';
+      chip.textContent=word;
+      words.appendChild(chip);
+      words.scrollTop=words.scrollHeight;
+    }
+    // Streak sounds
+    if(sprintScore%5===0)sCombo();
+  } else {
+    if(fb){fb.textContent='❌ "'+word+'" is not a '+sprintCategory.name+'!';fb.style.color='#E24B4A';}
+    sBad();
+  }
+
+  inp.value='';inp.style.borderColor='var(--lp)';inp.focus();
+}
+
+async function endSprint(){
+  sprintRunning=false;
+  clearInterval(sprintTInt);
+  sTU();
+  TICKER.resume();
+
+  const inp=document.getElementById('sprint-input');
+  if(inp)inp.disabled=true;
+
+  document.getElementById('sprint-game').style.display='none';
+  const over=document.getElementById('sprint-over');
+  if(over)over.style.display='block';
+
+  document.getElementById('sprint-final-score').textContent=sprintScore;
+
+  let stars='',msg='',icon='🏃';
+  if(sprintScore>=25){stars='⭐⭐⭐⭐⭐';msg='Word Sprint Legend! Incredible vocabulary!';icon='🏆';sWin();setTimeout(sLevelUp,900);}
+  else if(sprintScore>=18){stars='⭐⭐⭐⭐💫';msg='Amazing sprint! Vocabulary master!';icon='🥇';sWin();}
+  else if(sprintScore>=12){stars='⭐⭐⭐💫💫';msg='Great effort! Your vocabulary is growing!';icon='🎉';sLevelUp();}
+  else if(sprintScore>=6) {stars='⭐⭐💫💫💫';msg='Good start! Practice makes perfect!';}
+  else                    {stars='⭐💫💫💫💫';msg='Keep going! Try again to beat your score!';}
+
+  const ic=document.getElementById('sprint-over-icon');if(ic)ic.textContent=icon;
+  const rs=document.getElementById('sprint-stars');if(rs)rs.textContent=stars;
+  const rm=document.getElementById('sprint-msg');if(rm)rm.textContent=msg;
+
+  // Show accepted words
+  const wl=document.getElementById('sprint-word-list');
+  if(wl&&sprintAccepted.length>0){
+    wl.innerHTML='<div style="font-weight:900;color:var(--navy);margin-bottom:6px">Your words: '+sprintAccepted.length+'</div>'+
+      sprintAccepted.map(w=>`<span style="display:inline-block;background:var(--navy);color:#FAC775;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;margin:2px">${w}</span>`).join('');
+  }
+
+  // Save score
+  const entry={
+    name:CU?CU.name:'Guest',username:CU?CU.username:'guest',
+    type:CU?CU.type:'guest',score:sprintScore,total:99,
+    diff:'sprint-'+sprintDiff,stars,date:new Date().toLocaleDateString()
+  };
+  showLoader('Saving score...');
+  await api({action:'saveScore',...entry});
+  hideLoader();
+  TICKER.notifyLocal(entry);
+
+  const sa=document.getElementById('sprint-save-area');
+  if(sa)sa.innerHTML=CU
+    ?`<div style="font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:14px">✅ Score saved! ${sprintScore} words!</div>`
+    :`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:10px">Login to save your score!</p><div style="display:flex;gap:8px;justify-content:center"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up</button></div></div>`;
+
+  setTimeout(()=>over.scrollIntoView({behavior:'smooth'}),100);
+}
+
+function restartSprint(){
+  document.getElementById('sprint-over').style.display='none';
+  document.getElementById('sprint-game').style.display='none';
+  document.getElementById('sprint-start').style.display='block';
+  updateSprintLocks();
+}
+
+</script>
+
+<script>
+// ================================================================
 // BLOCK 3 — QUESTION BANK (loaded last)
 // ================================================================
 
@@ -4355,6 +4627,196 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
       <div id="chain-used-words" style="margin-bottom:14px;font-size:12px;font-weight:700;color:#888780;text-align:center"></div>
       <div class="rbtns">
         <button class="btn btn-gold" onclick="restartChain()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('games')">All Games</button>
+        <button class="btn btn-out" onclick="navTo('lb')">Leaderboard</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══ WORD SPRINT ══ -->
+<div id="sc-sprint" class="screen">
+  <div class="hero">
+    <div class="rpill" id="sprint-pill">Get Ready!</div>
+    <div class="htitle" style="font-size:clamp(20px,5vw,32px)">Word <span>Sprint!</span> 🏃</div>
+    <div class="hsub" id="sprint-category-label">Type as many words as you can!</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+
+    <!-- Start screen -->
+    <div id="sprint-start" style="text-align:center;padding:8px 0">
+      <div style="font-size:clamp(36px,9vw,60px);margin-bottom:10px">🏃</div>
+      <div style="font-size:clamp(15px,4vw,20px);font-weight:900;color:var(--navy);margin-bottom:8px">Type words from a category!</div>
+      <div style="font-size:clamp(13px,3vw,14px);color:#5F5E5A;font-weight:700;line-height:1.8;margin-bottom:16px">
+        A category appears — type any valid English word<br>
+        that belongs to it. <strong>60 seconds</strong> · each correct word = 1 point!
+      </div>
+      <div class="diff-grid" style="margin-bottom:16px">
+        <div class="dc easy" onclick="launchSprint('easy')">
+          <div class="di">🌱</div><div class="dt">Easy</div>
+          <div class="ds">Simple categories · 3+ letters</div>
+        </div>
+        <div class="dc medium" onclick="checkSprintAccess('medium')">
+          <div class="di">⚡</div><div class="dt">Medium</div>
+          <div class="ds">Harder categories · 4+ letters</div>
+          <div id="sprint-lock-medium" style="display:none;margin-top:6px;font-size:11px;background:#FAEEDA;color:#412402;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
+        </div>
+        <div class="dc hard" onclick="checkSprintAccess('hard')">
+          <div class="di">🔥</div><div class="dt">Hard</div>
+          <div class="ds">Specific categories · 5+ letters</div>
+          <div id="sprint-lock-hard" style="display:none;margin-top:6px;font-size:11px;background:#FCEBEB;color:#791F1F;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
+        </div>
+      </div>
+      <button class="lnk" onclick="navTo('games')">← Back to Games</button>
+    </div>
+
+    <!-- Game area -->
+    <div id="sprint-game" style="display:none">
+
+      <!-- Category banner -->
+      <div style="background:linear-gradient(135deg,#8E44AD,#6C3483);border-radius:clamp(14px,3vw,20px);padding:clamp(14px,3vw,20px);text-align:center;margin-bottom:14px;box-shadow:0 4px 20px rgba(142,68,173,0.3)">
+        <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Category</div>
+        <div id="sprint-category" style="font-size:clamp(20px,5vw,30px);font-weight:900;color:#fff;line-height:1.2"></div>
+        <div id="sprint-category-hint" style="font-size:clamp(12px,3vw,14px);color:rgba(255,255,255,0.8);font-weight:700;margin-top:4px"></div>
+      </div>
+
+      <!-- Stats -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
+        <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="sprint-score">0</span> words</div>
+        <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(15px,4vw,20px);font-weight:900;color:#F4C0D1">⏱ <span id="sprint-time">60</span>s</div>
+      </div>
+
+      <!-- Timer bar -->
+      <div style="background:var(--lp);border-radius:99px;height:10px;overflow:hidden;margin-bottom:12px">
+        <div id="sprint-timer-bar" style="height:10px;background:#8E44AD;width:100%;transition:width 1s linear;border-radius:99px"></div>
+      </div>
+
+      <!-- Input -->
+      <div style="position:relative;margin-bottom:10px">
+        <input id="sprint-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+          placeholder="Type a word..."
+          style="width:100%;font-family:'Nunito',sans-serif;font-size:clamp(18px,5vw,24px);font-weight:800;padding:clamp(14px,3vw,18px) 64px clamp(14px,3vw,18px) clamp(14px,3vw,18px);border-radius:14px;border:3px solid var(--lp);background:#FFF8F0;color:var(--navy);outline:none;text-align:center;box-sizing:border-box"
+          oninput="sprintInputChange(this.value)"
+          onkeydown="if(event.key==='Enter')submitSprintWord()"/>
+        <button onclick="submitSprintWord()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:#8E44AD;border:none;border-radius:10px;width:46px;height:46px;font-size:20px;cursor:pointer;color:#fff;font-weight:900;-webkit-tap-highlight-color:transparent;touch-action:manipulation;display:flex;align-items:center;justify-content:center">→</button>
+      </div>
+
+      <!-- Feedback -->
+      <div id="sprint-fb" style="text-align:center;min-height:26px;font-size:clamp(13px,3vw,15px);font-weight:800;margin-bottom:10px"></div>
+
+      <!-- Word list -->
+      <div style="font-size:11px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Words found:</div>
+      <div id="sprint-words" style="display:flex;flex-wrap:wrap;gap:6px;min-height:36px;max-height:100px;overflow-y:auto;padding:8px;background:#FFF8F0;border-radius:12px;border:2px solid var(--lp)"></div>
+    </div>
+
+    <!-- Result -->
+    <div id="sprint-over" class="result" style="display:none">
+      <div style="font-size:56px;margin-bottom:8px">🏃</div>
+      <div class="rlbl">Words Found</div>
+      <div class="rsco" id="sprint-final-score">0</div>
+      <div class="rstr" id="sprint-stars"></div>
+      <div class="rmsg" id="sprint-msg"></div>
+      <div id="sprint-save-area"></div>
+      <div id="sprint-word-list" style="margin:0 0 14px;font-size:12px;font-weight:700;color:#5F5E5A;text-align:center;line-height:1.8"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="restartSprint()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('games')">All Games</button>
+        <button class="btn btn-out" onclick="navTo('lb')">Leaderboard</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══ WORD SPRINT ══ -->
+<div id="sc-sprint" class="screen">
+  <div class="hero">
+    <div class="rpill" id="sprint-pill">Get Ready!</div>
+    <div class="htitle" style="font-size:clamp(20px,5vw,32px)">Word <span>Sprint!</span> 🏃</div>
+    <div class="hsub" id="sprint-diff-lbl">Type as many words as you can!</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+
+    <!-- Category picker / start screen -->
+    <div id="sprint-start" style="text-align:center;padding:8px 0">
+      <div style="font-size:clamp(36px,9vw,56px);margin-bottom:10px">🏃</div>
+      <div style="font-size:clamp(15px,3.5vw,20px);font-weight:900;color:var(--navy);margin-bottom:6px">Type category words fast!</div>
+      <div style="font-size:clamp(12px,2.5vw,14px);color:#5F5E5A;font-weight:700;line-height:1.7;margin-bottom:16px">
+        A category appears — type as many words that<br>belong to it as you can in <strong>60 seconds</strong>.<br>
+        Each correct unique word = 1 point! 🎯
+      </div>
+
+      <div class="diff-grid" style="margin-bottom:14px">
+        <div class="dc easy" onclick="launchSprint('easy')">
+          <div class="di">🌱</div><div class="dt">Easy</div>
+          <div class="ds">Simple categories · 60 sec</div>
+        </div>
+        <div class="dc medium" onclick="checkSprintAccess('medium')">
+          <div class="di">⚡</div><div class="dt">Medium</div>
+          <div class="ds">Harder categories · 60 sec</div>
+          <div id="sprint-lock-medium" style="display:none;margin-top:6px;font-size:11px;background:#FAEEDA;color:#412402;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
+        </div>
+        <div class="dc hard" onclick="checkSprintAccess('hard')">
+          <div class="di">🔥</div><div class="dt">Hard</div>
+          <div class="ds">Tricky categories · 60 sec</div>
+          <div id="sprint-lock-hard" style="display:none;margin-top:6px;font-size:11px;background:#FCEBEB;color:#791F1F;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
+        </div>
+      </div>
+      <button class="lnk" onclick="navTo('games')">← Back to Games</button>
+    </div>
+
+    <!-- Game area -->
+    <div id="sprint-game" style="display:none">
+
+      <!-- Timer + score -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px">
+        <div style="background:var(--navy);border-radius:99px;padding:8px 18px;font-size:clamp(15px,4vw,20px);font-weight:900;color:#FAC775">⭐ <span id="sprint-score">0</span></div>
+        <div style="flex:1;background:var(--lp);border-radius:99px;height:12px;overflow:hidden">
+          <div id="sprint-timer-bar" style="height:12px;background:var(--pink);width:100%;transition:width 1s linear;border-radius:99px"></div>
+        </div>
+        <div style="background:var(--navy);border-radius:99px;padding:8px 18px;font-size:clamp(15px,4vw,20px);font-weight:900;color:#B5D4F4">⏱ <span id="sprint-time">60</span>s</div>
+      </div>
+
+      <!-- Category display -->
+      <div style="background:linear-gradient(135deg,#8E44AD,#6C3483);border-radius:clamp(14px,3vw,20px);padding:clamp(14px,3vw,20px);text-align:center;margin-bottom:14px;box-shadow:0 6px 20px rgba(142,68,173,0.3)">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.7);margin-bottom:6px">Category</div>
+        <div id="sprint-category" style="font-size:clamp(22px,6vw,36px);font-weight:900;color:#fff">Animals</div>
+        <div id="sprint-cat-emoji" style="font-size:clamp(28px,7vw,44px);margin-top:4px">🐾</div>
+      </div>
+
+      <!-- Input -->
+      <div style="position:relative;margin-bottom:10px">
+        <input id="sprint-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+          placeholder="Type a word..."
+          style="width:100%;font-family:'Nunito',sans-serif;font-size:clamp(18px,5vw,24px);font-weight:800;padding:clamp(14px,3vw,18px) 64px clamp(14px,3vw,18px) clamp(14px,3vw,18px);border-radius:14px;border:3px solid var(--lp);background:#FFF8F0;color:var(--navy);outline:none;text-align:center;box-sizing:border-box"
+          oninput="sprintCheck(this.value)"
+          onkeydown="if(event.key==='Enter')sprintSubmit()"/>
+        <button onclick="sprintSubmit()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--pink);border:none;border-radius:10px;width:46px;height:46px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;-webkit-tap-highlight-color:transparent;touch-action:manipulation">→</button>
+      </div>
+
+      <!-- Feedback -->
+      <div id="sprint-fb" style="text-align:center;font-size:clamp(13px,3vw,15px);font-weight:800;min-height:26px;margin-bottom:10px"></div>
+
+      <!-- Accepted words -->
+      <div style="font-size:12px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Your words:</div>
+      <div id="sprint-words" style="display:flex;flex-wrap:wrap;gap:6px;min-height:40px;max-height:120px;overflow-y:auto;background:#FFF8F0;border-radius:12px;border:2px solid var(--lp);padding:10px"></div>
+
+    </div>
+
+    <!-- Result -->
+    <div id="sprint-over" class="result" style="display:none">
+      <div id="sprint-over-icon" style="font-size:56px;margin-bottom:8px">🏃</div>
+      <div class="rlbl">Words typed</div>
+      <div class="rsco" id="sprint-final-score">0</div>
+      <div class="rstr" id="sprint-stars"></div>
+      <div class="rmsg" id="sprint-msg"></div>
+      <div id="sprint-save-area"></div>
+      <div id="sprint-word-list" style="margin:10px 0;font-size:12px;font-weight:700;color:#888780;text-align:center"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="restartSprint()">Play Again!</button>
         <button class="btn btn-navy" onclick="navTo('games')">All Games</button>
         <button class="btn btn-out" onclick="navTo('lb')">Leaderboard</button>
       </div>
