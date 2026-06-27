@@ -3140,6 +3140,481 @@ function retryOdd(){
 
 <script>
 // ================================================================
+// BLOCK 5 — WORD SCRAMBLE
+// ================================================================
+// ================================================================
+// WORD SCRAMBLE GAME
+// ================================================================
+const SCRAMBLE_TL = {easy:20, medium:15, hard:10};
+const SCRAMBLE_QL = {easy:10, medium:15, hard:20};
+
+const SCRAMBLE_BANK = {
+  easy: [
+    {word:"cat",    hint:"A furry pet that meows",         category:"Animal"},
+    {word:"dog",    hint:"A loyal pet that barks",         category:"Animal"},
+    {word:"sun",    hint:"The bright star in our sky",     category:"Nature"},
+    {word:"hat",    hint:"You wear this on your head",     category:"Clothing"},
+    {word:"cup",    hint:"You drink from this",            category:"Object"},
+    {word:"red",    hint:"The color of fire",              category:"Color"},
+    {word:"big",    hint:"Very large in size",             category:"Adjective"},
+    {word:"run",    hint:"Move fast on your feet",         category:"Verb"},
+    {word:"hot",    hint:"Very high in temperature",       category:"Adjective"},
+    {word:"bed",    hint:"You sleep on this",              category:"Furniture"},
+    {word:"bus",    hint:"A large vehicle for many people",category:"Transport"},
+    {word:"egg",    hint:"A chicken lays this",            category:"Food"},
+    {word:"fly",    hint:"Birds and planes do this",       category:"Verb"},
+    {word:"ice",    hint:"Frozen water",                   category:"Nature"},
+    {word:"jam",    hint:"Sweet spread for bread",         category:"Food"},
+    {word:"key",    hint:"Opens a lock",                   category:"Object"},
+    {word:"leg",    hint:"Part of your body below the hip",category:"Body"},
+    {word:"map",    hint:"Shows you where places are",     category:"Object"},
+    {word:"net",    hint:"Used to catch fish or balls",    category:"Object"},
+    {word:"owl",    hint:"A bird that comes out at night", category:"Animal"},
+    {word:"pen",    hint:"You write with this",            category:"Object"},
+    {word:"sea",    hint:"A large body of salt water",     category:"Nature"},
+    {word:"toy",    hint:"Children play with these",       category:"Object"},
+    {word:"web",    hint:"A spider makes this",            category:"Nature"},
+    {word:"zoo",    hint:"Where animals are kept",         category:"Place"},
+    {word:"arm",    hint:"Part of your body",              category:"Body"},
+    {word:"bat",    hint:"A flying mammal or sports tool", category:"Animal"},
+    {word:"fox",    hint:"A clever wild animal",           category:"Animal"},
+    {word:"mud",    hint:"Wet dirty earth",                category:"Nature"},
+    {word:"nut",    hint:"Hard-shelled food from trees",   category:"Food"},
+  ],
+  medium: [
+    {word:"apple",   hint:"A round red or green fruit",       category:"Fruit"},
+    {word:"bread",   hint:"Baked food made from flour",       category:"Food"},
+    {word:"chair",   hint:"You sit on this",                  category:"Furniture"},
+    {word:"dance",   hint:"Move your body to music",          category:"Verb"},
+    {word:"earth",   hint:"The planet we live on",            category:"Nature"},
+    {word:"flame",   hint:"The bright part of a fire",        category:"Nature"},
+    {word:"grape",   hint:"A small fruit that grows in clusters", category:"Fruit"},
+    {word:"heart",   hint:"The organ that pumps blood",       category:"Body"},
+    {word:"image",   hint:"A picture or photo",               category:"Object"},
+    {word:"juice",   hint:"Liquid squeezed from fruit",       category:"Drink"},
+    {word:"knife",   hint:"A sharp cutting tool",             category:"Object"},
+    {word:"light",   hint:"The opposite of darkness",         category:"Nature"},
+    {word:"money",   hint:"Used to buy things",               category:"Object"},
+    {word:"night",   hint:"The dark part of the day",         category:"Time"},
+    {word:"ocean",   hint:"A very large body of water",       category:"Nature"},
+    {word:"paint",   hint:"Colorful liquid used in art",      category:"Art"},
+    {word:"queen",   hint:"Female ruler of a kingdom",        category:"Person"},
+    {word:"river",   hint:"Water that flows to the sea",      category:"Nature"},
+    {word:"smile",   hint:"A happy expression on your face",  category:"Emotion"},
+    {word:"table",   hint:"Furniture with a flat top",        category:"Furniture"},
+    {word:"uncle",   hint:"Your parent's brother",            category:"Family"},
+    {word:"voice",   hint:"The sound you make when speaking", category:"Body"},
+    {word:"water",   hint:"We drink this every day",          category:"Nature"},
+    {word:"young",   hint:"Not old in age",                   category:"Adjective"},
+    {word:"zebra",   hint:"A striped black and white animal", category:"Animal"},
+    {word:"brave",   hint:"Not afraid of danger",             category:"Adjective"},
+    {word:"cloud",   hint:"White or grey puff in the sky",    category:"Nature"},
+    {word:"dream",   hint:"Images you see while sleeping",    category:"Noun"},
+    {word:"eagle",   hint:"A large bird of prey",             category:"Animal"},
+    {word:"frost",   hint:"Ice crystals that form on surfaces",category:"Nature"},
+  ],
+  hard: [
+    {word:"amazing",    hint:"Very impressive and wonderful",       category:"Adjective"},
+    {word:"balance",    hint:"Equal weight on both sides",          category:"Noun"},
+    {word:"captain",    hint:"The leader of a ship or team",        category:"Person"},
+    {word:"diamond",    hint:"The hardest natural substance",       category:"Gem"},
+    {word:"element",    hint:"A basic substance in chemistry",      category:"Science"},
+    {word:"fantasy",    hint:"Something imagined, not real",        category:"Noun"},
+    {word:"gallery",    hint:"A room or building for art",          category:"Place"},
+    {word:"harvest",    hint:"Gathering crops from the field",      category:"Verb"},
+    {word:"imagine",    hint:"To form a picture in your mind",      category:"Verb"},
+    {word:"journey",    hint:"A long trip or travel",               category:"Noun"},
+    {word:"kingdom",    hint:"Land ruled by a king or queen",       category:"Place"},
+    {word:"lantern",    hint:"A portable light in a case",          category:"Object"},
+    {word:"mystery",    hint:"Something unknown or unexplained",    category:"Noun"},
+    {word:"network",    hint:"A system of connected things",        category:"Noun"},
+    {word:"package",    hint:"A wrapped bundle or parcel",          category:"Noun"},
+    {word:"quality",    hint:"How good something is",               category:"Noun"},
+    {word:"rainbow",    hint:"Colorful arc in the sky after rain",  category:"Nature"},
+    {word:"section",    hint:"A part or portion of something",      category:"Noun"},
+    {word:"thunder",    hint:"Loud sound during a storm",           category:"Nature"},
+    {word:"uniform",    hint:"Special clothing worn by a group",    category:"Clothing"},
+    {word:"venture",    hint:"A risky or exciting undertaking",     category:"Noun"},
+    {word:"warrior",    hint:"A skilled and brave fighter",         category:"Person"},
+    {word:"example",    hint:"Something that shows what others are like", category:"Noun"},
+    {word:"freedom",    hint:"The state of being free",             category:"Noun"},
+    {word:"gravity",    hint:"Force that pulls things downward",    category:"Science"},
+    {word:"history",    hint:"The study of past events",            category:"Subject"},
+    {word:"library",    hint:"A place where books are kept",        category:"Place"},
+    {word:"problem",    hint:"Something difficult to deal with",    category:"Noun"},
+    {word:"science",    hint:"The study of the natural world",      category:"Subject"},
+    {word:"society",    hint:"A community of people living together",category:"Noun"},
+  ]
+};
+
+let scrambleDiff='easy', scrambleRound=1;
+let scrambleQs=[], scrambleAns=[], scrambleAnswered=0;
+let scrambleTInt=null, scrambleTLeft=20, scrambleTTotal=20, scrambleCQ=0, scrambleLastSco=0;
+let scrambleSelected=[], scrambleAnswer=[];
+
+function startScramble(){
+  updateScrambleLocks();
+  navTo('scramble-pick');
+}
+
+function updateScrambleLocks(){
+  const sub=CU?.subscription||'free';
+  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  ['medium','hard'].forEach(d=>{
+    const lock=document.getElementById('scramble-lock-'+d);
+    const card=document.querySelector('#sc-scramble-pick .dc.'+d);
+    if(lock)lock.style.display=hasAccess?'none':'block';
+    if(card)card.style.opacity=hasAccess?'1':'0.65';
+  });
+}
+
+function checkScrambleAccess(d){
+  const sub=CU?.subscription||'free';
+  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  if(!hasAccess){
+    if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
+    else{if(confirm('Upgrade to Basic or Premium to unlock!\nView plans?'))navTo('pricing');}
+    return;
+  }
+  launchScramble(d);
+}
+
+function launchScramble(d){
+  scrambleDiff=d;
+  navTo('scramble');
+  buildScramble();
+}
+
+function buildScramble(){
+  const total=SCRAMBLE_QL[scrambleDiff];
+  scrambleQs=shuf(SCRAMBLE_BANK[scrambleDiff]).slice(0,total);
+  scrambleAns=new Array(total).fill(null);
+  scrambleAnswered=0; scrambleCQ=0;
+  scrambleTTotal=SCRAMBLE_TL[scrambleDiff]; scrambleTLeft=scrambleTTotal;
+
+  const labels={
+    easy:'Easy — 10 words · 20 sec · short words',
+    medium:'Medium — 15 words · 15 sec · medium words',
+    hard:'Hard — 20 words · 10 sec · long words'
+  };
+  const dlbl=document.getElementById('scramble-diff-lbl');
+  if(dlbl)dlbl.textContent=labels[scrambleDiff];
+
+  const pill=document.getElementById('scramble-pill');
+  if(pill)pill.textContent='Round '+scrambleRound;
+
+  const pbar=document.getElementById('scramble-pbar');
+  if(pbar)pbar.style.width='0%';
+
+  const plbl=document.getElementById('scramble-plbl');
+  if(plbl)plbl.textContent='0 of '+total+' answered';
+
+  const sbtn=document.getElementById('scramble-sbtn');
+  if(sbtn)sbtn.disabled=true;
+
+  const res=document.getElementById('scramble-result');
+  if(res)res.classList.remove('show');
+
+  // Build stars
+  const sr=document.getElementById('scramble-stars');
+  if(sr){
+    sr.innerHTML='';
+    const shown=Math.min(total,15);
+    for(let i=0;i<shown;i++){
+      const s=document.createElement('span');
+      s.className='star';s.id='sct'+i;
+      s.style.fontSize='clamp(10px,2vw,14px)';
+      s.textContent='⭐';sr.appendChild(s);
+    }
+  }
+
+  buildScrambleQuestion(0);
+  startScrambleTimer();
+  sStart();
+  TICKER.pause();
+}
+
+function scrambleWord(word){
+  // Scramble ensuring it's never in the original order
+  let arr=word.split('');
+  let tries=0;
+  do{
+    arr=shuf(arr);
+    tries++;
+  }while(arr.join('')===word && tries<20);
+  return arr;
+}
+
+function buildScrambleQuestion(idx){
+  scrambleCQ=idx;
+  scrambleSelected=[];
+  scrambleAnswer=[];
+  const q=scrambleQs[idx];
+  const total=SCRAMBLE_QL[scrambleDiff];
+  const letters=scrambleWord(q.word);
+  const con=document.getElementById('scramble-container');
+  if(!con)return;
+
+  con.innerHTML=`
+    <div class="qcard" id="scq${idx}">
+      <div style="text-align:center;margin-bottom:8px">
+        <span class="scramble-category">${q.category}</span>
+      </div>
+      <div class="scramble-hint">💡 ${q.hint}</div>
+      <div style="text-align:center;font-size:clamp(11px,2.5vw,13px);font-weight:700;color:#888780;margin-bottom:6px">
+        Tap the letters in the correct order:
+      </div>
+
+      <!-- Answer slots -->
+      <div class="scramble-answer" id="sc-answer-${idx}">
+        ${q.word.split('').map((_,i)=>`
+          <div class="s-slot" id="sc-slot-${idx}-${i}" onclick="removeFromAnswer(${idx},${i})"></div>
+        `).join('')}
+      </div>
+
+      <!-- Scrambled letter tiles -->
+      <div class="scramble-letters" id="sc-letters-${idx}">
+        ${letters.map((l,i)=>`
+          <div class="s-tile" id="sc-tile-${idx}-${i}" onclick="pickLetter(${idx},${i},'${l}')">${l.toUpperCase()}</div>
+        `).join('')}
+      </div>
+
+      <!-- Actions -->
+      <div class="scramble-actions">
+        <button class="s-action-btn" onclick="clearScrambleAnswer(${idx})">🔄 Clear</button>
+        <button class="s-action-btn" onclick="checkScrambleAnswer(${idx})">✅ Check</button>
+      </div>
+      <div class="fb" id="sc-fb-${idx}"></div>
+    </div>`;
+}
+
+function pickLetter(qIdx, tileIdx, letter){
+  const q=scrambleQs[qIdx];
+  const answerLen=q.word.length;
+
+  // Find next empty slot
+  const nextSlot=scrambleAnswer.length;
+  if(nextSlot>=answerLen) return;
+
+  // Mark tile as used
+  const tile=document.getElementById('sc-tile-'+qIdx+'-'+tileIdx);
+  if(!tile||tile.classList.contains('used'))return;
+  tile.classList.add('used');
+  sOk();
+
+  // Fill slot
+  scrambleAnswer.push({letter,tileIdx});
+  const slotEl=document.getElementById('sc-slot-'+qIdx+'-'+nextSlot);
+  if(slotEl){
+    slotEl.textContent=letter.toUpperCase();
+    slotEl.classList.add('filled');
+    slotEl.dataset.tileIdx=tileIdx;
+  }
+
+  // Auto-check when all slots filled
+  if(scrambleAnswer.length===answerLen){
+    setTimeout(()=>checkScrambleAnswer(qIdx),300);
+  }
+}
+
+function removeFromAnswer(qIdx, slotIdx){
+  // Only remove the LAST filled slot (from the end)
+  if(scrambleAnswer.length===0)return;
+  const lastFilledIdx=scrambleAnswer.length-1;
+  if(slotIdx!==lastFilledIdx)return;
+
+  const removed=scrambleAnswer.pop();
+  // Un-use the tile
+  const tile=document.getElementById('sc-tile-'+qIdx+'-'+removed.tileIdx);
+  if(tile)tile.classList.remove('used');
+  // Clear slot
+  const slotEl=document.getElementById('sc-slot-'+qIdx+'-'+slotIdx);
+  if(slotEl){slotEl.textContent='';slotEl.classList.remove('filled');delete slotEl.dataset.tileIdx;}
+}
+
+function clearScrambleAnswer(qIdx){
+  const q=scrambleQs[qIdx];
+  scrambleAnswer=[];
+  // Un-use all tiles
+  q.word.split('').forEach((_,i)=>{
+    const tile=document.getElementById('sc-tile-'+qIdx+'-'+i);
+    if(tile){tile.classList.remove('used','selected');}
+  });
+  // Clear all slots
+  q.word.split('').forEach((_,i)=>{
+    const slot=document.getElementById('sc-slot-'+qIdx+'-'+i);
+    if(slot){slot.textContent='';slot.classList.remove('filled');}
+  });
+}
+
+function checkScrambleAnswer(qIdx){
+  const q=scrambleQs[qIdx];
+  const guessed=scrambleAnswer.map(a=>a.letter).join('').toLowerCase();
+  const correct=q.word.toLowerCase();
+  const ok=guessed===correct;
+  const total=SCRAMBLE_QL[scrambleDiff];
+
+  // Disable tiles and slots
+  q.word.split('').forEach((_,i)=>{
+    const tile=document.getElementById('sc-tile-'+qIdx+'-'+i);
+    if(tile){tile.classList.add('used');}
+  });
+
+  // Visual feedback on slots
+  q.word.split('').forEach((_,i)=>{
+    const slot=document.getElementById('sc-slot-'+qIdx+'-'+i);
+    if(slot){
+      if(ok){slot.style.background='var(--green)';slot.style.color='#fff';slot.style.borderColor='#085041';}
+      else{slot.style.background='var(--red)';slot.style.color='#fff';slot.style.borderColor='#791F1F';}
+    }
+  });
+
+  const fb=document.getElementById('sc-fb-'+qIdx);
+  if(ok){
+    if(fb){fb.textContent='✓ Correct! The word is "'+q.word+'"!';fb.className='fb show correct';}
+    sSpell();sCr();
+  }else{
+    // Show correct answer
+    q.word.split('').forEach((l,i)=>{
+      const slot=document.getElementById('sc-slot-'+qIdx+'-'+i);
+      if(slot)slot.textContent=l.toUpperCase();
+    });
+    if(fb){fb.textContent='✗ It\'s "'+q.word.toUpperCase()+'"! Try to remember it!';fb.className='fb show wrong';}
+    sBad();
+  }
+
+  clearInterval(scrambleTInt);
+  scrambleAns[qIdx]=ok;
+  scrambleAnswered++;
+  updScrambleP();
+
+  const st=document.getElementById('sct'+Math.min(scrambleAnswered-1,14));
+  if(st)st.textContent=ok?'⭐':'💫';
+
+  if(scrambleAnswered<total){
+    setTimeout(()=>{
+      scrambleCQ++;
+      scrambleAnswer=[];
+      buildScrambleQuestion(scrambleCQ);
+      startScrambleTimer();
+    },1200);
+  }else{
+    const sbtn=document.getElementById('scramble-sbtn');
+    if(sbtn)sbtn.disabled=false;
+    TICKER.resume();
+  }
+}
+
+function startScrambleTimer(){
+  clearInterval(scrambleTInt);
+  scrambleTLeft=scrambleTTotal;updScrambleT();
+  scrambleTInt=setInterval(()=>{
+    scrambleTLeft--;updScrambleT();
+    if(scrambleTLeft<=5&&scrambleTLeft>0){sUrg();sDrip();}
+    if(scrambleTLeft<=0){clearInterval(scrambleTInt);sTU();timeUpScramble();}
+  },1000);
+}
+
+function updScrambleT(){
+  const n=document.getElementById('scramble-tnum');if(n)n.textContent=scrambleTLeft;
+  const r=document.getElementById('scramble-tri');if(r){
+    r.style.strokeDashoffset=163*(1-scrambleTLeft/scrambleTTotal);
+    r.style.stroke=scrambleTLeft<=5?'#E24B4A':scrambleTLeft<=Math.floor(scrambleTTotal*0.4)?'#EF9F27':'#FAC775';
+  }
+  const ft=document.getElementById('floating-timer');
+  const fn=document.getElementById('ft-num');
+  if(ft&&fn){
+    fn.textContent=scrambleTLeft;
+    fn.style.color=scrambleTLeft<=5?'#E24B4A':scrambleTLeft<=Math.floor(scrambleTTotal*0.4)?'#EF9F27':'#FAC775';
+    if(scrambleTLeft<=5)ft.classList.add('urgent');
+    else ft.classList.remove('urgent');
+  }
+}
+
+function timeUpScramble(){
+  const q=scrambleQs[scrambleCQ];
+  const total=SCRAMBLE_QL[scrambleDiff];
+  // Show correct answer in slots
+  q.word.split('').forEach((l,i)=>{
+    const slot=document.getElementById('sc-slot-'+scrambleCQ+'-'+i);
+    if(slot){
+      slot.textContent=l.toUpperCase();
+      slot.style.background='#888';slot.style.color='#fff';slot.style.borderColor='#666';
+    }
+  });
+  const fb=document.getElementById('sc-fb-'+scrambleCQ);
+  if(fb){fb.textContent='⏰ Time\'s up! The word was "'+q.word.toUpperCase()+'"';fb.className='fb show wrong';}
+  scrambleAns[scrambleCQ]=false;
+  scrambleAnswered++;
+  updScrambleP();
+  const st=document.getElementById('sct'+Math.min(scrambleAnswered-1,14));
+  if(st)st.textContent='💫';
+
+  if(scrambleAnswered<total){
+    setTimeout(()=>{
+      scrambleCQ++;
+      scrambleAnswer=[];
+      buildScrambleQuestion(scrambleCQ);
+      startScrambleTimer();
+    },1200);
+  }else{
+    const sbtn=document.getElementById('scramble-sbtn');
+    if(sbtn)sbtn.disabled=false;
+    TICKER.resume();
+  }
+}
+
+function updScrambleP(){
+  const total=SCRAMBLE_QL[scrambleDiff];
+  const pb=document.getElementById('scramble-pbar');if(pb)pb.style.width=Math.round(scrambleAnswered/total*100)+'%';
+  const pl=document.getElementById('scramble-plbl');if(pl)pl.textContent=scrambleAnswered+' of '+total+' answered';
+}
+
+async function showScrambleResult(){
+  clearInterval(scrambleTInt);
+  const total=SCRAMBLE_QL[scrambleDiff];
+  scrambleLastSco=scrambleAns.filter(a=>a).length;
+  const pct=Math.round(scrambleLastSco/total*100);
+  const rsco=document.getElementById('scramble-rsco');if(rsco)rsco.textContent=scrambleLastSco+'/'+total;
+  let stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! Word Scramble Master! 🏆';sWin();setTimeout(sLevelUp,900);}
+  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Amazing! Nearly unscrambled them all!';sWin();}
+  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good work! Keep unscrambling!';sLevelUp();}
+  else if(pct>=40){stars='⭐⭐💫💫💫';msg='Nice try! Practice makes perfect!';}
+  else{stars='⭐💫💫💫💫';msg="Don't give up! Try again!";}
+  const rstr=document.getElementById('scramble-rstr');if(rstr)rstr.textContent=stars;
+  const rmsg=document.getElementById('scramble-rmsg');if(rmsg)rmsg.textContent=msg;
+
+  const entry={
+    name:CU?CU.name:'Guest',username:CU?CU.username:'guest',
+    type:CU?CU.type:'guest',score:scrambleLastSco,total,
+    diff:'scramble-'+scrambleDiff,stars,date:new Date().toLocaleDateString()
+  };
+  showLoader('Saving score...');
+  await api({action:'saveScore',...entry});
+  hideLoader();
+  TICKER.notifyLocal(entry);
+
+  const sa=document.getElementById('scramble-save-area');
+  if(sa)sa.innerHTML=CU
+    ?`<div style="font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:14px">✅ Score saved! ${scrambleLastSco}/${total} (${pct}%)</div>`
+    :`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:10px">Login to save your score!</p><div style="display:flex;gap:8px;justify-content:center"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up</button></div></div>`;
+
+  const res=document.getElementById('scramble-result');if(res)res.classList.add('show');
+  const sbtn=document.getElementById('scramble-sbtn');if(sbtn)sbtn.disabled=true;
+  setTimeout(()=>document.getElementById('scramble-result')?.scrollIntoView({behavior:'smooth'}),100);
+}
+
+function retryScramble(){
+  scrambleRound++;
+  buildScramble();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+</script>
+
+<script>
+// ================================================================
 // BLOCK 3 — QUESTION BANK (loaded last)
 // ================================================================
 
