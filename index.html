@@ -353,6 +353,13 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 .scramble-actions{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
 .s-action-btn{font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;padding:8px 18px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;transition:all 0.2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .s-action-btn:hover{background:var(--lp);color:var(--navy)}
+
+/* ── WORD CHAIN ── */
+.chain-word{display:inline-flex;align-items:center;gap:4px;background:var(--navy);color:#FAC775;font-family:'Nunito',sans-serif;font-size:clamp(11px,2.5vw,14px);font-weight:800;padding:5px 12px;border-radius:99px;position:relative}
+.chain-word::after{content:'→';font-size:10px;color:#B5D4F4;margin-left:2px}
+.chain-word:last-child::after{display:none}
+.chain-word .chain-letter{color:#F4C0D1}
+#chain-input:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(212,83,126,0.15)}
 </style>
 </head>
 <body>
@@ -450,6 +457,13 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <div class="game-desc">Unscramble the letters to form the correct word!</div>
       </div>
     </div>
+      <div class="game-card" onclick="startChain()">
+        <div class="game-badge" style="background:#C0392B">CHAIN</div>
+        <div class="game-icon">🔗</div>
+        <div class="game-title">Word Chain</div>
+        <div class="game-desc">Each word must start with the last letter of the previous!</div>
+      </div>
+    </div>
     <div style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780;margin-top:8px">More games coming soon! 🚀</div>
 
     <!-- Word Scramble LB -->
@@ -465,6 +479,17 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 
   </div>
 </div>
+
+    <!-- Word Chain LB -->
+    <div id="lb-chain" class="lb-game-panel" style="display:none">
+      <div class="lbtabs">
+        <button class="lbt on" onclick="switchLBDiff('chain','all',this)">🏆 All Time</button>
+        <button class="lbt easy" onclick="switchLBDiff('chain','easy',this)">🌱 Easy</button>
+        <button class="lbt medium" onclick="switchLBDiff('chain','medium',this)">⚡ Medium</button>
+        <button class="lbt hard" onclick="switchLBDiff('chain','hard',this)">🔥 Hard</button>
+      </div>
+      <div id="lb-chain-list" class="lb-list"></div>
+    </div>
 
 <!-- ══ SPELL IT RIGHT ══ -->
 <div id="sc-spell" class="screen">
@@ -623,6 +648,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <button class="lb-gtab" onclick="switchLBGame('shark',this)">🦈 Shark</button>
       <button class="lb-gtab" onclick="switchLBGame('odd',this)">🎯 Odd One</button>
       <button class="lb-gtab" onclick="switchLBGame('scramble',this)">🔀 Scramble</button>
+      <button class="lb-gtab" onclick="switchLBGame('chain',this)">🔗 Chain</button>
     </div>
 
     <!-- Grammar Quiz LB -->
@@ -991,7 +1017,7 @@ function navTo(s){
   if(s==='start')  updateDiffCards();
   // Show/hide floating timer
   const ft=document.getElementById('floating-timer');
-  const gameScreens=['quiz','spell','odd','shark','scramble'];
+  const gameScreens=['quiz','spell','odd','shark','scramble','chain'];
   if(ft) ft.style.display=gameScreens.includes(s)?'flex':'none';
   // Show ticker on ALL pages always
   TICKER.setVisible(true);
@@ -1480,7 +1506,7 @@ function switchLBGame(game, el){
   lbCurrentGame = game;
   document.querySelectorAll('.lb-gtab').forEach(t=>t.classList.remove('on'));
   if(el)el.classList.add('on');
-  ['grammar','spell','shark','odd','scramble'].forEach(g=>{
+  ['grammar','spell','shark','odd','scramble','chain'].forEach(g=>{
     const p=document.getElementById('lb-'+g);
     if(p)p.style.display=(g===game?'block':'none');
   });
@@ -3615,6 +3641,446 @@ function retryScramble(){
 
 <script>
 // ================================================================
+// BLOCK 7 — WORD CHAIN GAME
+// ================================================================
+// ================================================================
+// WORD CHAIN GAME
+// ================================================================
+const CHAIN_TL    = {easy:15, medium:12, hard:8};
+const CHAIN_MINLEN = {easy:3, medium:4, hard:5};
+
+// Large valid word dictionary for chain validation
+const CHAIN_DICT = new Set([
+  // A
+  "ant","ape","ask","ace","age","ago","aim","air","all","arm","art","ate","axe","add","aid","amp",
+  "able","acid","aged","also","alto","area","army","aunt","avid","away","ache","arch","acre","axis",
+  "alarm","album","alert","alien","align","alive","alley","allow","aloud","altar","alter","angel",
+  "anger","angle","angry","anime","ankle","annex","apple","apply","April","arena","argue","arise",
+  "array","arrow","atlas","attic","audio","audit","avoid","award","aware","awful",
+  // B
+  "bad","bag","ban","bar","bat","bay","bed","big","bit","bow","box","boy","bug","bus","but","buy",
+  "back","bake","ball","band","bang","bank","base","bath","beam","bean","bear","beat","been","bell",
+  "best","bike","bill","bind","bird","bite","blow","blue","boat","body","bold","bolt","bomb","bond",
+  "bone","book","boom","boot","bore","born","both","brew","brow","burn","bush","busy",
+  "badge","basic","batch","beach","began","begin","bench","bible","birth","black","blade","blame",
+  "bland","blank","blast","blaze","bleed","blend","bless","blind","block","blood","bloom","blown",
+  "board","bonus","boost","bound","brain","brand","brave","bread","break","breed","bride","brief",
+  "bring","broad","brook","brown","brush","build","built","burst","buyer",
+  // C
+  "cab","can","cap","car","cat","cob","cod","cog","cop","cow","cry","cue","cup","cut",
+  "cage","cake","call","calm","came","camp","card","care","cart","case","cash","cast","cave","cell",
+  "chat","chef","chew","chip","city","clap","clay","clip","club","clue","coal","coat","code","coil",
+  "coin","cold","comb","come","cone","cook","cool","cope","copy","cord","core","corn","cost","coup",
+  "cove","crew","crop","crow","cure","curl","cute",
+  "cable","camel","candy","carry","catch","cause","cease","chain","chair","chaos","charm","chart",
+  "chase","cheap","check","cheek","cheer","chess","chest","chief","child","china","choir","chose",
+  "chunk","civic","civil","claim","clamp","clash","class","clean","clear","clerk","click","climb",
+  "cling","clock","clone","close","cloth","cloud","coach","coast","color","comic","comma","coral",
+  "could","count","court","cover","crack","craft","crane","crash","crazy","cream","creek","creep",
+  "crime","crisp","cross","crown","crude","crush","curve","cycle",
+  // D
+  "dam","dip","dog","dot","dry","dub","dug","dye","dad","dig","dim","dew",
+  "damp","dare","dark","dart","dash","data","date","dawn","days","dead","deaf","deal","dear","debt",
+  "deed","deep","dent","desk","dial","dice","diet","dirt","disc","dish","disk","dive","dock","dome",
+  "done","doom","door","dose","dove","down","draw","drew","drop","drum","dual","dull","dump","dusk","dust",
+  "daily","dance","dealt","decay","delay","delta","dense","depot","depth","derby","devil","dirty","disco",
+  "dizzy","dodge","doing","doubt","dough","draft","drain","drama","drank","drawn","dream","dress","drift",
+  "drink","drive","drove","drunk","dryer","dying",
+  // E
+  "ear","eat","egg","ego","elk","elm","end","era","eve","eye","elf","era",
+  "each","earn","ease","east","edge","edit","else","emit","epic","even","ever","evil","exam","exit",
+  "eagle","early","earth","eight","elect","elite","empty","ended","enemy","enjoy","enter","entry","equal",
+  "error","essay","event","every","exact","exist","extra",
+  // F
+  "fad","fan","far","fat","fee","few","fig","fit","fix","fly","fog","for","fun","fur","fox","fin",
+  "face","fact","fade","fail","fair","fake","fall","fame","farm","fast","fate","fear","feat","feed",
+  "feel","feet","fell","felt","file","fill","film","find","fine","fire","firm","fish","fist","flag",
+  "flat","flew","flip","flow","foam","fold","folk","fond","font","food","fool","foot","ford","fore",
+  "fork","form","fort","foul","four","free","from","fuel","full","fund","fuse",
+  "fable","faces","facts","faith","false","fancy","fatal","fault","feast","fence","fever","fiber",
+  "field","fiery","fifth","fifty","fight","final","first","fixed","flame","flash","fleet","flesh",
+  "float","flood","floor","flour","flown","fluid","flute","focus","force","forge","forth","forum",
+  "found","frame","frank","fraud","fresh","front","frost","froze","fruit","fully","funny","fuzzy",
+  // G
+  "gap","gas","gel","gem","gin","god","got","gun","gut","guy","gag","gig",
+  "gain","game","gate","gave","gear","gene","gift","girl","give","glad","glow","glue","goal","goat",
+  "gold","golf","gone","good","gore","gown","grab","gray","grew","grid","grin","grip","grow","gulf","gust",
+  "gains","giant","given","glass","globe","gloom","gloss","glove","going","grace","grade","grain",
+  "grand","grant","graph","grasp","grass","grave","great","greed","green","greet","grief","grind",
+  "groan","groin","groom","gross","group","grove","growl","grown","gruel","guard","guess","guest",
+  "guide","guild","guilt","guise","gusto",
+  // H
+  "had","ham","has","hat","hay","hem","hen","her","him","his","hit","hoe","hop","hot","how","hug","hum",
+  "hack","hail","hair","half","hall","halt","hand","hang","hard","harm","harp","hash","hate","have",
+  "head","heal","heap","hear","heat","heel","held","helm","help","herb","hero","hide","high","hill",
+  "hint","hire","hold","hole","home","hood","hook","hope","horn","hose","host","hour","huge","hull","hump","hung","hunt","hurl","hurt",
+  "habit","harsh","haven","heart","heavy","hedge","hello","hence","herbs","hinge","honor","horse",
+  "hotel","house","human","humid","hurry","hyper",
+  // I
+  "ice","ill","ink","inn","ion","ire","ivy","icy",
+  "idea","idle","idol","inch","into","iron","isle","itch",
+  "ideal","image","inbox","index","indie","inner","input","inter","intro","issue","ivory",
+  // J
+  "jab","jag","jam","jar","jaw","jet","job","jog","joy","jug",
+  "jack","jail","jazz","jest","join","joke","jolt","jump","june","just","jury",
+  "joker","joint","jelly","jewel","judge","juice","juicy","jumbo","jumpy","junior",
+  // K
+  "keg","kin","kit",
+  "keen","keep","kelp","kick","kill","kind","king","knew","knot","know",
+  "karma","kayak","kneel","knife","knock","known",
+  // L
+  "lab","lag","lap","law","lax","lay","led","leg","lid","lip","lit","log","lot","low",
+  "lack","laid","lake","lamp","land","lane","lard","lark","last","late","lazy","lead","leaf","leak",
+  "lean","leap","left","lend","lens","less","liar","lick","life","lift","like","lime","limp","line",
+  "link","lion","list","live","load","loan","lock","loft","lone","long","look","loom","loop","lore",
+  "lose","loss","lost","love","luck","lump","lung","lure","lush","lust",
+  "label","labor","large","laser","later","laugh","layer","learn","lease","least","leave","legal",
+  "lemon","level","light","lilac","limit","liner","liver","local","lodge","logic","loose","lower",
+  "lucky","lunar","lunch","lyric",
+  // M
+  "mad","map","mat","mix","mob","mod","mop","mud","mug",
+  "made","mail","main","make","male","mall","mane","many","mark","mars","mask","mass","mast","mate",
+  "math","maze","mean","meat","melt","memo","menu","mere","mesh","mild","mile","milk","mill","mime",
+  "mind","mine","mint","miss","mist","mode","mole","monk","mood","moon","more","moss","most","move",
+  "much","muse","must","myth",
+  "magic","major","maker","manor","maple","march","match","mayor","media","mercy","merit","metal",
+  "might","minor","minus","mixed","model","money","month","moral","motor","mount","mouse","mouth",
+  "movie","muddy","music","mango","manga","melon","mercy","merge","midst","might","mirth","moose",
+  // N
+  "nag","nap","nip","nod","nor","now","nun","nut",
+  "nail","name","near","neat","neck","need","nest","next","nice","nine","node","none","noon","norm",
+  "nose","note","noun","nude","null","numb",
+  "naive","nerve","never","newer","night","ninja","noble","noise","north","noted","novel","nurse",
+  // O
+  "oak","oar","oat","odd","off","oil","old","one","orb","ore","our","out","owe","owl","own",
+  "obey","odds","omen","once","only","open","oval","oven","over",
+  "occur","ocean","offer","often","olive","onset","opera","orbit","order","other","outer","oxide",
+  // P
+  "pad","pan","paw","pay","pea","peg","pet","pie","pig","pin","pit","ply","pod","pot","pro","pub","pun","pup","put",
+  "pace","pack","page","pain","pair","pale","palm","park","part","pass","past","path","pave","peak",
+  "peel","peer","pick","pile","pink","pipe","plan","play","plot","plow","plug","plus","poem","poet",
+  "poll","polo","pond","pool","poor","pope","pore","port","pose","post","pour","pray","prey","prod",
+  "prop","pull","pump","pure","push",
+  "paint","panel","panic","paper","party","pasta","patch","pause","peace","pearl","pedal","penny",
+  "phase","phone","photo","piano","piece","pilot","pinch","pixel","pizza","place","plain","plane",
+  "plant","plate","plaza","plead","pluck","plumb","plume","plunge","point","polar","posed","power",
+  "press","price","pride","prime","print","prior","prize","probe","proof","prose","proud","prove",
+  "psalm","pulse","pupil","purse","pushy",
+  // Q
+  "quit","quiz","quest","queen","queue","quick","quiet","quota","quote",
+  // R
+  "rag","ram","ran","rap","rat","raw","ray","red","ref","rep","rid","rim","rip","rob","rod","rot","row","rub","rug","run",
+  "race","rack","rage","raid","rail","rain","rake","rank","rare","rash","rate","read","real","reap",
+  "rear","reef","reel","rely","rent","rest","rice","rich","ride","ring","riot","rise","risk","road",
+  "roam","roar","robe","rock","role","roll","roof","room","root","rope","rose","rude","ruin","rule","rush","rust",
+  "radar","radio","raise","rally","range","rapid","ratio","reach","ready","realm","rebel","refer",
+  "reign","relax","renew","repay","repel","reply","rerun","rider","ridge","rifle","right","rigid",
+  "risky","rival","river","robin","robot","rocky","rouge","rough","round","route","royal","rugby","ruler","rural",
+  // S
+  "sad","sag","sap","sat","saw","say","set","sew","shy","sin","sip","sit","six","ski","sky","sob","sod","son","sow","spy","sub","sum","sun","sup",
+  "safe","sage","sake","sale","salt","same","sand","sane","sang","sank","save","seal","seam","seat",
+  "seed","seek","seem","seen","self","sell","send","sent","shed","ship","shop","shot","show","shut",
+  "sick","side","sigh","sign","silk","sill","sing","sink","site","size","skin","skip","slam","slap",
+  "slim","slip","slot","slow","slug","snap","snow","soap","sock","soft","soil","sold","sole","some",
+  "song","soon","sore","sort","soul","soup","sour","span","spin","spit","spot","spur","star","stay",
+  "stem","step","stew","stop","stub","stun","such","suit","surf","swam","swap","swim","swam",
+  "salad","saint","scale","scary","scene","scope","score","sense","serve","seven","shade","shake",
+  "shall","shame","shape","share","shark","sharp","sheep","sheer","shelf","shell","shift","shine",
+  "shirt","shock","shore","short","shout","shove","sight","silly","since","sixth","sixty","skill",
+  "skull","slate","sleep","slice","slide","slime","slope","small","smart","smell","smile","smoke",
+  "snake","solar","solid","solve","sorry","south","space","spare","spark","speak","speed","spend",
+  "spice","spike","spine","spoil","spoon","spray","squad","stack","staff","stage","stain","stair",
+  "stake","stale","stamp","stand","stark","start","state","stays","steam","steel","steep","steer",
+  "stick","stiff","still","stock","stomp","stone","stood","store","stork","storm","story","stout",
+  "stove","strap","straw","stray","strip","strum","stuck","study","stuff","style","sugar","sunny",
+  "super","surge","swamp","swear","sweep","sweet","swept","swift","sword","swore",
+  // T
+  "tab","tan","tar","tax","tie","tin","tip","toe","ton","too","top","toy","try","tub","tug","two",
+  "tail","tale","talk","tall","tame","tank","tape","tart","task","tear","teem","tell","tend","tent",
+  "term","test","text","than","that","them","then","they","thin","this","thou","tide","tile","till",
+  "time","tire","toad","told","toll","tomb","tome","tone","took","tool","tore","torn","toss","tour",
+  "town","tram","trap","tray","tree","trek","trim","trio","trip","trot","true","tube","tuck","tune","turf","turn","tusk",
+  "table","talon","taste","teach","teeth","tempo","tense","tenth","theme","there","these","thick",
+  "thing","think","third","thorn","those","three","threw","throw","thumb","tiger","tight","timer",
+  "tired","title","today","token","tooth","topic","total","touch","tough","towel","tower","toxic",
+  "trace","track","trade","trail","train","trait","tramp","trash","treat","tribe","tried","trill",
+  "troop","trout","truck","truly","trump","trunk","trust","truth","tulip","tumor","tuner","twist",
+  // U
+  "undo","unit","upon","urge","used","user",
+  "ultra","under","unify","union","unite","unity","until","upper","upset","urban","usage","usual",
+  // V
+  "van","vat","vet","via","vow",
+  "vain","vale","vane","vary","vast","veil","vein","vent","verb","very","vest","vibe","vice","view","vine","void","vote",
+  "valid","value","valve","vapor","vault","video","vigor","viral","virus","visit","vital","vivid","vocal","voice","voter",
+  // W
+  "wag","war","was","wax","web","wet","who","why","wig","win","wit","woe","wok","won","wow",
+  "wade","wage","wake","walk","wall","wand","ward","ware","warm","warn","wary","wave","weak","weal",
+  "wean","wear","weed","week","well","went","were","west","when","whim","whip","whom","wide","wife",
+  "wild","will","wind","wine","wing","wink","wire","wise","wish","with","woke","wolf","wood","wool",
+  "word","wore","work","worm","wove","wrap","wren","writ",
+  "waste","watch","water","weary","weave","wedge","weird","whale","wheat","wheel","where","which",
+  "while","white","whole","whose","widen","widow","wield","witch","woman","women","world","worry",
+  "worse","worst","worth","would","wound","wrath","wrist","write","wrong","wrote",
+  // X Y Z
+  "xray","yard","yarn","year","yell","yoga","yolk","your","zero","zinc","zone","zoom",
+  "yacht","yearn","yield","young","youth","zesty","zippy"
+]);
+
+let chainDiff='easy', chainScore=0, chainBest=0, chainRunning=false;
+let chainCurrentLetter='', chainUsedWords=[], chainTLeft=15, chainTTotal=15;
+let chainTInt=null, chainTimerBarInt=null, chainTimerStart=0;
+
+function startChain(){
+  updateChainLocks();
+  navTo('chain');
+}
+
+function updateChainLocks(){
+  const sub=CU?.subscription||'free';
+  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  ['medium','hard'].forEach(d=>{
+    const lock=document.getElementById('chain-lock-'+d);
+    const card=document.querySelector('#sc-chain .dc.'+d);
+    if(lock)lock.style.display=hasAccess?'none':'block';
+    if(card)card.style.opacity=hasAccess?'1':'0.65';
+  });
+}
+
+function checkChainAccess(d){
+  const sub=CU?.subscription||'free';
+  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  if(!hasAccess){
+    if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
+    else{if(confirm('Upgrade to unlock!\nView plans?'))navTo('pricing');}
+    return;
+  }
+  launchChain(d);
+}
+
+function launchChain(d){
+  chainDiff=d;
+  chainScore=0; chainBest=0; chainUsedWords=[];
+  chainTTotal=CHAIN_TL[d]; chainTLeft=chainTTotal;
+  chainRunning=true;
+
+  document.getElementById('chain-start').style.display='none';
+  document.getElementById('chain-over').style.display='none';
+  document.getElementById('chain-game').style.display='block';
+
+  const dlbl=document.getElementById('chain-diff-lbl');
+  if(dlbl)dlbl.textContent={
+    easy:'Easy — 15 sec · min 3 letters',
+    medium:'Medium — 12 sec · min 4 letters',
+    hard:'Hard — 8 sec · min 5 letters'
+  }[d];
+
+  document.getElementById('chain-score').textContent='0';
+  document.getElementById('chain-best').textContent='0';
+  document.getElementById('chain-history').innerHTML='';
+  document.getElementById('chain-fb').textContent='';
+
+  // Start with a random letter
+  const starters='abcdefghiklmnoprstw';
+  chainCurrentLetter=starters[Math.floor(Math.random()*starters.length)];
+  updateChainLetter();
+
+  const inp=document.getElementById('chain-input');
+  if(inp){inp.value='';inp.disabled=false;inp.style.borderColor='var(--lp)';inp.focus();}
+
+  sStart();
+  TICKER.pause();
+  startChainTimer();
+}
+
+function updateChainLetter(){
+  const el=document.getElementById('chain-letter');
+  if(el)el.textContent=chainCurrentLetter.toUpperCase();
+}
+
+function startChainTimer(){
+  clearInterval(chainTInt);
+  clearInterval(chainTimerBarInt);
+  chainTLeft=chainTTotal;
+  chainTimerStart=Date.now();
+
+  // Update time display
+  chainTInt=setInterval(()=>{
+    chainTLeft--;
+    const el=document.getElementById('chain-time');
+    if(el)el.textContent=chainTLeft;
+    // Floating timer
+    const ft=document.getElementById('floating-timer');
+    const fn=document.getElementById('ft-num');
+    if(ft&&fn){
+      fn.textContent=chainTLeft;
+      fn.style.color=chainTLeft<=5?'#E24B4A':chainTLeft<=Math.floor(chainTTotal*0.4)?'#EF9F27':'#FAC775';
+      if(chainTLeft<=5)ft.classList.add('urgent');
+      else ft.classList.remove('urgent');
+    }
+    if(chainTLeft<=5&&chainTLeft>0){sUrg();sDrip();}
+    if(chainTLeft<=0){clearInterval(chainTInt);clearInterval(chainTimerBarInt);chainTimeUp();}
+  },1000);
+
+  // Smooth timer bar
+  chainTimerBarInt=setInterval(()=>{
+    const elapsed=(Date.now()-chainTimerStart)/1000;
+    const pct=Math.max(0,100-(elapsed/chainTTotal*100));
+    const bar=document.getElementById('chain-timer-bar');
+    if(bar){
+      bar.style.width=pct+'%';
+      bar.style.background=pct<33?'#E24B4A':pct<66?'#EF9F27':'var(--pink)';
+    }
+  },100);
+}
+
+function chainInputChange(val){
+  const inp=document.getElementById('chain-input');
+  if(!inp)return;
+  const v=val.toLowerCase().trim();
+  if(v.startsWith(chainCurrentLetter)){
+    inp.style.borderColor='var(--green)';
+  } else if(v.length>0){
+    inp.style.borderColor='var(--red)';
+  } else {
+    inp.style.borderColor='var(--lp)';
+  }
+}
+
+function submitChainWord(){
+  if(!chainRunning)return;
+  const inp=document.getElementById('chain-input');
+  if(!inp)return;
+  const word=inp.value.toLowerCase().trim();
+  const fb=document.getElementById('chain-fb');
+  const minLen=CHAIN_MINLEN[chainDiff];
+
+  // Validations
+  if(!word){return;}
+  if(word.length<minLen){
+    showChainFb('❌ Too short! Min '+minLen+' letters.','#E24B4A');
+    sBad();inp.value='';return;
+  }
+  if(word[0]!==chainCurrentLetter){
+    showChainFb('❌ Must start with "'+chainCurrentLetter.toUpperCase()+'"!','#E24B4A');
+    sBad();inp.value='';return;
+  }
+  if(chainUsedWords.includes(word)){
+    showChainFb('❌ Already used "'+word+'"! Try another.','#BA7517');
+    sBad();inp.value='';return;
+  }
+  if(!CHAIN_DICT.has(word)){
+    showChainFb('❌ "'+word+'" is not a valid English word!','#E24B4A');
+    sBad();inp.value='';return;
+  }
+
+  // Valid word!
+  chainUsedWords.push(word);
+  chainScore++;
+  if(chainScore>chainBest)chainBest=chainScore;
+
+  // Update score display
+  document.getElementById('chain-score').textContent=chainScore;
+  document.getElementById('chain-best').textContent=chainBest;
+
+  // Add to history
+  const hist=document.getElementById('chain-history');
+  if(hist){
+    const span=document.createElement('span');
+    span.className='chain-word';
+    const lastL=word[word.length-1];
+    span.innerHTML=word.slice(0,-1)+'<span class="chain-letter">'+lastL.toUpperCase()+'</span>';
+    hist.appendChild(span);
+    hist.scrollTop=hist.scrollHeight;
+  }
+
+  // Set next letter
+  chainCurrentLetter=word[word.length-1];
+  updateChainLetter();
+
+  // Clear input and reset timer
+  inp.value='';inp.style.borderColor='var(--lp)';inp.focus();
+  showChainFb('✓ "'+word+'"! Next: '+chainCurrentLetter.toUpperCase(),'#1D9E75');
+  sSwim();sCr();
+
+  // Reset timer for next word
+  startChainTimer();
+}
+
+function showChainFb(msg, color){
+  const fb=document.getElementById('chain-fb');
+  if(fb){fb.textContent=msg;fb.style.color=color;}
+}
+
+function chainTimeUp(){
+  chainRunning=false;
+  clearInterval(chainTInt);
+  clearInterval(chainTimerBarInt);
+  sTU();
+  endChain();
+}
+
+async function endChain(){
+  chainRunning=false;
+  clearInterval(chainTInt);
+  clearInterval(chainTimerBarInt);
+
+  document.getElementById('chain-game').style.display='none';
+  const over=document.getElementById('chain-over');
+  if(over)over.style.display='block';
+
+  document.getElementById('chain-final-score').textContent=chainScore;
+
+  let stars='',msg='',icon='⛓️';
+  if(chainScore>=20){stars='⭐⭐⭐⭐⭐';msg='Unbelievable! Word Chain Legend! 🏆';icon='🏆';sWin();setTimeout(sLevelUp,900);}
+  else if(chainScore>=15){stars='⭐⭐⭐⭐💫';msg='Amazing chain! You\'re a vocabulary pro!';sWin();}
+  else if(chainScore>=10){stars='⭐⭐⭐💫💫';msg='Great chain! Keep expanding your vocabulary!';sLevelUp();}
+  else if(chainScore>=5) {stars='⭐⭐💫💫💫';msg='Good start! Try to keep the chain going longer!';}
+  else                   {stars='⭐💫💫💫💫';msg='Keep practicing! Every word counts!';}
+
+  const icon_el=document.getElementById('chain-over-icon');
+  if(icon_el)icon_el.textContent=icon;
+  const rstr=document.getElementById('chain-stars');
+  if(rstr)rstr.textContent=stars;
+  const rmsg=document.getElementById('chain-msg');
+  if(rmsg)rmsg.textContent=msg;
+
+  // Show used words
+  const uw=document.getElementById('chain-used-words');
+  if(uw&&chainUsedWords.length>0){
+    uw.textContent='Your chain: '+chainUsedWords.join(' → ');
+  }
+
+  // Save score
+  const entry={
+    name:CU?CU.name:'Guest',username:CU?CU.username:'guest',
+    type:CU?CU.type:'guest',score:chainScore,total:99,
+    diff:'chain-'+chainDiff,stars,date:new Date().toLocaleDateString()
+  };
+  showLoader('Saving score...');
+  await api({action:'saveScore',...entry});
+  hideLoader();
+  TICKER.notifyLocal(entry);
+  TICKER.resume();
+
+  const sa=document.getElementById('chain-save-area');
+  if(sa)sa.innerHTML=CU
+    ?`<div style="font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:14px">✅ Score saved! ${chainScore} words!</div>`
+    :`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:10px">Login to save your score!</p><div style="display:flex;gap:8px;justify-content:center"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up</button></div></div>`;
+
+  setTimeout(()=>over.scrollIntoView({behavior:'smooth'}),100);
+}
+
+function restartChain(){
+  document.getElementById('chain-over').style.display='none';
+  document.getElementById('chain-game').style.display='none';
+  document.getElementById('chain-start').style.display='block';
+  updateChainLocks();
+}
+
+</script>
+
+<script>
+// ================================================================
 // BLOCK 3 — QUESTION BANK (loaded last)
 // ================================================================
 
@@ -3787,6 +4253,99 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
       </div>
     </div>
     <div style="text-align:center;margin-top:4px"><button class="lnk" onclick="navTo('games')">← Back to Games</button></div>
+  </div>
+</div>
+
+
+<!-- ══ WORD CHAIN ══ -->
+<div id="sc-chain" class="screen">
+  <div class="hero">
+    <div class="rpill" id="chain-pill">Round 1</div>
+    <div class="htitle" style="font-size:clamp(20px,5vw,32px)">Word <span>Chain!</span> 🔗</div>
+    <div class="hsub" id="chain-diff-lbl">Type a word starting with the last letter!</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+
+    <!-- Start screen -->
+    <div id="chain-start" style="text-align:center;padding:16px 0">
+      <div style="font-size:clamp(40px,10vw,64px);margin-bottom:12px">🔗</div>
+      <div style="font-size:clamp(16px,4vw,22px);font-weight:900;color:var(--navy);margin-bottom:8px">Keep the chain alive!</div>
+      <div style="font-size:clamp(13px,3vw,15px);color:#5F5E5A;font-weight:700;line-height:1.8;margin-bottom:20px">
+        Type an English word that starts with<br>the <strong>last letter</strong> of the previous word.<br>
+        Wrong word or time out = chain breaks! ⛓️
+      </div>
+      <div class="diff-grid" style="margin-bottom:16px">
+        <div class="dc easy" onclick="launchChain('easy')">
+          <div class="di">🌱</div><div class="dt">Easy</div>
+          <div class="ds">15 sec · 3+ letters</div>
+        </div>
+        <div class="dc medium" onclick="checkChainAccess('medium')">
+          <div class="di">⚡</div><div class="dt">Medium</div>
+          <div class="ds">12 sec · 4+ letters</div>
+          <div id="chain-lock-medium" style="display:none;margin-top:6px;font-size:11px;background:#FAEEDA;color:#412402;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
+        </div>
+        <div class="dc hard" onclick="checkChainAccess('hard')">
+          <div class="di">🔥</div><div class="dt">Hard</div>
+          <div class="ds">8 sec · 5+ letters</div>
+          <div id="chain-lock-hard" style="display:none;margin-top:6px;font-size:11px;background:#FCEBEB;color:#791F1F;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
+        </div>
+      </div>
+      <button class="lnk" onclick="navTo('games')">← Back to Games</button>
+    </div>
+
+    <!-- Game area -->
+    <div id="chain-game" style="display:none">
+      <!-- Stats bar -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">🔗 <span id="chain-score">0</span> words</div>
+        <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#F4C0D1">🔥 Best: <span id="chain-best">0</span></div>
+        <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#B5D4F4">⏱ <span id="chain-time">15</span>s</div>
+      </div>
+
+      <!-- Current letter prompt -->
+      <div style="text-align:center;margin-bottom:10px">
+        <div style="font-size:clamp(13px,3vw,15px);font-weight:700;color:#888780;margin-bottom:4px">Type a word starting with:</div>
+        <div id="chain-letter" style="font-size:clamp(48px,12vw,80px);font-weight:900;color:var(--pink);line-height:1;text-transform:uppercase;text-shadow:0 4px 16px rgba(212,83,126,0.3)">A</div>
+      </div>
+
+      <!-- Chain history -->
+      <div id="chain-history" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:14px;min-height:36px;max-height:80px;overflow-y:auto"></div>
+
+      <!-- Input -->
+      <div style="position:relative;margin-bottom:12px">
+        <input id="chain-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+          placeholder="Type your word..."
+          style="width:100%;font-family:'Nunito',sans-serif;font-size:clamp(18px,5vw,26px);font-weight:800;padding:clamp(14px,3vw,18px) 60px clamp(14px,3vw,18px) clamp(14px,3vw,18px);border-radius:14px;border:3px solid var(--lp);background:#FFF8F0;color:var(--navy);outline:none;text-align:center;box-sizing:border-box;text-transform:lowercase"
+          oninput="chainInputChange(this.value)"
+          onkeydown="if(event.key==='Enter')submitChainWord()"/>
+        <button onclick="submitChainWord()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--pink);border:none;border-radius:10px;padding:8px 12px;font-size:18px;cursor:pointer;-webkit-tap-highlight-color:transparent">→</button>
+      </div>
+
+      <!-- Feedback -->
+      <div id="chain-fb" style="text-align:center;min-height:28px;font-size:clamp(13px,3vw,15px);font-weight:800;margin-bottom:8px"></div>
+
+      <!-- Timer bar -->
+      <div style="background:var(--lp);border-radius:99px;height:8px;overflow:hidden">
+        <div id="chain-timer-bar" style="height:8px;background:var(--pink);width:100%;transition:width 0.1s linear;border-radius:99px"></div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div id="chain-over" class="result" style="display:none">
+      <div id="chain-over-icon" style="font-size:56px;margin-bottom:8px">⛓️</div>
+      <div class="rlbl">Chain Length</div>
+      <div class="rsco" id="chain-final-score">0</div>
+      <div class="rstr" id="chain-stars"></div>
+      <div class="rmsg" id="chain-msg"></div>
+      <div id="chain-save-area"></div>
+      <div id="chain-used-words" style="margin-bottom:14px;font-size:12px;font-weight:700;color:#888780;text-align:center"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="restartChain()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('games')">All Games</button>
+        <button class="btn btn-out" onclick="navTo('lb')">Leaderboard</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
