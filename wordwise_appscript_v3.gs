@@ -312,32 +312,44 @@ function getScores(p) {
 }
 
 function getAllTimeScores(p) {
-  var rows   = getSheet(SHEET_SCORES).getDataRange().getValues();
-  var totals = {}; // username -> {name, type, total, rounds, best, username}
+  var rows = getSheet(SHEET_SCORES).getDataRange().getValues();
+  var players = {}; // username -> {name, type, total, rounds, best, games:{grammar,spell,shark,odd}}
 
   for (var i = 1; i < rows.length; i++) {
-    var diff = rows[i][5] || '';
-    // Filter by game if provided
-    if (p.game) {
-      var gameMatch = false;
-      if (p.game === 'grammar' && !diff.startsWith('spell') && !diff.startsWith('shark') && !diff.startsWith('odd')) gameMatch = true;
-      if (p.game === 'spell'   && diff.startsWith('spell'))   gameMatch = true;
-      if (p.game === 'shark'   && diff.startsWith('shark'))   gameMatch = true;
-      if (p.game === 'odd'     && diff.startsWith('odd'))     gameMatch = true;
-      if (!gameMatch) continue;
-    }
     var username = rows[i][2];
-    var score    = Number(rows[i][4]) || 0;
-    if (!totals[username]) {
-      totals[username] = {name:rows[i][1], username:username, type:rows[i][3], total:0, rounds:0, best:0};
+    if (!username || username === 'guest') continue;
+    var score = Number(rows[i][4]) || 0;
+    var diff  = rows[i][5] || '';
+
+    // Determine which game this score belongs to
+    var game = 'grammar';
+    if (diff.startsWith('spell')) game = 'spell';
+    else if (diff.startsWith('shark')) game = 'shark';
+    else if (diff.startsWith('odd'))   game = 'odd';
+
+    if (!players[username]) {
+      players[username] = {
+        name: rows[i][1], username: username, type: rows[i][3],
+        total: 0, rounds: 0, best: 0,
+        games: {grammar:false, spell:false, shark:false, odd:false}
+      };
     }
-    totals[username].total  += score;
-    totals[username].rounds += 1;
-    if (score > totals[username].best) totals[username].best = score;
+    players[username].total  += score;
+    players[username].rounds += 1;
+    players[username].games[game] = true;
+    if (score > players[username].best) players[username].best = score;
   }
 
-  // Convert to array and sort by total score
-  var result = Object.values(totals);
+  // Only include players who have played ALL 4 games
+  var result = [];
+  for (var u in players) {
+    var p2 = players[u];
+    var g  = p2.games;
+    if (g.grammar && g.spell && g.shark && g.odd) {
+      result.push(p2);
+    }
+  }
+
   result.sort(function(a,b){ return b.total - a.total; });
   return {success:true, scores:result.slice(0,10)};
 }
