@@ -334,6 +334,25 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
   -webkit-user-select:none;
   user-select:none;
 }
+
+/* ── WORD SCRAMBLE ── */
+.scramble-letters{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0;min-height:60px}
+.s-tile{width:clamp(40px,10vw,54px);height:clamp(40px,10vw,54px);background:var(--navy);color:#FAC775;font-family:'Nunito',sans-serif;font-size:clamp(18px,5vw,26px);font-weight:900;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;border:3px solid transparent;box-shadow:0 4px 10px rgba(29,43,85,0.25);-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
+.s-tile:hover{transform:translateY(-3px);box-shadow:0 7px 16px rgba(29,43,85,0.3)}
+.s-tile.selected{background:#F4C0D1;color:var(--navy);border-color:var(--pink);transform:translateY(-4px)}
+.s-tile.used{background:#ccc;color:#fff;cursor:default;transform:none;box-shadow:none}
+.s-tile.correct{background:var(--green);color:#fff;border-color:#085041}
+.s-tile.wrong{background:var(--red);color:#fff;border-color:#791F1F;animation:shake 0.4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.scramble-answer{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0;min-height:clamp(44px,11vw,60px)}
+.s-slot{width:clamp(40px,10vw,54px);height:clamp(40px,10vw,54px);border-radius:10px;border:2.5px dashed var(--lp);display:flex;align-items:center;justify-content:center;font-size:clamp(18px,5vw,26px);font-weight:900;color:var(--navy);background:#FFF8F0;cursor:pointer;transition:all 0.15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.s-slot:hover{border-color:var(--pink);background:#FFF0F5}
+.s-slot.filled{background:var(--navy);color:#FAC775;border-style:solid;border-color:var(--navy)}
+.scramble-hint{font-size:clamp(12px,3vw,15px);color:#5F5E5A;font-weight:700;text-align:center;margin-bottom:8px;line-height:1.5}
+.scramble-category{display:inline-block;font-size:11px;font-weight:800;padding:3px 12px;border-radius:99px;background:#FEF3E2;color:#412402;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.scramble-actions{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.s-action-btn{font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;padding:8px 18px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;transition:all 0.2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.s-action-btn:hover{background:var(--lp);color:var(--navy)}
 </style>
 </head>
 <body>
@@ -424,7 +443,26 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <div class="game-desc">Find the word that doesn't belong!</div>
       </div>
     </div>
+      <div class="game-card" onclick="startScramble()">
+        <div class="game-badge" style="background:#E07B39">SCRAMBLE</div>
+        <div class="game-icon">🔀</div>
+        <div class="game-title">Word Scramble</div>
+        <div class="game-desc">Unscramble the letters to form the correct word!</div>
+      </div>
+    </div>
     <div style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780;margin-top:8px">More games coming soon! 🚀</div>
+
+    <!-- Word Scramble LB -->
+    <div id="lb-scramble" class="lb-game-panel" style="display:none">
+      <div class="lbtabs">
+        <button class="lbt on" onclick="switchLBDiff('scramble','all',this)">🏆 All Time</button>
+        <button class="lbt easy" onclick="switchLBDiff('scramble','easy',this)">🌱 Easy</button>
+        <button class="lbt medium" onclick="switchLBDiff('scramble','medium',this)">⚡ Medium</button>
+        <button class="lbt hard" onclick="switchLBDiff('scramble','hard',this)">🔥 Hard</button>
+      </div>
+      <div id="lb-scramble-list" class="lb-list"></div>
+    </div>
+
   </div>
 </div>
 
@@ -584,6 +622,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <button class="lb-gtab" onclick="switchLBGame('spell',this)">🔤 Spelling</button>
       <button class="lb-gtab" onclick="switchLBGame('shark',this)">🦈 Shark</button>
       <button class="lb-gtab" onclick="switchLBGame('odd',this)">🎯 Odd One</button>
+      <button class="lb-gtab" onclick="switchLBGame('scramble',this)">🔀 Scramble</button>
     </div>
 
     <!-- Grammar Quiz LB -->
@@ -886,7 +925,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 // ================================================================
 // WORDWISE PH — GAS-ONLY BACKEND (no localStorage)
 // ================================================================
-const GAS = "https://script.google.com/macros/s/AKfycbyc1pwQgCGynSBXwn23-MqjaBc_qc-Jza8GFItluM_Z6AUodpzSg8RzNEPXbZk-_pwr2w/exec";
+const GAS = "https://script.google.com/macros/s/AKfycbzKjd-A_LiZRZwPaPnH79J7833WMrT7auZEhuHihLII7I8hJJx9dDUfABBrqdmYUOhKYQ/exec";
 let CU=null, snd=true, round=1, diff='easy';
 let selPlan=null, selPrice=0, aLB='easy';
 const TL={easy:30,medium:20,hard:10};
@@ -952,7 +991,7 @@ function navTo(s){
   if(s==='start')  updateDiffCards();
   // Show/hide floating timer
   const ft=document.getElementById('floating-timer');
-  const gameScreens=['quiz','spell','odd','shark'];
+  const gameScreens=['quiz','spell','odd','shark','scramble'];
   if(ft) ft.style.display=gameScreens.includes(s)?'flex':'none';
   // Show ticker on ALL pages always
   TICKER.setVisible(true);
@@ -1441,7 +1480,7 @@ function switchLBGame(game, el){
   lbCurrentGame = game;
   document.querySelectorAll('.lb-gtab').forEach(t=>t.classList.remove('on'));
   if(el)el.classList.add('on');
-  ['grammar','spell','shark','odd'].forEach(g=>{
+  ['grammar','spell','shark','odd','scramble'].forEach(g=>{
     const p=document.getElementById('lb-'+g);
     if(p)p.style.display=(g===game?'block':'none');
   });
@@ -3218,6 +3257,63 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
 
 <!-- LIVE SCORE TICKER -->
 <div id="score-ticker"></div>
+
+
+<!-- ══ WORD SCRAMBLE ══ -->
+<div id="sc-scramble" class="screen">
+  <div class="hero">
+    <div class="rpill" id="scramble-pill">Round 1</div>
+    <div class="strow" id="scramble-stars"></div>
+    <div class="htitle" style="font-size:clamp(20px,5vw,32px)">Word <span>Scramble!</span> 🔀</div>
+    <div class="hsub" id="scramble-diff-lbl">Unscramble the letters!</div>
+    <div class="pbar-w"><div class="pbar" id="scramble-pbar"></div></div>
+    <div class="plbl" id="scramble-plbl">0 of 10 answered</div>
+    <div class="tw">
+      <div class="tc"><svg viewBox="0 0 64 64"><circle class="ttr" cx="32" cy="32" r="26"/><circle class="tri" id="scramble-tri" cx="32" cy="32" r="26"/></svg><div class="tnum" id="scramble-tnum">20</div></div>
+      <div class="tlbl">seconds<br>left</div>
+    </div>
+  </div>
+  <div class="qmain">
+    <div id="scramble-container"></div>
+    <div class="sw"><button class="sbtn" id="scramble-sbtn" onclick="showScrambleResult()" disabled>See My Score!</button></div>
+    <div class="result" id="scramble-result">
+      <div class="rlbl">Your score</div>
+      <div class="rsco" id="scramble-rsco"></div>
+      <div class="rstr" id="scramble-rstr"></div>
+      <div class="rmsg" id="scramble-rmsg"></div>
+      <div id="scramble-save-area"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="retryScramble()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('games')">All Games</button>
+        <button class="btn btn-out" onclick="navTo('lb')">Leaderboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCRAMBLE DIFFICULTY ══ -->
+<div id="sc-scramble-pick" class="screen">
+  <div class="hero"><div class="htitle">Word <span>Scramble!</span></div><div class="hsub">Choose your difficulty</div></div>
+  <div class="wrap">
+    <div class="diff-grid">
+      <div class="dc easy" onclick="launchScramble('easy')">
+        <div class="di">🔀</div><div class="dt">Easy</div>
+        <div class="ds">10 words · 20 sec · 3–5 letters</div>
+      </div>
+      <div class="dc medium" onclick="checkScrambleAccess('medium')">
+        <div class="di">⚡</div><div class="dt">Medium</div>
+        <div class="ds">15 words · 15 sec · 5–7 letters</div>
+        <div id="scramble-lock-medium" style="display:none;margin-top:6px;font-size:11px;background:#FAEEDA;color:#412402;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
+      </div>
+      <div class="dc hard" onclick="checkScrambleAccess('hard')">
+        <div class="di">🔥</div><div class="dt">Hard</div>
+        <div class="ds">20 words · 10 sec · 7–12 letters</div>
+        <div id="scramble-lock-hard" style="display:none;margin-top:6px;font-size:11px;background:#FCEBEB;color:#791F1F;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:4px"><button class="lnk" onclick="navTo('games')">← Back to Games</button></div>
+  </div>
+</div>
 
 </body>
 </html>
