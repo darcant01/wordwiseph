@@ -1472,25 +1472,41 @@ async function loadLBGame(game, diff){
 
   const medals=['🥇','🥈','🥉'], cls=['gold','silver','bronze'];
 
-  // ── ALL TIME: aggregate total scores across all rounds ──
+  // ── ALL TIME: aggregate total scores — must play ALL 4 games ──
   if(diff==='all'){
-    const res = await api({action:'getAllTimeScores', game});
+    const res = await api({action:'getAllTimeScores'});
     if(!res.success||!res.scores?.length){
-      listEl.innerHTML='<div class="lb-empty">No scores yet!<br>Be the first to play! 🚀</div>';
+      listEl.innerHTML=`
+        <div class="lb-empty">
+          <div style="font-size:40px;margin-bottom:12px">🏆</div>
+          <div style="font-size:16px;font-weight:900;color:var(--navy);margin-bottom:8px">No All-Time Champions Yet!</div>
+          <div style="font-size:13px;font-weight:700;color:#888780;line-height:1.7">
+            To appear here, you must play<br>
+            <strong style="color:var(--navy)">ALL 4 games</strong> at least once:<br><br>
+            📝 Grammar Quiz &nbsp;·&nbsp; 🔤 Spell It Right<br>
+            🦈 Shark Typing &nbsp;·&nbsp; 🎯 Odd One Out
+          </div>
+        </div>`;
       return;
     }
-    listEl.innerHTML = res.scores.map((e,i)=>`
-      <div class="lbrow ${cls[i]||''}">
-        <div class="lbmedal">${medals[i]||'#'+(i+1)}</div>
-        <div class="lbinfo">
-          <div class="lbname">${e.name}<span class="lbbdg ${e.type}">${e.type==='kid'?'Kid':e.type==='adult'?'Adult':'Guest'}</span></div>
-          <div class="lbstars" style="font-size:12px;color:#888780">${e.rounds} round${e.rounds===1?'':'s'} played · Best: ${e.best}</div>
-        </div>
-        <div class="lbright">
-          <span class="lb-score-display" style="font-size:clamp(18px,4vw,24px)">${e.total}</span>
-          <div class="lbdate">total pts</div>
-        </div>
-      </div>`).join('');
+    listEl.innerHTML =
+      `<div style="text-align:center;font-size:11px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;padding:8px 0 12px">
+        Must play all 4 games to qualify · Ranked by total points
+      </div>` +
+      res.scores.map((e,i)=>`
+        <div class="lbrow ${cls[i]||''}">
+          <div class="lbmedal">${medals[i]||'#'+(i+1)}</div>
+          <div class="lbinfo">
+            <div class="lbname">${e.name}<span class="lbbdg ${e.type}">${e.type==='kid'?'Kid':e.type==='adult'?'Adult':'Guest'}</span></div>
+            <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">
+              📝🔤🦈🎯 · ${e.rounds} rounds · Best: ${e.best}pts
+            </div>
+          </div>
+          <div class="lbright">
+            <span class="lb-score-display" style="font-size:clamp(18px,4vw,26px)">${e.total}</span>
+            <div class="lbdate">total pts</div>
+          </div>
+        </div>`).join('');
     return;
   }
 
