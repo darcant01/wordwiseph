@@ -190,6 +190,7 @@ function doGet(e) {
       case "getChildren":        result = getChildren(p); break;
       case "setExpiry":          result = setExpiry(p); break;
       case "ping":               result = {success:true, message:"WordWise PH v3 running!"}; break;
+      case "getAllTimeScores":    result = getAllTimeScores(p); break;
       default:                   result = {success:false, error:"Unknown action: " + action};
     }
     return respond(result);
@@ -308,6 +309,37 @@ function getScores(p) {
   }
   scores.sort(function(a,b){return b.score-a.score;});
   return {success:true, scores:scores.slice(0,10)};
+}
+
+function getAllTimeScores(p) {
+  var rows   = getSheet(SHEET_SCORES).getDataRange().getValues();
+  var totals = {}; // username -> {name, type, total, rounds, best, username}
+
+  for (var i = 1; i < rows.length; i++) {
+    var diff = rows[i][5] || '';
+    // Filter by game if provided
+    if (p.game) {
+      var gameMatch = false;
+      if (p.game === 'grammar' && !diff.startsWith('spell') && !diff.startsWith('shark') && !diff.startsWith('odd')) gameMatch = true;
+      if (p.game === 'spell'   && diff.startsWith('spell'))   gameMatch = true;
+      if (p.game === 'shark'   && diff.startsWith('shark'))   gameMatch = true;
+      if (p.game === 'odd'     && diff.startsWith('odd'))     gameMatch = true;
+      if (!gameMatch) continue;
+    }
+    var username = rows[i][2];
+    var score    = Number(rows[i][4]) || 0;
+    if (!totals[username]) {
+      totals[username] = {name:rows[i][1], username:username, type:rows[i][3], total:0, rounds:0, best:0};
+    }
+    totals[username].total  += score;
+    totals[username].rounds += 1;
+    if (score > totals[username].best) totals[username].best = score;
+  }
+
+  // Convert to array and sort by total score
+  var result = Object.values(totals);
+  result.sort(function(a,b){ return b.total - a.total; });
+  return {success:true, scores:result.slice(0,10)};
 }
 
 function getProfile(p) {
