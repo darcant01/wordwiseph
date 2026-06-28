@@ -4528,6 +4528,10 @@ function showTracerLetter(idx){
     dot.className = 'tracer-dot ' + (i < idx ? 'done' : i === idx ? 'active' : '');
   });
 
+  // Init canvas for this letter
+  var tfb = document.getElementById('tracer-feedback');
+  if(tfb){tfb.textContent='';tfb.style.color='';}
+  setTimeout(function(){ initTracerCanvas(); }, 60);
   sClick();
 }
 
