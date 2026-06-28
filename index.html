@@ -5788,122 +5788,113 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
 <div id="sc-letter-tracer" class="screen">
   <div class="hero" style="background:linear-gradient(135deg,#FF6B9D,#FF8E53)">
     <div class="htitle" style="color:#fff">✏️ Letter <span style="color:#FFD93D">Tracer!</span></div>
-    <div class="hsub" style="color:rgba(255,255,255,0.9)">Learn to write letters and your name!</div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Learn to write letters!</div>
   </div>
   <div class="qmain" style="padding-top:0">
 
-    <!-- Mode selector -->
-    <div id="tracer-mode-pick" style="margin-bottom:16px">
-      <div style="font-size:13px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:10px">Choose what to trace:</div>
+    <!-- Mode picker -->
+    <div id="tracer-mode-pick">
+      <div style="font-size:13px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:12px">Choose what to trace:</div>
       <div style="display:flex;flex-direction:column;gap:10px">
 
-        <!-- Uppercase - Free -->
         <button onclick="launchTracerMode('upper')" style="font-family:Nunito,sans-serif;display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;border:2.5px solid #FF6B9D;background:#FFF0F7;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
           <div style="font-size:32px">🔠</div>
           <div style="flex:1">
-            <div style="font-size:16px;font-weight:900;color:#1D2B55">UPPERCASE Letters</div>
-            <div style="font-size:12px;font-weight:700;color:#888780">Trace A B C ... Z</div>
+            <div style="font-size:15px;font-weight:900;color:#1D2B55">UPPERCASE Letters</div>
+            <div style="font-size:12px;font-weight:700;color:#888780">Trace A B C ... Z — Free!</div>
           </div>
           <div style="background:#1D9E75;color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px">FREE</div>
         </button>
 
-        <!-- Lowercase - Paid -->
         <button onclick="launchTracerModePaid('lower')" style="font-family:Nunito,sans-serif;display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;border:2.5px solid #FFB347;background:#FFF8E8;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
           <div style="font-size:32px">🔡</div>
           <div style="flex:1">
-            <div style="font-size:16px;font-weight:900;color:#1D2B55">lowercase letters</div>
+            <div style="font-size:15px;font-weight:900;color:#1D2B55">lowercase letters</div>
             <div style="font-size:12px;font-weight:700;color:#888780">Trace a b c ... z</div>
           </div>
           <div style="background:#BA7517;color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px">⚡ PRO</div>
         </button>
 
-        <!-- Name tracer - Paid -->
         <button onclick="launchTracerModePaid('name')" style="font-family:Nunito,sans-serif;display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;border:2.5px solid #A855F7;background:#F5F0FF;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
           <div style="font-size:32px">✍️</div>
           <div style="flex:1">
-            <div style="font-size:16px;font-weight:900;color:#1D2B55">Trace My Name</div>
-            <div style="font-size:12px;font-weight:700;color:#888780">Type your name, then trace each letter!</div>
+            <div style="font-size:15px;font-weight:900;color:#1D2B55">Trace My Name</div>
+            <div style="font-size:12px;font-weight:700;color:#888780">Type your name, then trace it!</div>
           </div>
           <div style="background:#7C3AED;color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px">⚡ PRO</div>
         </button>
-
       </div>
 
-      <!-- Name input (hidden until name mode selected) -->
       <div id="tracer-name-input" style="display:none;margin-top:14px">
         <div style="font-size:13px;font-weight:800;color:#7C3AED;margin-bottom:8px;text-align:center">Type the name to trace:</div>
         <div style="display:flex;gap:8px">
           <input id="tracer-name-field" type="text" maxlength="12" autocorrect="off" autocapitalize="words" placeholder="e.g. Maria"
             style="flex:1;font-family:Nunito,sans-serif;font-size:18px;font-weight:800;padding:12px 16px;border-radius:12px;border:2.5px solid #A855F7;background:#F5F0FF;color:#1D2B55;outline:none"/>
-          <button onclick="startNameTrace()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:12px 18px;border-radius:12px;background:#A855F7;border:none;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">Go! ›</button>
+          <button onclick="startNameTrace()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:12px 18px;border-radius:12px;background:#A855F7;border:none;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">Go ›</button>
         </div>
+      </div>
+
+      <div style="text-align:center;margin-top:14px">
+        <button class="lnk" onclick="navTo('kids')">← Back to Kids Corner</button>
       </div>
     </div>
 
+    <!-- Game area (hidden until mode selected) -->
     <div id="tracer-game" style="display:none">
-      <!-- Back to mode picker -->
-      <div style="text-align:center;margin-bottom:10px">
-        <button onclick="backToTracerModes()" class="lnk" style="font-size:13px">← Choose different mode</button>
+      <div style="text-align:center;margin-bottom:8px">
+        <button onclick="backToTracerModes()" class="lnk" style="font-size:12px">← Choose mode</button>
       </div>
-      <!-- Mode badge -->
-      <div id="tracer-mode-badge" style="text-align:center;margin-bottom:10px"></div>
+      <div id="tracer-mode-badge" style="text-align:center;margin-bottom:8px"></div>
+
       <!-- Letter nav -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px">
-        <button onclick="tracerPrev()" style="font-family:Nunito,sans-serif;font-size:22px;font-weight:900;background:var(--navy);color:#fff;border:none;border-radius:12px;width:48px;height:48px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">‹</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px">
+        <button onclick="tracerPrev()" style="font-family:Nunito,sans-serif;font-size:22px;font-weight:900;background:var(--navy);color:#fff;border:none;border-radius:12px;width:48px;height:48px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;flex-shrink:0">‹</button>
         <div style="text-align:center;flex:1">
-          <div id="tracer-progress" style="font-size:12px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px">A of 26</div>
-          <div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin-top:4px" id="tracer-dots"></div>
+          <div id="tracer-progress" style="font-size:12px;font-weight:800;color:#888780">A — Letter 1 of 26</div>
+          <div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin-top:4px;max-height:30px;overflow:hidden" id="tracer-dots"></div>
         </div>
-        <button onclick="tracerNext()" style="font-family:Nunito,sans-serif;font-size:22px;font-weight:900;background:var(--navy);color:#fff;border:none;border-radius:12px;width:48px;height:48px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">›</button>
+        <button onclick="tracerNext()" style="font-family:Nunito,sans-serif;font-size:22px;font-weight:900;background:var(--navy);color:#fff;border:none;border-radius:12px;width:48px;height:48px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;flex-shrink:0">›</button>
       </div>
 
-      <!-- Letter display with canvas tracer -->
-      <div style="text-align:center;margin-bottom:14px">
-        <div style="display:flex;gap:14px;justify-content:center;align-items:flex-end;margin-bottom:10px">
+      <!-- Big letter display -->
+      <div style="text-align:center;margin-bottom:12px">
+        <div style="display:flex;gap:14px;justify-content:center;align-items:flex-end;margin-bottom:8px">
           <div id="tracer-letter-big" style="font-size:clamp(48px,13vw,80px);font-weight:900;color:var(--navy);line-height:1">A</div>
           <div id="tracer-letter-small" style="font-size:clamp(28px,8vw,50px);font-weight:900;color:#D4537E;line-height:1">a</div>
         </div>
 
-        <!-- Canvas tracer area -->
+        <!-- Canvas area -->
         <div style="position:relative;display:inline-block;margin-bottom:8px">
-          <!-- Guide letter (dotted) underneath -->
           <div id="tracer-guide-letter" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(110px,28vw,180px);font-weight:900;color:rgba(212,83,126,0.12);font-family:Nunito,sans-serif;pointer-events:none;user-select:none;line-height:1">A</div>
-          <!-- Break lines (dashed guide lines) -->
           <canvas id="tracer-guide-lines" style="position:absolute;inset:0;pointer-events:none"></canvas>
-          <!-- Drawing canvas -->
           <canvas id="tracer-canvas" style="border-radius:16px;background:#FFF8F0;border:3px solid #FFB347;display:block;touch-action:none;cursor:crosshair"></canvas>
         </div>
 
-        <!-- Controls -->
-        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px;flex-wrap:wrap">
+        <!-- Canvas controls -->
+        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:8px;flex-wrap:wrap">
           <button onclick="clearTracerCanvas()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 16px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">🗑️ Clear</button>
           <button onclick="checkTracerDrawing()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 20px;border-radius:99px;background:#FFB347;border:2px solid #FFB347;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">✅ Check!</button>
-          <button onclick="tracerPrev()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 14px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">‹</button>
-          <button onclick="tracerNext()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 14px;border-radius:99px;background:var(--pink);border:2px solid var(--pink);color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">›</button>
         </div>
-        <!-- Feedback area -->
+
         <div id="tracer-feedback" style="min-height:44px;text-align:center;margin-bottom:6px"></div>
         <div style="font-size:12px;font-weight:700;color:#888780">✏️ Trace the letter then tap Check!</div>
       </div>
 
-      <!-- Word example -->
-      <div id="tracer-word-card" style="background:linear-gradient(135deg,#FFF0F7,#FFF8E8);border-radius:16px;border:2px solid #FFB347;padding:16px;text-align:center;margin-bottom:14px">
-        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#888780;margin-bottom:8px">Starts with this letter</div>
-        <div id="tracer-word-emoji" style="font-size:clamp(36px,9vw,56px);margin-bottom:6px">🍎</div>
-        <div id="tracer-word" style="font-size:clamp(20px,5vw,30px);font-weight:900;color:var(--navy)">Apple</div>
-        <div id="tracer-word-letters" style="display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap"></div>
+      <!-- Word hint -->
+      <div id="tracer-word-card" style="background:linear-gradient(135deg,#FFF0F7,#FFF8E8);border-radius:16px;border:2px solid #FFB347;padding:14px;text-align:center;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#888780;margin-bottom:6px">Starts with this letter</div>
+        <div id="tracer-word-emoji" style="font-size:clamp(30px,8vw,48px);margin-bottom:4px">🍎</div>
+        <div id="tracer-word" style="font-size:clamp(18px,5vw,26px);font-weight:900;color:var(--navy)">Apple</div>
+        <div id="tracer-word-letters" style="display:flex;gap:6px;justify-content:center;margin-top:8px;flex-wrap:wrap"></div>
       </div>
 
-      <!-- Stroke instructions -->
-      <div style="background:var(--n2);border-radius:14px;padding:12px 16px;text-align:center;margin-bottom:14px">
+      <!-- Instructions -->
+      <div style="background:var(--n2);border-radius:14px;padding:12px 16px;text-align:center;margin-bottom:12px">
         <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:4px">✏️ How to write:</div>
         <div id="tracer-instructions" style="font-size:clamp(12px,3vw,14px);font-weight:700;color:#5F5E5A;line-height:1.7"></div>
       </div>
+    </div>
 
-      <div style="text-align:center;margin-top:6px">
-        <button class="lnk" onclick="navTo('kids')">← Back to Kids Corner</button>
-      </div>
-    </div><!-- end tracer-game -->
   </div>
 </div>
 
