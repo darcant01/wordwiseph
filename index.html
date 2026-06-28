@@ -2183,6 +2183,43 @@ function togglePw(id, btn){
   inp.focus();
 }
 
+
+// ── KIDS CORNER SOUNDS ───────────────────────────────────────
+function sKidCorrect(){
+  if(!snd)return;
+  // Happy bubble pop
+  [600,800,1000,1200].forEach((f,i)=>tone(f,0.1,'sine',0.4,i*0.06));
+  noise(0.05,2000,0.08,0.2);
+}
+function sKidWrong(){
+  if(!snd)return;
+  tone(300,0.12,'sawtooth',0.3);
+  tone(250,0.12,'sawtooth',0.25,0.1);
+}
+function sKidStar(){
+  if(!snd)return;
+  // Sparkle sound
+  [1047,1319,1568,2093].forEach((f,i)=>tone(f,0.12,'sine',0.35,i*0.08));
+  noise(0.1,3000,0.1,0.3);
+}
+function sKidTap(){
+  if(!snd)return;
+  tone(700,0.06,'sine',0.25);
+}
+function sKidFinish(){
+  if(!snd)return;
+  // Big happy fanfare for kids
+  const melody=[523,659,784,659,784,1047];
+  const times=[0,0.12,0.24,0.36,0.48,0.6];
+  melody.forEach((f,i)=>tone(f,0.2,'sine',0.5,times[i]));
+  noise(0.2,1500,0.12,0.65);
+}
+function sKidWhoops(){
+  if(!snd)return;
+  // Time up / wrong answer for kids
+  [400,350,300].forEach((f,i)=>tone(f,0.15,'sawtooth',0.3,i*0.1));
+}
+
 // ── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',function(){
   buildHdr();
@@ -4490,7 +4527,7 @@ function showTracerLetter(idx){
 
 function tracerNext(){
   if(tracerIdx < 25){
-    sOk();
+    sKidTap();
     showTracerLetter(tracerIdx + 1);
   } else {
     sWin();
@@ -4562,6 +4599,14 @@ function launchABCOrder(){
     abcTLeft--;
     const el=document.getElementById('abc-time');
     if(el)el.textContent=abcTLeft;
+    const ft=document.getElementById('floating-timer');
+    const fn=document.getElementById('ft-num');
+    if(ft&&fn){
+      fn.textContent=abcTLeft;
+      fn.style.color=abcTLeft<=10?'#E24B4A':abcTLeft<=20?'#EF9F27':'#FAC775';
+      if(abcTLeft<=10)ft.classList.add('urgent');
+      else ft.classList.remove('urgent');
+    }
     if(abcTLeft<=10)sUrg();
     if(abcTLeft<=0){clearInterval(abcTInt);endABCOrder();}
   },1000);
@@ -4605,10 +4650,11 @@ function tapABCLetter(l){
     if(fb){fb.textContent='✅ '+l+'! Great job!';fb.style.color='#1D9E75';}
     // Say the letter
     speak(l, 0.75, 1.2);
-    sOk();sCr();
+    sKidCorrect();
     if(abcTarget>=26){
       clearInterval(abcTInt);
       setTimeout(()=>speak('Yay!', 0.9, 1.3), 400);
+      sKidFinish();
       endABCOrder();
     } else {
       updateABCTarget();
@@ -4620,9 +4666,8 @@ function tapABCLetter(l){
       setTimeout(()=>tile.classList.remove('wrong'),500);
     }
     if(fb){fb.textContent='❌ Find '+letters[abcTarget]+' first!';fb.style.color='#E24B4A';}
-    // Repeat the target letter
     setTimeout(()=>speak(letters[abcTarget], 0.75, 1.2), 200);
-    sBad();
+    sKidWrong();
   }
 }
 
@@ -4735,6 +4780,14 @@ function startMLTimer(){
 
 function updMLT(){
   const el=document.getElementById('ml-time');if(el)el.textContent=mlTLeft;
+  const ft=document.getElementById('floating-timer');
+  const fn=document.getElementById('ft-num');
+  if(ft&&fn){
+    fn.textContent=mlTLeft;
+    fn.style.color=mlTLeft<=5?'#E24B4A':mlTLeft<=8?'#EF9F27':'#FAC775';
+    if(mlTLeft<=5)ft.classList.add('urgent');
+    else ft.classList.remove('urgent');
+  }
 }
 
 function autoML(){
@@ -4756,8 +4809,8 @@ function ansML(idx,btn,chosen,correct){
   const ok=chosen===correct;
   mlAns[idx]=ok;
   const fb=document.getElementById(`mlfb${idx}`);
-  if(ok){if(fb){fb.textContent='✅ Correct! The letter is '+correct+'!';fb.className='fb show correct';}sOk();sCr();}
-  else{btn.classList.add('wrong');if(fb){fb.textContent='❌ It\'s '+correct+'!';fb.className='fb show wrong';}sBad();}
+  if(ok){if(fb){fb.textContent='✅ Correct! The letter is '+correct+'!';fb.className='fb show correct';}sKidCorrect();speak(correct, 0.8, 1.2);}
+  else{btn.classList.add('wrong');if(fb){fb.textContent='❌ It\'s '+correct+'!';fb.className='fb show wrong';}sKidWrong();speak(correct, 0.8, 1.2);}
   mlAnswered++;
   document.getElementById('ml-score').textContent=mlAns.filter(a=>a).length;
   if(mlAnswered<10){setTimeout(()=>{mlCQ++;buildMLQuestion(mlCQ);startMLTimer();},900);}
@@ -4770,7 +4823,7 @@ function showMLResult(){
   const pct=Math.round(score/10*100);
   document.getElementById('ml-rsco').textContent=score+'/10';
   let stars='',msg='';
-  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You found every missing letter! 🏆';sWin();}
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You found every missing letter! 🏆';sKidFinish();speak('Perfect!',0.9,1.3);}
   else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost perfect!';sWin();}
   else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good job! Keep practicing your letters!';}
   else{stars='⭐⭐💫💫💫';msg='Keep trying! You can do it!';}
@@ -4895,10 +4948,10 @@ function submitRhyme(idx){
   const fb=document.getElementById(`rhfb${idx}`);
   if(correct){
     if(fb){fb.textContent='✅ Perfect! All rhymes found!';fb.className='fb show correct';}
-    rhAns[idx]=true;sOk();sCr();
+    rhAns[idx]=true;sKidStar();
   } else {
     if(fb){fb.textContent='❌ Some rhymes were missed! Green = rhymes, Orange = missed, Red = wrong.';fb.className='fb show wrong';}
-    rhAns[idx]=false;sBad();
+    rhAns[idx]=false;sKidWrong();
   }
   rhAnswered++;
   document.getElementById('rh-score').textContent=rhAns.filter(a=>a).length;
@@ -4916,6 +4969,14 @@ function startRhymeTimer(){
   rhTInt=setInterval(()=>{
     rhTLeft--;
     const t=document.getElementById('rh-time');if(t)t.textContent=rhTLeft;
+    const ft=document.getElementById('floating-timer');
+    const fn=document.getElementById('ft-num');
+    if(ft&&fn){
+      fn.textContent=rhTLeft;
+      fn.style.color=rhTLeft<=5?'#E24B4A':rhTLeft<=10?'#EF9F27':'#FAC775';
+      if(rhTLeft<=5)ft.classList.add('urgent');
+      else ft.classList.remove('urgent');
+    }
     if(rhTLeft<=5&&rhTLeft>0)sUrg();
     if(rhTLeft<=0){clearInterval(rhTInt);sTU();submitRhyme(rhCQ);}
   },1000);
