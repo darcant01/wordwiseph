@@ -4528,6 +4528,13 @@ function showTracerLetter(idx){
     dot.className = 'tracer-dot ' + (i < idx ? 'done' : i === idx ? 'active' : '');
   });
 
+  // Update guide letter and setup canvas
+  var guide = document.getElementById('tracer-guide-letter');
+  if(guide) guide.textContent = d.letter;
+  var tfb = document.getElementById('tracer-feedback');
+  if(tfb) tfb.textContent = '';
+  setTimeout(function(){ setupTracerCanvas(); }, 50);
+
   sClick();
 }
 
