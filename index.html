@@ -4484,6 +4484,8 @@ function showTracerLetter(idx){
   });
 
   sClick();
+  // Speak the letter and word
+  setTimeout(()=>speak(d.letter+'. '+d.letter+' is for '+d.word+'. '+d.letter+'.', 0.8, 1.3), 300);
 }
 
 function tracerNext(){
@@ -4492,9 +4494,8 @@ function tracerNext(){
     showTracerLetter(tracerIdx + 1);
   } else {
     sWin();
-    alert('🎉 Amazing! You learned all 26 letters of the alphabet!');
-    tracerIdx = 0;
-    showTracerLetter(0);
+    speak('Amazing! You learned all 26 letters of the alphabet! You are a superstar!', 0.85, 1.3);
+    setTimeout(()=>{tracerIdx=0;showTracerLetter(0);}, 3000);
   }
 }
 
@@ -4508,8 +4509,37 @@ function tracerPrev(){
 // ── ABC ORDER GAME ─────────────────────────────────────────────
 let abcScore=0, abcTarget=0, abcTLeft=60, abcTInt=null, abcRunning=false;
 
+// ── TEXT TO SPEECH HELPER ──────────────────────────────────────
+function speak(text, rate, pitch){
+  if(!window.speechSynthesis) return;
+  window.speechSynthesis.cancel(); // stop any current speech
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang  = 'en-US';
+  utt.rate  = rate  || 0.8;  // slightly slow for kids
+  utt.pitch = pitch || 1.2;  // slightly higher pitch, friendly
+  utt.volume = 1;
+  // Try to use a female voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const female = voices.find(v=>v.lang.startsWith('en')&&(v.name.includes('Female')||v.name.includes('Woman')||v.name.includes('Samantha')||v.name.includes('Karen')||v.name.includes('Victoria')||v.name.includes('Google US English Female')));
+  if(female) utt.voice = female;
+  window.speechSynthesis.speak(utt);
+}
+
+// Letter names and phonics for voiceover
+const LETTER_NAMES = {
+  A:'A — Ah!', B:'B — Buh!', C:'C — Cuh!', D:'D — Duh!',
+  E:'E — Eh!',  F:'F — Fuh!', G:'G — Guh!', H:'H — Huh!',
+  I:'I — Ih!',  J:'J — Juh!', K:'K — Kuh!', L:'L — Luh!',
+  M:'M — Muh!', N:'N — Nuh!', O:'O — Oh!',  P:'P — Puh!',
+  Q:'Q — Kwuh!',R:'R — Ruh!', S:'S — Sss!', T:'T — Tuh!',
+  U:'U — Uh!',  V:'V — Vuh!', W:'W — Wuh!', X:'X — Ks!',
+  Y:'Y — Yuh!', Z:'Z — Zuh!'
+};
+
 function startABCOrder(){
   navTo('abc-order');
+  // Preload voices
+  if(window.speechSynthesis) window.speechSynthesis.getVoices();
   launchABCOrder();
 }
 
@@ -4523,6 +4553,8 @@ function launchABCOrder(){
   buildABCGrid();
   updateABCTarget();
   sStart();
+  // Announce first letter
+  setTimeout(()=>speakABCTarget(0), 600);
   clearInterval(abcTInt);
   abcTInt=setInterval(()=>{
     abcTLeft--;
@@ -4531,6 +4563,14 @@ function launchABCOrder(){
     if(abcTLeft<=10)sUrg();
     if(abcTLeft<=0){clearInterval(abcTInt);endABCOrder();}
   },1000);
+}
+
+function speakABCTarget(idx){
+  const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  if(idx<26){
+    const l=letters[idx];
+    speak('Find the letter '+l+'. '+l+' says '+LETTER_NAMES[l], 0.85, 1.3);
+  }
 }
 
 function buildABCGrid(){
@@ -4547,6 +4587,8 @@ function updateABCTarget(){
   const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const el=document.getElementById('abc-target');
   if(el&&abcTarget<26) el.textContent=letters[abcTarget];
+  // Speak the new target letter
+  setTimeout(()=>speakABCTarget(abcTarget), 300);
 }
 
 function tapABCLetter(l){
@@ -4555,19 +4597,30 @@ function tapABCLetter(l){
   const tile=document.getElementById('abc-tile-'+l);
   const fb=document.getElementById('abc-fb');
   if(l===letters[abcTarget]){
+    // Correct!
     if(tile){tile.classList.add('used');tile.textContent='✓';}
     abcScore++; abcTarget++;
     document.getElementById('abc-score').textContent=abcScore;
-    if(fb){fb.textContent='✅ '+l+'!';fb.style.color='#1D9E75';}
+    if(fb){fb.textContent='✅ '+l+'! Great job!';fb.style.color='#1D9E75';}
+    // Speak: "Great! B!" then new target
+    speak(l+'! Great job!', 1.0, 1.4);
     sOk();sCr();
-    if(abcTarget>=26){clearInterval(abcTInt);endABCOrder();}
-    else updateABCTarget();
+    if(abcTarget>=26){
+      clearInterval(abcTInt);
+      setTimeout(()=>speak('Amazing! You found all 26 letters! You are a superstar!', 0.85, 1.3), 400);
+      endABCOrder();
+    } else {
+      updateABCTarget();
+    }
   } else {
+    // Wrong!
     if(tile){
       tile.classList.add('wrong');
       setTimeout(()=>tile.classList.remove('wrong'),500);
     }
     if(fb){fb.textContent='❌ Find '+letters[abcTarget]+' first!';fb.style.color='#E24B4A';}
+    // Speak the correct target again
+    speak('Try again! Find the letter '+letters[abcTarget], 0.85, 1.2);
     sBad();
   }
 }
@@ -4575,17 +4628,19 @@ function tapABCLetter(l){
 function endABCOrder(){
   abcRunning=false;
   clearInterval(abcTInt);
+  window.speechSynthesis && window.speechSynthesis.cancel();
   document.getElementById('abc-game').style.display='none';
   document.getElementById('abc-over').style.display='block';
   document.getElementById('abc-final').textContent=abcScore+'/26';
   const pct=Math.round(abcScore/26*100);
-  let stars='',msg='';
-  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You know all your ABCs! 🏆';sWin();}
-  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost all letters!';sWin();}
-  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Great job! Keep practicing!';}
-  else{stars='⭐⭐💫💫💫';msg='Good try! Practice your ABCs more!';}
+  let stars='',msg='',speech='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You know all your ABCs! 🏆';speech='Perfect score! You know all your ABCs! You are amazing!';sWin();}
+  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost all letters!';speech='Wow! Almost perfect! Great job!';sWin();}
+  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Great job! Keep practicing!';speech='Good job! Keep practicing your ABCs!';}
+  else{stars='⭐⭐💫💫💫';msg='Good try! Practice your ABCs more!';speech='Good try! Keep practicing your alphabet!';}
   document.getElementById('abc-stars').textContent=stars;
   document.getElementById('abc-msg').textContent=msg;
+  setTimeout(()=>speak(speech, 0.85, 1.3), 500);
 }
 
 // ── MISSING LETTER GAME ────────────────────────────────────────
