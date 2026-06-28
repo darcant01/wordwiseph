@@ -5657,6 +5657,65 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
 <!-- ══ WORD SPRINT ══ -->
 
 
+<!-- ══ WORD SPRINT ══ -->
+<div id="sc-sprint" class="screen">
+  <div class="hero">
+    <div class="rpill" id="sprint-pill">Get Ready!</div>
+    <div class="htitle" style="font-size:clamp(20px,5vw,32px)">Word <span>Sprint!</span> 🏃</div>
+    <div class="hsub" id="sprint-diff-lbl">Type as many words as you can!</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div id="sprint-start" style="text-align:center;padding:8px 0">
+      <div style="font-size:clamp(36px,9vw,56px);margin-bottom:10px">🏃</div>
+      <div style="font-size:clamp(15px,3.5vw,20px);font-weight:900;color:var(--navy);margin-bottom:6px">Type category words fast!</div>
+      <div style="font-size:clamp(12px,2.5vw,14px);color:#5F5E5A;font-weight:700;line-height:1.7;margin-bottom:16px">
+        A category appears — type as many words that belong to it as you can in <strong>60 seconds</strong>. Each correct unique word = 1 point! 🎯
+      </div>
+      <div class="diff-grid" style="margin-bottom:14px">
+        <div class="dc easy" onclick="launchSprint('easy')"><div class="di">🌱</div><div class="dt">Easy</div><div class="ds">Simple categories · 60 sec</div></div>
+        <div class="dc medium" onclick="checkSprintAccess('medium')"><div class="di">⚡</div><div class="dt">Medium</div><div class="ds">Harder categories · 60 sec</div><div id="sprint-lock-medium" style="display:none;margin-top:6px;font-size:11px;background:#FAEEDA;color:#412402;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div></div>
+        <div class="dc hard" onclick="checkSprintAccess('hard')"><div class="di">🔥</div><div class="dt">Hard</div><div class="ds">Tricky categories · 60 sec</div><div id="sprint-lock-hard" style="display:none;margin-top:6px;font-size:11px;background:#FCEBEB;color:#791F1F;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div></div>
+      </div>
+      <button class="lnk" onclick="navTo('games')">← Back to Games</button>
+    </div>
+    <div id="sprint-game" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px">
+        <div style="background:var(--navy);border-radius:99px;padding:8px 18px;font-size:clamp(15px,4vw,20px);font-weight:900;color:#FAC775">⭐ <span id="sprint-score">0</span></div>
+        <div style="flex:1;background:var(--lp);border-radius:99px;height:12px;overflow:hidden"><div id="sprint-timer-bar" style="height:12px;background:var(--pink);width:100%;transition:width 1s linear;border-radius:99px"></div></div>
+        <div style="background:var(--navy);border-radius:99px;padding:8px 18px;font-size:clamp(15px,4vw,20px);font-weight:900;color:#B5D4F4">⏱ <span id="sprint-time">60</span>s</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#8E44AD,#6C3483);border-radius:clamp(14px,3vw,20px);padding:clamp(14px,3vw,20px);text-align:center;margin-bottom:14px;box-shadow:0 6px 20px rgba(142,68,173,0.3)">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.7);margin-bottom:6px">Category</div>
+        <div id="sprint-category" style="font-size:clamp(22px,6vw,36px);font-weight:900;color:#fff">Animals</div>
+        <div id="sprint-cat-emoji" style="font-size:clamp(28px,7vw,44px);margin-top:4px">🐾</div>
+      </div>
+      <div style="position:relative;margin-bottom:10px">
+        <input id="sprint-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Type a word..."
+          style="width:100%;font-family:'Nunito',sans-serif;font-size:clamp(18px,5vw,24px);font-weight:800;padding:clamp(14px,3vw,18px) 64px clamp(14px,3vw,18px) clamp(14px,3vw,18px);border-radius:14px;border:3px solid var(--lp);background:#FFF8F0;color:var(--navy);outline:none;text-align:center;box-sizing:border-box"
+          oninput="sprintCheck(this.value)" onkeydown="if(event.key==='Enter')sprintSubmit()"/>
+        <button onclick="sprintSubmit()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--pink);border:none;border-radius:10px;width:46px;height:46px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;-webkit-tap-highlight-color:transparent;touch-action:manipulation">→</button>
+      </div>
+      <div id="sprint-fb" style="text-align:center;font-size:clamp(13px,3vw,15px);font-weight:800;min-height:26px;margin-bottom:10px"></div>
+      <div style="font-size:12px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Your words:</div>
+      <div id="sprint-words" style="display:flex;flex-wrap:wrap;gap:6px;min-height:40px;max-height:120px;overflow-y:auto;background:#FFF8F0;border-radius:12px;border:2px solid var(--lp);padding:10px"></div>
+    </div>
+    <div id="sprint-over" class="result" style="display:none">
+      <div id="sprint-over-icon" style="font-size:56px;margin-bottom:8px">🏃</div>
+      <div class="rlbl">Words typed</div>
+      <div class="rsco" id="sprint-final-score">0</div>
+      <div class="rstr" id="sprint-stars"></div>
+      <div class="rmsg" id="sprint-msg"></div>
+      <div id="sprint-save-area"></div>
+      <div id="sprint-word-list" style="margin:10px 0;font-size:12px;font-weight:700;color:#888780;text-align:center"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="restartSprint()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('games')">All Games</button>
+        <button class="btn btn-out" onclick="navTo('lb')">Leaderboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ══ KIDS CORNER ══ -->
 <div id="sc-kids" class="screen">
   <div class="hero" style="background:linear-gradient(135deg,#FF6B9D,#FFB347,#FFD93D)">
