@@ -4477,154 +4477,16 @@ const LETTERS_DATA = [
 
 let tracerIdx = 0;
 
-// ── TRACER MODES ──────────────────────────────────────────────
-let tracerMode = 'upper';   // 'upper' | 'lower' | 'name'
-let tracerNameLetters = []; // letters for name mode
-let tracerNameIdx = 0;
-
 function startLetterTracer(){
-  try{
-    tracerIdx = 0;
-    navTo('letter-tracer');
-    document.getElementById('tracer-mode-pick').style.display='block';
-    document.getElementById('tracer-game').style.display='none';
-    document.getElementById('tracer-name-input').style.display='none';
-  }catch(e){
-    alert('Letter Tracer error: '+e.message);
-  }
-}
-
-function launchTracerModePaid(mode){
-  const sub = CU?.subscription||'free';
-  const hasAccess = CU && (sub==='basic'||sub==='premium');
-  if(!hasAccess){
-    if(!CU){
-      if(confirm('This mode requires a subscription.
-Login to your account first!
-
-Go to Login?')) navTo('login');
-    } else {
-      if(confirm('lowercase and Name Trace are available on Basic & Premium plans.
-
-Upgrade now?')) navTo('pricing');
-    }
-    return;
-  }
-  launchTracerMode(mode);
-}
-
-function launchTracerMode(mode){
-  tracerMode = mode;
-  if(mode==='name'){
-    // Show name input
-    document.getElementById('tracer-name-input').style.display='block';
-    document.getElementById('tracer-name-field').value='';
-    document.getElementById('tracer-name-field').focus();
-    return;
-  }
-  // Start tracing
-  document.getElementById('tracer-mode-pick').style.display='none';
-  document.getElementById('tracer-game').style.display='block';
-  document.getElementById('tracer-name-input').style.display='none';
   tracerIdx = 0;
+  navTo('letter-tracer');
   buildTracerDots();
-  // Set mode badge
-  const badge = document.getElementById('tracer-mode-badge');
-  if(badge){
-    if(mode==='upper') badge.innerHTML='<span style="background:#FF6B9D;color:#fff;font-size:12px;font-weight:800;padding:4px 14px;border-radius:99px">🔠 UPPERCASE</span>';
-    if(mode==='lower') badge.innerHTML='<span style="background:#FFB347;color:#fff;font-size:12px;font-weight:800;padding:4px 14px;border-radius:99px">🔡 lowercase</span>';
-  }
-  setTimeout(()=>showTracerLetter(0), 100);
-}
-
-function startNameTrace(){
-  const inp = document.getElementById('tracer-name-field');
-  if(!inp) return;
-  const name = inp.value.trim().toUpperCase().replace(/[^A-Z]/g,'');
-  if(name.length < 1){ alert('Please type a name first!'); return; }
-  tracerNameLetters = name.split('');
-  tracerNameIdx = 0;
-  tracerMode = 'name';
-  document.getElementById('tracer-mode-pick').style.display='none';
-  document.getElementById('tracer-game').style.display='block';
-  document.getElementById('tracer-name-input').style.display='none';
-  // Build dots for name letters
-  buildNameTracerDots();
-  const badge = document.getElementById('tracer-mode-badge');
-  if(badge) badge.innerHTML='<span style="background:#A855F7;color:#fff;font-size:12px;font-weight:800;padding:4px 14px;border-radius:99px">✍️ '+inp.value.trim().toUpperCase()+'</span>';
-  setTimeout(()=>showNameLetter(0), 100);
-}
-
-function buildNameTracerDots(){
-  const sr = document.getElementById('tracer-dots');
-  if(!sr) return;
-  sr.innerHTML = tracerNameLetters.map((l,i)=>
-    `<span class="tracer-dot ${i===0?'active':''}" id="tdot${i}" style="background:${i===0?'var(--pink)':'var(--lp)'}">${l}</span>`
-  ).join('');
-}
-
-function showNameLetter(idx){
-  tracerNameIdx = idx;
-  const letter = tracerNameLetters[idx];
-  if(!letter) return;
-
-  const prog = document.getElementById('tracer-progress');
-  if(prog) prog.textContent = 'Letter ' + (idx+1) + ' of ' + tracerNameLetters.length + ' — ' + letter;
-
-  const big = document.getElementById('tracer-letter-big');
-  if(big) big.textContent = letter;
-
-  const small = document.getElementById('tracer-letter-small');
-  if(small) small.textContent = letter.toLowerCase();
-
-  const guide = document.getElementById('tracer-guide-letter');
-  if(guide) guide.textContent = letter;
-
-  // Find letter data for hint
-  const d = LETTERS_DATA.find(x=>x.letter===letter);
-  const emoji = document.getElementById('tracer-word-emoji');
-  const word  = document.getElementById('tracer-word');
-  const boxes = document.getElementById('tracer-word-letters');
-  const instr = document.getElementById('tracer-instructions');
-  if(d){
-    if(emoji) emoji.textContent = d.emoji;
-    if(word)  word.textContent  = d.word;
-    if(boxes) boxes.innerHTML = d.word.split('').map(l=>
-      `<div class="word-letter-box ${l.toUpperCase()===letter?'blank':''}">${l.toUpperCase()===letter?'?':l.toUpperCase()}</div>`
-    ).join('');
-    if(instr) instr.textContent = d.instructions;
-  } else {
-    if(emoji) emoji.textContent = '✍️';
-    if(word)  word.textContent  = letter;
-    if(boxes) boxes.innerHTML = `<div class="word-letter-box blank">${letter}</div>`;
-    if(instr) instr.textContent = 'Trace this letter carefully!';
-  }
-
-  // Update name dots
-  document.querySelectorAll('.tracer-dot').forEach((dot,i)=>{
-    dot.style.background = i<idx?'#1D9E75':i===idx?'var(--pink)':'var(--lp)';
-    dot.textContent = tracerNameLetters[i]||'';
-  });
-
-  const fb = document.getElementById('tracer-feedback');
-  if(fb) fb.innerHTML='';
-  setupTracerCanvas();
-  clearTracerCanvas();
-
-  sKidTap();
-  setTimeout(()=>speak(letter, 0.75, 1.1), 300);
-}
-
-function backToTracerModes(){
-  document.getElementById('tracer-mode-pick').style.display='block';
-  document.getElementById('tracer-game').style.display='none';
-  document.getElementById('tracer-name-input').style.display='none';
+  showTracerLetter(0);
 }
 
 function buildTracerDots(){
   const el = document.getElementById('tracer-dots');
   if(!el) return;
-  if(tracerMode==='name') return; // name dots handled separately
   el.innerHTML = LETTERS_DATA.map((_, i) =>
     `<span class="tracer-dot ${i<tracerIdx?'done':i===tracerIdx?'active':''}" id="tdot${i}"></span>`
   ).join('');
@@ -4643,14 +4505,6 @@ function showTracerLetter(idx){
 
   const small = document.getElementById('tracer-letter-small');
   if(small) small.textContent = d.letter.toLowerCase();
-
-  const guide = document.getElementById('tracer-guide-letter');
-  if(guide) guide.textContent = tracerMode==='lower' ? d.letter.toLowerCase() : d.letter;
-  // Show lowercase in big display too
-  const bigEl = document.getElementById('tracer-letter-big');
-  if(bigEl) bigEl.textContent = tracerMode==='lower' ? d.letter.toLowerCase() : d.letter;
-  const smallEl = document.getElementById('tracer-letter-small');
-  if(smallEl) smallEl.textContent = tracerMode==='lower' ? d.letter : d.letter.toLowerCase();
 
   const emoji = document.getElementById('tracer-word-emoji');
   if(emoji) emoji.textContent = d.emoji;
@@ -4674,299 +4528,34 @@ function showTracerLetter(idx){
     dot.className = 'tracer-dot ' + (i < idx ? 'done' : i === idx ? 'active' : '');
   });
 
-  // Setup canvas
-  setupTracerCanvas();
-  clearTracerCanvas();
-
-  // Clear feedback on letter change
-  const tracerFb = document.getElementById('tracer-feedback');
-  if(tracerFb) tracerFb.innerHTML='';
-  sKidTap();
-  setTimeout(()=>speak(d.letter+'. '+d.word, 0.75, 1.1), 300);
-}
-
-// ── CANVAS TRACER ─────────────────────────────────────────────
-let tracerDrawing = false;
-let tracerCtx = null;
-let tracerGuideCtx = null;
-
-function setupTracerCanvas(){
-  const canvas = document.getElementById('tracer-canvas');
-  const guideCanvas = document.getElementById('tracer-guide-lines');
-  if(!canvas) return;
-
-  // Size canvas to fill the container nicely
-  const size = Math.min(window.innerWidth - 60, 320);
-  canvas.width  = size;
-  canvas.height = size;
-  if(guideCanvas){ guideCanvas.width=size; guideCanvas.height=size; }
-
-  tracerCtx = canvas.getContext('2d');
-  tracerCtx.strokeStyle = '#D4537E';
-  tracerCtx.lineWidth   = Math.max(8, size * 0.03);
-  tracerCtx.lineCap     = 'round';
-  tracerCtx.lineJoin    = 'round';
-
-  // Draw guide lines on guide canvas
-  if(guideCanvas){
-    tracerGuideCtx = guideCanvas.getContext('2d');
-    drawGuideLines(tracerGuideCtx, size);
-  }
-
-  // Touch events
-  canvas.addEventListener('touchstart',  tracerTouchStart,  {passive:false});
-  canvas.addEventListener('touchmove',   tracerTouchMove,   {passive:false});
-  canvas.addEventListener('touchend',    tracerTouchEnd,    {passive:false});
-  // Mouse events (desktop)
-  canvas.addEventListener('mousedown',   tracerMouseDown);
-  canvas.addEventListener('mousemove',   tracerMouseMove);
-  canvas.addEventListener('mouseup',     ()=>{tracerDrawing=false;});
-  canvas.addEventListener('mouseleave',  ()=>{tracerDrawing=false;});
-}
-
-function drawGuideLines(ctx, size){
-  ctx.clearRect(0, 0, size, size);
-  ctx.setLineDash([8, 8]);
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = 'rgba(212,83,126,0.35)';
-
-  // Baseline (bottom third)
-  ctx.beginPath();
-  ctx.moveTo(size*0.05, size*0.75);
-  ctx.lineTo(size*0.95, size*0.75);
-  ctx.stroke();
-
-  // Midline (middle)
-  ctx.strokeStyle = 'rgba(212,83,126,0.25)';
-  ctx.beginPath();
-  ctx.moveTo(size*0.05, size*0.5);
-  ctx.lineTo(size*0.95, size*0.5);
-  ctx.stroke();
-
-  // Topline
-  ctx.strokeStyle = 'rgba(212,83,126,0.2)';
-  ctx.beginPath();
-  ctx.moveTo(size*0.05, size*0.15);
-  ctx.lineTo(size*0.95, size*0.15);
-  ctx.stroke();
-
-  // Solid baseline
-  ctx.setLineDash([]);
-  ctx.lineWidth = 2.5;
-  ctx.strokeStyle = 'rgba(212,83,126,0.5)';
-  ctx.beginPath();
-  ctx.moveTo(size*0.05, size*0.78);
-  ctx.lineTo(size*0.95, size*0.78);
-  ctx.stroke();
-
-  ctx.setLineDash([]);
-}
-
-function getTracerPos(canvas, e){
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width  / rect.width;
-  const scaleY = canvas.height / rect.height;
-  return {
-    x: (e.clientX - rect.left) * scaleX,
-    y: (e.clientY - rect.top)  * scaleY
-  };
-}
-
-function tracerTouchStart(e){
-  e.preventDefault();
-  const t = e.touches[0];
-  const pos = getTracerPos(e.target, t);
-  tracerDrawing = true;
-  tracerCtx.beginPath();
-  tracerCtx.moveTo(pos.x, pos.y);
-  sKidTap();
-}
-function tracerTouchMove(e){
-  e.preventDefault();
-  if(!tracerDrawing) return;
-  const t = e.touches[0];
-  const pos = getTracerPos(e.target, t);
-  tracerCtx.lineTo(pos.x, pos.y);
-  tracerCtx.stroke();
-  tracerCtx.beginPath();
-  tracerCtx.moveTo(pos.x, pos.y);
-}
-function tracerTouchEnd(e){
-  e.preventDefault();
-  tracerDrawing = false;
-  tracerCtx.beginPath();
-}
-function tracerMouseDown(e){
-  const pos = getTracerPos(e.target, e);
-  tracerDrawing = true;
-  tracerCtx.beginPath();
-  tracerCtx.moveTo(pos.x, pos.y);
-}
-function tracerMouseMove(e){
-  if(!tracerDrawing) return;
-  const pos = getTracerPos(e.target, e);
-  tracerCtx.lineTo(pos.x, pos.y);
-  tracerCtx.stroke();
-  tracerCtx.beginPath();
-  tracerCtx.moveTo(pos.x, pos.y);
-}
-function clearTracerCanvas(){
-  const canvas = document.getElementById('tracer-canvas');
-  if(!canvas || !tracerCtx) return;
-  tracerCtx.clearRect(0, 0, canvas.width, canvas.height);
-  // Clear feedback too
-  const fb = document.getElementById('tracer-feedback');
-  if(fb) fb.innerHTML = '';
-  sKidTap();
-}
-
-function checkTracerDrawing(){
-  const canvas = document.getElementById('tracer-canvas');
-  const fb = document.getElementById('tracer-feedback');
-  if(!canvas || !tracerCtx || !fb) return;
-
-  // Get pixel data to check if child drew anything
-  const data = tracerCtx.getImageData(0, 0, canvas.width, canvas.height).data;
-  let pixelCount = 0;
-  for(let i = 3; i < data.length; i += 4){
-    if(data[i] > 30) pixelCount++; // count non-transparent pixels
-  }
-
-  const total = canvas.width * canvas.height;
-  const coverage = pixelCount / total;
-
-  // Check how well they covered the guide letter area (center portion)
-  // Sample pixels in the center 60% of the canvas
-  const cx = canvas.width, cy = canvas.height;
-  const margin = 0.2;
-  let centerPixels = 0, centerTotal = 0;
-  const imgData = tracerCtx.getImageData(
-    Math.floor(cx * margin), Math.floor(cy * margin),
-    Math.floor(cx * (1-margin*2)), Math.floor(cy * (1-margin*2))
-  );
-  for(let i = 3; i < imgData.data.length; i += 4){
-    if(imgData.data[i] > 30) centerPixels++;
-    centerTotal++;
-  }
-  const centerCoverage = centerPixels / centerTotal;
-
-  if(pixelCount < 50){
-    // Nothing drawn
-    fb.innerHTML = '<div style="font-size:clamp(14px,3.5vw,18px);font-weight:800;color:#E24B4A">✏️ Try tracing the letter first!</div>';
-    speak('Try again!', 0.9, 1.2);
-    sKidWrong();
-    return;
-  }
-
-  const d = LETTERS_DATA[tracerIdx];
-
-  if(centerCoverage > 0.04){
-    // Great coverage — well done!
-    fb.innerHTML = `
-      <div style="background:#E1F5EE;border:2px solid #1D9E75;border-radius:14px;padding:12px 16px;display:inline-block">
-        <div style="font-size:clamp(22px,6vw,34px);margin-bottom:4px">🌟 Great job!</div>
-        <div style="font-size:clamp(13px,3vw,15px);font-weight:800;color:#085041">${d.letter} is for <strong>${d.word}</strong> ${d.emoji}</div>
-      </div>`;
-    sKidStar();
-    speak('Great job! '+d.letter+' is for '+d.word, 0.85, 1.2);
-    // Auto advance after 2 seconds
-    setTimeout(()=>{
-      tracerNext();
-    }, 2200);
-  } else if(coverage > 0.008){
-    // Some drawing but needs more
-    fb.innerHTML = `
-      <div style="background:#FAEEDA;border:2px solid #FFB347;border-radius:14px;padding:12px 16px;display:inline-block">
-        <div style="font-size:clamp(18px,5vw,26px);margin-bottom:4px">👍 Good try!</div>
-        <div style="font-size:clamp(12px,2.5vw,14px);font-weight:700;color:#412402">Keep going! Fill in more of the letter.</div>
-      </div>`;
-    speak('Good try! Keep going!', 0.85, 1.2);
-    sKidCorrect();
-  } else {
-    // Very little drawn
-    fb.innerHTML = `
-      <div style="background:#FFF0F7;border:2px solid #FF6B9D;border-radius:14px;padding:12px 16px;display:inline-block">
-        <div style="font-size:clamp(18px,5vw,26px);margin-bottom:4px">✏️ Try more!</div>
-        <div style="font-size:clamp(12px,2.5vw,14px);font-weight:700;color:#C0392B">Trace over the whole letter!</div>
-      </div>`;
-    speak('Try more!', 0.85, 1.2);
-    sKidTap();
-  }
+  sClick();
 }
 
 function tracerNext(){
-  if(tracerMode==='name'){
-    if(tracerNameIdx < tracerNameLetters.length-1){
-      sKidTap();
-      showNameLetter(tracerNameIdx+1);
-    } else {
-      sKidFinish();
-      speak('Yay! You traced your name!', 0.85, 1.2);
-      const fb=document.getElementById('tracer-feedback');
-      if(fb) fb.innerHTML='<div style="font-size:clamp(18px,5vw,26px);font-weight:900;color:#7C3AED;text-align:center">🎉 Amazing! You traced your whole name!</div>';
-    }
-    return;
-  }
-  const maxIdx = tracerMode==='lower' ? 25 : 25;
-  if(tracerIdx < maxIdx){
-    sKidTap();
-    showTracerLetter(tracerIdx+1);
+  if(tracerIdx < 25){
+    sOk();
+    showTracerLetter(tracerIdx + 1);
   } else {
-    sKidFinish();
-    speak('Yay! All done!', 0.85, 1.2);
-    setTimeout(()=>backToTracerModes(), 2500);
+    sWin();
+    alert('🎉 Amazing! You learned all 26 letters of the alphabet!');
+    tracerIdx = 0;
+    showTracerLetter(0);
   }
 }
 
 function tracerPrev(){
-  if(tracerMode==='name'){
-    if(tracerNameIdx > 0){ sClick(); showNameLetter(tracerNameIdx-1); }
-    return;
+  if(tracerIdx > 0){
+    sClick();
+    showTracerLetter(tracerIdx - 1);
   }
-  if(tracerIdx > 0){ sClick(); showTracerLetter(tracerIdx-1); }
 }
 
 // ── ABC ORDER GAME ─────────────────────────────────────────────
 let abcScore=0, abcTarget=0, abcTLeft=60, abcTInt=null, abcRunning=false;
 
-// ── TEXT TO SPEECH HELPER ──────────────────────────────────────
-function speak(text, rate, pitch){
-  try{
-    if(!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    setTimeout(()=>{
-      try{
-        const utt = new SpeechSynthesisUtterance(text);
-        utt.lang   = 'en-US';
-        utt.rate   = rate  || 0.9;
-        utt.pitch  = pitch || 1.0;
-        utt.volume = 1;
-        const voices = window.speechSynthesis.getVoices();
-        const preferred = voices.find(v=>
-          v.lang.startsWith('en') && (
-            v.name.includes('Samantha') ||
-            v.name.includes('Karen')    ||
-            v.name.includes('Google US English') ||
-            v.name.includes('Microsoft Aria')    ||
-            v.name.includes('Microsoft Zira')
-          )
-        ) || voices.find(v=>v.lang==='en-US');
-        if(preferred) utt.voice = preferred;
-        window.speechSynthesis.speak(utt);
-      }catch(e){}
-    }, 50);
-  }catch(e){}
-}
-
-// Letter names and phonics for voiceover
 function startABCOrder(){
-  try{
-    navTo('abc-order');
-    if(window.speechSynthesis) window.speechSynthesis.getVoices();
-    launchABCOrder();
-  }catch(e){
-    alert('ABC Order error: '+e.message);
-  }
+  navTo('abc-order');
+  launchABCOrder();
 }
 
 function launchABCOrder(){
@@ -4979,31 +4568,14 @@ function launchABCOrder(){
   buildABCGrid();
   updateABCTarget();
   sStart();
-  // Announce first letter
-  setTimeout(()=>speak('A', 0.75, 1.2), 600);
   clearInterval(abcTInt);
   abcTInt=setInterval(()=>{
     abcTLeft--;
     const el=document.getElementById('abc-time');
     if(el)el.textContent=abcTLeft;
-    const ft=document.getElementById('floating-timer');
-    const fn=document.getElementById('ft-num');
-    if(ft&&fn){
-      fn.textContent=abcTLeft;
-      fn.style.color=abcTLeft<=10?'#E24B4A':abcTLeft<=20?'#EF9F27':'#FAC775';
-      if(abcTLeft<=10)ft.classList.add('urgent');
-      else ft.classList.remove('urgent');
-    }
     if(abcTLeft<=10)sUrg();
     if(abcTLeft<=0){clearInterval(abcTInt);endABCOrder();}
   },1000);
-}
-
-function speakABCTarget(idx){
-  const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  if(idx<26){
-    speak(letters[idx], 0.75, 1.2);
-  }
 }
 
 function buildABCGrid(){
@@ -5020,8 +4592,6 @@ function updateABCTarget(){
   const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const el=document.getElementById('abc-target');
   if(el&&abcTarget<26) el.textContent=letters[abcTarget];
-  // Speak the new target letter
-  setTimeout(()=>speakABCTarget(abcTarget), 300);
 }
 
 function tapABCLetter(l){
@@ -5030,50 +4600,37 @@ function tapABCLetter(l){
   const tile=document.getElementById('abc-tile-'+l);
   const fb=document.getElementById('abc-fb');
   if(l===letters[abcTarget]){
-    // Correct!
     if(tile){tile.classList.add('used');tile.textContent='✓';}
     abcScore++; abcTarget++;
     document.getElementById('abc-score').textContent=abcScore;
-    if(fb){fb.textContent='✅ '+l+'! Great job!';fb.style.color='#1D9E75';}
-    // Say the letter
-    speak(l, 0.75, 1.2);
-    sKidCorrect();
-    if(abcTarget>=26){
-      clearInterval(abcTInt);
-      setTimeout(()=>speak('Yay!', 0.9, 1.3), 400);
-      sKidFinish();
-      endABCOrder();
-    } else {
-      updateABCTarget();
-    }
+    if(fb){fb.textContent='✅ '+l+'!';fb.style.color='#1D9E75';}
+    sOk();sCr();
+    if(abcTarget>=26){clearInterval(abcTInt);endABCOrder();}
+    else updateABCTarget();
   } else {
-    // Wrong!
     if(tile){
       tile.classList.add('wrong');
       setTimeout(()=>tile.classList.remove('wrong'),500);
     }
     if(fb){fb.textContent='❌ Find '+letters[abcTarget]+' first!';fb.style.color='#E24B4A';}
-    setTimeout(()=>speak(letters[abcTarget], 0.75, 1.2), 200);
-    sKidWrong();
+    sBad();
   }
 }
 
 function endABCOrder(){
   abcRunning=false;
   clearInterval(abcTInt);
-  window.speechSynthesis && window.speechSynthesis.cancel();
   document.getElementById('abc-game').style.display='none';
   document.getElementById('abc-over').style.display='block';
   document.getElementById('abc-final').textContent=abcScore+'/26';
   const pct=Math.round(abcScore/26*100);
-  let stars='',msg='',speech='';
-  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You know all your ABCs! 🏆';speech='Yay! Perfect!';sWin();}
-  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost all letters!';speech='Wow! So close!';sWin();}
-  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Great job! Keep practicing!';speech='Good job!';}
-  else{stars='⭐⭐💫💫💫';msg='Good try! Practice your ABCs more!';speech='Good try!';}
+  let stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You know all your ABCs! 🏆';sWin();}
+  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost all letters!';sWin();}
+  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Great job! Keep practicing!';}
+  else{stars='⭐⭐💫💫💫';msg='Good try! Practice your ABCs more!';}
   document.getElementById('abc-stars').textContent=stars;
   document.getElementById('abc-msg').textContent=msg;
-  setTimeout(()=>speak(speech, 0.85, 1.3), 500);
 }
 
 // ── MISSING LETTER GAME ────────────────────────────────────────
@@ -5099,12 +4656,8 @@ let mlQs=[], mlAns=[], mlAnswered=0, mlCQ=0;
 let mlTInt=null, mlTLeft=15, mlTTotal=15;
 
 function startMissingLetter(){
-  try{
-    navTo('missing-letter');
-    launchMissingLetter();
-  }catch(e){
-    alert('Missing Letter error: '+e.message);
-  }
+  navTo('missing-letter');
+  launchMissingLetter();
 }
 
 function launchMissingLetter(){
@@ -5171,14 +4724,6 @@ function startMLTimer(){
 
 function updMLT(){
   const el=document.getElementById('ml-time');if(el)el.textContent=mlTLeft;
-  const ft=document.getElementById('floating-timer');
-  const fn=document.getElementById('ft-num');
-  if(ft&&fn){
-    fn.textContent=mlTLeft;
-    fn.style.color=mlTLeft<=5?'#E24B4A':mlTLeft<=8?'#EF9F27':'#FAC775';
-    if(mlTLeft<=5)ft.classList.add('urgent');
-    else ft.classList.remove('urgent');
-  }
 }
 
 function autoML(){
@@ -5200,8 +4745,8 @@ function ansML(idx,btn,chosen,correct){
   const ok=chosen===correct;
   mlAns[idx]=ok;
   const fb=document.getElementById(`mlfb${idx}`);
-  if(ok){if(fb){fb.textContent='✅ Correct! The letter is '+correct+'!';fb.className='fb show correct';}sKidCorrect();speak(correct, 0.8, 1.2);}
-  else{btn.classList.add('wrong');if(fb){fb.textContent='❌ It\'s '+correct+'!';fb.className='fb show wrong';}sKidWrong();speak(correct, 0.8, 1.2);}
+  if(ok){if(fb){fb.textContent='✅ Correct! The letter is '+correct+'!';fb.className='fb show correct';}sOk();sCr();}
+  else{btn.classList.add('wrong');if(fb){fb.textContent='❌ It\'s '+correct+'!';fb.className='fb show wrong';}sBad();}
   mlAnswered++;
   document.getElementById('ml-score').textContent=mlAns.filter(a=>a).length;
   if(mlAnswered<10){setTimeout(()=>{mlCQ++;buildMLQuestion(mlCQ);startMLTimer();},900);}
@@ -5214,7 +4759,7 @@ function showMLResult(){
   const pct=Math.round(score/10*100);
   document.getElementById('ml-rsco').textContent=score+'/10';
   let stars='',msg='';
-  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You found every missing letter! 🏆';sKidFinish();speak('Perfect!',0.9,1.3);}
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You found every missing letter! 🏆';sWin();}
   else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost perfect!';sWin();}
   else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good job! Keep practicing your letters!';}
   else{stars='⭐⭐💫💫💫';msg='Keep trying! You can do it!';}
@@ -5247,12 +4792,8 @@ let rhQs=[], rhAns=[], rhAnswered=0, rhCQ=0;
 let rhTInt=null, rhTLeft=20, rhTTotal=20;
 
 function startRhymeTime(){
-  try{
-    navTo('rhyme');
-    launchRhymeTime();
-  }catch(e){
-    alert('Rhyme Time error: '+e.message);
-  }
+  navTo('rhyme');
+  launchRhymeTime();
 }
 
 function launchRhymeTime(){
@@ -5343,10 +4884,10 @@ function submitRhyme(idx){
   const fb=document.getElementById(`rhfb${idx}`);
   if(correct){
     if(fb){fb.textContent='✅ Perfect! All rhymes found!';fb.className='fb show correct';}
-    rhAns[idx]=true;sKidStar();
+    rhAns[idx]=true;sOk();sCr();
   } else {
     if(fb){fb.textContent='❌ Some rhymes were missed! Green = rhymes, Orange = missed, Red = wrong.';fb.className='fb show wrong';}
-    rhAns[idx]=false;sKidWrong();
+    rhAns[idx]=false;sBad();
   }
   rhAnswered++;
   document.getElementById('rh-score').textContent=rhAns.filter(a=>a).length;
@@ -5364,14 +4905,6 @@ function startRhymeTimer(){
   rhTInt=setInterval(()=>{
     rhTLeft--;
     const t=document.getElementById('rh-time');if(t)t.textContent=rhTLeft;
-    const ft=document.getElementById('floating-timer');
-    const fn=document.getElementById('ft-num');
-    if(ft&&fn){
-      fn.textContent=rhTLeft;
-      fn.style.color=rhTLeft<=5?'#E24B4A':rhTLeft<=10?'#EF9F27':'#FAC775';
-      if(rhTLeft<=5)ft.classList.add('urgent');
-      else ft.classList.remove('urgent');
-    }
     if(rhTLeft<=5&&rhTLeft>0)sUrg();
     if(rhTLeft<=0){clearInterval(rhTInt);sTU();submitRhyme(rhCQ);}
   },1000);
@@ -5750,33 +5283,33 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
     <!-- Games grid -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,2vw,16px);margin-bottom:16px">
 
-      <button onclick="startLetterTracer()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #FF6B9D;background:#fff;padding:clamp(16px,3vw,24px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+      <div class="game-card" onclick="startLetterTracer()" style="border-color:#FF6B9D">
         <div class="game-badge" style="background:#FF6B9D">TRACE</div>
         <div class="game-icon">✏️</div>
         <div class="game-title">Letter Tracer</div>
         <div class="game-desc">Trace A-Z letters with your finger!</div>
-      </button>
+      </div>
 
-      <button onclick="startABCOrder()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #FFB347;background:#fff;padding:clamp(16px,3vw,24px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+      <div class="game-card" onclick="startABCOrder()" style="border-color:#FFB347">
         <div class="game-badge" style="background:#FFB347;color:#1D2B55">ABC ORDER</div>
         <div class="game-icon">🔤</div>
         <div class="game-title">ABC Order</div>
         <div class="game-desc">Tap letters in the right order!</div>
-      </button>
+      </div>
 
-      <button onclick="startMissingLetter()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #4ECDC4;background:#fff;padding:clamp(16px,3vw,24px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+      <div class="game-card" onclick="startMissingLetter()" style="border-color:#4ECDC4">
         <div class="game-badge" style="background:#4ECDC4;color:#1D2B55">MISSING</div>
         <div class="game-icon">🔍</div>
         <div class="game-title">Missing Letter</div>
         <div class="game-desc">Find the missing letter in the word!</div>
-      </button>
+      </div>
 
-      <button onclick="startRhymeTime()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #A855F7;background:#fff;padding:clamp(16px,3vw,24px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+      <div class="game-card" onclick="startRhymeTime()" style="border-color:#A855F7">
         <div class="game-badge" style="background:#A855F7">RHYME</div>
         <div class="game-icon">🎵</div>
         <div class="game-title">Rhyme Time</div>
         <div class="game-desc">Find the words that rhyme!</div>
-      </button>
+      </div>
 
     </div>
 
@@ -5788,113 +5321,49 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
 <div id="sc-letter-tracer" class="screen">
   <div class="hero" style="background:linear-gradient(135deg,#FF6B9D,#FF8E53)">
     <div class="htitle" style="color:#fff">✏️ Letter <span style="color:#FFD93D">Tracer!</span></div>
-    <div class="hsub" style="color:rgba(255,255,255,0.9)">Learn to write letters!</div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Learn to write A to Z!</div>
   </div>
   <div class="qmain" style="padding-top:0">
-
-    <!-- Mode picker -->
-    <div id="tracer-mode-pick">
-      <div style="font-size:13px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:12px">Choose what to trace:</div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-
-        <button onclick="launchTracerMode('upper')" style="font-family:Nunito,sans-serif;display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;border:2.5px solid #FF6B9D;background:#FFF0F7;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
-          <div style="font-size:32px">🔠</div>
-          <div style="flex:1">
-            <div style="font-size:15px;font-weight:900;color:#1D2B55">UPPERCASE Letters</div>
-            <div style="font-size:12px;font-weight:700;color:#888780">Trace A B C ... Z — Free!</div>
-          </div>
-          <div style="background:#1D9E75;color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px">FREE</div>
-        </button>
-
-        <button onclick="launchTracerModePaid('lower')" style="font-family:Nunito,sans-serif;display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;border:2.5px solid #FFB347;background:#FFF8E8;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
-          <div style="font-size:32px">🔡</div>
-          <div style="flex:1">
-            <div style="font-size:15px;font-weight:900;color:#1D2B55">lowercase letters</div>
-            <div style="font-size:12px;font-weight:700;color:#888780">Trace a b c ... z</div>
-          </div>
-          <div style="background:#BA7517;color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px">⚡ PRO</div>
-        </button>
-
-        <button onclick="launchTracerModePaid('name')" style="font-family:Nunito,sans-serif;display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;border:2.5px solid #A855F7;background:#F5F0FF;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
-          <div style="font-size:32px">✍️</div>
-          <div style="flex:1">
-            <div style="font-size:15px;font-weight:900;color:#1D2B55">Trace My Name</div>
-            <div style="font-size:12px;font-weight:700;color:#888780">Type your name, then trace it!</div>
-          </div>
-          <div style="background:#7C3AED;color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px">⚡ PRO</div>
-        </button>
-      </div>
-
-      <div id="tracer-name-input" style="display:none;margin-top:14px">
-        <div style="font-size:13px;font-weight:800;color:#7C3AED;margin-bottom:8px;text-align:center">Type the name to trace:</div>
-        <div style="display:flex;gap:8px">
-          <input id="tracer-name-field" type="text" maxlength="12" autocorrect="off" autocapitalize="words" placeholder="e.g. Maria"
-            style="flex:1;font-family:Nunito,sans-serif;font-size:18px;font-weight:800;padding:12px 16px;border-radius:12px;border:2.5px solid #A855F7;background:#F5F0FF;color:#1D2B55;outline:none"/>
-          <button onclick="startNameTrace()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:12px 18px;border-radius:12px;background:#A855F7;border:none;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">Go ›</button>
-        </div>
-      </div>
-
-      <div style="text-align:center;margin-top:14px">
-        <button class="lnk" onclick="navTo('kids')">← Back to Kids Corner</button>
-      </div>
-    </div>
-
-    <!-- Game area (hidden until mode selected) -->
-    <div id="tracer-game" style="display:none">
-      <div style="text-align:center;margin-bottom:8px">
-        <button onclick="backToTracerModes()" class="lnk" style="font-size:12px">← Choose mode</button>
-      </div>
-      <div id="tracer-mode-badge" style="text-align:center;margin-bottom:8px"></div>
-
+    <div id="tracer-game">
       <!-- Letter nav -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px">
-        <button onclick="tracerPrev()" style="font-family:Nunito,sans-serif;font-size:22px;font-weight:900;background:var(--navy);color:#fff;border:none;border-radius:12px;width:48px;height:48px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;flex-shrink:0">‹</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px">
+        <button onclick="tracerPrev()" style="font-family:Nunito,sans-serif;font-size:22px;font-weight:900;background:var(--navy);color:#fff;border:none;border-radius:12px;width:48px;height:48px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">‹</button>
         <div style="text-align:center;flex:1">
-          <div id="tracer-progress" style="font-size:12px;font-weight:800;color:#888780">A — Letter 1 of 26</div>
-          <div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin-top:4px;max-height:30px;overflow:hidden" id="tracer-dots"></div>
+          <div id="tracer-progress" style="font-size:12px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px">A of 26</div>
+          <div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin-top:4px" id="tracer-dots"></div>
         </div>
-        <button onclick="tracerNext()" style="font-family:Nunito,sans-serif;font-size:22px;font-weight:900;background:var(--navy);color:#fff;border:none;border-radius:12px;width:48px;height:48px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;flex-shrink:0">›</button>
+        <button onclick="tracerNext()" style="font-family:Nunito,sans-serif;font-size:22px;font-weight:900;background:var(--navy);color:#fff;border:none;border-radius:12px;width:48px;height:48px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">›</button>
       </div>
 
-      <!-- Big letter display -->
-      <div style="text-align:center;margin-bottom:12px">
-        <div style="display:flex;gap:14px;justify-content:center;align-items:flex-end;margin-bottom:8px">
-          <div id="tracer-letter-big" style="font-size:clamp(48px,13vw,80px);font-weight:900;color:var(--navy);line-height:1">A</div>
-          <div id="tracer-letter-small" style="font-size:clamp(28px,8vw,50px);font-weight:900;color:#D4537E;line-height:1">a</div>
-        </div>
-
-        <!-- Canvas area -->
-        <div style="position:relative;display:inline-block;margin-bottom:8px">
-          <div id="tracer-guide-letter" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(110px,28vw,180px);font-weight:900;color:rgba(212,83,126,0.12);font-family:Nunito,sans-serif;pointer-events:none;user-select:none;line-height:1">A</div>
-          <canvas id="tracer-guide-lines" style="position:absolute;inset:0;pointer-events:none"></canvas>
-          <canvas id="tracer-canvas" style="border-radius:16px;background:#FFF8F0;border:3px solid #FFB347;display:block;touch-action:none;cursor:crosshair"></canvas>
-        </div>
-
-        <!-- Canvas controls -->
-        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:8px;flex-wrap:wrap">
-          <button onclick="clearTracerCanvas()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 16px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">🗑️ Clear</button>
-          <button onclick="checkTracerDrawing()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 20px;border-radius:99px;background:#FFB347;border:2px solid #FFB347;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">✅ Check!</button>
-        </div>
-
-        <div id="tracer-feedback" style="min-height:44px;text-align:center;margin-bottom:6px"></div>
-        <div style="font-size:12px;font-weight:700;color:#888780">✏️ Trace the letter then tap Check!</div>
+      <!-- Letter display -->
+      <div style="text-align:center;margin-bottom:16px">
+        <div id="tracer-letter-big" style="font-size:clamp(80px,22vw,130px);font-weight:900;color:var(--navy);line-height:1;text-shadow:0 4px 20px rgba(29,43,85,0.15)">A</div>
+        <div id="tracer-letter-small" style="font-size:clamp(40px,11vw,65px);font-weight:900;color:#D4537E;line-height:1;margin-top:4px">a</div>
       </div>
 
-      <!-- Word hint -->
-      <div id="tracer-word-card" style="background:linear-gradient(135deg,#FFF0F7,#FFF8E8);border-radius:16px;border:2px solid #FFB347;padding:14px;text-align:center;margin-bottom:12px">
-        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#888780;margin-bottom:6px">Starts with this letter</div>
-        <div id="tracer-word-emoji" style="font-size:clamp(30px,8vw,48px);margin-bottom:4px">🍎</div>
-        <div id="tracer-word" style="font-size:clamp(18px,5vw,26px);font-weight:900;color:var(--navy)">Apple</div>
-        <div id="tracer-word-letters" style="display:flex;gap:6px;justify-content:center;margin-top:8px;flex-wrap:wrap"></div>
+      <!-- Word example -->
+      <div id="tracer-word-card" style="background:linear-gradient(135deg,#FFF0F7,#FFF8E8);border-radius:16px;border:2px solid #FFB347;padding:16px;text-align:center;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#888780;margin-bottom:8px">Starts with this letter</div>
+        <div id="tracer-word-emoji" style="font-size:clamp(36px,9vw,56px);margin-bottom:6px">🍎</div>
+        <div id="tracer-word" style="font-size:clamp(20px,5vw,30px);font-weight:900;color:var(--navy)">Apple</div>
+        <div id="tracer-word-letters" style="display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap"></div>
       </div>
 
-      <!-- Instructions -->
-      <div style="background:var(--n2);border-radius:14px;padding:12px 16px;text-align:center;margin-bottom:12px">
+      <!-- Stroke instructions -->
+      <div style="background:var(--n2);border-radius:14px;padding:12px 16px;text-align:center;margin-bottom:14px">
         <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:4px">✏️ How to write:</div>
         <div id="tracer-instructions" style="font-size:clamp(12px,3vw,14px);font-weight:700;color:#5F5E5A;line-height:1.7"></div>
       </div>
-    </div>
 
+      <!-- Navigation buttons -->
+      <div style="display:flex;gap:10px">
+        <button onclick="tracerPrev()" class="btn" style="flex:1;background:#fff;color:var(--navy);border:2.5px solid var(--lp)">‹ Previous</button>
+        <button onclick="tracerNext()" class="btn btn-pink" style="flex:1">Next ›</button>
+      </div>
+      <div style="text-align:center;margin-top:10px">
+        <button class="lnk" onclick="navTo('kids')">← Back to Kids Corner</button>
+      </div>
+    </div>
   </div>
 </div>
 
