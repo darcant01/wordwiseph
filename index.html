@@ -1067,7 +1067,6 @@ function hideLoader(){
 
 // ── NAVIGATION ───────────────────────────────────────────────
 function navTo(s){
-  sClick();
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   const el=document.getElementById('sc-'+s);
   if(el)el.classList.add('active');
@@ -1212,8 +1211,7 @@ function sCr(){
 // 🖱️ Button click
 function sClick(){
   if(!snd)return;
-  tone(800,0.05,'sine',0.15);
-  noise(0.04,3000,0.06);
+  try{tone(800,0.05,'sine',0.15);}catch(e){}
 }
 
 // 🎮 Game start jingle
@@ -4930,30 +4928,31 @@ let abcScore=0, abcTarget=0, abcTLeft=60, abcTInt=null, abcRunning=false;
 
 // ── TEXT TO SPEECH HELPER ──────────────────────────────────────
 function speak(text, rate, pitch){
-  if(!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  // Small delay so cancel takes effect
-  setTimeout(()=>{
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.lang   = 'en-US';
-    utt.rate   = rate  || 0.9;
-    utt.pitch  = pitch || 1.0;
-    utt.volume = 1;
-    // Prefer a natural-sounding voice
-    const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v=>
-      v.lang.startsWith('en') && (
-        v.name.includes('Samantha') ||
-        v.name.includes('Karen')    ||
-        v.name.includes('Moira')    ||
-        v.name.includes('Google US English') ||
-        v.name.includes('Microsoft Aria')    ||
-        v.name.includes('Microsoft Zira')
-      )
-    ) || voices.find(v=>v.lang==='en-US');
-    if(preferred) utt.voice = preferred;
-    window.speechSynthesis.speak(utt);
-  }, 50);
+  try{
+    if(!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    setTimeout(()=>{
+      try{
+        const utt = new SpeechSynthesisUtterance(text);
+        utt.lang   = 'en-US';
+        utt.rate   = rate  || 0.9;
+        utt.pitch  = pitch || 1.0;
+        utt.volume = 1;
+        const voices = window.speechSynthesis.getVoices();
+        const preferred = voices.find(v=>
+          v.lang.startsWith('en') && (
+            v.name.includes('Samantha') ||
+            v.name.includes('Karen')    ||
+            v.name.includes('Google US English') ||
+            v.name.includes('Microsoft Aria')    ||
+            v.name.includes('Microsoft Zira')
+          )
+        ) || voices.find(v=>v.lang==='en-US');
+        if(preferred) utt.voice = preferred;
+        window.speechSynthesis.speak(utt);
+      }catch(e){}
+    }, 50);
+  }catch(e){}
 }
 
 // Letter names and phonics for voiceover
