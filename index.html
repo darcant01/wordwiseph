@@ -4527,6 +4527,9 @@ function showTracerLetter(idx){
   setupTracerCanvas();
   clearTracerCanvas();
 
+  // Clear feedback on letter change
+  const tracerFb = document.getElementById('tracer-feedback');
+  if(tracerFb) tracerFb.innerHTML='';
   sKidTap();
   setTimeout(()=>speak(d.letter+'. '+d.word, 0.75, 1.1), 300);
 }
@@ -4660,7 +4663,86 @@ function clearTracerCanvas(){
   const canvas = document.getElementById('tracer-canvas');
   if(!canvas || !tracerCtx) return;
   tracerCtx.clearRect(0, 0, canvas.width, canvas.height);
+  // Clear feedback too
+  const fb = document.getElementById('tracer-feedback');
+  if(fb) fb.innerHTML = '';
   sKidTap();
+}
+
+function checkTracerDrawing(){
+  const canvas = document.getElementById('tracer-canvas');
+  const fb = document.getElementById('tracer-feedback');
+  if(!canvas || !tracerCtx || !fb) return;
+
+  // Get pixel data to check if child drew anything
+  const data = tracerCtx.getImageData(0, 0, canvas.width, canvas.height).data;
+  let pixelCount = 0;
+  for(let i = 3; i < data.length; i += 4){
+    if(data[i] > 30) pixelCount++; // count non-transparent pixels
+  }
+
+  const total = canvas.width * canvas.height;
+  const coverage = pixelCount / total;
+
+  // Check how well they covered the guide letter area (center portion)
+  // Sample pixels in the center 60% of the canvas
+  const cx = canvas.width, cy = canvas.height;
+  const margin = 0.2;
+  let centerPixels = 0, centerTotal = 0;
+  const imgData = tracerCtx.getImageData(
+    Math.floor(cx * margin), Math.floor(cy * margin),
+    Math.floor(cx * (1-margin*2)), Math.floor(cy * (1-margin*2))
+  );
+  for(let i = 3; i < imgData.data.length; i += 4){
+    if(imgData.data[i] > 30) centerPixels++;
+    centerTotal++;
+  }
+  const centerCoverage = centerPixels / centerTotal;
+
+  if(pixelCount < 50){
+    // Nothing drawn
+    fb.innerHTML = '<div style="font-size:clamp(14px,3.5vw,18px);font-weight:800;color:#E24B4A">✏️ Try tracing the letter first!</div>';
+    speak('Try again!', 0.9, 1.2);
+    sKidWrong();
+    return;
+  }
+
+  const d = LETTERS_DATA[tracerIdx];
+
+  if(centerCoverage > 0.04){
+    // Great coverage — well done!
+    fb.innerHTML = `
+      <div style="background:#E1F5EE;border:2px solid #1D9E75;border-radius:14px;padding:12px 16px;display:inline-block">
+        <div style="font-size:clamp(22px,6vw,34px);margin-bottom:4px">🌟 Great job!</div>
+        <div style="font-size:clamp(13px,3vw,15px);font-weight:800;color:#085041">${d.letter} is for <strong>${d.word}</strong> ${d.emoji}</div>
+      </div>`;
+    sKidStar();
+    speak('Great job! '+d.letter+' is for '+d.word, 0.85, 1.2);
+    // Auto advance after 2 seconds
+    setTimeout(()=>{
+      if(tracerIdx < 25){
+        tracerNext();
+      }
+    }, 2200);
+  } else if(coverage > 0.008){
+    // Some drawing but needs more
+    fb.innerHTML = `
+      <div style="background:#FAEEDA;border:2px solid #FFB347;border-radius:14px;padding:12px 16px;display:inline-block">
+        <div style="font-size:clamp(18px,5vw,26px);margin-bottom:4px">👍 Good try!</div>
+        <div style="font-size:clamp(12px,2.5vw,14px);font-weight:700;color:#412402">Keep going! Fill in more of the letter.</div>
+      </div>`;
+    speak('Good try! Keep going!', 0.85, 1.2);
+    sKidCorrect();
+  } else {
+    // Very little drawn
+    fb.innerHTML = `
+      <div style="background:#FFF0F7;border:2px solid #FF6B9D;border-radius:14px;padding:12px 16px;display:inline-block">
+        <div style="font-size:clamp(18px,5vw,26px);margin-bottom:4px">✏️ Try more!</div>
+        <div style="font-size:clamp(12px,2.5vw,14px);font-weight:700;color:#C0392B">Trace over the whole letter!</div>
+      </div>`;
+    speak('Try more!', 0.85, 1.2);
+    sKidTap();
+  }
 }
 
 function tracerNext(){
@@ -5691,12 +5773,15 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
         </div>
 
         <!-- Controls -->
-        <div style="display:flex;gap:10px;justify-content:center;margin-bottom:8px">
-          <button onclick="clearTracerCanvas()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 18px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">🗑️ Clear</button>
-          <button onclick="tracerPrev()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 18px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">‹ Prev</button>
-          <button onclick="tracerNext()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 18px;border-radius:99px;background:var(--pink);border:2px solid var(--pink);color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">Next ›</button>
+        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px;flex-wrap:wrap">
+          <button onclick="clearTracerCanvas()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 16px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">🗑️ Clear</button>
+          <button onclick="checkTracerDrawing()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 20px;border-radius:99px;background:#FFB347;border:2px solid #FFB347;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">✅ Check!</button>
+          <button onclick="tracerPrev()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 14px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">‹</button>
+          <button onclick="tracerNext()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 14px;border-radius:99px;background:var(--pink);border:2px solid var(--pink);color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">›</button>
         </div>
-        <div style="font-size:12px;font-weight:700;color:#888780">✏️ Use your finger to trace the letter!</div>
+        <!-- Feedback area -->
+        <div id="tracer-feedback" style="min-height:44px;text-align:center;margin-bottom:6px"></div>
+        <div style="font-size:12px;font-weight:700;color:#888780">✏️ Trace the letter then tap Check!</div>
       </div>
 
       <!-- Word example -->
