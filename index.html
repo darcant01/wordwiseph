@@ -4528,13 +4528,6 @@ function showTracerLetter(idx){
     dot.className = 'tracer-dot ' + (i < idx ? 'done' : i === idx ? 'active' : '');
   });
 
-  // Update guide letter and setup canvas
-  var guide = document.getElementById('tracer-guide-letter');
-  if(guide) guide.textContent = d.letter;
-  var tfb = document.getElementById('tracer-feedback');
-  if(tfb) tfb.textContent = '';
-  setTimeout(function(){ setupTracerCanvas(); }, 50);
-
   sClick();
 }
 
@@ -4933,183 +4926,6 @@ function showRhymeResult(){
   document.getElementById('rh-sbtn').disabled=true;
 }
 
-// ── CANVAS TRACER ─────────────────────────────────────────────
-let tracerDrawing = false;
-let tracerCtx = null;
-
-var tracerRefPixels = null; // reference letter pixel map
-
-function buildLetterReference(letter, size){
-  // Render the guide letter onto an offscreen canvas to get reference pixels
-  var ref = document.createElement('canvas');
-  ref.width = size; ref.height = size;
-  var ctx = ref.getContext('2d');
-  ctx.fillStyle = '#000';
-  ctx.font = 'bold '+Math.floor(size*0.72)+'px Nunito, Arial, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(letter, size/2, size/2);
-  var data = ctx.getImageData(0,0,size,size).data;
-  // Build boolean map of letter pixels (alpha > 30)
-  var map = new Uint8Array(size*size);
-  var count = 0;
-  for(var i=0;i<size*size;i++){
-    if(data[i*4+3]>30){ map[i]=1; count++; }
-  }
-  return {map:map, count:count, size:size};
-}
-
-function setupTracerCanvas(){
-  var canvas = document.getElementById('tracer-canvas');
-  if(!canvas) return;
-  var size = Math.min(window.innerWidth - 48, 300);
-  canvas.width = size;
-  canvas.height = size;
-  var guide = document.getElementById('tracer-guide-letter');
-  if(guide){ guide.style.width=size+'px'; guide.style.height=size+'px'; guide.style.fontSize=Math.floor(size*0.7)+'px'; }
-  tracerCtx = canvas.getContext('2d');
-  tracerCtx.strokeStyle = '#D4537E';
-  tracerCtx.lineWidth = Math.max(8, size * 0.04);
-  tracerCtx.lineCap = 'round';
-  tracerCtx.lineJoin = 'round';
-  drawBreakLines(tracerCtx, size);
-
-  // Build reference for current letter
-  var d = LETTERS_DATA[tracerIdx];
-  if(d) tracerRefPixels = buildLetterReference(d.letter, size);
-
-  canvas.addEventListener('touchstart',  tracerTS, {passive:false});
-  canvas.addEventListener('touchmove',   tracerTM, {passive:false});
-  canvas.addEventListener('touchend',    function(e){e.preventDefault();tracerDrawing=false;}, {passive:false});
-  canvas.addEventListener('mousedown',   tracerMD);
-  canvas.addEventListener('mousemove',   tracerMV);
-  canvas.addEventListener('mouseup',     function(){tracerDrawing=false;});
-  canvas.addEventListener('mouseleave',  function(){tracerDrawing=false;});
-}
-
-function drawBreakLines(ctx, size){
-  // Dotted break lines like school writing paper
-  ctx.save();
-  ctx.setLineDash([6,6]);
-  ctx.lineWidth = 1.5;
-  // Top line
-  ctx.strokeStyle = 'rgba(212,83,126,0.25)';
-  ctx.beginPath(); ctx.moveTo(size*0.04,size*0.18); ctx.lineTo(size*0.96,size*0.18); ctx.stroke();
-  // Mid line (dashed)
-  ctx.strokeStyle = 'rgba(212,83,126,0.35)';
-  ctx.beginPath(); ctx.moveTo(size*0.04,size*0.5); ctx.lineTo(size*0.96,size*0.5); ctx.stroke();
-  // Baseline (solid)
-  ctx.setLineDash([]);
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = 'rgba(212,83,126,0.55)';
-  ctx.beginPath(); ctx.moveTo(size*0.04,size*0.77); ctx.lineTo(size*0.96,size*0.77); ctx.stroke();
-  ctx.restore();
-}
-
-function getPos(canvas, e){
-  var rect = canvas.getBoundingClientRect();
-  return {
-    x: (e.clientX - rect.left) * (canvas.width / rect.width),
-    y: (e.clientY - rect.top)  * (canvas.height / rect.height)
-  };
-}
-function tracerTS(e){ e.preventDefault(); var p=getPos(e.target,e.touches[0]); tracerDrawing=true; tracerCtx.beginPath(); tracerCtx.moveTo(p.x,p.y); }
-function tracerTM(e){ e.preventDefault(); if(!tracerDrawing)return; var p=getPos(e.target,e.touches[0]); tracerCtx.lineTo(p.x,p.y); tracerCtx.stroke(); tracerCtx.beginPath(); tracerCtx.moveTo(p.x,p.y); }
-function tracerMD(e){ var p=getPos(e.target,e); tracerDrawing=true; tracerCtx.beginPath(); tracerCtx.moveTo(p.x,p.y); }
-function tracerMV(e){ if(!tracerDrawing)return; var p=getPos(e.target,e); tracerCtx.lineTo(p.x,p.y); tracerCtx.stroke(); tracerCtx.beginPath(); tracerCtx.moveTo(p.x,p.y); }
-
-function clearTracerCanvas(){
-  var canvas = document.getElementById('tracer-canvas');
-  if(!canvas||!tracerCtx) return;
-  tracerCtx.clearRect(0,0,canvas.width,canvas.height);
-  drawBreakLines(tracerCtx, canvas.width);
-  var fb=document.getElementById('tracer-feedback');
-  if(fb) fb.textContent='';
-}
-
-function checkTracerDrawing(){
-  var canvas = document.getElementById('tracer-canvas');
-  var fb = document.getElementById('tracer-feedback');
-  if(!canvas||!tracerCtx||!fb) return;
-
-  var size = canvas.width;
-  var data = tracerCtx.getImageData(0,0,size,size).data;
-  var d = LETTERS_DATA[tracerIdx];
-
-  // Count total drawn pixels (thickened stroke — use alpha > 20)
-  var drawnPixels = 0;
-  var drawnMap = new Uint8Array(size*size);
-  for(var i=0;i<size*size;i++){
-    // skip break-line pixels (they are drawn with 1.5px — thin)
-    // user strokes are thick (lineWidth ~8-12px), so they have more solid alpha
-    if(data[i*4+3] > 60){ drawnMap[i]=1; drawnPixels++; }
-  }
-
-  if(drawnPixels < 80){
-    fb.style.color='#E24B4A';
-    fb.textContent='✏️ Trace the letter first!';
-    return;
-  }
-
-  if(!tracerRefPixels || tracerRefPixels.count < 10){
-    // Fallback if reference couldn't be built
-    fb.style.color='#1D9E75';
-    fb.textContent='🌟 Good job! Keep practicing '+d.letter+'!';
-    return;
-  }
-
-  var ref = tracerRefPixels;
-  // Dilate reference by ~12px to account for stroke width
-  var dilateR = Math.max(6, Math.floor(size * 0.04));
-  var dilated = new Uint8Array(size*size);
-  for(var y=0;y<size;y++){
-    for(var x=0;x<size;x++){
-      if(ref.map[y*size+x]){
-        // Mark surrounding pixels as part of letter zone
-        for(var dy=-dilateR;dy<=dilateR;dy++){
-          for(var dx=-dilateR;dx<=dilateR;dx++){
-            var ny=y+dy, nx=x+dx;
-            if(ny>=0&&ny<size&&nx>=0&&nx<size){
-              dilated[ny*size+nx]=1;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // Count: how many of user's drawn pixels land ON the letter
-  var onLetter = 0;
-  for(var k=0;k<size*size;k++){
-    if(drawnMap[k] && dilated[k]) onLetter++;
-  }
-
-  // Precision: % of drawn pixels that are on the letter (accuracy)
-  var precision = drawnPixels > 0 ? onLetter / drawnPixels : 0;
-
-  // Coverage: % of dilated letter pixels covered by drawing
-  var dilatedCount = 0;
-  for(var m=0;m<size*size;m++){ if(dilated[m]) dilatedCount++; }
-  var coverage = dilatedCount > 0 ? onLetter / dilatedCount : 0;
-
-  // Score: both precision AND coverage matter
-  var score = (precision * 0.5) + (coverage * 0.5);
-
-  if(score > 0.35 && precision > 0.4){
-    fb.style.color='#1D9E75';
-    fb.textContent='🌟 Great job! '+d.letter+' is for '+d.word+' '+d.emoji;
-    setTimeout(function(){ tracerNext(); }, 2000);
-  } else if(score > 0.2 || coverage > 0.25){
-    fb.style.color='#BA7517';
-    fb.textContent='👍 Getting there! Follow the '+d.letter+' shape more carefully.';
-  } else if(precision < 0.3){
-    fb.style.color='#E24B4A';
-    fb.textContent='❌ That doesn't look like '+d.letter+'. Try tracing the letter shape!';
-  } else {
-    fb.style.color='#E24B4A';
-    fb.textContent='✏️ Cover more of the '+d.letter+' shape!';
-  }
-}
 </script>
 
 <script>
@@ -5519,26 +5335,10 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
         <button onclick="tracerNext()" style="font-family:Nunito,sans-serif;font-size:22px;font-weight:900;background:var(--navy);color:#fff;border:none;border-radius:12px;width:48px;height:48px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">›</button>
       </div>
 
-      <!-- Letter display + canvas tracer -->
-      <div style="text-align:center;margin-bottom:12px">
-        <div style="display:flex;gap:12px;justify-content:center;align-items:flex-end;margin-bottom:10px">
-          <div id="tracer-letter-big" style="font-size:clamp(56px,15vw,90px);font-weight:900;color:var(--navy);line-height:1">A</div>
-          <div id="tracer-letter-small" style="font-size:clamp(32px,9vw,56px);font-weight:900;color:#D4537E;line-height:1">a</div>
-        </div>
-
-        <!-- Canvas with break lines -->
-        <div style="position:relative;display:inline-block;margin-bottom:10px">
-          <div id="tracer-guide-letter" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:160px;font-weight:900;color:rgba(29,43,85,0.07);font-family:Nunito,sans-serif;pointer-events:none;user-select:none;line-height:1">A</div>
-          <canvas id="tracer-canvas" style="display:block;border-radius:16px;background:#FFF8F0;border:3px solid #FFB347;touch-action:none"></canvas>
-        </div>
-
-        <!-- Controls -->
-        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:6px">
-          <button onclick="clearTracerCanvas()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 18px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">🗑️ Clear</button>
-          <button onclick="checkTracerDrawing()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 20px;border-radius:99px;background:#FFB347;border:2px solid #FFB347;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">✅ Check!</button>
-        </div>
-        <div id="tracer-feedback" style="min-height:36px;text-align:center;margin-bottom:4px;font-size:14px;font-weight:800"></div>
-        <div style="font-size:11px;font-weight:700;color:#888780">Trace the letter with your finger, then tap Check!</div>
+      <!-- Letter display -->
+      <div style="text-align:center;margin-bottom:16px">
+        <div id="tracer-letter-big" style="font-size:clamp(80px,22vw,130px);font-weight:900;color:var(--navy);line-height:1;text-shadow:0 4px 20px rgba(29,43,85,0.15)">A</div>
+        <div id="tracer-letter-small" style="font-size:clamp(40px,11vw,65px);font-weight:900;color:#D4537E;line-height:1;margin-top:4px">a</div>
       </div>
 
       <!-- Word example -->
