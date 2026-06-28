@@ -4473,7 +4473,7 @@ function startLetterTracer(){
   tracerIdx = 0;
   navTo('letter-tracer');
   buildTracerDots();
-  showTracerLetter(0);
+  setTimeout(()=>showTracerLetter(0), 100); // small delay so canvas is rendered
 }
 
 function buildTracerDots(){
@@ -4498,6 +4498,9 @@ function showTracerLetter(idx){
   const small = document.getElementById('tracer-letter-small');
   if(small) small.textContent = d.letter.toLowerCase();
 
+  const guide = document.getElementById('tracer-guide-letter');
+  if(guide) guide.textContent = d.letter;
+
   const emoji = document.getElementById('tracer-word-emoji');
   if(emoji) emoji.textContent = d.emoji;
 
@@ -4520,9 +4523,144 @@ function showTracerLetter(idx){
     dot.className = 'tracer-dot ' + (i < idx ? 'done' : i === idx ? 'active' : '');
   });
 
-  sClick();
-  // Speak the letter and word
+  // Setup canvas
+  setupTracerCanvas();
+  clearTracerCanvas();
+
+  sKidTap();
   setTimeout(()=>speak(d.letter+'. '+d.word, 0.75, 1.1), 300);
+}
+
+// ── CANVAS TRACER ─────────────────────────────────────────────
+let tracerDrawing = false;
+let tracerCtx = null;
+let tracerGuideCtx = null;
+
+function setupTracerCanvas(){
+  const canvas = document.getElementById('tracer-canvas');
+  const guideCanvas = document.getElementById('tracer-guide-lines');
+  if(!canvas) return;
+
+  // Size canvas to fill the container nicely
+  const size = Math.min(window.innerWidth - 60, 320);
+  canvas.width  = size;
+  canvas.height = size;
+  if(guideCanvas){ guideCanvas.width=size; guideCanvas.height=size; }
+
+  tracerCtx = canvas.getContext('2d');
+  tracerCtx.strokeStyle = '#D4537E';
+  tracerCtx.lineWidth   = Math.max(8, size * 0.03);
+  tracerCtx.lineCap     = 'round';
+  tracerCtx.lineJoin    = 'round';
+
+  // Draw guide lines on guide canvas
+  if(guideCanvas){
+    tracerGuideCtx = guideCanvas.getContext('2d');
+    drawGuideLines(tracerGuideCtx, size);
+  }
+
+  // Touch events
+  canvas.addEventListener('touchstart',  tracerTouchStart,  {passive:false});
+  canvas.addEventListener('touchmove',   tracerTouchMove,   {passive:false});
+  canvas.addEventListener('touchend',    tracerTouchEnd,    {passive:false});
+  // Mouse events (desktop)
+  canvas.addEventListener('mousedown',   tracerMouseDown);
+  canvas.addEventListener('mousemove',   tracerMouseMove);
+  canvas.addEventListener('mouseup',     ()=>{tracerDrawing=false;});
+  canvas.addEventListener('mouseleave',  ()=>{tracerDrawing=false;});
+}
+
+function drawGuideLines(ctx, size){
+  ctx.clearRect(0, 0, size, size);
+  ctx.setLineDash([8, 8]);
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(212,83,126,0.35)';
+
+  // Baseline (bottom third)
+  ctx.beginPath();
+  ctx.moveTo(size*0.05, size*0.75);
+  ctx.lineTo(size*0.95, size*0.75);
+  ctx.stroke();
+
+  // Midline (middle)
+  ctx.strokeStyle = 'rgba(212,83,126,0.25)';
+  ctx.beginPath();
+  ctx.moveTo(size*0.05, size*0.5);
+  ctx.lineTo(size*0.95, size*0.5);
+  ctx.stroke();
+
+  // Topline
+  ctx.strokeStyle = 'rgba(212,83,126,0.2)';
+  ctx.beginPath();
+  ctx.moveTo(size*0.05, size*0.15);
+  ctx.lineTo(size*0.95, size*0.15);
+  ctx.stroke();
+
+  // Solid baseline
+  ctx.setLineDash([]);
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = 'rgba(212,83,126,0.5)';
+  ctx.beginPath();
+  ctx.moveTo(size*0.05, size*0.78);
+  ctx.lineTo(size*0.95, size*0.78);
+  ctx.stroke();
+
+  ctx.setLineDash([]);
+}
+
+function getTracerPos(canvas, e){
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width  / rect.width;
+  const scaleY = canvas.height / rect.height;
+  return {
+    x: (e.clientX - rect.left) * scaleX,
+    y: (e.clientY - rect.top)  * scaleY
+  };
+}
+
+function tracerTouchStart(e){
+  e.preventDefault();
+  const t = e.touches[0];
+  const pos = getTracerPos(e.target, t);
+  tracerDrawing = true;
+  tracerCtx.beginPath();
+  tracerCtx.moveTo(pos.x, pos.y);
+  sKidTap();
+}
+function tracerTouchMove(e){
+  e.preventDefault();
+  if(!tracerDrawing) return;
+  const t = e.touches[0];
+  const pos = getTracerPos(e.target, t);
+  tracerCtx.lineTo(pos.x, pos.y);
+  tracerCtx.stroke();
+  tracerCtx.beginPath();
+  tracerCtx.moveTo(pos.x, pos.y);
+}
+function tracerTouchEnd(e){
+  e.preventDefault();
+  tracerDrawing = false;
+  tracerCtx.beginPath();
+}
+function tracerMouseDown(e){
+  const pos = getTracerPos(e.target, e);
+  tracerDrawing = true;
+  tracerCtx.beginPath();
+  tracerCtx.moveTo(pos.x, pos.y);
+}
+function tracerMouseMove(e){
+  if(!tracerDrawing) return;
+  const pos = getTracerPos(e.target, e);
+  tracerCtx.lineTo(pos.x, pos.y);
+  tracerCtx.stroke();
+  tracerCtx.beginPath();
+  tracerCtx.moveTo(pos.x, pos.y);
+}
+function clearTracerCanvas(){
+  const canvas = document.getElementById('tracer-canvas');
+  if(!canvas || !tracerCtx) return;
+  tracerCtx.clearRect(0, 0, canvas.width, canvas.height);
+  sKidTap();
 }
 
 function tracerNext(){
@@ -5535,10 +5673,30 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
         <button onclick="tracerNext()" style="font-family:Nunito,sans-serif;font-size:22px;font-weight:900;background:var(--navy);color:#fff;border:none;border-radius:12px;width:48px;height:48px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">›</button>
       </div>
 
-      <!-- Letter display -->
-      <div style="text-align:center;margin-bottom:16px">
-        <div id="tracer-letter-big" style="font-size:clamp(80px,22vw,130px);font-weight:900;color:var(--navy);line-height:1;text-shadow:0 4px 20px rgba(29,43,85,0.15)">A</div>
-        <div id="tracer-letter-small" style="font-size:clamp(40px,11vw,65px);font-weight:900;color:#D4537E;line-height:1;margin-top:4px">a</div>
+      <!-- Letter display with canvas tracer -->
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="display:flex;gap:14px;justify-content:center;align-items:flex-end;margin-bottom:10px">
+          <div id="tracer-letter-big" style="font-size:clamp(48px,13vw,80px);font-weight:900;color:var(--navy);line-height:1">A</div>
+          <div id="tracer-letter-small" style="font-size:clamp(28px,8vw,50px);font-weight:900;color:#D4537E;line-height:1">a</div>
+        </div>
+
+        <!-- Canvas tracer area -->
+        <div style="position:relative;display:inline-block;margin-bottom:8px">
+          <!-- Guide letter (dotted) underneath -->
+          <div id="tracer-guide-letter" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(110px,28vw,180px);font-weight:900;color:rgba(212,83,126,0.12);font-family:Nunito,sans-serif;pointer-events:none;user-select:none;line-height:1">A</div>
+          <!-- Break lines (dashed guide lines) -->
+          <canvas id="tracer-guide-lines" style="position:absolute;inset:0;pointer-events:none"></canvas>
+          <!-- Drawing canvas -->
+          <canvas id="tracer-canvas" style="border-radius:16px;background:#FFF8F0;border:3px solid #FFB347;display:block;touch-action:none;cursor:crosshair"></canvas>
+        </div>
+
+        <!-- Controls -->
+        <div style="display:flex;gap:10px;justify-content:center;margin-bottom:8px">
+          <button onclick="clearTracerCanvas()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 18px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">🗑️ Clear</button>
+          <button onclick="tracerPrev()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 18px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">‹ Prev</button>
+          <button onclick="tracerNext()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 18px;border-radius:99px;background:var(--pink);border:2px solid var(--pink);color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">Next ›</button>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:#888780">✏️ Use your finger to trace the letter!</div>
       </div>
 
       <!-- Word example -->
@@ -5555,12 +5713,7 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
         <div id="tracer-instructions" style="font-size:clamp(12px,3vw,14px);font-weight:700;color:#5F5E5A;line-height:1.7"></div>
       </div>
 
-      <!-- Navigation buttons -->
-      <div style="display:flex;gap:10px">
-        <button onclick="tracerPrev()" class="btn" style="flex:1;background:#fff;color:var(--navy);border:2.5px solid var(--lp)">‹ Previous</button>
-        <button onclick="tracerNext()" class="btn btn-pink" style="flex:1">Next ›</button>
-      </div>
-      <div style="text-align:center;margin-top:10px">
+      <div style="text-align:center;margin-top:6px">
         <button class="lnk" onclick="navTo('kids')">← Back to Kids Corner</button>
       </div>
     </div>
