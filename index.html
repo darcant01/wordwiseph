@@ -251,7 +251,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 .spell-definition{font-size:clamp(13px,3vw,16px);color:#5F5E5A;font-weight:700;line-height:1.6;text-align:center;margin-bottom:8px;padding:0 8px}
 .spell-streak{font-size:clamp(13px,3vw,16px);font-weight:900;color:var(--gold)}
 .games-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,2vw,16px);margin-bottom:16px}
-.game-card{border-radius:clamp(14px,3vw,20px);border:2.5px solid var(--lp);background:#fff;padding:clamp(16px,3vw,24px);text-align:center;cursor:pointer;transition:all 0.2s;position:relative}
+.game-card{border-radius:clamp(14px,3vw,20px);border:2.5px solid var(--lp);background:#fff;padding:clamp(16px,3vw,24px);text-align:center;cursor:pointer;transition:all 0.2s;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
 .game-card:hover{transform:translateY(-4px);border-color:var(--pink)}
 .game-card.active{border-color:var(--pink);background:#FFF0F5}
 .game-card.locked{opacity:0.6}
@@ -5750,33 +5750,33 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
     <!-- Games grid -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,2vw,16px);margin-bottom:16px">
 
-      <div class="game-card" onclick="startLetterTracer()" style="border-color:#FF6B9D">
+      <button onclick="startLetterTracer()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #FF6B9D;background:#fff;padding:clamp(16px,3vw,24px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
         <div class="game-badge" style="background:#FF6B9D">TRACE</div>
         <div class="game-icon">✏️</div>
         <div class="game-title">Letter Tracer</div>
         <div class="game-desc">Trace A-Z letters with your finger!</div>
-      </div>
+      </button>
 
-      <div class="game-card" onclick="startABCOrder()" style="border-color:#FFB347">
+      <button onclick="startABCOrder()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #FFB347;background:#fff;padding:clamp(16px,3vw,24px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
         <div class="game-badge" style="background:#FFB347;color:#1D2B55">ABC ORDER</div>
         <div class="game-icon">🔤</div>
         <div class="game-title">ABC Order</div>
         <div class="game-desc">Tap letters in the right order!</div>
-      </div>
+      </button>
 
-      <div class="game-card" onclick="startMissingLetter()" style="border-color:#4ECDC4">
+      <button onclick="startMissingLetter()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #4ECDC4;background:#fff;padding:clamp(16px,3vw,24px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
         <div class="game-badge" style="background:#4ECDC4;color:#1D2B55">MISSING</div>
         <div class="game-icon">🔍</div>
         <div class="game-title">Missing Letter</div>
         <div class="game-desc">Find the missing letter in the word!</div>
-      </div>
+      </button>
 
-      <div class="game-card" onclick="startRhymeTime()" style="border-color:#A855F7">
+      <button onclick="startRhymeTime()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #A855F7;background:#fff;padding:clamp(16px,3vw,24px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
         <div class="game-badge" style="background:#A855F7">RHYME</div>
         <div class="game-icon">🎵</div>
         <div class="game-title">Rhyme Time</div>
         <div class="game-desc">Find the words that rhyme!</div>
-      </div>
+      </button>
 
     </div>
 
