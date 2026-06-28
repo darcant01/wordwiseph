@@ -390,6 +390,13 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 .rhyme-choice.wrong{background:#FCEBEB;border-color:var(--red);color:#791F1F}
 .rhyme-choice.missed{background:#FAEEDA;border-color:#BA7517;color:#412402}
 
+
+/* ── LETTER TRACER BREAK LINES ── */
+.tracer-lined-box{position:relative;display:inline-block;padding:10px 24px;min-width:clamp(120px,35vw,180px)}
+.tracer-lined-box .tl-top{position:absolute;left:5%;right:5%;top:20%;height:0;border-top:2px dashed rgba(255,107,157,0.35)}
+.tracer-lined-box .tl-mid{position:absolute;left:5%;right:5%;top:54%;height:0;border-top:2px dashed rgba(255,107,157,0.45)}
+.tracer-lined-box .tl-base{position:absolute;left:5%;right:5%;bottom:14%;height:0;border-top:2.5px solid rgba(255,107,157,0.6)}
+.tracer-lined-box .tl-letter{position:relative;z-index:1;line-height:1}
 </style>
 </head>
 <body>
@@ -5346,10 +5353,20 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
           <!-- Uppercase -->
           <div>
             <div style="font-size:10px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Aa</div>
-            <div style="display:flex;align-items:baseline;gap:8px">
-              <div id="tracer-letter-big" style="font-size:clamp(60px,17vw,90px);font-weight:900;color:var(--navy);line-height:1">A</div>
-              <div id="tracer-letter-small" style="font-size:clamp(42px,12vw,65px);font-weight:900;color:#FF6B9D;line-height:1">a</div>
-            </div>
+            <!-- Uppercase with break lines -->
+          <div class="tracer-lined-box">
+            <div class="tl-top"></div>
+            <div class="tl-mid"></div>
+            <div class="tl-base"></div>
+            <div id="tracer-letter-big" class="tl-letter" style="font-size:clamp(60px,17vw,90px);font-weight:900;color:var(--navy)">A</div>
+          </div>
+          <!-- Lowercase with break lines -->
+          <div class="tracer-lined-box" style="min-width:clamp(90px,25vw,130px)">
+            <div class="tl-top"></div>
+            <div class="tl-mid"></div>
+            <div class="tl-base"></div>
+            <div id="tracer-letter-small" class="tl-letter" style="font-size:clamp(42px,12vw,65px);font-weight:900;color:#FF6B9D">a</div>
+          </div>
           </div>
           <!-- Divider -->
           <div style="width:1.5px;height:70px;background:var(--lp);border-radius:99px;flex-shrink:0"></div>
