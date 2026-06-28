@@ -390,6 +390,10 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 .rhyme-choice.wrong{background:#FCEBEB;border-color:var(--red);color:#791F1F}
 .rhyme-choice.missed{background:#FAEEDA;border-color:#BA7517;color:#412402}
 
+
+/* ── END GAME BUTTON ── */
+.end-game-btn{position:fixed;bottom:18px;right:18px;z-index:300;background:rgba(29,43,85,0.85);color:#fff;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;padding:9px 16px;border-radius:99px;border:2px solid rgba(255,255,255,0.2);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;display:none;backdrop-filter:blur(4px);box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+.end-game-btn:active{transform:scale(0.95)}
 </style>
 </head>
 <body>
@@ -414,6 +418,9 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
   <div class="logo" onclick="navTo('start')">WordWise<span>PH</span></div>
   <div class="hdr-right" id="hdr-right"></div>
 </div>
+
+<!-- End Game Button -->
+<button id="end-game-btn" class="end-game-btn" onclick="confirmEndGame()">✕ End Game</button>
 
 <!-- ══ START ══ -->
 <div id="sc-start" class="screen active">
@@ -1066,10 +1073,29 @@ function hideLoader(){
 }
 
 // ── NAVIGATION ───────────────────────────────────────────────
+function confirmEndGame(){
+  if(confirm('End the game?
+
+Your current progress will be lost.')){
+    // Stop all timers
+    clearInterval(spellTInt); clearInterval(sharkTInt); clearInterval(oddTInt);
+    clearInterval(scrambleTInt); clearInterval(abcTInt); clearInterval(rhTInt);
+    clearInterval(mlTInt); clearInterval(chainTInt); clearInterval(sprintTInt);
+    if(window.speechSynthesis) window.speechSynthesis.cancel();
+    navTo('games');
+  }
+}
+
+const GAME_SCREENS = ['quiz','spell','odd','shark','scramble','chain','sprint',
+                      'letter-tracer','abc-order','missing-letter','rhyme'];
+
 function navTo(s){
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   const el=document.getElementById('sc-'+s);
   if(el)el.classList.add('active');
+  // Show end-game button only during active gameplay screens
+  const endBtn = document.getElementById('end-game-btn');
+  if(endBtn) endBtn.style.display = GAME_SCREENS.includes(s) ? 'block' : 'none';
   if(s==='lb')   { loadLBGame('grammar','easy'); }
   if(s==='profile') loadProfile();
   if(s==='admin'){
