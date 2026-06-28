@@ -5353,19 +5353,16 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
           <!-- Uppercase -->
           <div>
             <div style="font-size:10px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Aa</div>
-            <!-- Uppercase with break lines -->
-          <div class="tracer-lined-box">
-            <div class="tl-top"></div>
-            <div class="tl-mid"></div>
-            <div class="tl-base"></div>
-            <div id="tracer-letter-big" class="tl-letter" style="font-size:clamp(60px,17vw,90px);font-weight:900;color:var(--navy)">A</div>
-          </div>
-          <!-- Lowercase with break lines -->
-          <div class="tracer-lined-box" style="min-width:clamp(90px,25vw,130px)">
-            <div class="tl-top"></div>
-            <div class="tl-mid"></div>
-            <div class="tl-base"></div>
-            <div id="tracer-letter-small" class="tl-letter" style="font-size:clamp(42px,12vw,65px);font-weight:900;color:#FF6B9D">a</div>
+            <!-- Hidden spans for JS to read -->
+          <span id="tracer-letter-big" style="display:none">A</span>
+          <span id="tracer-letter-small" style="display:none">a</span>
+          <!-- Canvas tracer with break lines -->
+          <div style="text-align:center">
+            <canvas id="tracer-canvas" style="border-radius:14px;border:2.5px solid #FFB347;background:#FFF8F0;touch-action:none;display:block;margin:0 auto"></canvas>
+            <div style="display:flex;gap:8px;justify-content:center;margin-top:8px">
+              <button id="tracer-clear-btn" style="font-family:Nunito,sans-serif;font-size:12px;font-weight:800;padding:6px 14px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">🗑️ Clear</button>
+            </div>
+            <div style="margin-top:6px;font-size:11px;font-weight:700;color:#888780">Trace the letter with your finger!</div>
           </div>
           </div>
           <!-- Divider -->
@@ -5491,6 +5488,106 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
     </div>
   </div>
 </div>
+
+
+<script>
+// ================================================================
+// BLOCK 10 — LETTER TRACER CANVAS (isolated — safe to fail)
+// ================================================================
+(function(){
+  try{
+    var tc = null, td = false;
+
+    function ltInit(){
+      var canvas = document.getElementById('tracer-canvas');
+      if(!canvas) return;
+      var sz = Math.min(window.innerWidth - 80, 260);
+      canvas.width = sz; canvas.height = sz;
+      // Clone to remove stale listeners
+      var c2 = canvas.cloneNode(false);
+      canvas.parentNode.replaceChild(c2, canvas);
+      tc = c2.getContext('2d');
+      tc.lineWidth = Math.max(10, sz*0.05);
+      tc.lineCap = 'round'; tc.lineJoin = 'round';
+      tc.strokeStyle = '#D4537E';
+      ltDraw(c2, sz);
+
+      // Attach clear button
+      var clrBtn = document.getElementById('tracer-clear-btn');
+      if(clrBtn) clrBtn.onclick = function(){ ltClear(c2, sz); };
+
+      function xy(e, r){ return {x:(e.clientX-r.left)*(c2.width/r.width), y:(e.clientY-r.top)*(c2.height/r.height)}; }
+      c2.addEventListener('touchstart',  function(e){ e.preventDefault(); var p=xy(e.touches[0],c2.getBoundingClientRect()); td=true; tc.beginPath(); tc.moveTo(p.x,p.y); }, {passive:false});
+      c2.addEventListener('touchmove',   function(e){ e.preventDefault(); if(!td)return; var p=xy(e.touches[0],c2.getBoundingClientRect()); tc.lineTo(p.x,p.y); tc.stroke(); tc.beginPath(); tc.moveTo(p.x,p.y); }, {passive:false});
+      c2.addEventListener('touchend',    function(e){ e.preventDefault(); td=false; tc.beginPath(); }, {passive:false});
+      c2.addEventListener('mousedown',   function(e){ var p=xy(e,c2.getBoundingClientRect()); td=true; tc.beginPath(); tc.moveTo(p.x,p.y); });
+      c2.addEventListener('mousemove',   function(e){ if(!td)return; var p=xy(e,c2.getBoundingClientRect()); tc.lineTo(p.x,p.y); tc.stroke(); tc.beginPath(); tc.moveTo(p.x,p.y); });
+      c2.addEventListener('mouseup',     function(){ td=false; tc.beginPath(); });
+      c2.addEventListener('mouseleave',  function(){ td=false; tc.beginPath(); });
+    }
+
+    function ltDraw(canvas, sz){
+      var ctx = canvas.getContext('2d');
+      ctx.save();
+      // Faint guide letter
+      ctx.globalAlpha = 0.10;
+      ctx.fillStyle = '#1D2B55';
+      ctx.font = 'bold '+Math.floor(sz*0.72)+'px Nunito,Arial,sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      var ltr = (document.getElementById('tracer-letter-big')||{textContent:'A'}).textContent || 'A';
+      ctx.fillText(ltr, sz/2, sz*0.44);
+      ctx.globalAlpha = 1;
+      // Break lines
+      ctx.lineCap = 'butt'; ctx.lineWidth = 1.5;
+      // Top dashed
+      ctx.setLineDash([5,7]); ctx.strokeStyle = 'rgba(255,107,157,0.30)';
+      ctx.beginPath(); ctx.moveTo(sz*0.05,sz*0.18); ctx.lineTo(sz*0.95,sz*0.18); ctx.stroke();
+      // Mid dashed
+      ctx.strokeStyle = 'rgba(255,107,157,0.38)';
+      ctx.beginPath(); ctx.moveTo(sz*0.05,sz*0.50); ctx.lineTo(sz*0.95,sz*0.50); ctx.stroke();
+      // Baseline solid
+      ctx.setLineDash([]); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,107,157,0.58)';
+      ctx.beginPath(); ctx.moveTo(sz*0.05,sz*0.77); ctx.lineTo(sz*0.95,sz*0.77); ctx.stroke();
+      ctx.restore();
+      // Reset stroke style for drawing
+      if(tc){ tc.lineWidth=Math.max(10,sz*0.05); tc.lineCap='round'; tc.lineJoin='round'; tc.strokeStyle='#D4537E'; tc.setLineDash([]); }
+    }
+
+    function ltClear(canvas, sz){
+      var ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,sz,sz);
+      ltDraw(canvas, sz);
+    }
+
+    // Hook into showTracerLetter — reinit canvas on each letter change
+    var origShow = window.showTracerLetter;
+    if(typeof origShow === 'function'){
+      window.showTracerLetter = function(idx){
+        origShow(idx);
+        setTimeout(ltInit, 100);
+      };
+    }
+
+    // Init on page load
+    document.addEventListener('DOMContentLoaded', function(){
+      setTimeout(ltInit, 500);
+    });
+
+    // Also init when letter tracer screen becomes active
+    var origNavTo = window.navTo;
+    if(typeof origNavTo === 'function'){
+      window.navTo = function(s){
+        origNavTo(s);
+        if(s === 'letter-tracer') setTimeout(ltInit, 200);
+      };
+    }
+
+  } catch(e) {
+    // Silent fail — canvas error never affects other games
+    console.warn('Tracer canvas error:', e);
+  }
+})();
+</script>
 
 </body>
 </html>
