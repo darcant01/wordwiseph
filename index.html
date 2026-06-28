@@ -4469,16 +4469,151 @@ const LETTERS_DATA = [
 
 let tracerIdx = 0;
 
+// ── TRACER MODES ──────────────────────────────────────────────
+let tracerMode = 'upper';   // 'upper' | 'lower' | 'name'
+let tracerNameLetters = []; // letters for name mode
+let tracerNameIdx = 0;
+
 function startLetterTracer(){
   tracerIdx = 0;
   navTo('letter-tracer');
+  // Show mode picker, hide game
+  document.getElementById('tracer-mode-pick').style.display='block';
+  document.getElementById('tracer-game').style.display='none';
+  document.getElementById('tracer-name-input').style.display='none';
+}
+
+function launchTracerModePaid(mode){
+  const sub = CU?.subscription||'free';
+  const hasAccess = CU && (sub==='basic'||sub==='premium');
+  if(!hasAccess){
+    if(!CU){
+      if(confirm('This mode requires a subscription.
+Login to your account first!
+
+Go to Login?')) navTo('login');
+    } else {
+      if(confirm('lowercase and Name Trace are available on Basic & Premium plans.
+
+Upgrade now?')) navTo('pricing');
+    }
+    return;
+  }
+  launchTracerMode(mode);
+}
+
+function launchTracerMode(mode){
+  tracerMode = mode;
+  if(mode==='name'){
+    // Show name input
+    document.getElementById('tracer-name-input').style.display='block';
+    document.getElementById('tracer-name-field').value='';
+    document.getElementById('tracer-name-field').focus();
+    return;
+  }
+  // Start tracing
+  document.getElementById('tracer-mode-pick').style.display='none';
+  document.getElementById('tracer-game').style.display='block';
+  document.getElementById('tracer-name-input').style.display='none';
+  tracerIdx = 0;
   buildTracerDots();
-  setTimeout(()=>showTracerLetter(0), 100); // small delay so canvas is rendered
+  // Set mode badge
+  const badge = document.getElementById('tracer-mode-badge');
+  if(badge){
+    if(mode==='upper') badge.innerHTML='<span style="background:#FF6B9D;color:#fff;font-size:12px;font-weight:800;padding:4px 14px;border-radius:99px">🔠 UPPERCASE</span>';
+    if(mode==='lower') badge.innerHTML='<span style="background:#FFB347;color:#fff;font-size:12px;font-weight:800;padding:4px 14px;border-radius:99px">🔡 lowercase</span>';
+  }
+  setTimeout(()=>showTracerLetter(0), 100);
+}
+
+function startNameTrace(){
+  const inp = document.getElementById('tracer-name-field');
+  if(!inp) return;
+  const name = inp.value.trim().toUpperCase().replace(/[^A-Z]/g,'');
+  if(name.length < 1){ alert('Please type a name first!'); return; }
+  tracerNameLetters = name.split('');
+  tracerNameIdx = 0;
+  tracerMode = 'name';
+  document.getElementById('tracer-mode-pick').style.display='none';
+  document.getElementById('tracer-game').style.display='block';
+  document.getElementById('tracer-name-input').style.display='none';
+  // Build dots for name letters
+  buildNameTracerDots();
+  const badge = document.getElementById('tracer-mode-badge');
+  if(badge) badge.innerHTML='<span style="background:#A855F7;color:#fff;font-size:12px;font-weight:800;padding:4px 14px;border-radius:99px">✍️ '+inp.value.trim().toUpperCase()+'</span>';
+  setTimeout(()=>showNameLetter(0), 100);
+}
+
+function buildNameTracerDots(){
+  const sr = document.getElementById('tracer-dots');
+  if(!sr) return;
+  sr.innerHTML = tracerNameLetters.map((l,i)=>
+    `<span class="tracer-dot ${i===0?'active':''}" id="tdot${i}" style="background:${i===0?'var(--pink)':'var(--lp)'}">${l}</span>`
+  ).join('');
+}
+
+function showNameLetter(idx){
+  tracerNameIdx = idx;
+  const letter = tracerNameLetters[idx];
+  if(!letter) return;
+
+  const prog = document.getElementById('tracer-progress');
+  if(prog) prog.textContent = 'Letter ' + (idx+1) + ' of ' + tracerNameLetters.length + ' — ' + letter;
+
+  const big = document.getElementById('tracer-letter-big');
+  if(big) big.textContent = letter;
+
+  const small = document.getElementById('tracer-letter-small');
+  if(small) small.textContent = letter.toLowerCase();
+
+  const guide = document.getElementById('tracer-guide-letter');
+  if(guide) guide.textContent = letter;
+
+  // Find letter data for hint
+  const d = LETTERS_DATA.find(x=>x.letter===letter);
+  const emoji = document.getElementById('tracer-word-emoji');
+  const word  = document.getElementById('tracer-word');
+  const boxes = document.getElementById('tracer-word-letters');
+  const instr = document.getElementById('tracer-instructions');
+  if(d){
+    if(emoji) emoji.textContent = d.emoji;
+    if(word)  word.textContent  = d.word;
+    if(boxes) boxes.innerHTML = d.word.split('').map(l=>
+      `<div class="word-letter-box ${l.toUpperCase()===letter?'blank':''}">${l.toUpperCase()===letter?'?':l.toUpperCase()}</div>`
+    ).join('');
+    if(instr) instr.textContent = d.instructions;
+  } else {
+    if(emoji) emoji.textContent = '✍️';
+    if(word)  word.textContent  = letter;
+    if(boxes) boxes.innerHTML = `<div class="word-letter-box blank">${letter}</div>`;
+    if(instr) instr.textContent = 'Trace this letter carefully!';
+  }
+
+  // Update name dots
+  document.querySelectorAll('.tracer-dot').forEach((dot,i)=>{
+    dot.style.background = i<idx?'#1D9E75':i===idx?'var(--pink)':'var(--lp)';
+    dot.textContent = tracerNameLetters[i]||'';
+  });
+
+  const fb = document.getElementById('tracer-feedback');
+  if(fb) fb.innerHTML='';
+  setupTracerCanvas();
+  clearTracerCanvas();
+
+  sKidTap();
+  setTimeout(()=>speak(letter, 0.75, 1.1), 300);
+}
+
+function backToTracerModes(){
+  document.getElementById('tracer-mode-pick').style.display='block';
+  document.getElementById('tracer-game').style.display='none';
+  document.getElementById('tracer-name-input').style.display='none';
 }
 
 function buildTracerDots(){
   const el = document.getElementById('tracer-dots');
   if(!el) return;
+  if(tracerMode==='name') return; // name dots handled separately
   el.innerHTML = LETTERS_DATA.map((_, i) =>
     `<span class="tracer-dot ${i<tracerIdx?'done':i===tracerIdx?'active':''}" id="tdot${i}"></span>`
   ).join('');
@@ -4499,7 +4634,12 @@ function showTracerLetter(idx){
   if(small) small.textContent = d.letter.toLowerCase();
 
   const guide = document.getElementById('tracer-guide-letter');
-  if(guide) guide.textContent = d.letter;
+  if(guide) guide.textContent = tracerMode==='lower' ? d.letter.toLowerCase() : d.letter;
+  // Show lowercase in big display too
+  const bigEl = document.getElementById('tracer-letter-big');
+  if(bigEl) bigEl.textContent = tracerMode==='lower' ? d.letter.toLowerCase() : d.letter;
+  const smallEl = document.getElementById('tracer-letter-small');
+  if(smallEl) smallEl.textContent = tracerMode==='lower' ? d.letter : d.letter.toLowerCase();
 
   const emoji = document.getElementById('tracer-word-emoji');
   if(emoji) emoji.textContent = d.emoji;
@@ -4720,9 +4860,7 @@ function checkTracerDrawing(){
     speak('Great job! '+d.letter+' is for '+d.word, 0.85, 1.2);
     // Auto advance after 2 seconds
     setTimeout(()=>{
-      if(tracerIdx < 25){
-        tracerNext();
-      }
+      tracerNext();
     }, 2200);
   } else if(coverage > 0.008){
     // Some drawing but needs more
@@ -4746,21 +4884,35 @@ function checkTracerDrawing(){
 }
 
 function tracerNext(){
-  if(tracerIdx < 25){
+  if(tracerMode==='name'){
+    if(tracerNameIdx < tracerNameLetters.length-1){
+      sKidTap();
+      showNameLetter(tracerNameIdx+1);
+    } else {
+      sKidFinish();
+      speak('Yay! You traced your name!', 0.85, 1.2);
+      const fb=document.getElementById('tracer-feedback');
+      if(fb) fb.innerHTML='<div style="font-size:clamp(18px,5vw,26px);font-weight:900;color:#7C3AED;text-align:center">🎉 Amazing! You traced your whole name!</div>';
+    }
+    return;
+  }
+  const maxIdx = tracerMode==='lower' ? 25 : 25;
+  if(tracerIdx < maxIdx){
     sKidTap();
-    showTracerLetter(tracerIdx + 1);
+    showTracerLetter(tracerIdx+1);
   } else {
-    sWin();
+    sKidFinish();
     speak('Yay! All done!', 0.85, 1.2);
-    setTimeout(()=>{tracerIdx=0;showTracerLetter(0);}, 3000);
+    setTimeout(()=>backToTracerModes(), 2500);
   }
 }
 
 function tracerPrev(){
-  if(tracerIdx > 0){
-    sClick();
-    showTracerLetter(tracerIdx - 1);
+  if(tracerMode==='name'){
+    if(tracerNameIdx > 0){ sClick(); showNameLetter(tracerNameIdx-1); }
+    return;
   }
+  if(tracerIdx > 0){ sClick(); showTracerLetter(tracerIdx-1); }
 }
 
 // ── ABC ORDER GAME ─────────────────────────────────────────────
@@ -5741,10 +5893,65 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
 <div id="sc-letter-tracer" class="screen">
   <div class="hero" style="background:linear-gradient(135deg,#FF6B9D,#FF8E53)">
     <div class="htitle" style="color:#fff">✏️ Letter <span style="color:#FFD93D">Tracer!</span></div>
-    <div class="hsub" style="color:rgba(255,255,255,0.9)">Learn to write A to Z!</div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Learn to write letters and your name!</div>
   </div>
   <div class="qmain" style="padding-top:0">
-    <div id="tracer-game">
+
+    <!-- Mode selector -->
+    <div id="tracer-mode-pick" style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:10px">Choose what to trace:</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+
+        <!-- Uppercase - Free -->
+        <button onclick="launchTracerMode('upper')" style="font-family:Nunito,sans-serif;display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;border:2.5px solid #FF6B9D;background:#FFF0F7;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+          <div style="font-size:32px">🔠</div>
+          <div style="flex:1">
+            <div style="font-size:16px;font-weight:900;color:#1D2B55">UPPERCASE Letters</div>
+            <div style="font-size:12px;font-weight:700;color:#888780">Trace A B C ... Z</div>
+          </div>
+          <div style="background:#1D9E75;color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px">FREE</div>
+        </button>
+
+        <!-- Lowercase - Paid -->
+        <button onclick="launchTracerModePaid('lower')" style="font-family:Nunito,sans-serif;display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;border:2.5px solid #FFB347;background:#FFF8E8;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+          <div style="font-size:32px">🔡</div>
+          <div style="flex:1">
+            <div style="font-size:16px;font-weight:900;color:#1D2B55">lowercase letters</div>
+            <div style="font-size:12px;font-weight:700;color:#888780">Trace a b c ... z</div>
+          </div>
+          <div style="background:#BA7517;color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px">⚡ PRO</div>
+        </button>
+
+        <!-- Name tracer - Paid -->
+        <button onclick="launchTracerModePaid('name')" style="font-family:Nunito,sans-serif;display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;border:2.5px solid #A855F7;background:#F5F0FF;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+          <div style="font-size:32px">✍️</div>
+          <div style="flex:1">
+            <div style="font-size:16px;font-weight:900;color:#1D2B55">Trace My Name</div>
+            <div style="font-size:12px;font-weight:700;color:#888780">Type your name, then trace each letter!</div>
+          </div>
+          <div style="background:#7C3AED;color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px">⚡ PRO</div>
+        </button>
+
+      </div>
+
+      <!-- Name input (hidden until name mode selected) -->
+      <div id="tracer-name-input" style="display:none;margin-top:14px">
+        <div style="font-size:13px;font-weight:800;color:#7C3AED;margin-bottom:8px;text-align:center">Type the name to trace:</div>
+        <div style="display:flex;gap:8px">
+          <input id="tracer-name-field" type="text" maxlength="12" autocorrect="off" autocapitalize="words" placeholder="e.g. Maria"
+            style="flex:1;font-family:Nunito,sans-serif;font-size:18px;font-weight:800;padding:12px 16px;border-radius:12px;border:2.5px solid #A855F7;background:#F5F0FF;color:#1D2B55;outline:none"/>
+          <button onclick="startNameTrace()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:12px 18px;border-radius:12px;background:#A855F7;border:none;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">Go! ›</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="tracer-game" style="display:none">
+      <!-- Back to mode picker -->
+      <div style="text-align:center;margin-bottom:10px">
+        <button onclick="backToTracerModes()" class="lnk" style="font-size:13px">← Choose different mode</button>
+      </div>
+      <!-- Mode badge -->
+      <div id="tracer-mode-badge" style="text-align:center;margin-bottom:10px"></div>
       <!-- Letter nav -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px">
         <button onclick="tracerPrev()" style="font-family:Nunito,sans-serif;font-size:22px;font-weight:900;background:var(--navy);color:#fff;border:none;border-radius:12px;width:48px;height:48px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">‹</button>
@@ -5801,7 +6008,7 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
       <div style="text-align:center;margin-top:6px">
         <button class="lnk" onclick="navTo('kids')">← Back to Kids Corner</button>
       </div>
-    </div>
+    </div><!-- end tracer-game -->
   </div>
 </div>
 
