@@ -4937,6 +4937,28 @@ function showRhymeResult(){
 let tracerDrawing = false;
 let tracerCtx = null;
 
+var tracerRefPixels = null; // reference letter pixel map
+
+function buildLetterReference(letter, size){
+  // Render the guide letter onto an offscreen canvas to get reference pixels
+  var ref = document.createElement('canvas');
+  ref.width = size; ref.height = size;
+  var ctx = ref.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.font = 'bold '+Math.floor(size*0.72)+'px Nunito, Arial, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(letter, size/2, size/2);
+  var data = ctx.getImageData(0,0,size,size).data;
+  // Build boolean map of letter pixels (alpha > 30)
+  var map = new Uint8Array(size*size);
+  var count = 0;
+  for(var i=0;i<size*size;i++){
+    if(data[i*4+3]>30){ map[i]=1; count++; }
+  }
+  return {map:map, count:count, size:size};
+}
+
 function setupTracerCanvas(){
   var canvas = document.getElementById('tracer-canvas');
   if(!canvas) return;
@@ -4951,6 +4973,11 @@ function setupTracerCanvas(){
   tracerCtx.lineCap = 'round';
   tracerCtx.lineJoin = 'round';
   drawBreakLines(tracerCtx, size);
+
+  // Build reference for current letter
+  var d = LETTERS_DATA[tracerIdx];
+  if(d) tracerRefPixels = buildLetterReference(d.letter, size);
+
   canvas.addEventListener('touchstart',  tracerTS, {passive:false});
   canvas.addEventListener('touchmove',   tracerTM, {passive:false});
   canvas.addEventListener('touchend',    function(e){e.preventDefault();tracerDrawing=false;}, {passive:false});
@@ -5006,44 +5033,81 @@ function checkTracerDrawing(){
   if(!canvas||!tracerCtx||!fb) return;
 
   var size = canvas.width;
-  // Sample center 70% of canvas (where the letter guide is)
-  var margin = Math.floor(size * 0.15);
-  var cw = size - margin*2;
-  var ch = size - margin*2;
-  var imgData = tracerCtx.getImageData(margin, margin, cw, ch);
-  var centerPixels = 0;
-  for(var i=3;i<imgData.data.length;i+=4){
-    if(imgData.data[i]>30) centerPixels++;
-  }
-  var centerTotal = cw * ch;
-  var pct = centerPixels / centerTotal;
-
-  // Also count total pixels
-  var allData = tracerCtx.getImageData(0,0,size,size).data;
-  var totalPixels = 0;
-  for(var j=3;j<allData.length;j+=4){ if(allData[j]>30) totalPixels++; }
-
+  var data = tracerCtx.getImageData(0,0,size,size).data;
   var d = LETTERS_DATA[tracerIdx];
 
-  if(totalPixels < 100){
+  // Count total drawn pixels (thickened stroke — use alpha > 20)
+  var drawnPixels = 0;
+  var drawnMap = new Uint8Array(size*size);
+  for(var i=0;i<size*size;i++){
+    // skip break-line pixels (they are drawn with 1.5px — thin)
+    // user strokes are thick (lineWidth ~8-12px), so they have more solid alpha
+    if(data[i*4+3] > 60){ drawnMap[i]=1; drawnPixels++; }
+  }
+
+  if(drawnPixels < 80){
     fb.style.color='#E24B4A';
-    fb.textContent='✏️ Nothing drawn yet! Trace the letter first.';
+    fb.textContent='✏️ Trace the letter first!';
     return;
   }
 
-  if(pct > 0.06){
-    // Good coverage of center letter area
+  if(!tracerRefPixels || tracerRefPixels.count < 10){
+    // Fallback if reference couldn't be built
+    fb.style.color='#1D9E75';
+    fb.textContent='🌟 Good job! Keep practicing '+d.letter+'!';
+    return;
+  }
+
+  var ref = tracerRefPixels;
+  // Dilate reference by ~12px to account for stroke width
+  var dilateR = Math.max(6, Math.floor(size * 0.04));
+  var dilated = new Uint8Array(size*size);
+  for(var y=0;y<size;y++){
+    for(var x=0;x<size;x++){
+      if(ref.map[y*size+x]){
+        // Mark surrounding pixels as part of letter zone
+        for(var dy=-dilateR;dy<=dilateR;dy++){
+          for(var dx=-dilateR;dx<=dilateR;dx++){
+            var ny=y+dy, nx=x+dx;
+            if(ny>=0&&ny<size&&nx>=0&&nx<size){
+              dilated[ny*size+nx]=1;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Count: how many of user's drawn pixels land ON the letter
+  var onLetter = 0;
+  for(var k=0;k<size*size;k++){
+    if(drawnMap[k] && dilated[k]) onLetter++;
+  }
+
+  // Precision: % of drawn pixels that are on the letter (accuracy)
+  var precision = drawnPixels > 0 ? onLetter / drawnPixels : 0;
+
+  // Coverage: % of dilated letter pixels covered by drawing
+  var dilatedCount = 0;
+  for(var m=0;m<size*size;m++){ if(dilated[m]) dilatedCount++; }
+  var coverage = dilatedCount > 0 ? onLetter / dilatedCount : 0;
+
+  // Score: both precision AND coverage matter
+  var score = (precision * 0.5) + (coverage * 0.5);
+
+  if(score > 0.35 && precision > 0.4){
     fb.style.color='#1D9E75';
     fb.textContent='🌟 Great job! '+d.letter+' is for '+d.word+' '+d.emoji;
     setTimeout(function(){ tracerNext(); }, 2000);
-  } else if(pct > 0.02 || totalPixels > 600){
-    // Some effort but not enough coverage
+  } else if(score > 0.2 || coverage > 0.25){
     fb.style.color='#BA7517';
-    fb.textContent='👍 Good try! Trace MORE of the letter shape!';
-  } else {
-    // Drew something small in corner etc
+    fb.textContent='👍 Getting there! Follow the '+d.letter+' shape more carefully.';
+  } else if(precision < 0.3){
     fb.style.color='#E24B4A';
-    fb.textContent='✏️ Trace the full letter shape in the middle!';
+    fb.textContent='❌ That doesn't look like '+d.letter+'. Try tracing the letter shape!';
+  } else {
+    fb.style.color='#E24B4A';
+    fb.textContent='✏️ Cover more of the '+d.letter+' shape!';
   }
 }
 </script>
