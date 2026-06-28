@@ -4965,7 +4965,8 @@ function drawTracerLines(canvas, size){
   ctx.fillStyle = '#1D2B55';
   ctx.font = 'bold '+Math.floor(size*0.70)+'px Nunito,Arial,sans-serif';
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(LETTERS_DATA[tracerIdx].letter, size/2, size*0.45);
+  var tLetter = (typeof tracerIdx!=='undefined' && LETTERS_DATA[tracerIdx]) ? LETTERS_DATA[tracerIdx].letter : 'A';
+  ctx.fillText(tLetter, size/2, size*0.45);
   ctx.globalAlpha = 1.0;
   // Break lines
   ctx.lineCap = 'butt';
