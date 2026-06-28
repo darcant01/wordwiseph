@@ -372,6 +372,24 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 .chain-fb{text-align:center;min-height:28px;font-size:clamp(13px,3vw,15px);font-weight:800;margin-bottom:8px}
 .chain-timer-track{background:var(--lp);border-radius:99px;height:10px;overflow:hidden;margin-bottom:4px}
 .chain-timer-fill{height:10px;border-radius:99px;transition:width 0.1s linear,background 0.3s}
+
+/* ── KIDS CORNER ── */
+.kids-letter-tile{width:clamp(44px,11vw,58px);height:clamp(44px,11vw,58px);background:var(--navy);color:#FAC775;font-family:'Nunito',sans-serif;font-size:clamp(18px,5vw,26px);font-weight:900;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;border:3px solid transparent;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
+.kids-letter-tile:active{transform:scale(0.9)}
+.kids-letter-tile.correct{background:var(--green);color:#fff;border-color:#085041}
+.kids-letter-tile.wrong{background:var(--red);color:#fff;animation:shake 0.4s ease}
+.kids-letter-tile.used{background:#C8C6C2;color:#fff;cursor:default}
+.tracer-dot{width:10px;height:10px;border-radius:50%;background:var(--lp);display:inline-block;margin:2px;transition:all 0.3s;flex-shrink:0}
+.tracer-dot.done{background:var(--green)}
+.tracer-dot.active{background:var(--pink);transform:scale(1.4)}
+.word-letter-box{width:clamp(32px,8vw,44px);height:clamp(32px,8vw,44px);background:var(--navy);color:#FAC775;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:clamp(14px,3.5vw,20px);font-weight:900;font-family:'Nunito',sans-serif}
+.word-letter-box.blank{background:#FFF8F0;color:var(--pink);border:2.5px dashed var(--pink)}
+.rhyme-choice{padding:clamp(12px,3vw,16px) clamp(16px,4vw,24px);border-radius:14px;border:2.5px solid var(--lp);background:#FFF8F0;font-family:'Nunito',sans-serif;font-size:clamp(16px,4vw,22px);font-weight:900;color:var(--navy);cursor:pointer;text-align:center;transition:all 0.2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
+.rhyme-choice:active{transform:scale(0.97)}
+.rhyme-choice.correct{background:#E1F5EE;border-color:var(--green);color:#085041}
+.rhyme-choice.wrong{background:#FCEBEB;border-color:var(--red);color:#791F1F}
+.rhyme-choice.missed{background:#FAEEDA;border-color:#BA7517;color:#412402}
+
 </style>
 </head>
 <body>
@@ -1055,7 +1073,7 @@ function navTo(s){
   if(s==='start')  updateDiffCards();
   // Show/hide floating timer
   const ft=document.getElementById('floating-timer');
-  const gameScreens=['quiz','spell','odd','shark','scramble','chain','sprint'];
+  const gameScreens=['quiz','spell','odd','shark','scramble','chain','sprint','letter-tracer','abc-order','missing-letter','rhyme'];
   if(ft) ft.style.display=gameScreens.includes(s)?'flex':'none';
   // Show ticker on ALL pages always
   TICKER.setVisible(true);
@@ -1068,7 +1086,7 @@ function buildHdr(){
   const r=document.getElementById('hdr-right');
   if(!r)return;
   const sb=`<button class="hbtn" id="sndbtn" onclick="toggleSound()" style="min-width:110px">🔊 Sound ON</button>`;
-  const play=`<button class="hbtn" onclick="navTo('games')">🎮 Games</button>`;
+  const play=`<button class="hbtn" onclick="navTo('games')">🎮 Games</button><button class="hbtn" onclick="navTo('kids')" style="color:#FAC775;border-color:#FAC775">🌟 Kids</button>`;
   const lb=`<button class="hbtn" onclick="navTo('lb')">Scores</button>`;
   if(CU){
     const ini=CU.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
@@ -4376,6 +4394,497 @@ function restartSprint(){
 
 <script>
 // ================================================================
+// BLOCK 9 — KIDS CORNER GAMES
+// ================================================================
+// ================================================================
+// KIDS CORNER GAMES
+// ================================================================
+
+// ── LETTER TRACER DATA ─────────────────────────────────────────
+const LETTERS_DATA = [
+  {letter:'A',word:'Apple',   emoji:'🍎',instructions:'Start at the top. Draw two lines going down and outward. Add a line across the middle.'},
+  {letter:'B',word:'Bear',    emoji:'🐻',instructions:'Draw a straight line down. Add two bumps on the right side — one small on top, one bigger below.'},
+  {letter:'C',word:'Cat',     emoji:'🐱',instructions:'Start at the top right. Curve left and around like a smile. Stop before you reach the start.'},
+  {letter:'D',word:'Dog',     emoji:'🐶',instructions:'Draw a straight line down. Add a big curve from the top to the bottom on the right.'},
+  {letter:'E',word:'Elephant',emoji:'🐘',instructions:'Draw a line down. Add three lines going right — one at the top, middle, and bottom.'},
+  {letter:'F',word:'Fish',    emoji:'🐟',instructions:'Draw a line down. Add two lines going right — one at the top and one in the middle.'},
+  {letter:'G',word:'Goat',    emoji:'🐐',instructions:'Like C, but add a short line going inward at the middle right.'},
+  {letter:'H',word:'Hat',     emoji:'🎩',instructions:'Draw two lines going down. Connect them with a line across the middle.'},
+  {letter:'I',word:'Ice',     emoji:'🧊',instructions:'Draw a straight line down the middle. Add short lines at the top and bottom.'},
+  {letter:'J',word:'Jellyfish',emoji:'🪼',instructions:'Draw a short line at the top. Draw a line down and curve it left at the bottom.'},
+  {letter:'K',word:'Kite',    emoji:'🪁',instructions:'Draw a line down. Add two diagonal lines from the middle — one going up-right, one going down-right.'},
+  {letter:'L',word:'Lion',    emoji:'🦁',instructions:'Draw a line straight down. Add a short line going right at the bottom.'},
+  {letter:'M',word:'Monkey',  emoji:'🐒',instructions:'Draw two lines down. Connect with two diagonal lines meeting at a point in the middle.'},
+  {letter:'N',word:'Nest',    emoji:'🪺',instructions:'Draw two lines down. Connect with one diagonal line from the top of the left to the bottom of the right.'},
+  {letter:'O',word:'Owl',     emoji:'🦉',instructions:'Draw a complete oval or circle — round and smooth!'},
+  {letter:'P',word:'Pig',     emoji:'🐷',instructions:'Draw a line down. Add a bump on the top right side.'},
+  {letter:'Q',word:'Queen',   emoji:'👑',instructions:'Draw a circle. Add a small diagonal line at the bottom right, going outward.'},
+  {letter:'R',word:'Rabbit',  emoji:'🐰',instructions:'Draw a line down. Add a bump on the top right and a diagonal line going down-right from the middle.'},
+  {letter:'S',word:'Snake',   emoji:'🐍',instructions:'Curve right at the top, then left in the middle, then right at the bottom — like a curvy S!'},
+  {letter:'T',word:'Tiger',   emoji:'🐯',instructions:'Draw a line straight down the middle. Add a long line going left and right across the top.'},
+  {letter:'U',word:'Umbrella',emoji:'☂️', instructions:'Draw two lines down and curve them together at the bottom — like a bucket shape.'},
+  {letter:'V',word:'Van',     emoji:'🚐',instructions:'Draw two diagonal lines meeting at a point at the bottom — like a V shape!'},
+  {letter:'W',word:'Whale',   emoji:'🐳',instructions:'Draw four diagonal lines making two V shapes side by side.'},
+  {letter:'X',word:'X-ray',   emoji:'🩻',instructions:'Draw one diagonal line from top-left to bottom-right. Cross it with another from top-right to bottom-left.'},
+  {letter:'Y',word:'Yak',     emoji:'🦬',instructions:'Draw two diagonal lines meeting in the middle. Add a short line going straight down from the middle.'},
+  {letter:'Z',word:'Zebra',   emoji:'🦓',instructions:'Draw a line going right at the top. Add a diagonal line going down-left. Add a line going right at the bottom.'},
+];
+
+let tracerIdx = 0;
+
+function startLetterTracer(){
+  tracerIdx = 0;
+  navTo('letter-tracer');
+  buildTracerDots();
+  showTracerLetter(0);
+}
+
+function buildTracerDots(){
+  const el = document.getElementById('tracer-dots');
+  if(!el) return;
+  el.innerHTML = LETTERS_DATA.map((_, i) =>
+    `<span class="tracer-dot ${i<tracerIdx?'done':i===tracerIdx?'active':''}" id="tdot${i}"></span>`
+  ).join('');
+}
+
+function showTracerLetter(idx){
+  tracerIdx = idx;
+  const d = LETTERS_DATA[idx];
+  if(!d) return;
+
+  const prog = document.getElementById('tracer-progress');
+  if(prog) prog.textContent = d.letter + ' — Letter ' + (idx+1) + ' of 26';
+
+  const big = document.getElementById('tracer-letter-big');
+  if(big) big.textContent = d.letter;
+
+  const small = document.getElementById('tracer-letter-small');
+  if(small) small.textContent = d.letter.toLowerCase();
+
+  const emoji = document.getElementById('tracer-word-emoji');
+  if(emoji) emoji.textContent = d.emoji;
+
+  const word = document.getElementById('tracer-word');
+  if(word) word.textContent = d.word;
+
+  // Show word with letter boxes
+  const boxes = document.getElementById('tracer-word-letters');
+  if(boxes){
+    boxes.innerHTML = d.word.split('').map(l =>
+      `<div class="word-letter-box ${l.toUpperCase()===d.letter?'blank':''}">${l.toUpperCase()===d.letter?'?':l.toUpperCase()}</div>`
+    ).join('');
+  }
+
+  const instr = document.getElementById('tracer-instructions');
+  if(instr) instr.textContent = d.instructions;
+
+  // Update dots
+  document.querySelectorAll('.tracer-dot').forEach((dot, i) => {
+    dot.className = 'tracer-dot ' + (i < idx ? 'done' : i === idx ? 'active' : '');
+  });
+
+  sClick();
+}
+
+function tracerNext(){
+  if(tracerIdx < 25){
+    sOk();
+    showTracerLetter(tracerIdx + 1);
+  } else {
+    sWin();
+    alert('🎉 Amazing! You learned all 26 letters of the alphabet!');
+    tracerIdx = 0;
+    showTracerLetter(0);
+  }
+}
+
+function tracerPrev(){
+  if(tracerIdx > 0){
+    sClick();
+    showTracerLetter(tracerIdx - 1);
+  }
+}
+
+// ── ABC ORDER GAME ─────────────────────────────────────────────
+let abcScore=0, abcTarget=0, abcTLeft=60, abcTInt=null, abcRunning=false;
+
+function startABCOrder(){
+  navTo('abc-order');
+  launchABCOrder();
+}
+
+function launchABCOrder(){
+  abcScore=0; abcTarget=0; abcTLeft=60; abcRunning=true;
+  document.getElementById('abc-score').textContent='0';
+  document.getElementById('abc-time').textContent='60';
+  document.getElementById('abc-fb').textContent='';
+  document.getElementById('abc-game').style.display='block';
+  document.getElementById('abc-over').style.display='none';
+  buildABCGrid();
+  updateABCTarget();
+  sStart();
+  clearInterval(abcTInt);
+  abcTInt=setInterval(()=>{
+    abcTLeft--;
+    const el=document.getElementById('abc-time');
+    if(el)el.textContent=abcTLeft;
+    if(abcTLeft<=10)sUrg();
+    if(abcTLeft<=0){clearInterval(abcTInt);endABCOrder();}
+  },1000);
+}
+
+function buildABCGrid(){
+  const grid=document.getElementById('abc-grid');
+  if(!grid)return;
+  const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const shuffled=shuf(letters);
+  grid.innerHTML=shuffled.map(l=>
+    `<div class="kids-letter-tile" id="abc-tile-${l}" onclick="tapABCLetter('${l}')">${l}</div>`
+  ).join('');
+}
+
+function updateABCTarget(){
+  const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const el=document.getElementById('abc-target');
+  if(el&&abcTarget<26) el.textContent=letters[abcTarget];
+}
+
+function tapABCLetter(l){
+  if(!abcRunning)return;
+  const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const tile=document.getElementById('abc-tile-'+l);
+  const fb=document.getElementById('abc-fb');
+  if(l===letters[abcTarget]){
+    if(tile){tile.classList.add('used');tile.textContent='✓';}
+    abcScore++; abcTarget++;
+    document.getElementById('abc-score').textContent=abcScore;
+    if(fb){fb.textContent='✅ '+l+'!';fb.style.color='#1D9E75';}
+    sOk();sCr();
+    if(abcTarget>=26){clearInterval(abcTInt);endABCOrder();}
+    else updateABCTarget();
+  } else {
+    if(tile){
+      tile.classList.add('wrong');
+      setTimeout(()=>tile.classList.remove('wrong'),500);
+    }
+    if(fb){fb.textContent='❌ Find '+letters[abcTarget]+' first!';fb.style.color='#E24B4A';}
+    sBad();
+  }
+}
+
+function endABCOrder(){
+  abcRunning=false;
+  clearInterval(abcTInt);
+  document.getElementById('abc-game').style.display='none';
+  document.getElementById('abc-over').style.display='block';
+  document.getElementById('abc-final').textContent=abcScore+'/26';
+  const pct=Math.round(abcScore/26*100);
+  let stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You know all your ABCs! 🏆';sWin();}
+  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost all letters!';sWin();}
+  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Great job! Keep practicing!';}
+  else{stars='⭐⭐💫💫💫';msg='Good try! Practice your ABCs more!';}
+  document.getElementById('abc-stars').textContent=stars;
+  document.getElementById('abc-msg').textContent=msg;
+}
+
+// ── MISSING LETTER GAME ────────────────────────────────────────
+const ML_WORDS = [
+  {word:'CAT',  emoji:'🐱', blanks:[0]},  {word:'DOG',  emoji:'🐶', blanks:[1]},
+  {word:'SUN',  emoji:'☀️',  blanks:[2]},  {word:'BED',  emoji:'🛏️', blanks:[1]},
+  {word:'HAT',  emoji:'🎩', blanks:[0]},  {word:'CUP',  emoji:'☕', blanks:[2]},
+  {word:'BUS',  emoji:'🚌', blanks:[1]},  {word:'PIG',  emoji:'🐷', blanks:[0]},
+  {word:'HEN',  emoji:'🐓', blanks:[2]},  {word:'MAP',  emoji:'🗺️', blanks:[1]},
+  {word:'JAM',  emoji:'🫙', blanks:[0]},  {word:'NUT',  emoji:'🥜', blanks:[2]},
+  {word:'LOG',  emoji:'🪵', blanks:[1]},  {word:'WEB',  emoji:'🕸️', blanks:[0]},
+  {word:'FAN',  emoji:'🌬️', blanks:[2]},  {word:'BOX',  emoji:'📦', blanks:[1]},
+  {word:'ZIP',  emoji:'🤐', blanks:[0]},  {word:'OWL',  emoji:'🦉', blanks:[1]},
+  {word:'ANT',  emoji:'🐜', blanks:[2]},  {word:'FOX',  emoji:'🦊', blanks:[0]},
+  {word:'EGG',  emoji:'🥚', blanks:[0]},  {word:'BEE',  emoji:'🐝', blanks:[2]},
+  {word:'RAT',  emoji:'🐀', blanks:[1]},  {word:'COW',  emoji:'🐄', blanks:[0]},
+  {word:'KEY',  emoji:'🔑', blanks:[1]},  {word:'ICE',  emoji:'🧊', blanks:[0]},
+  {word:'TOY',  emoji:'🪀', blanks:[2]},  {word:'SKY',  emoji:'🌤️', blanks:[1]},
+  {word:'GUM',  emoji:'🍬', blanks:[0]},  {word:'JET',  emoji:'✈️', blanks:[2]},
+];
+
+let mlQs=[], mlAns=[], mlAnswered=0, mlCQ=0;
+let mlTInt=null, mlTLeft=15, mlTTotal=15;
+
+function startMissingLetter(){
+  navTo('missing-letter');
+  launchMissingLetter();
+}
+
+function launchMissingLetter(){
+  mlQs=shuf([...ML_WORDS]).slice(0,10);
+  mlAns=new Array(10).fill(null);
+  mlAnswered=0; mlCQ=0;
+  mlTLeft=15; mlTTotal=15;
+  document.getElementById('ml-score').textContent='0';
+  const sbtn=document.getElementById('ml-sbtn');if(sbtn)sbtn.disabled=true;
+  const res=document.getElementById('ml-result');if(res)res.classList.remove('show');
+  buildMLQuestion(0);
+  startMLTimer();
+  sStart();
+}
+
+function buildMLQuestion(idx){
+  mlCQ=idx;
+  const q=mlQs[idx];
+  const blankIdx=q.blanks[0];
+  const correctLetter=q.word[blankIdx];
+
+  // Generate wrong choices
+  const allLetters='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const wrongs=shuf(allLetters.filter(l=>l!==correctLetter)).slice(0,3);
+  const choices=shuf([correctLetter,...wrongs]);
+
+  const con=document.getElementById('ml-container');
+  if(!con)return;
+
+  // Build word display with blank
+  const wordDisplay=q.word.split('').map((l,i)=>{
+    if(i===blankIdx) return `<div class="word-letter-box blank" style="width:clamp(36px,9vw,50px);height:clamp(36px,9vw,50px);font-size:clamp(16px,4vw,24px)">?</div>`;
+    return `<div class="word-letter-box" style="width:clamp(36px,9vw,50px);height:clamp(36px,9vw,50px);font-size:clamp(16px,4vw,24px)">${l}</div>`;
+  }).join('');
+
+  con.innerHTML=`
+    <div class="qcard" id="mlqc${idx}" style="${idx>0?'opacity:0.4;pointer-events:none':''}">
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="font-size:clamp(44px,11vw,64px)">${q.emoji}</div>
+        <div style="font-size:clamp(13px,3vw,15px);font-weight:700;color:#888780;margin-top:6px">${idx+1} of 10</div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px">${wordDisplay}</div>
+      <div style="text-align:center;font-size:clamp(12px,3vw,14px);font-weight:700;color:#888780;margin-bottom:12px">Tap the missing letter:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="mlch${idx}">
+        ${choices.map(c=>`
+          <div class="kids-letter-tile" style="width:100%;height:clamp(52px,13vw,70px);font-size:clamp(22px,6vw,34px);border-radius:14px"
+            onclick="ansML(${idx},this,'${c}','${correctLetter}')">${c}</div>
+        `).join('')}
+      </div>
+      <div class="fb" id="mlfb${idx}" style="margin-top:12px"></div>
+    </div>`;
+}
+
+function startMLTimer(){
+  clearInterval(mlTInt);
+  mlTLeft=mlTTotal;
+  updMLT();
+  mlTInt=setInterval(()=>{
+    mlTLeft--;updMLT();
+    if(mlTLeft<=5&&mlTLeft>0)sUrg();
+    if(mlTLeft<=0){clearInterval(mlTInt);sTU();autoML();}
+  },1000);
+}
+
+function updMLT(){
+  const el=document.getElementById('ml-time');if(el)el.textContent=mlTLeft;
+}
+
+function autoML(){
+  const q=mlQs[mlCQ];
+  const btns=document.querySelectorAll(`#mlch${mlCQ} .kids-letter-tile`);
+  btns.forEach(b=>{b.onclick=null;if(b.textContent===q.word[q.blanks[0]])b.classList.add('correct');});
+  const fb=document.getElementById(`mlfb${mlCQ}`);
+  if(fb){fb.textContent="⏰ Time's up! Answer: "+q.word[q.blanks[0]];fb.className='fb show wrong';}
+  mlAns[mlCQ]=false; mlAnswered++;
+  document.getElementById('ml-score').textContent=mlAns.filter(a=>a).length;
+  if(mlAnswered<10){setTimeout(()=>{mlCQ++;buildMLQuestion(mlCQ);startMLTimer();},1000);}
+  else{const sb=document.getElementById('ml-sbtn');if(sb)sb.disabled=false;}
+}
+
+function ansML(idx,btn,chosen,correct){
+  const btns=document.querySelectorAll(`#mlch${idx} .kids-letter-tile`);
+  btns.forEach(b=>{b.onclick=null;if(b.textContent===correct)b.classList.add('correct');});
+  clearInterval(mlTInt);
+  const ok=chosen===correct;
+  mlAns[idx]=ok;
+  const fb=document.getElementById(`mlfb${idx}`);
+  if(ok){if(fb){fb.textContent='✅ Correct! The letter is '+correct+'!';fb.className='fb show correct';}sOk();sCr();}
+  else{btn.classList.add('wrong');if(fb){fb.textContent='❌ It\'s '+correct+'!';fb.className='fb show wrong';}sBad();}
+  mlAnswered++;
+  document.getElementById('ml-score').textContent=mlAns.filter(a=>a).length;
+  if(mlAnswered<10){setTimeout(()=>{mlCQ++;buildMLQuestion(mlCQ);startMLTimer();},900);}
+  else{const sb=document.getElementById('ml-sbtn');if(sb)sb.disabled=false;}
+}
+
+function showMLResult(){
+  clearInterval(mlTInt);
+  const score=mlAns.filter(a=>a).length;
+  const pct=Math.round(score/10*100);
+  document.getElementById('ml-rsco').textContent=score+'/10';
+  let stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You found every missing letter! 🏆';sWin();}
+  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost perfect!';sWin();}
+  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good job! Keep practicing your letters!';}
+  else{stars='⭐⭐💫💫💫';msg='Keep trying! You can do it!';}
+  document.getElementById('ml-rstr').textContent=stars;
+  document.getElementById('ml-rmsg').textContent=msg;
+  document.getElementById('ml-result').classList.add('show');
+  document.getElementById('ml-sbtn').disabled=true;
+}
+
+// ── RHYME TIME GAME ─────────────────────────────────────────────
+const RHYME_BANK = [
+  {word:'CAT',  rhymes:['hat','mat','bat','rat','fat','sat'],  non:['dog','sun','bus','pig','hen']},
+  {word:'DOG',  rhymes:['log','fog','frog','hog','blog'],      non:['cat','hat','sun','map','bird']},
+  {word:'SUN',  rhymes:['fun','run','bun','gun','nun','ton'],  non:['cat','dog','bus','map','hat']},
+  {word:'BED',  rhymes:['red','fed','led','wed','shed','sled'],non:['cat','sun','pig','cup','hen']},
+  {word:'HAT',  rhymes:['cat','bat','mat','rat','flat','that'],non:['dog','sun','bed','bus','pig']},
+  {word:'BAG',  rhymes:['tag','wag','flag','drag','stag'],     non:['cat','sun','bed','map','bus']},
+  {word:'HOP',  rhymes:['top','pop','cop','shop','stop','drop'],non:['cat','sun','bed','hat','bus']},
+  {word:'FAN',  rhymes:['can','man','ran','van','plan','scan'],non:['dog','sun','bed','pig','map']},
+  {word:'BIG',  rhymes:['dig','fig','pig','wig','jig','twig'], non:['cat','sun','hat','bus','hen']},
+  {word:'CUP',  rhymes:['pup','sup','up','hiccup','backup'],   non:['cat','dog','bed','pig','map']},
+  {word:'CAKE', rhymes:['lake','make','rake','take','snake','wake'],non:['dog','sun','bed','hat','pig']},
+  {word:'SING', rhymes:['ring','king','wing','bring','spring'],non:['cat','dog','sun','bed','hat']},
+  {word:'BLUE', rhymes:['clue','glue','flew','true','shoe'],   non:['cat','dog','sun','bed','hat']},
+  {word:'NIGHT',rhymes:['light','right','might','sight','tight'],non:['cat','dog','sun','bed','hat']},
+  {word:'RAIN', rhymes:['train','plain','brain','chain','main'],non:['dog','sun','bed','pig','bus']},
+];
+
+let rhQs=[], rhAns=[], rhAnswered=0, rhCQ=0;
+let rhTInt=null, rhTLeft=20, rhTTotal=20;
+
+function startRhymeTime(){
+  navTo('rhyme');
+  launchRhymeTime();
+}
+
+function launchRhymeTime(){
+  rhQs=shuf([...RHYME_BANK]).slice(0,8);
+  rhAns=new Array(8).fill(null);
+  rhAnswered=0; rhCQ=0;
+  rhTLeft=20; rhTTotal=20;
+  const sbtn=document.getElementById('rh-sbtn');if(sbtn)sbtn.disabled=true;
+  const res=document.getElementById('rh-result');if(res)res.classList.remove('show');
+  buildRhymeQ(0);
+  startRhymeTimer();
+  sStart();
+}
+
+function buildRhymeQ(idx){
+  rhCQ=idx;
+  const q=rhQs[idx];
+  // Pick 1-2 rhymes and 2-3 non-rhymes for choices (4 total)
+  const r=shuf([...q.rhymes]).slice(0,2);
+  const n=shuf([...q.non]).slice(0,2);
+  const choices=shuf([...r,...n]);
+
+  const con=document.getElementById('rh-container');
+  if(!con)return;
+
+  con.innerHTML=`
+    <div class="qcard" id="rhqc${idx}" style="${idx>0?'opacity:0.4;pointer-events:none':''}">
+      <div style="text-align:center;margin-bottom:10px">
+        <div style="font-size:clamp(13px,3vw,15px);font-weight:700;color:#888780">${idx+1} of 8</div>
+      </div>
+      <div style="text-align:center;background:linear-gradient(135deg,#A855F7,#7C3AED);border-radius:16px;padding:clamp(14px,3vw,20px);margin-bottom:16px">
+        <div style="font-size:clamp(13px,3vw,15px);font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.8);margin-bottom:6px">Which words rhyme with?</div>
+        <div style="font-size:clamp(32px,8vw,52px);font-weight:900;color:#FFD93D;letter-spacing:4px">${q.word}</div>
+      </div>
+      <div style="font-size:clamp(12px,3vw,14px);font-weight:700;color:#888780;text-align:center;margin-bottom:10px">Tap ALL the rhyming words!</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px" id="rhch${idx}">
+        ${choices.map(c=>`
+          <div class="rhyme-choice" id="rhbtn-${idx}-${c}" onclick="tapRhyme(${idx},this,'${c}')">${c}</div>
+        `).join('')}
+      </div>
+      <div style="text-align:center">
+        <button class="btn btn-pink" onclick="submitRhyme(${idx})" id="rhsub${idx}" style="min-width:140px">✅ Done!</button>
+      </div>
+      <div class="fb" id="rhfb${idx}" style="margin-top:10px"></div>
+    </div>`;
+}
+
+let rhSelected=[];
+
+function tapRhyme(idx,btn,word){
+  if(!rhSelected)rhSelected=[];
+  const q=rhQs[idx];
+  const isSelected=btn.style.background.includes('A855F7')||btn.classList.contains('selected-rhyme');
+  if(isSelected){
+    btn.classList.remove('selected-rhyme');
+    btn.style.background='';
+    btn.style.borderColor='var(--lp)';
+    btn.style.color='var(--navy)';
+    rhSelected=rhSelected.filter(w=>w!==word);
+  } else {
+    btn.classList.add('selected-rhyme');
+    btn.style.background='linear-gradient(135deg,#A855F7,#7C3AED)';
+    btn.style.borderColor='#A855F7';
+    btn.style.color='#fff';
+    rhSelected.push(word);
+  }
+  sClick();
+}
+
+function submitRhyme(idx){
+  clearInterval(rhTInt);
+  const q=rhQs[idx];
+  const rhymeSet=new Set(q.rhymes.map(r=>r.toLowerCase()));
+  let correct=true;
+  const choices=document.querySelectorAll(`#rhch${idx} .rhyme-choice`);
+  choices.forEach(btn=>{
+    const w=btn.textContent.toLowerCase();
+    const isRhyme=rhymeSet.has(w);
+    const wasSelected=btn.classList.contains('selected-rhyme');
+    btn.onclick=null;
+    btn.style.background='';
+    if(isRhyme&&wasSelected){btn.classList.add('correct');}
+    else if(isRhyme&&!wasSelected){btn.classList.add('missed');correct=false;}
+    else if(!isRhyme&&wasSelected){btn.classList.add('wrong');correct=false;}
+    btn.classList.remove('selected-rhyme');
+  });
+  rhSelected=[];
+  const fb=document.getElementById(`rhfb${idx}`);
+  if(correct){
+    if(fb){fb.textContent='✅ Perfect! All rhymes found!';fb.className='fb show correct';}
+    rhAns[idx]=true;sOk();sCr();
+  } else {
+    if(fb){fb.textContent='❌ Some rhymes were missed! Green = rhymes, Orange = missed, Red = wrong.';fb.className='fb show wrong';}
+    rhAns[idx]=false;sBad();
+  }
+  rhAnswered++;
+  document.getElementById('rh-score').textContent=rhAns.filter(a=>a).length;
+  if(rhAnswered<8){
+    setTimeout(()=>{rhCQ++;rhSelected=[];buildRhymeQ(rhCQ);startRhymeTimer();},1200);
+  } else {
+    const sbtn=document.getElementById('rh-sbtn');if(sbtn)sbtn.disabled=false;
+  }
+}
+
+function startRhymeTimer(){
+  clearInterval(rhTInt);
+  rhTLeft=rhTTotal;
+  const el=document.getElementById('rh-time');if(el)el.textContent=rhTLeft;
+  rhTInt=setInterval(()=>{
+    rhTLeft--;
+    const t=document.getElementById('rh-time');if(t)t.textContent=rhTLeft;
+    if(rhTLeft<=5&&rhTLeft>0)sUrg();
+    if(rhTLeft<=0){clearInterval(rhTInt);sTU();submitRhyme(rhCQ);}
+  },1000);
+}
+
+function showRhymeResult(){
+  clearInterval(rhTInt);
+  const score=rhAns.filter(a=>a).length;
+  const pct=Math.round(score/8*100);
+  document.getElementById('rh-rsco').textContent=score+'/8';
+  let stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect Rhymer! Amazing! 🏆';sWin();}
+  else if(pct>=75){stars='⭐⭐⭐⭐💫';msg='Great rhyming skills!';sWin();}
+  else if(pct>=50){stars='⭐⭐⭐💫💫';msg='Good job! Keep listening to rhymes!';}
+  else{stars='⭐⭐💫💫💫';msg='Keep practicing! Rhyming is fun!';}
+  document.getElementById('rh-rstr').textContent=stars;
+  document.getElementById('rh-rmsg').textContent=msg;
+  document.getElementById('rh-result').classList.add('show');
+  document.getElementById('rh-sbtn').disabled=true;
+}
+
+</script>
+
+<script>
+// ================================================================
 // BLOCK 3 — QUESTION BANK (loaded last)
 // ================================================================
 
@@ -4833,6 +5342,203 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
       </div>
     </div>
 
+  </div>
+</div>
+
+
+<!-- ══ KIDS CORNER ══ -->
+<div id="sc-kids" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#FF6B9D,#FFB347,#FFD93D)">
+    <div class="htitle" style="color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.2)">🌟 Kids <span style="color:#fff">Corner!</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Fun learning games for young readers!</div>
+  </div>
+  <div class="wrap">
+
+    <!-- Age guide -->
+    <div style="background:linear-gradient(135deg,#FFF0F7,#FFF8E8);border-radius:16px;border:2px solid #FFB347;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+      <div style="font-size:28px">👩</div>
+      <div>
+        <div style="font-size:13px;font-weight:900;color:#1D2B55;margin-bottom:2px">For Mommies & Daddies</div>
+        <div style="font-size:12px;font-weight:700;color:#888780;line-height:1.5">All games here are designed for young children ages 4–9. Simple, colorful, and educational!</div>
+      </div>
+    </div>
+
+    <!-- Games grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,2vw,16px);margin-bottom:16px">
+
+      <div class="game-card" onclick="startLetterTracer()" style="border-color:#FF6B9D">
+        <div class="game-badge" style="background:#FF6B9D">TRACE</div>
+        <div class="game-icon">✏️</div>
+        <div class="game-title">Letter Tracer</div>
+        <div class="game-desc">Trace A-Z letters with your finger!</div>
+      </div>
+
+      <div class="game-card" onclick="startABCOrder()" style="border-color:#FFB347">
+        <div class="game-badge" style="background:#FFB347;color:#1D2B55">ABC ORDER</div>
+        <div class="game-icon">🔤</div>
+        <div class="game-title">ABC Order</div>
+        <div class="game-desc">Tap letters in the right order!</div>
+      </div>
+
+      <div class="game-card" onclick="startMissingLetter()" style="border-color:#4ECDC4">
+        <div class="game-badge" style="background:#4ECDC4;color:#1D2B55">MISSING</div>
+        <div class="game-icon">🔍</div>
+        <div class="game-title">Missing Letter</div>
+        <div class="game-desc">Find the missing letter in the word!</div>
+      </div>
+
+      <div class="game-card" onclick="startRhymeTime()" style="border-color:#A855F7">
+        <div class="game-badge" style="background:#A855F7">RHYME</div>
+        <div class="game-icon">🎵</div>
+        <div class="game-title">Rhyme Time</div>
+        <div class="game-desc">Find the words that rhyme!</div>
+      </div>
+
+    </div>
+
+    <div style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780">More kids games coming soon! 🌈</div>
+  </div>
+</div>
+
+<!-- ══ LETTER TRACER ══ -->
+<div id="sc-letter-tracer" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#FF6B9D,#FF8E53)">
+    <div class="htitle" style="color:#fff">✏️ Letter <span style="color:#FFD93D">Tracer!</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Learn to write A to Z!</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div id="tracer-game">
+      <!-- Letter nav -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px">
+        <button onclick="tracerPrev()" style="font-family:Nunito,sans-serif;font-size:22px;font-weight:900;background:var(--navy);color:#fff;border:none;border-radius:12px;width:48px;height:48px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">‹</button>
+        <div style="text-align:center;flex:1">
+          <div id="tracer-progress" style="font-size:12px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px">A of 26</div>
+          <div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin-top:4px" id="tracer-dots"></div>
+        </div>
+        <button onclick="tracerNext()" style="font-family:Nunito,sans-serif;font-size:22px;font-weight:900;background:var(--navy);color:#fff;border:none;border-radius:12px;width:48px;height:48px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">›</button>
+      </div>
+
+      <!-- Letter display -->
+      <div style="text-align:center;margin-bottom:16px">
+        <div id="tracer-letter-big" style="font-size:clamp(80px,22vw,130px);font-weight:900;color:var(--navy);line-height:1;text-shadow:0 4px 20px rgba(29,43,85,0.15)">A</div>
+        <div id="tracer-letter-small" style="font-size:clamp(40px,11vw,65px);font-weight:900;color:#D4537E;line-height:1;margin-top:4px">a</div>
+      </div>
+
+      <!-- Word example -->
+      <div id="tracer-word-card" style="background:linear-gradient(135deg,#FFF0F7,#FFF8E8);border-radius:16px;border:2px solid #FFB347;padding:16px;text-align:center;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#888780;margin-bottom:8px">Starts with this letter</div>
+        <div id="tracer-word-emoji" style="font-size:clamp(36px,9vw,56px);margin-bottom:6px">🍎</div>
+        <div id="tracer-word" style="font-size:clamp(20px,5vw,30px);font-weight:900;color:var(--navy)">Apple</div>
+        <div id="tracer-word-letters" style="display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap"></div>
+      </div>
+
+      <!-- Stroke instructions -->
+      <div style="background:var(--n2);border-radius:14px;padding:12px 16px;text-align:center;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:4px">✏️ How to write:</div>
+        <div id="tracer-instructions" style="font-size:clamp(12px,3vw,14px);font-weight:700;color:#5F5E5A;line-height:1.7"></div>
+      </div>
+
+      <!-- Navigation buttons -->
+      <div style="display:flex;gap:10px">
+        <button onclick="tracerPrev()" class="btn" style="flex:1;background:#fff;color:var(--navy);border:2.5px solid var(--lp)">‹ Previous</button>
+        <button onclick="tracerNext()" class="btn btn-pink" style="flex:1">Next ›</button>
+      </div>
+      <div style="text-align:center;margin-top:10px">
+        <button class="lnk" onclick="navTo('kids')">← Back to Kids Corner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ABC ORDER ══ -->
+<div id="sc-abc-order" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#FFB347,#FFD93D)">
+    <div class="htitle" style="color:#fff">🔤 ABC <span style="color:#FF6B9D">Order!</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Tap the letters A to Z in order!</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div id="abc-game">
+      <!-- Score + timer -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="abc-score">0</span></div>
+        <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#F4C0D1">⏱ <span id="abc-time">60</span>s</div>
+      </div>
+      <!-- Current target -->
+      <div style="text-align:center;margin-bottom:14px;background:linear-gradient(135deg,#FFF0F7,#FFF8E8);border-radius:16px;padding:16px;border:2px solid #FFB347">
+        <div style="font-size:12px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Tap this letter!</div>
+        <div id="abc-target" style="font-size:clamp(48px,14vw,80px);font-weight:900;color:var(--navy);line-height:1">A</div>
+      </div>
+      <!-- Letter grid -->
+      <div id="abc-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:clamp(6px,1.5vw,10px);margin-bottom:14px"></div>
+      <div id="abc-fb" style="text-align:center;font-size:clamp(14px,3.5vw,18px);font-weight:900;min-height:30px"></div>
+    </div>
+    <div id="abc-over" class="result" style="display:none">
+      <div style="font-size:56px;margin-bottom:8px">🔤</div>
+      <div class="rlbl">Letters found</div>
+      <div class="rsco" id="abc-final"></div>
+      <div class="rstr" id="abc-stars"></div>
+      <div class="rmsg" id="abc-msg"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="launchABCOrder()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('kids')">Kids Corner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MISSING LETTER ══ -->
+<div id="sc-missing-letter" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#4ECDC4,#44B8A8)">
+    <div class="htitle" style="color:#fff">🔍 Missing <span style="color:#FFD93D">Letter!</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Find the missing letter in the word!</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div id="missing-game">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="ml-score">0</span>/10</div>
+        <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#F4C0D1">⏱ <span id="ml-time">15</span>s</div>
+      </div>
+      <div id="ml-container"></div>
+      <div class="sw"><button class="sbtn" id="ml-sbtn" onclick="showMLResult()" disabled>See My Score!</button></div>
+      <div class="result" id="ml-result">
+        <div class="rlbl">Your score</div>
+        <div class="rsco" id="ml-rsco"></div>
+        <div class="rstr" id="ml-rstr"></div>
+        <div class="rmsg" id="ml-rmsg"></div>
+        <div class="rbtns">
+          <button class="btn btn-gold" onclick="launchMissingLetter()">Play Again!</button>
+          <button class="btn btn-navy" onclick="navTo('kids')">Kids Corner</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RHYME TIME ══ -->
+<div id="sc-rhyme" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#A855F7,#7C3AED)">
+    <div class="htitle" style="color:#fff">🎵 Rhyme <span style="color:#FFD93D">Time!</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Find all the words that rhyme!</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div id="rhyme-game">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="rh-score">0</span></div>
+        <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#F4C0D1">⏱ <span id="rh-time">20</span>s</div>
+      </div>
+      <div id="rh-container"></div>
+      <div class="sw"><button class="sbtn" id="rh-sbtn" onclick="showRhymeResult()" disabled>See My Score!</button></div>
+      <div class="result" id="rh-result">
+        <div class="rlbl">Your score</div>
+        <div class="rsco" id="rh-rsco"></div>
+        <div class="rstr" id="rh-rstr"></div>
+        <div class="rmsg" id="rh-rmsg"></div>
+        <div class="rbtns">
+          <button class="btn btn-gold" onclick="launchRhymeTime()">Play Again!</button>
+          <button class="btn btn-navy" onclick="navTo('kids')">Kids Corner</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
