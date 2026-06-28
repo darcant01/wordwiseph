@@ -4483,12 +4483,15 @@ let tracerNameLetters = []; // letters for name mode
 let tracerNameIdx = 0;
 
 function startLetterTracer(){
-  tracerIdx = 0;
-  navTo('letter-tracer');
-  // Show mode picker, hide game
-  document.getElementById('tracer-mode-pick').style.display='block';
-  document.getElementById('tracer-game').style.display='none';
-  document.getElementById('tracer-name-input').style.display='none';
+  try{
+    tracerIdx = 0;
+    navTo('letter-tracer');
+    document.getElementById('tracer-mode-pick').style.display='block';
+    document.getElementById('tracer-game').style.display='none';
+    document.getElementById('tracer-name-input').style.display='none';
+  }catch(e){
+    alert('Letter Tracer error: '+e.message);
+  }
 }
 
 function launchTracerModePaid(mode){
@@ -4957,10 +4960,13 @@ function speak(text, rate, pitch){
 
 // Letter names and phonics for voiceover
 function startABCOrder(){
-  navTo('abc-order');
-  // Preload voices
-  if(window.speechSynthesis) window.speechSynthesis.getVoices();
-  launchABCOrder();
+  try{
+    navTo('abc-order');
+    if(window.speechSynthesis) window.speechSynthesis.getVoices();
+    launchABCOrder();
+  }catch(e){
+    alert('ABC Order error: '+e.message);
+  }
 }
 
 function launchABCOrder(){
@@ -5093,8 +5099,12 @@ let mlQs=[], mlAns=[], mlAnswered=0, mlCQ=0;
 let mlTInt=null, mlTLeft=15, mlTTotal=15;
 
 function startMissingLetter(){
-  navTo('missing-letter');
-  launchMissingLetter();
+  try{
+    navTo('missing-letter');
+    launchMissingLetter();
+  }catch(e){
+    alert('Missing Letter error: '+e.message);
+  }
 }
 
 function launchMissingLetter(){
@@ -5237,8 +5247,12 @@ let rhQs=[], rhAns=[], rhAnswered=0, rhCQ=0;
 let rhTInt=null, rhTLeft=20, rhTTotal=20;
 
 function startRhymeTime(){
-  navTo('rhyme');
-  launchRhymeTime();
+  try{
+    navTo('rhyme');
+    launchRhymeTime();
+  }catch(e){
+    alert('Rhyme Time error: '+e.message);
+  }
 }
 
 function launchRhymeTime(){
