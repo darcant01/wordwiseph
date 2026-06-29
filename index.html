@@ -6184,5 +6184,582 @@ function showFCResult(){
 
 </script>
 
+
+<!-- ══ ANIMAL SOUND ══ -->
+<div id="sc-animal-sound" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#E67E22,#E74C3C)">
+    <div class="htitle" style="color:#fff">🔊 Animal <span style="color:#FFD93D">Sound!</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">What sound does it make?</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="as-score">0</span></div>
+      <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#F4C0D1">⏱ <span id="as-time">12</span>s</div>
+    </div>
+    <div id="as-container"></div>
+    <div class="sw"><button class="sbtn" id="as-sbtn" onclick="showASResult()" disabled>See My Score!</button></div>
+    <div class="result" id="as-result">
+      <div class="rlbl">Your score</div><div class="rsco" id="as-rsco"></div>
+      <div class="rstr" id="as-rstr"></div><div class="rmsg" id="as-rmsg"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="launchAnimalSound()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('kids')">Kids Corner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ANIMAL MATCH ══ -->
+<div id="sc-animal-match" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#8E44AD,#3F51B5)">
+    <div class="htitle" style="color:#fff">👶 Animal <span style="color:#FFD93D">Match!</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Match the baby to its parent!</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="am-score">0</span></div>
+    </div>
+    <div id="am-container"></div>
+    <div class="sw"><button class="sbtn" id="am-sbtn" onclick="showAMResult()" disabled>See My Score!</button></div>
+    <div class="result" id="am-result">
+      <div class="rlbl">Your score</div><div class="rsco" id="am-rsco"></div>
+      <div class="rstr" id="am-rstr"></div><div class="rmsg" id="am-rmsg"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="launchAnimalMatch()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('kids')">Kids Corner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ WHERE DO I LIVE ══ -->
+<div id="sc-where-live" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#27AE60,#16A085)">
+    <div class="htitle" style="color:#fff">🏠 Where Do <span style="color:#FFD93D">I Live?</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Find the animal's home!</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="wh-score">0</span></div>
+    </div>
+    <div id="wh-container"></div>
+    <div class="sw"><button class="sbtn" id="wh-sbtn" onclick="showWHResult()" disabled>See My Score!</button></div>
+    <div class="result" id="wh-result">
+      <div class="rlbl">Your score</div><div class="rsco" id="wh-rsco"></div>
+      <div class="rstr" id="wh-rstr"></div><div class="rmsg" id="wh-rmsg"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="launchWhereDoILive()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('kids')">Kids Corner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ANIMAL ALPHABET ══ -->
+<div id="sc-animal-alphabet" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#2980B9,#1D2B55)">
+    <div class="htitle" style="color:#fff">🔤 Animal <span style="color:#FFD93D">Alphabet!</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Which animal starts with this letter?</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="aa-score">0</span></div>
+    </div>
+    <div id="aa-container"></div>
+    <div class="sw"><button class="sbtn" id="aa-sbtn" onclick="showAAResult()" disabled>See My Score!</button></div>
+    <div class="result" id="aa-result">
+      <div class="rlbl">Your score</div><div class="rsco" id="aa-rsco"></div>
+      <div class="rstr" id="aa-rstr"></div><div class="rmsg" id="aa-rmsg"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="launchAnimalAlphabet()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('kids')">Kids Corner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HOW MANY LEGS ══ -->
+<div id="sc-how-many-legs" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#E74C3C,#C0392B)">
+    <div class="htitle" style="color:#fff">🦵 How Many <span style="color:#FFD93D">Legs?</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Count the animal's legs!</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="hl-score">0</span></div>
+    </div>
+    <div id="hl-container"></div>
+    <div class="sw"><button class="sbtn" id="hl-sbtn" onclick="showHLResult()" disabled>See My Score!</button></div>
+    <div class="result" id="hl-result">
+      <div class="rlbl">Your score</div><div class="rsco" id="hl-rsco"></div>
+      <div class="rstr" id="hl-rstr"></div><div class="rmsg" id="hl-rmsg"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="launchHowManyLegs()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('kids')">Kids Corner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BIG OR SMALL ══ -->
+<div id="sc-big-or-small" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#F39C12,#E67E22)">
+    <div class="htitle" style="color:#fff">🐘 Big or <span style="color:#fff">Small?</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Which animal is bigger?</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="bs-score">0</span></div>
+    </div>
+    <div id="bs-container"></div>
+    <div class="sw"><button class="sbtn" id="bs-sbtn" onclick="showBSResult()" disabled>See My Score!</button></div>
+    <div class="result" id="bs-result">
+      <div class="rlbl">Your score</div><div class="rsco" id="bs-rsco"></div>
+      <div class="rstr" id="bs-rstr"></div><div class="rmsg" id="bs-rmsg"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="launchBigOrSmall()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('kids')">Kids Corner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ANIMAL GROUP ══ -->
+<div id="sc-animal-group" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#16A085,#1D2B55)">
+    <div class="htitle" style="color:#fff">🐾 Animal <span style="color:#FFD93D">Group!</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Mammal, Bird, Fish, Reptile or Insect?</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="ag-score">0</span></div>
+    </div>
+    <div id="ag-container"></div>
+    <div class="sw"><button class="sbtn" id="ag-sbtn" onclick="showAGResult()" disabled>See My Score!</button></div>
+    <div class="result" id="ag-result">
+      <div class="rlbl">Your score</div><div class="rsco" id="ag-rsco"></div>
+      <div class="rstr" id="ag-rstr"></div><div class="rmsg" id="ag-rmsg"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="launchAnimalGroup()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('kids')">Kids Corner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ================================================================
+// BLOCK 12 — ANIMAL GAMES
+// ================================================================
+// ================================================================
+// BLOCK 12 — KIDS CORNER ANIMAL GAMES
+// ================================================================
+
+const ANIMALS = [
+  {name:'Cat',      emoji:'🐱', sound:'Meow',   legs:4, habitat:'Home',   group:'Mammal',  baby:'Kitten',  size:2},
+  {name:'Dog',      emoji:'🐶', sound:'Woof',   legs:4, habitat:'Home',   group:'Mammal',  baby:'Puppy',   size:3},
+  {name:'Cow',      emoji:'🐄', sound:'Moo',    legs:4, habitat:'Farm',   group:'Mammal',  baby:'Calf',    size:7},
+  {name:'Duck',     emoji:'🦆', sound:'Quack',  legs:2, habitat:'Farm',   group:'Bird',    baby:'Duckling',size:3},
+  {name:'Pig',      emoji:'🐷', sound:'Oink',   legs:4, habitat:'Farm',   group:'Mammal',  baby:'Piglet',  size:4},
+  {name:'Hen',      emoji:'🐔', sound:'Cluck',  legs:2, habitat:'Farm',   group:'Bird',    baby:'Chick',   size:2},
+  {name:'Sheep',    emoji:'🐑', sound:'Baa',    legs:4, habitat:'Farm',   group:'Mammal',  baby:'Lamb',    size:5},
+  {name:'Horse',    emoji:'🐴', sound:'Neigh',  legs:4, habitat:'Farm',   group:'Mammal',  baby:'Foal',    size:8},
+  {name:'Lion',     emoji:'🦁', sound:'Roar',   legs:4, habitat:'Savanna',group:'Mammal',  baby:'Cub',     size:9},
+  {name:'Elephant', emoji:'🐘', sound:'Trumpet',legs:4, habitat:'Savanna',group:'Mammal',  baby:'Calf',    size:10},
+  {name:'Monkey',   emoji:'🐒', sound:'Chatter',legs:4, habitat:'Forest', group:'Mammal',  baby:'Infant',  size:4},
+  {name:'Frog',     emoji:'🐸', sound:'Croak',  legs:4, habitat:'Pond',   group:'Reptile', baby:'Tadpole', size:1},
+  {name:'Fish',     emoji:'🐟', sound:'...',    legs:0, habitat:'Ocean',  group:'Fish',    baby:'Fry',     size:2},
+  {name:'Shark',    emoji:'🦈', sound:'...',    legs:0, habitat:'Ocean',  group:'Fish',    baby:'Pup',     size:9},
+  {name:'Whale',    emoji:'🐳', sound:'Song',   legs:0, habitat:'Ocean',  group:'Mammal',  baby:'Calf',    size:10},
+  {name:'Penguin',  emoji:'🐧', sound:'Squawk', legs:2, habitat:'Arctic', group:'Bird',    baby:'Chick',   size:3},
+  {name:'Eagle',    emoji:'🦅', sound:'Screech',legs:2, habitat:'Forest', group:'Bird',    baby:'Eaglet',  size:5},
+  {name:'Snake',    emoji:'🐍', sound:'Hiss',   legs:0, habitat:'Desert', group:'Reptile', baby:'Snakelet',size:3},
+  {name:'Camel',    emoji:'🐪', sound:'Groan',  legs:4, habitat:'Desert', group:'Mammal',  baby:'Calf',    size:7},
+  {name:'Bee',      emoji:'🐝', sound:'Buzz',   legs:6, habitat:'Garden', group:'Insect',  baby:'Larva',   size:1},
+  {name:'Butterfly',emoji:'🦋', sound:'...',    legs:6, habitat:'Garden', group:'Insect',  baby:'Larva',   size:1},
+  {name:'Spider',   emoji:'🕷️', sound:'...',    legs:8, habitat:'Garden', group:'Insect',  baby:'Spiderling',size:1},
+  {name:'Rabbit',   emoji:'🐰', sound:'Squeak', legs:4, habitat:'Forest', group:'Mammal',  baby:'Kitten',  size:2},
+  {name:'Bear',     emoji:'🐻', sound:'Growl',  legs:4, habitat:'Forest', group:'Mammal',  baby:'Cub',     size:9},
+  {name:'Fox',      emoji:'🦊', sound:'Bark',   legs:4, habitat:'Forest', group:'Mammal',  baby:'Kit',     size:4},
+  {name:'Owl',      emoji:'🦉', sound:'Hoot',   legs:2, habitat:'Forest', group:'Bird',    baby:'Owlet',   size:3},
+  {name:'Deer',     emoji:'🦌', sound:'Bleat',  legs:4, habitat:'Forest', group:'Mammal',  baby:'Fawn',    size:6},
+  {name:'Giraffe',  emoji:'🦒', sound:'Hum',    legs:4, habitat:'Savanna',group:'Mammal',  baby:'Calf',    size:10},
+  {name:'Zebra',    emoji:'🦓', sound:'Bark',   legs:4, habitat:'Savanna',group:'Mammal',  baby:'Foal',    size:7},
+  {name:'Parrot',   emoji:'🦜', sound:'Squawk', legs:2, habitat:'Forest', group:'Bird',    baby:'Chick',   size:2},
+];
+
+const HABITATS = ['Home','Farm','Forest','Ocean','Savanna','Desert','Arctic','Pond','Garden'];
+const HABITAT_EMOJIS = {Home:'🏠',Farm:'🌾',Forest:'🌲',Ocean:'🌊',Savanna:'🌅',Desert:'🏜️',Arctic:'❄️',Pond:'💧',Garden:'🌸'};
+const GROUPS = ['Mammal','Bird','Fish','Reptile','Insect'];
+const GROUP_EMOJIS = {Mammal:'🐾',Bird:'🪶',Fish:'🐟',Reptile:'🦎',Insect:'🐛'};
+
+function shufA(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+
+// ── 1. ANIMAL SOUND ────────────────────────────────────────────
+var asScore=0,asTotal=10,asAnswered=0,asCQ=0,asQs=[],asTInt=null,asTLeft=12;
+
+function startAnimalSound(){navTo('animal-sound');launchAnimalSound();}
+function launchAnimalSound(){
+  asScore=0;asAnswered=0;asCQ=0;asQs=shufA(ANIMALS.filter(function(a){return a.sound!=='...';}).slice(0,asTotal));
+  document.getElementById('as-score').textContent='0';
+  document.getElementById('as-result').classList.remove('show');
+  document.getElementById('as-sbtn').disabled=true;
+  buildASQuestion(0);sStart();
+}
+function buildASQuestion(idx){
+  asCQ=idx;var q=asQs[idx];
+  var wrong=shufA(ANIMALS.filter(function(a){return a.sound!==q.sound&&a.sound!=='...';}).map(function(a){return a.sound;}));
+  var uniqueWrong=[],seen={};
+  wrong.forEach(function(s){if(!seen[s]&&uniqueWrong.length<3){seen[s]=1;uniqueWrong.push(s);}});
+  var choices=shufA([q.sound].concat(uniqueWrong));
+  clearInterval(asTInt);asTLeft=12;
+  var con=document.getElementById('as-container');if(!con)return;
+  con.innerHTML='<div class="qcard" style="text-align:center">'+
+    '<div style="font-size:12px;font-weight:800;color:#888780;margin-bottom:10px">'+(idx+1)+' of '+asTotal+' · <span id="as-time">12</span>s</div>'+
+    '<div style="font-size:clamp(64px,18vw,100px);margin-bottom:8px">'+q.emoji+'</div>'+
+    '<div style="font-size:clamp(18px,5vw,24px);font-weight:900;color:var(--navy);margin-bottom:4px">'+q.name+'</div>'+
+    '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:14px">What sound does it make?</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="as-choices-'+idx+'">'+
+    choices.map(function(s){return '<button onclick="ansAS('+idx+',\''+s+'\',\''+q.sound+'\')" style="font-family:Nunito,sans-serif;font-size:clamp(14px,4vw,18px);font-weight:800;padding:14px 8px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">'+s+'</button>';}).join('')+
+    '</div><div class="fb" id="as-fb-'+idx+'" style="margin-top:12px"></div></div>';
+  asTInt=setInterval(function(){asTLeft--;var t=document.getElementById('as-time');if(t)t.textContent=asTLeft;if(asTLeft<=0){clearInterval(asTInt);ansAS(asCQ,'__none__',asQs[asCQ].sound);}},1000);
+}
+function ansAS(idx,chosen,correct){
+  document.querySelectorAll('#as-choices-'+idx+' button').forEach(function(b){b.onclick=null;});
+  clearInterval(asTInt);
+  var ok=chosen===correct;asAnswered++;if(ok)asScore++;
+  document.getElementById('as-score').textContent=asScore;
+  var fb=document.getElementById('as-fb-'+idx);
+  if(ok){if(fb){fb.textContent='✅ Correct! It says '+correct+'!';fb.className='fb show correct';}sKidCorrect();}
+  else{if(fb){fb.textContent='❌ It says '+correct+'!';fb.className='fb show wrong';}sKidWrong();}
+  if(asAnswered<asTotal){setTimeout(function(){asCQ++;buildASQuestion(asCQ);},900);}
+  else{document.getElementById('as-sbtn').disabled=false;}
+}
+function showASResult(){
+  clearInterval(asTInt);
+  var pct=Math.round(asScore/asTotal*100);
+  document.getElementById('as-rsco').textContent=asScore+'/'+asTotal;
+  var stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Amazing! You know all animal sounds! 🐾';sKidFinish();}
+  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great job! Almost perfect!';sKidStar();}
+  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good! Keep learning animal sounds!';}
+  else{stars='⭐⭐💫💫💫';msg='Keep practicing! Animals are fun!';}
+  document.getElementById('as-rstr').textContent=stars;
+  document.getElementById('as-rmsg').textContent=msg;
+  document.getElementById('as-result').classList.add('show');
+  document.getElementById('as-sbtn').disabled=true;
+}
+
+// ── 2. ANIMAL MATCH (baby to parent) ───────────────────────────
+var amScore=0,amTotal=8,amAnswered=0,amCQ=0,amQs=[];
+
+function startAnimalMatch(){navTo('animal-match');launchAnimalMatch();}
+function launchAnimalMatch(){
+  amScore=0;amAnswered=0;amCQ=0;
+  amQs=shufA(ANIMALS.filter(function(a){return a.baby&&a.baby!=='Calf'&&a.baby!=='Chick'&&a.baby!=='Larva';}).slice(0,amTotal));
+  // add some with repeated babies for variety
+  if(amQs.length<amTotal) amQs=shufA(ANIMALS).slice(0,amTotal);
+  document.getElementById('am-score').textContent='0';
+  document.getElementById('am-result').classList.remove('show');
+  document.getElementById('am-sbtn').disabled=true;
+  buildAMQuestion(0);sStart();
+}
+function buildAMQuestion(idx){
+  amCQ=idx;var q=amQs[idx];
+  var wrong=shufA(ANIMALS.filter(function(a){return a.name!==q.name;})).slice(0,3);
+  var choices=shufA([q].concat(wrong));
+  var con=document.getElementById('am-container');if(!con)return;
+  con.innerHTML='<div class="qcard" style="text-align:center">'+
+    '<div style="font-size:12px;font-weight:800;color:#888780;margin-bottom:10px">'+(idx+1)+' of '+amTotal+'</div>'+
+    '<div style="font-size:clamp(56px,15vw,80px);margin-bottom:6px">'+q.emoji+'</div>'+
+    '<div style="font-size:clamp(16px,4vw,20px);font-weight:900;color:var(--navy);margin-bottom:4px">Baby: <span style="color:var(--pink)">'+q.baby+'</span></div>'+
+    '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:14px">Which animal is its parent?</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="am-choices-'+idx+'">'+
+    choices.map(function(a){return '<button onclick="ansAM('+idx+',\''+a.name+'\',\''+q.name+'\')" style="font-family:Nunito,sans-serif;font-size:clamp(28px,8vw,40px);padding:14px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation" title="'+a.name+'">'+a.emoji+'</button>';}).join('')+
+    '</div><div class="fb" id="am-fb-'+idx+'" style="margin-top:12px"></div></div>';
+}
+function ansAM(idx,chosen,correct){
+  document.querySelectorAll('#am-choices-'+idx+' button').forEach(function(b){b.onclick=null;});
+  var ok=chosen===correct;amAnswered++;if(ok)amScore++;
+  document.getElementById('am-score').textContent=amScore;
+  var q=amQs[idx];var fb=document.getElementById('am-fb-'+idx);
+  if(ok){if(fb){fb.textContent='✅ Correct! '+q.baby+' → '+correct+'!';fb.className='fb show correct';}sKidCorrect();}
+  else{if(fb){fb.textContent='❌ The parent is '+correct+'!';fb.className='fb show wrong';}sKidWrong();}
+  if(amAnswered<amTotal){setTimeout(function(){amCQ++;buildAMQuestion(amCQ);},900);}
+  else{document.getElementById('am-sbtn').disabled=false;}
+}
+function showAMResult(){
+  var pct=Math.round(amScore/amTotal*100);
+  document.getElementById('am-rsco').textContent=amScore+'/'+amTotal;
+  var stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You matched them all! 🐾';sKidFinish();}
+  else if(pct>=75){stars='⭐⭐⭐⭐💫';msg='Great matching skills!';}
+  else if(pct>=50){stars='⭐⭐⭐💫💫';msg='Good job! Keep learning!';}
+  else{stars='⭐⭐💫💫💫';msg='Keep trying! Practice makes perfect!';}
+  document.getElementById('am-rstr').textContent=stars;
+  document.getElementById('am-rmsg').textContent=msg;
+  document.getElementById('am-result').classList.add('show');
+  document.getElementById('am-sbtn').disabled=true;
+}
+
+// ── 3. WHERE DO I LIVE? ────────────────────────────────────────
+var whScore=0,whTotal=10,whAnswered=0,whCQ=0,whQs=[];
+
+function startWhereDoILive(){navTo('where-live');launchWhereDoILive();}
+function launchWhereDoILive(){
+  whScore=0;whAnswered=0;whCQ=0;whQs=shufA(ANIMALS).slice(0,whTotal);
+  document.getElementById('wh-score').textContent='0';
+  document.getElementById('wh-result').classList.remove('show');
+  document.getElementById('wh-sbtn').disabled=true;
+  buildWHQuestion(0);sStart();
+}
+function buildWHQuestion(idx){
+  whCQ=idx;var q=whQs[idx];
+  var wrongH=shufA(HABITATS.filter(function(h){return h!==q.habitat;})).slice(0,3);
+  var choices=shufA([q.habitat].concat(wrongH));
+  var con=document.getElementById('wh-container');if(!con)return;
+  con.innerHTML='<div class="qcard" style="text-align:center">'+
+    '<div style="font-size:12px;font-weight:800;color:#888780;margin-bottom:10px">'+(idx+1)+' of '+whTotal+'</div>'+
+    '<div style="font-size:clamp(56px,15vw,80px);margin-bottom:6px">'+q.emoji+'</div>'+
+    '<div style="font-size:clamp(18px,5vw,24px);font-weight:900;color:var(--navy);margin-bottom:4px">'+q.name+'</div>'+
+    '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:14px">Where do I live?</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="wh-choices-'+idx+'">'+
+    choices.map(function(h){return '<button onclick="ansWH('+idx+',\''+h+'\',\''+q.habitat+'\')" style="font-family:Nunito,sans-serif;font-size:clamp(13px,3.5vw,16px);font-weight:800;padding:14px 8px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">'+(HABITAT_EMOJIS[h]||'🏠')+' '+h+'</button>';}).join('')+
+    '</div><div class="fb" id="wh-fb-'+idx+'" style="margin-top:12px"></div></div>';
+}
+function ansWH(idx,chosen,correct){
+  document.querySelectorAll('#wh-choices-'+idx+' button').forEach(function(b){b.onclick=null;});
+  var ok=chosen===correct;whAnswered++;if(ok)whScore++;
+  document.getElementById('wh-score').textContent=whScore;
+  var fb=document.getElementById('wh-fb-'+idx);
+  if(ok){if(fb){fb.textContent='✅ Correct! The '+(HABITAT_EMOJIS[correct]||'')+' '+correct+'!';fb.className='fb show correct';}sKidCorrect();}
+  else{if(fb){fb.textContent='❌ It lives in the '+correct+'!';fb.className='fb show wrong';}sKidWrong();}
+  if(whAnswered<whTotal){setTimeout(function(){whCQ++;buildWHQuestion(whCQ);},900);}
+  else{document.getElementById('wh-sbtn').disabled=false;}
+}
+function showWHResult(){
+  var pct=Math.round(whScore/whTotal*100);
+  document.getElementById('wh-rsco').textContent=whScore+'/'+whTotal;
+  var stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Amazing! You know where they all live! 🏠';sKidFinish();}
+  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great habitat knowledge!';}
+  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good job! Keep exploring!';}
+  else{stars='⭐⭐💫💫💫';msg='Keep learning animal homes!';}
+  document.getElementById('wh-rstr').textContent=stars;
+  document.getElementById('wh-rmsg').textContent=msg;
+  document.getElementById('wh-result').classList.add('show');
+  document.getElementById('wh-sbtn').disabled=true;
+}
+
+// ── 4. ANIMAL ALPHABET ─────────────────────────────────────────
+var aaScore=0,aaTotal=10,aaAnswered=0,aaCQ=0,aaQs=[];
+
+function startAnimalAlphabet(){navTo('animal-alphabet');launchAnimalAlphabet();}
+function launchAnimalAlphabet(){
+  aaScore=0;aaAnswered=0;aaCQ=0;aaQs=shufA(ANIMALS).slice(0,aaTotal);
+  document.getElementById('aa-score').textContent='0';
+  document.getElementById('aa-result').classList.remove('show');
+  document.getElementById('aa-sbtn').disabled=true;
+  buildAAQuestion(0);sStart();
+}
+function buildAAQuestion(idx){
+  aaCQ=idx;var q=aaQs[idx];
+  var wrong=shufA(ANIMALS.filter(function(a){return a.name[0]!==q.name[0];})).slice(0,3);
+  var choices=shufA([q].concat(wrong));
+  var con=document.getElementById('aa-container');if(!con)return;
+  con.innerHTML='<div class="qcard" style="text-align:center">'+
+    '<div style="font-size:12px;font-weight:800;color:#888780;margin-bottom:10px">'+(idx+1)+' of '+aaTotal+'</div>'+
+    '<div style="font-size:clamp(56px,16vw,90px);font-weight:900;color:var(--navy);margin-bottom:6px">'+q.name[0]+'</div>'+
+    '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:14px">Which animal starts with <strong>'+q.name[0]+'</strong>?</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="aa-choices-'+idx+'">'+
+    choices.map(function(a){return '<button onclick="ansAA('+idx+',\''+a.name+'\',\''+q.name+'\')" style="font-family:Nunito,sans-serif;padding:12px 8px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation"><div style="font-size:clamp(28px,8vw,40px)">'+a.emoji+'</div><div style="font-size:clamp(11px,3vw,14px);font-weight:800;color:var(--navy);margin-top:4px">'+a.name+'</div></button>';}).join('')+
+    '</div><div class="fb" id="aa-fb-'+idx+'" style="margin-top:12px"></div></div>';
+}
+function ansAA(idx,chosen,correct){
+  document.querySelectorAll('#aa-choices-'+idx+' button').forEach(function(b){b.onclick=null;});
+  var ok=chosen===correct;aaAnswered++;if(ok)aaScore++;
+  document.getElementById('aa-score').textContent=aaScore;
+  var fb=document.getElementById('aa-fb-'+idx);
+  if(ok){if(fb){fb.textContent='✅ Correct! '+correct+' starts with '+correct[0]+'!';fb.className='fb show correct';}sKidCorrect();}
+  else{if(fb){fb.textContent='❌ '+correct+' starts with '+correct[0]+'!';fb.className='fb show wrong';}sKidWrong();}
+  if(aaAnswered<aaTotal){setTimeout(function(){aaCQ++;buildAAQuestion(aaCQ);},900);}
+  else{document.getElementById('aa-sbtn').disabled=false;}
+}
+function showAAResult(){
+  var pct=Math.round(aaScore/aaTotal*100);
+  document.getElementById('aa-rsco').textContent=aaScore+'/'+aaTotal;
+  var stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Amazing! Animals and letters master! 🐾';sKidFinish();}
+  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great job!';}
+  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good! Keep learning!';}
+  else{stars='⭐⭐💫💫💫';msg='Keep practicing animals and letters!';}
+  document.getElementById('aa-rstr').textContent=stars;
+  document.getElementById('aa-rmsg').textContent=msg;
+  document.getElementById('aa-result').classList.add('show');
+  document.getElementById('aa-sbtn').disabled=true;
+}
+
+// ── 5. HOW MANY LEGS? ──────────────────────────────────────────
+var hlScore=0,hlTotal=10,hlAnswered=0,hlCQ=0,hlQs=[];
+
+function startHowManyLegs(){navTo('how-many-legs');launchHowManyLegs();}
+function launchHowManyLegs(){
+  hlScore=0;hlAnswered=0;hlCQ=0;hlQs=shufA(ANIMALS).slice(0,hlTotal);
+  document.getElementById('hl-score').textContent='0';
+  document.getElementById('hl-result').classList.remove('show');
+  document.getElementById('hl-sbtn').disabled=true;
+  buildHLQuestion(0);sStart();
+}
+function buildHLQuestion(idx){
+  hlCQ=idx;var q=hlQs[idx];
+  var allLegs=[0,2,4,6,8];
+  var wrong=shufA(allLegs.filter(function(l){return l!==q.legs;})).slice(0,3);
+  var choices=shufA([q.legs].concat(wrong));
+  var con=document.getElementById('hl-container');if(!con)return;
+  con.innerHTML='<div class="qcard" style="text-align:center">'+
+    '<div style="font-size:12px;font-weight:800;color:#888780;margin-bottom:10px">'+(idx+1)+' of '+hlTotal+'</div>'+
+    '<div style="font-size:clamp(56px,15vw,80px);margin-bottom:8px">'+q.emoji+'</div>'+
+    '<div style="font-size:clamp(18px,5vw,24px);font-weight:900;color:var(--navy);margin-bottom:4px">'+q.name+'</div>'+
+    '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:14px">How many legs do I have?</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px" id="hl-choices-'+idx+'">'+
+    choices.map(function(n){return '<button onclick="ansHL('+idx+','+n+','+q.legs+')" style="font-family:Nunito,sans-serif;font-size:clamp(20px,6vw,30px);font-weight:900;padding:14px 6px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">'+n+'</button>';}).join('')+
+    '</div><div class="fb" id="hl-fb-'+idx+'" style="margin-top:12px"></div></div>';
+}
+function ansHL(idx,chosen,correct){
+  document.querySelectorAll('#hl-choices-'+idx+' button').forEach(function(b){b.onclick=null;});
+  var ok=chosen===correct;hlAnswered++;if(ok)hlScore++;
+  document.getElementById('hl-score').textContent=hlScore;
+  var fb=document.getElementById('hl-fb-'+idx);
+  var legWord=correct===1?'leg':' legs';
+  if(ok){if(fb){fb.textContent='✅ Correct! '+correct+legWord+'!';fb.className='fb show correct';}sKidCorrect();}
+  else{if(fb){fb.textContent='❌ It has '+correct+legWord+'!';fb.className='fb show wrong';}sKidWrong();}
+  if(hlAnswered<hlTotal){setTimeout(function(){hlCQ++;buildHLQuestion(hlCQ);},900);}
+  else{document.getElementById('hl-sbtn').disabled=false;}
+}
+function showHLResult(){
+  var pct=Math.round(hlScore/hlTotal*100);
+  document.getElementById('hl-rsco').textContent=hlScore+'/'+hlTotal;
+  var stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='You counted every leg! 🦵';sKidFinish();}
+  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great counting skills!';}
+  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good job! Keep counting!';}
+  else{stars='⭐⭐💫💫💫';msg='Keep practicing! Count those legs!';}
+  document.getElementById('hl-rstr').textContent=stars;
+  document.getElementById('hl-rmsg').textContent=msg;
+  document.getElementById('hl-result').classList.add('show');
+  document.getElementById('hl-sbtn').disabled=true;
+}
+
+// ── 6. BIG OR SMALL? ───────────────────────────────────────────
+var bsScore=0,bsTotal=10,bsAnswered=0,bsCQ=0,bsQs=[];
+
+function startBigOrSmall(){navTo('big-or-small');launchBigOrSmall();}
+function launchBigOrSmall(){
+  bsScore=0;bsAnswered=0;bsCQ=0;
+  var pairs=[];
+  for(var i=0;i<ANIMALS.length;i++){
+    for(var j=i+1;j<ANIMALS.length;j++){
+      if(ANIMALS[i].size!==ANIMALS[j].size) pairs.push([ANIMALS[i],ANIMALS[j]]);
+    }
+  }
+  bsQs=shufA(pairs).slice(0,bsTotal);
+  document.getElementById('bs-score').textContent='0';
+  document.getElementById('bs-result').classList.remove('show');
+  document.getElementById('bs-sbtn').disabled=true;
+  buildBSQuestion(0);sStart();
+}
+function buildBSQuestion(idx){
+  bsCQ=idx;var pair=bsQs[idx];
+  var a=pair[0],b=pair[1];
+  var bigger=a.size>b.size?a:b;
+  var con=document.getElementById('bs-container');if(!con)return;
+  con.innerHTML='<div class="qcard" style="text-align:center">'+
+    '<div style="font-size:12px;font-weight:800;color:#888780;margin-bottom:14px">'+(idx+1)+' of '+bsTotal+'</div>'+
+    '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:16px">Which animal is BIGGER?</div>'+
+    '<div style="display:flex;gap:12px;justify-content:center" id="bs-choices-'+idx+'">'+
+    [a,b].map(function(animal){
+      return '<button onclick="ansBS('+idx+',\''+animal.name+'\',\''+bigger.name+'\')" style="font-family:Nunito,sans-serif;flex:1;padding:16px 8px;border-radius:16px;background:#FFF8F0;border:2.5px solid var(--lp);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;text-align:center">'+
+        '<div style="font-size:clamp(40px,11vw,60px)">'+animal.emoji+'</div>'+
+        '<div style="font-size:clamp(13px,3.5vw,16px);font-weight:800;color:var(--navy);margin-top:6px">'+animal.name+'</div>'+
+        '</button>';
+    }).join('')+
+    '</div><div class="fb" id="bs-fb-'+idx+'" style="margin-top:12px"></div></div>';
+}
+function ansBS(idx,chosen,correct){
+  document.querySelectorAll('#bs-choices-'+idx+' button').forEach(function(b){b.onclick=null;});
+  var ok=chosen===correct;bsAnswered++;if(ok)bsScore++;
+  document.getElementById('bs-score').textContent=bsScore;
+  var fb=document.getElementById('bs-fb-'+idx);
+  if(ok){if(fb){fb.textContent='✅ Correct! '+correct+' is bigger!';fb.className='fb show correct';}sKidCorrect();}
+  else{if(fb){fb.textContent='❌ '+correct+' is bigger!';fb.className='fb show wrong';}sKidWrong();}
+  if(bsAnswered<bsTotal){setTimeout(function(){bsCQ++;buildBSQuestion(bsCQ);},900);}
+  else{document.getElementById('bs-sbtn').disabled=false;}
+}
+function showBSResult(){
+  var pct=Math.round(bsScore/bsTotal*100);
+  document.getElementById('bs-rsco').textContent=bsScore+'/'+bsTotal;
+  var stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect size master! 🐘';sKidFinish();}
+  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great size comparison!';}
+  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good job! Keep comparing!';}
+  else{stars='⭐⭐💫💫💫';msg='Keep learning animal sizes!';}
+  document.getElementById('bs-rstr').textContent=stars;
+  document.getElementById('bs-rmsg').textContent=msg;
+  document.getElementById('bs-result').classList.add('show');
+  document.getElementById('bs-sbtn').disabled=true;
+}
+
+// ── 7. ANIMAL GROUP ────────────────────────────────────────────
+var agScore=0,agTotal=10,agAnswered=0,agCQ=0,agQs=[];
+
+function startAnimalGroup(){navTo('animal-group');launchAnimalGroup();}
+function launchAnimalGroup(){
+  agScore=0;agAnswered=0;agCQ=0;agQs=shufA(ANIMALS).slice(0,agTotal);
+  document.getElementById('ag-score').textContent='0';
+  document.getElementById('ag-result').classList.remove('show');
+  document.getElementById('ag-sbtn').disabled=true;
+  buildAGQuestion(0);sStart();
+}
+function buildAGQuestion(idx){
+  agCQ=idx;var q=agQs[idx];
+  var wrong=shufA(GROUPS.filter(function(g){return g!==q.group;})).slice(0,3);
+  var choices=shufA([q.group].concat(wrong));
+  var con=document.getElementById('ag-container');if(!con)return;
+  con.innerHTML='<div class="qcard" style="text-align:center">'+
+    '<div style="font-size:12px;font-weight:800;color:#888780;margin-bottom:10px">'+(idx+1)+' of '+agTotal+'</div>'+
+    '<div style="font-size:clamp(56px,15vw,80px);margin-bottom:8px">'+q.emoji+'</div>'+
+    '<div style="font-size:clamp(18px,5vw,24px);font-weight:900;color:var(--navy);margin-bottom:4px">'+q.name+'</div>'+
+    '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:14px">What animal group am I?</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="ag-choices-'+idx+'">'+
+    choices.map(function(g){return '<button onclick="ansAG('+idx+',\''+g+'\',\''+q.group+'\')" style="font-family:Nunito,sans-serif;font-size:clamp(13px,3.5vw,16px);font-weight:800;padding:14px 8px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">'+(GROUP_EMOJIS[g]||'🐾')+' '+g+'</button>';}).join('')+
+    '</div><div class="fb" id="ag-fb-'+idx+'" style="margin-top:12px"></div></div>';
+}
+function ansAG(idx,chosen,correct){
+  document.querySelectorAll('#ag-choices-'+idx+' button').forEach(function(b){b.onclick=null;});
+  var ok=chosen===correct;agAnswered++;if(ok)agScore++;
+  document.getElementById('ag-score').textContent=agScore;
+  var fb=document.getElementById('ag-fb-'+idx);
+  if(ok){if(fb){fb.textContent='✅ Correct! It is a '+(GROUP_EMOJIS[correct]||'')+' '+correct+'!';fb.className='fb show correct';}sKidCorrect();}
+  else{if(fb){fb.textContent='❌ It is a '+correct+'!';fb.className='fb show wrong';}sKidWrong();}
+  if(agAnswered<agTotal){setTimeout(function(){agCQ++;buildAGQuestion(agCQ);},900);}
+  else{document.getElementById('ag-sbtn').disabled=false;}
+}
+function showAGResult(){
+  var pct=Math.round(agScore/agTotal*100);
+  document.getElementById('ag-rsco').textContent=agScore+'/'+agTotal;
+  var stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Animal Expert! You know them all! 🐾';sKidFinish();}
+  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great animal knowledge!';}
+  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good job! Keep grouping!';}
+  else{stars='⭐⭐💫💫💫';msg='Keep learning animal groups!';}
+  document.getElementById('ag-rstr').textContent=stars;
+  document.getElementById('ag-rmsg').textContent=msg;
+  document.getElementById('ag-result').classList.add('show');
+  document.getElementById('ag-sbtn').disabled=true;
+}
+
+</script>
+
 </body>
 </html>
