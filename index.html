@@ -5322,7 +5322,48 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
 
     </div>
 
-    <div style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780">More kids games coming soon! 🌈</div>
+    <!-- Color Games row -->
+    <div style="margin-top:14px;margin-bottom:8px">
+      <div style="font-size:12px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;text-align:center">🎨 Color Games</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,2vw,16px)">
+
+        <button onclick="startColorMatch()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #E74C3C;background:#fff;padding:clamp(14px,3vw,20px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+          <div class="game-badge" style="background:#E74C3C">MATCH</div>
+          <div class="game-icon">🎯</div>
+          <div class="game-title">Color Match</div>
+          <div class="game-desc">Tap the correct color!</div>
+        </button>
+
+        <button onclick="startColorWord()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #8E44AD;background:#fff;padding:clamp(14px,3vw,20px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+          <div class="game-badge" style="background:#8E44AD">FOCUS</div>
+          <div class="game-icon">👁️</div>
+          <div class="game-title">Color the Word</div>
+          <div class="game-desc">Does the color match the word?</div>
+        </button>
+
+        <button onclick="startRainbowOrder()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #F1C40F;background:#fff;padding:clamp(14px,3vw,20px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+          <div class="game-badge" style="background:#F1C40F;color:#1D2B55">RAINBOW</div>
+          <div class="game-icon">🌈</div>
+          <div class="game-title">Rainbow Order</div>
+          <div class="game-desc">Tap colors in rainbow order!</div>
+        </button>
+
+        <button onclick="startColorMixer()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #27AE60;background:#fff;padding:clamp(14px,3vw,20px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+          <div class="game-badge" style="background:#27AE60">MIXER</div>
+          <div class="game-icon">🎨</div>
+          <div class="game-title">Color Mixer</div>
+          <div class="game-desc">Mix colors to find the result!</div>
+        </button>
+
+        <button onclick="startFindColor()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #2980B9;background:#fff;padding:clamp(14px,3vw,20px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%;grid-column:span 2">
+          <div class="game-badge" style="background:#2980B9">FIND</div>
+          <div class="game-icon">🔍</div>
+          <div class="game-title">Find the Color</div>
+          <div class="game-desc">Tap all things that match the color!</div>
+        </button>
+
+      </div>
+    </div>
   </div>
 </div>
 
@@ -5584,6 +5625,563 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
     console.warn('Tracer canvas error:',e);
   }
 })();
+</script>
+
+
+<!-- ══ COLOR MATCH ══ -->
+<div id="sc-color-match" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#E74C3C,#E91E8C)">
+    <div class="htitle" style="color:#fff">🎯 Color <span style="color:#FFD93D">Match!</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Tap the correct color!</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="cm-score">0</span></div>
+      <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#F4C0D1">⏱ <span id="cm-time">12</span>s</div>
+    </div>
+    <div id="cm-container"></div>
+    <div class="sw"><button class="sbtn" id="cm-sbtn" onclick="showCMResult()" disabled>See My Score!</button></div>
+    <div class="result" id="cm-result">
+      <div class="rlbl">Your score</div><div class="rsco" id="cm-rsco"></div>
+      <div class="rstr" id="cm-rstr"></div><div class="rmsg" id="cm-rmsg"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="launchColorMatch()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('kids')">Kids Corner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COLOR THE WORD ══ -->
+<div id="sc-color-word" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#8E44AD,#3F51B5)">
+    <div class="htitle" style="color:#fff">👁️ Color the <span style="color:#FFD93D">Word!</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Does the color match the word?</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="cw-score">0</span></div>
+    </div>
+    <div id="cw-container"></div>
+    <div class="sw"><button class="sbtn" id="cw-sbtn" onclick="showCWResult()" disabled>See My Score!</button></div>
+    <div class="result" id="cw-result">
+      <div class="rlbl">Your score</div><div class="rsco" id="cw-rsco"></div>
+      <div class="rstr" id="cw-rstr"></div><div class="rmsg" id="cw-rmsg"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="launchColorWord()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('kids')">Kids Corner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RAINBOW ORDER ══ -->
+<div id="sc-rainbow-order" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#F1C40F,#E67E22)">
+    <div class="htitle" style="color:#fff">🌈 Rainbow <span style="color:#fff">Order!</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Tap colors in rainbow order!</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="ro-score">0</span></div>
+      <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#B5D4F4">⏱ <span id="ro-time">30</span>s</div>
+    </div>
+    <div style="text-align:center;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:4px">Next color to tap:</div>
+      <div id="ro-target" style="font-size:clamp(20px,5vw,28px);font-weight:900;color:var(--navy)">Red</div>
+    </div>
+    <div id="ro-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px"></div>
+    <div id="ro-fb" style="text-align:center;font-size:14px;font-weight:800;min-height:24px;margin-bottom:10px"></div>
+    <div class="sw"><button class="sbtn" id="ro-sbtn" onclick="showROResult()" disabled>See My Score!</button></div>
+    <div class="result" id="ro-result">
+      <div class="rlbl">Colors found</div><div class="rsco" id="ro-rsco"></div>
+      <div class="rstr" id="ro-rstr"></div><div class="rmsg" id="ro-rmsg"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="launchRainbowOrder()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('kids')">Kids Corner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COLOR MIXER ══ -->
+<div id="sc-color-mixer" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#27AE60,#2980B9)">
+    <div class="htitle" style="color:#fff">🎨 Color <span style="color:#FFD93D">Mixer!</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Mix colors to find the result!</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="mx-score">0</span></div>
+    </div>
+    <div id="mx-container"></div>
+    <div class="sw"><button class="sbtn" id="mx-sbtn" onclick="showMXResult()" disabled>See My Score!</button></div>
+    <div class="result" id="mx-result">
+      <div class="rlbl">Your score</div><div class="rsco" id="mx-rsco"></div>
+      <div class="rstr" id="mx-rstr"></div><div class="rmsg" id="mx-rmsg"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="launchColorMixer()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('kids')">Kids Corner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FIND THE COLOR ══ -->
+<div id="sc-find-color" class="screen">
+  <div class="hero" style="background:linear-gradient(135deg,#2980B9,#1D2B55)">
+    <div class="htitle" style="color:#fff">🔍 Find the <span style="color:#FFD93D">Color!</span></div>
+    <div class="hsub" style="color:rgba(255,255,255,0.9)">Tap all things that match!</div>
+  </div>
+  <div class="qmain" style="padding-top:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="background:var(--navy);border-radius:99px;padding:7px 16px;font-size:clamp(13px,3vw,16px);font-weight:900;color:#FAC775">⭐ <span id="fc-score">0</span></div>
+    </div>
+    <div id="fc-container"></div>
+    <div class="sw"><button class="sbtn" id="fc-sbtn" onclick="showFCResult()" disabled>See My Score!</button></div>
+    <div class="result" id="fc-result">
+      <div class="rlbl">Your score</div><div class="rsco" id="fc-rsco"></div>
+      <div class="rstr" id="fc-rstr"></div><div class="rmsg" id="fc-rmsg"></div>
+      <div class="rbtns">
+        <button class="btn btn-gold" onclick="launchFindColor()">Play Again!</button>
+        <button class="btn btn-navy" onclick="navTo('kids')">Kids Corner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ================================================================
+// BLOCK 11 — COLOR GAMES
+// ================================================================
+// ================================================================
+// BLOCK 11 — KIDS CORNER COLOR GAMES
+// ================================================================
+
+// ── SHARED COLOR DATA ──────────────────────────────────────────
+const COLORS = [
+  {name:'Red',    hex:'#E74C3C', light:'#FADBD8'},
+  {name:'Orange', hex:'#E67E22', light:'#FDEBD0'},
+  {name:'Yellow', hex:'#F1C40F', light:'#FEF9E7'},
+  {name:'Green',  hex:'#27AE60', light:'#D5F5E3'},
+  {name:'Blue',   hex:'#2980B9', light:'#D6EAF8'},
+  {name:'Purple', hex:'#8E44AD', light:'#E8DAEF'},
+  {name:'Pink',   hex:'#E91E8C', light:'#FCE4F3'},
+  {name:'Brown',  hex:'#795548', light:'#EFEBE9'},
+  {name:'Black',  hex:'#212121', light:'#F5F5F5'},
+  {name:'White',  hex:'#FFFFFF', light:'#F8F9FA'},
+  {name:'Gray',   hex:'#9E9E9E', light:'#F5F5F5'},
+  {name:'Indigo', hex:'#3F51B5', light:'#E8EAF6'},
+];
+
+const COLOR_EMOJIS = {
+  Red:['🍎','🍓','🌹','🍒','❤️'],
+  Orange:['🍊','🥕','🎃','🦊','🔶'],
+  Yellow:['🍋','🌟','🌻','🍌','🐝'],
+  Green:['🍀','🐸','🌿','🥦','🍃'],
+  Blue:['💧','🫐','🐬','🦋','🔵'],
+  Purple:['🍇','🦄','🌸','💜','🫂'],
+  Pink:['🌸','🦩','🍡','💗','🎀'],
+  Brown:['🍫','🐻','🍪','🪵','🐿️'],
+  Black:['🐦‍⬛','🎱','🖤','🐧','🦇'],
+  White:['🤍','☁️','🦢','🌨️','🕊️'],
+  Gray:['🐘','🪨','🌫️','🐺','🔘'],
+  Indigo:['🔷','🧿','💎','🫐','🔹'],
+};
+
+const RAINBOW_ORDER = ['Red','Orange','Yellow','Green','Blue','Indigo','Purple'];
+
+const MIX_QUESTIONS = [
+  {a:'Red',    b:'Yellow', result:'Orange', wrong:['Green','Purple','Blue']},
+  {a:'Red',    b:'Blue',   result:'Purple', wrong:['Orange','Green','Yellow']},
+  {a:'Blue',   b:'Yellow', result:'Green',  wrong:['Orange','Purple','Pink']},
+  {a:'Red',    b:'White',  result:'Pink',   wrong:['Orange','Yellow','Purple']},
+  {a:'Black',  b:'White',  result:'Gray',   wrong:['Brown','Blue','Green']},
+  {a:'Orange', b:'Red',    result:'Brown',  wrong:['Purple','Pink','Gray']},
+  {a:'Blue',   b:'White',  result:'Blue',   wrong:['Purple','Green','Gray']},
+  {a:'Yellow', b:'White',  result:'Yellow', wrong:['Orange','Green','Pink']},
+];
+
+function shufArr(a){ var b=a.slice(); for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;} return b; }
+
+// ── 1. COLOR MATCH ─────────────────────────────────────────────
+var cmScore=0, cmTotal=10, cmAnswered=0, cmCQ=0, cmQs=[], cmTInt=null, cmTLeft=12;
+
+function startColorMatch(){ navTo('color-match'); launchColorMatch(); }
+function launchColorMatch(){
+  cmScore=0; cmAnswered=0; cmCQ=0; cmTLeft=12;
+  cmQs = shufArr(COLORS).slice(0,cmTotal);
+  document.getElementById('cm-score').textContent='0';
+  document.getElementById('cm-result').classList.remove('show');
+  document.getElementById('cm-sbtn').disabled=true;
+  buildCMQuestion(0);
+  startCMTimer();
+  sStart();
+}
+function buildCMQuestion(idx){
+  cmCQ=idx;
+  var q=cmQs[idx];
+  var wrong=shufArr(COLORS.filter(function(c){return c.name!==q.name;})).slice(0,3);
+  var choices=shufArr([q].concat(wrong));
+  var con=document.getElementById('cm-container');
+  if(!con)return;
+  con.innerHTML=
+    '<div class="qcard">'+
+    '<div style="text-align:center;margin-bottom:16px">'+
+    '<div style="font-size:12px;font-weight:800;color:#888780;margin-bottom:8px">'+(idx+1)+' of '+cmTotal+'</div>'+
+    '<div style="font-size:clamp(28px,8vw,42px);font-weight:900;color:'+q.hex+';text-shadow:0 2px 8px rgba(0,0,0,0.15);margin-bottom:6px">'+q.name.toUpperCase()+'</div>'+
+    '<div style="font-size:13px;font-weight:700;color:#888780">Tap the correct color!</div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" id="cm-choices-'+idx+'">'+
+    choices.map(function(c){
+      return '<button onclick="ansCM('+idx+',\''+c.name+'\',\''+q.name+'\')" style="font-family:Nunito,sans-serif;height:clamp(70px,18vw,90px);border-radius:16px;border:3px solid transparent;background:'+c.hex+';cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;box-shadow:0 4px 12px rgba(0,0,0,0.15)"></button>';
+    }).join('')+
+    '</div>'+
+    '<div class="fb" id="cm-fb-'+idx+'" style="margin-top:12px"></div>'+
+    '</div>';
+}
+function ansCM(idx,chosen,correct){
+  var btns=document.querySelectorAll('#cm-choices-'+idx+' button');
+  btns.forEach(function(b){b.onclick=null;});
+  clearInterval(cmTInt);
+  var ok=chosen===correct;
+  cmAnswered++; if(ok) cmScore++;
+  document.getElementById('cm-score').textContent=cmScore;
+  var fb=document.getElementById('cm-fb-'+idx);
+  if(ok){if(fb){fb.textContent='✅ Correct! That is '+correct+'!';fb.className='fb show correct';}sKidCorrect();}
+  else{if(fb){fb.textContent='❌ That is '+chosen+'! The answer is '+correct+'!';fb.className='fb show wrong';}sKidWrong();}
+  if(cmAnswered<cmTotal){setTimeout(function(){cmCQ++;buildCMQuestion(cmCQ);startCMTimer();},1000);}
+  else{document.getElementById('cm-sbtn').disabled=false;}
+}
+function startCMTimer(){
+  clearInterval(cmTInt); cmTLeft=12;
+  var el=document.getElementById('cm-time'); if(el)el.textContent=cmTLeft;
+  cmTInt=setInterval(function(){
+    cmTLeft--;
+    var el=document.getElementById('cm-time');if(el)el.textContent=cmTLeft;
+    if(cmTLeft<=0){clearInterval(cmTInt);ansCM(cmCQ,'__none__',cmQs[cmCQ].name);}
+  },1000);
+}
+function showCMResult(){
+  clearInterval(cmTInt);
+  var pct=Math.round(cmScore/cmTotal*100);
+  document.getElementById('cm-rsco').textContent=cmScore+'/'+cmTotal;
+  var stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You know all your colors! 🌈';sKidFinish();}
+  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost perfect!';sKidStar();}
+  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good job! Keep learning colors!';}
+  else{stars='⭐⭐💫💫💫';msg='Keep practicing! Colors are fun!';}
+  document.getElementById('cm-rstr').textContent=stars;
+  document.getElementById('cm-rmsg').textContent=msg;
+  document.getElementById('cm-result').classList.add('show');
+  document.getElementById('cm-sbtn').disabled=true;
+}
+
+// ── 2. COLOR THE WORD ──────────────────────────────────────────
+var cwScore=0, cwTotal=12, cwAnswered=0, cwCQ=0, cwQs=[], cwTInt=null, cwTLeft=5;
+
+function startColorWord(){ navTo('color-word'); launchColorWord(); }
+function launchColorWord(){
+  cwScore=0; cwAnswered=0; cwCQ=0;
+  var pairs=[];
+  COLORS.slice(0,8).forEach(function(c){
+    COLORS.slice(0,8).forEach(function(d){
+      if(c.name!==d.name) pairs.push({word:c.name,color:d.hex,colorName:d.name,match:false});
+      else pairs.push({word:c.name,color:c.hex,colorName:c.name,match:true});
+    });
+  });
+  cwQs=shufArr(pairs).slice(0,cwTotal);
+  document.getElementById('cw-score').textContent='0';
+  document.getElementById('cw-result').classList.remove('show');
+  document.getElementById('cw-sbtn').disabled=true;
+  buildCWQuestion(0);
+  sStart();
+}
+function buildCWQuestion(idx){
+  cwCQ=idx;
+  var q=cwQs[idx];
+  clearInterval(cwTInt); cwTLeft=5;
+  var con=document.getElementById('cw-container');
+  if(!con)return;
+  con.innerHTML=
+    '<div class="qcard" style="text-align:center">'+
+    '<div style="font-size:12px;font-weight:800;color:#888780;margin-bottom:12px">'+(idx+1)+' of '+cwTotal+' · <span id="cw-time">5</span>s</div>'+
+    '<div style="font-size:13px;font-weight:700;color:#5F5E5A;margin-bottom:10px">Is the word color MATCHING?</div>'+
+    '<div style="font-size:clamp(36px,10vw,56px);font-weight:900;color:'+q.color+';margin:16px 0;text-shadow:0 2px 8px rgba(0,0,0,0.1)">'+q.word.toUpperCase()+'</div>'+
+    '<div style="display:flex;gap:12px;justify-content:center;margin-top:16px">'+
+    '<button onclick="ansCW('+idx+',true)" style="font-family:Nunito,sans-serif;font-size:clamp(22px,6vw,32px);font-weight:900;padding:14px 28px;border-radius:16px;background:#27AE60;color:#fff;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-width:90px">✅ Yes</button>'+
+    '<button onclick="ansCW('+idx+',false)" style="font-family:Nunito,sans-serif;font-size:clamp(22px,6vw,32px);font-weight:900;padding:14px 28px;border-radius:16px;background:#E74C3C;color:#fff;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-width:90px">❌ No</button>'+
+    '</div>'+
+    '<div class="fb" id="cw-fb-'+idx+'" style="margin-top:12px"></div>'+
+    '</div>';
+  cwTInt=setInterval(function(){
+    cwTLeft--;
+    var t=document.getElementById('cw-time');if(t)t.textContent=cwTLeft;
+    if(cwTLeft<=0){clearInterval(cwTInt);ansCW(cwCQ,!cwQs[cwCQ].match);}
+  },1000);
+}
+function ansCW(idx,answer){
+  clearInterval(cwTInt);
+  var q=cwQs[idx];
+  var ok=answer===q.match;
+  cwAnswered++; if(ok) cwScore++;
+  document.getElementById('cw-score').textContent=cwScore;
+  var fb=document.getElementById('cw-fb-'+idx);
+  var msg=q.match?'The word matches its color!':'The word color is '+q.colorName+', not '+q.word+'!';
+  if(ok){if(fb){fb.textContent='✅ Correct! '+msg;fb.className='fb show correct';}sKidCorrect();}
+  else{if(fb){fb.textContent='❌ '+msg;fb.className='fb show wrong';}sKidWrong();}
+  if(cwAnswered<cwTotal){setTimeout(function(){cwCQ++;buildCWQuestion(cwCQ);},900);}
+  else{document.getElementById('cw-sbtn').disabled=false;}
+}
+function showCWResult(){
+  var pct=Math.round(cwScore/cwTotal*100);
+  document.getElementById('cw-rsco').textContent=cwScore+'/'+cwTotal;
+  var stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect focus! 🏆';sKidFinish();}
+  else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great eyes! Almost perfect!';}
+  else if(pct>=60){stars='⭐⭐⭐💫💫';msg='Good job! Keep practicing!';}
+  else{stars='⭐⭐💫💫💫';msg='Keep trying! Focus on the color!';}
+  document.getElementById('cw-rstr').textContent=stars;
+  document.getElementById('cw-rmsg').textContent=msg;
+  document.getElementById('cw-result').classList.add('show');
+  document.getElementById('cw-sbtn').disabled=true;
+}
+
+// ── 3. RAINBOW ORDER ───────────────────────────────────────────
+var roScore=0, roTapped=[], roTInt=null, roTLeft=30;
+
+function startRainbowOrder(){ navTo('rainbow-order'); launchRainbowOrder(); }
+function launchRainbowOrder(){
+  roScore=0; roTapped=[];
+  document.getElementById('ro-score').textContent='0';
+  document.getElementById('ro-result').classList.remove('show');
+  document.getElementById('ro-sbtn').disabled=true;
+  buildROGrid();
+  roTLeft=30; var t=document.getElementById('ro-time');if(t)t.textContent=30;
+  clearInterval(roTInt);
+  roTInt=setInterval(function(){
+    roTLeft--; var t=document.getElementById('ro-time');if(t)t.textContent=roTLeft;
+    if(roTLeft<=0){clearInterval(roTInt);endROGame();}
+  },1000);
+  sStart();
+}
+function buildROGrid(){
+  var grid=document.getElementById('ro-grid');
+  if(!grid)return;
+  var shuffled=shufArr(RAINBOW_ORDER.slice());
+  grid.innerHTML=shuffled.map(function(name){
+    var c=COLORS.find(function(x){return x.name===name;});
+    return '<button id="ro-btn-'+name+'" onclick="tapROColor(\''+name+'\')" style="font-family:Nunito,sans-serif;height:clamp(60px,15vw,80px);border-radius:14px;background:'+c.hex+';border:3px solid transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;font-size:clamp(11px,3vw,14px);font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.4)">'+name+'</button>';
+  }).join('');
+  var tgt=document.getElementById('ro-target');
+  if(tgt)tgt.textContent=RAINBOW_ORDER[0];
+}
+function tapROColor(name){
+  var expected=RAINBOW_ORDER[roTapped.length];
+  var btn=document.getElementById('ro-btn-'+name);
+  var fb=document.getElementById('ro-fb');
+  if(name===expected){
+    roTapped.push(name);
+    if(btn){btn.style.opacity='0.4';btn.onclick=null;btn.style.borderColor='#fff';}
+    roScore++; document.getElementById('ro-score').textContent=roScore;
+    sKidCorrect();
+    if(roTapped.length>=RAINBOW_ORDER.length){
+      clearInterval(roTInt); sKidFinish();
+      if(fb){fb.textContent='🌈 Perfect Rainbow! You did it!';fb.style.color='#27AE60';}
+      document.getElementById('ro-sbtn').disabled=false;
+    } else {
+      var tgt=document.getElementById('ro-target');
+      if(tgt)tgt.textContent=RAINBOW_ORDER[roTapped.length];
+    }
+  } else {
+    if(fb){fb.textContent='❌ Next is '+expected+'!';fb.style.color='#E74C3C';}
+    sKidWrong();
+    if(btn){ btn.classList.add('wrong'); setTimeout(function(){btn.classList.remove('wrong');},400); }
+  }
+}
+function endROGame(){
+  document.getElementById('ro-sbtn').disabled=false;
+}
+function showROResult(){
+  clearInterval(roTInt);
+  var pct=Math.round(roScore/RAINBOW_ORDER.length*100);
+  document.getElementById('ro-rsco').textContent=roScore+'/'+RAINBOW_ORDER.length;
+  var stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect Rainbow! You know ROYGBIV! 🌈';sKidFinish();}
+  else if(pct>=71){stars='⭐⭐⭐⭐💫';msg='Almost! Keep learning the rainbow!';}
+  else if(pct>=43){stars='⭐⭐⭐💫💫';msg='Good try! Practice the rainbow order!';}
+  else{stars='⭐⭐💫💫💫';msg='Remember: Red Orange Yellow Green Blue Indigo Violet!';}
+  document.getElementById('ro-rstr').textContent=stars;
+  document.getElementById('ro-rmsg').textContent=msg;
+  document.getElementById('ro-result').classList.add('show');
+  document.getElementById('ro-sbtn').disabled=true;
+}
+
+// ── 4. COLOR MIXER ─────────────────────────────────────────────
+var mxScore=0, mxTotal=8, mxAnswered=0, mxCQ=0, mxQs=[];
+
+function startColorMixer(){ navTo('color-mixer'); launchColorMixer(); }
+function launchColorMixer(){
+  mxScore=0; mxAnswered=0; mxCQ=0;
+  mxQs=shufArr(MIX_QUESTIONS).slice(0,mxTotal);
+  document.getElementById('mx-score').textContent='0';
+  document.getElementById('mx-result').classList.remove('show');
+  document.getElementById('mx-sbtn').disabled=true;
+  buildMXQuestion(0);
+  sStart();
+}
+function buildMXQuestion(idx){
+  mxCQ=idx;
+  var q=mxQs[idx];
+  var ca=COLORS.find(function(c){return c.name===q.a;});
+  var cb=COLORS.find(function(c){return c.name===q.b;});
+  var cr=COLORS.find(function(c){return c.name===q.result;});
+  var choices=shufArr([q.result].concat(q.wrong));
+  var con=document.getElementById('mx-container');
+  if(!con)return;
+  con.innerHTML=
+    '<div class="qcard" style="text-align:center">'+
+    '<div style="font-size:12px;font-weight:800;color:#888780;margin-bottom:14px">'+(idx+1)+' of '+mxTotal+'</div>'+
+    '<div style="font-size:13px;font-weight:700;color:#5F5E5A;margin-bottom:12px">What color do you get?</div>'+
+    '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">'+
+    '<div style="width:clamp(48px,13vw,64px);height:clamp(48px,13vw,64px);border-radius:50%;background:'+(ca?ca.hex:'#ccc')+';box-shadow:0 3px 10px rgba(0,0,0,0.2)"></div>'+
+    '<div style="font-size:clamp(22px,6vw,30px);font-weight:900;color:#888780">+</div>'+
+    '<div style="width:clamp(48px,13vw,64px);height:clamp(48px,13vw,64px);border-radius:50%;background:'+(cb?cb.hex:'#ccc')+';box-shadow:0 3px 10px rgba(0,0,0,0.2)"></div>'+
+    '<div style="font-size:clamp(22px,6vw,30px);font-weight:900;color:#888780">=</div>'+
+    '<div style="width:clamp(48px,13vw,64px);height:clamp(48px,13vw,64px);border-radius:50%;background:linear-gradient(135deg,#eee,#ddd);border:3px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:24px">?</div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="mx-choices-'+idx+'">'+
+    choices.map(function(name){
+      var cc=COLORS.find(function(c){return c.name===name;});
+      return '<button onclick="ansMX('+idx+',\''+name+'\',\''+q.result+'\')" style="font-family:Nunito,sans-serif;padding:12px 8px;border-radius:14px;background:'+(cc?cc.hex:'#ccc')+';border:3px solid transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;font-size:clamp(12px,3vw,15px);font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.4)">'+name+'</button>';
+    }).join('')+
+    '</div>'+
+    '<div class="fb" id="mx-fb-'+idx+'" style="margin-top:12px"></div>'+
+    '</div>';
+}
+function ansMX(idx,chosen,correct){
+  var btns=document.querySelectorAll('#mx-choices-'+idx+' button');
+  btns.forEach(function(b){b.onclick=null;});
+  var ok=chosen===correct;
+  mxAnswered++; if(ok) mxScore++;
+  document.getElementById('mx-score').textContent=mxScore;
+  var fb=document.getElementById('mx-fb-'+idx);
+  if(ok){if(fb){fb.textContent='✅ Correct! '+mxQs[idx].a+' + '+mxQs[idx].b+' = '+correct+'!';fb.className='fb show correct';}sKidCorrect();}
+  else{if(fb){fb.textContent='❌ The answer is '+correct+'!';fb.className='fb show wrong';}sKidWrong();}
+  if(mxAnswered<mxTotal){setTimeout(function(){mxCQ++;buildMXQuestion(mxCQ);},1000);}
+  else{document.getElementById('mx-sbtn').disabled=false;}
+}
+function showMXResult(){
+  var pct=Math.round(mxScore/mxTotal*100);
+  document.getElementById('mx-rsco').textContent=mxScore+'/'+mxTotal;
+  var stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect Color Scientist! 🎨';sKidFinish();}
+  else if(pct>=75){stars='⭐⭐⭐⭐💫';msg='Great color mixing skills!';}
+  else if(pct>=50){stars='⭐⭐⭐💫💫';msg='Good try! Keep mixing colors!';}
+  else{stars='⭐⭐💫💫💫';msg='Keep practicing! Mix and learn!';}
+  document.getElementById('mx-rstr').textContent=stars;
+  document.getElementById('mx-rmsg').textContent=msg;
+  document.getElementById('mx-result').classList.add('show');
+  document.getElementById('mx-sbtn').disabled=true;
+}
+
+// ── 5. FIND THE COLOR ──────────────────────────────────────────
+var fcScore=0, fcTotal=8, fcAnswered=0, fcCQ=0, fcQs=[], fcTInt=null, fcTLeft=15;
+
+function startFindColor(){ navTo('find-color'); launchFindColor(); }
+function launchFindColor(){
+  fcScore=0; fcAnswered=0; fcCQ=0;
+  fcQs=shufArr(Object.keys(COLOR_EMOJIS)).slice(0,fcTotal).map(function(name){
+    return {name:name, color:COLORS.find(function(c){return c.name===name;})};
+  });
+  document.getElementById('fc-score').textContent='0';
+  document.getElementById('fc-result').classList.remove('show');
+  document.getElementById('fc-sbtn').disabled=true;
+  buildFCQuestion(0);
+  sStart();
+}
+function buildFCQuestion(idx){
+  fcCQ=idx;
+  var q=fcQs[idx];
+  var correctEmojis=shufArr(COLOR_EMOJIS[q.name]).slice(0,2);
+  // Get wrong emojis from other colors
+  var wrongPool=[];
+  Object.keys(COLOR_EMOJIS).forEach(function(k){
+    if(k!==q.name) COLOR_EMOJIS[k].forEach(function(e){ wrongPool.push({e:e,correct:false}); });
+  });
+  var wrongs=shufArr(wrongPool).slice(0,6);
+  var allItems=shufArr(correctEmojis.map(function(e){return {e:e,correct:true};}).concat(wrongs));
+  var selected=[];
+  var con=document.getElementById('fc-container');
+  if(!con)return;
+  clearInterval(fcTInt); fcTLeft=15;
+
+  con.innerHTML=
+    '<div class="qcard" style="text-align:center">'+
+    '<div style="font-size:12px;font-weight:800;color:#888780;margin-bottom:10px">'+(idx+1)+' of '+fcTotal+' · <span id="fc-time">15</span>s</div>'+
+    '<div style="margin-bottom:10px">'+
+    '<div style="font-size:13px;font-weight:700;color:#5F5E5A;margin-bottom:6px">Tap all things that are...</div>'+
+    '<div style="font-size:clamp(22px,6vw,32px);font-weight:900;color:'+(q.color?q.color.hex:'#000')+';text-shadow:0 2px 6px rgba(0,0,0,0.15)">'+q.name.toUpperCase()+'</div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px" id="fc-grid-'+idx+'">'+
+    allItems.map(function(item,i){
+      return '<button id="fc-item-'+idx+'-'+i+'" data-correct="'+item.correct+'" data-selected="false" onclick="tapFC('+idx+','+i+','+item.correct+')" style="font-family:Nunito,sans-serif;font-size:clamp(24px,7vw,34px);padding:10px;border-radius:12px;background:#FFF8F0;border:2.5px solid var(--lp);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;line-height:1">'+item.e+'</button>';
+    }).join('')+
+    '</div>'+
+    '<button onclick="submitFC('+idx+')" style="font-family:Nunito,sans-serif;font-size:14px;font-weight:800;padding:10px 24px;border-radius:99px;background:var(--pink);border:none;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">✅ Done!</button>'+
+    '<div class="fb" id="fc-fb-'+idx+'" style="margin-top:10px"></div>'+
+    '</div>';
+
+  fcTInt=setInterval(function(){
+    fcTLeft--; var t=document.getElementById('fc-time');if(t)t.textContent=fcTLeft;
+    if(fcTLeft<=0){clearInterval(fcTInt);submitFC(fcCQ);}
+  },1000);
+}
+function tapFC(qIdx,itemIdx,isCorrect){
+  var btn=document.getElementById('fc-item-'+qIdx+'-'+itemIdx);
+  if(!btn)return;
+  var sel=btn.dataset.selected==='true';
+  btn.dataset.selected=sel?'false':'true';
+  btn.style.background=sel?'#FFF8F0':(isCorrect?'#D5F5E3':'#FADBD8');
+  btn.style.borderColor=sel?'var(--lp)':(isCorrect?'#27AE60':'#E74C3C');
+  sKidTap();
+}
+function submitFC(idx){
+  clearInterval(fcTInt);
+  var btns=document.querySelectorAll('#fc-grid-'+idx+' button');
+  var allCorrect=true;
+  btns.forEach(function(btn){
+    btn.onclick=null;
+    var isCorrect=btn.dataset.correct==='true';
+    var sel=btn.dataset.selected==='true';
+    if(isCorrect&&!sel){btn.style.background='#FAEEDA';btn.style.borderColor='#BA7517';allCorrect=false;}
+    else if(!isCorrect&&sel){btn.style.background='#FADBD8';btn.style.borderColor='#E74C3C';allCorrect=false;}
+    else if(isCorrect&&sel){btn.style.background='#D5F5E3';btn.style.borderColor='#27AE60';}
+  });
+  fcAnswered++;
+  if(allCorrect) fcScore++;
+  document.getElementById('fc-score').textContent=fcScore;
+  var fb=document.getElementById('fc-fb-'+idx);
+  if(allCorrect){if(fb){fb.textContent='🌟 Perfect! All '+fcQs[idx].name+' things found!';fb.className='fb show correct';}sKidStar();}
+  else{if(fb){fb.textContent='❌ Some were missed! Orange = missed, Red = wrong';fb.className='fb show wrong';}sKidWrong();}
+  if(fcAnswered<fcTotal){setTimeout(function(){fcCQ++;buildFCQuestion(fcCQ);},1200);}
+  else{document.getElementById('fc-sbtn').disabled=false;}
+}
+function showFCResult(){
+  var pct=Math.round(fcScore/fcTotal*100);
+  document.getElementById('fc-rsco').textContent=fcScore+'/'+fcTotal;
+  var stars='',msg='';
+  if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Amazing! You found every color! 🌈';sKidFinish();}
+  else if(pct>=75){stars='⭐⭐⭐⭐💫';msg='Great color finding skills!';}
+  else if(pct>=50){stars='⭐⭐⭐💫💫';msg='Good job! Keep searching!';}
+  else{stars='⭐⭐💫💫💫';msg='Keep practicing! Colors are everywhere!';}
+  document.getElementById('fc-rstr').textContent=stars;
+  document.getElementById('fc-rmsg').textContent=msg;
+  document.getElementById('fc-result').classList.add('show');
+  document.getElementById('fc-sbtn').disabled=true;
+}
+
 </script>
 
 </body>
