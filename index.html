@@ -6510,12 +6510,14 @@ function buildASQuestion(idx){
   var con=document.getElementById('as-container');if(!con)return;
   con.innerHTML='<div class="qcard" style="text-align:center">'+
     '<div style="font-size:12px;font-weight:800;color:#888780;margin-bottom:10px">'+(idx+1)+' of '+asTotal+' · <span id="as-time">12</span>s</div>'+
-    '<div style="font-size:clamp(64px,18vw,100px);margin-bottom:8px">'+q.emoji+'</div>'+
-    '<div style="font-size:clamp(18px,5vw,24px);font-weight:900;color:var(--navy);margin-bottom:4px">'+q.name+'</div>'+
-    '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:14px">What sound does it make?</div>'+
+    '<div style="font-size:clamp(56px,15vw,84px);margin-bottom:6px">'+q.emoji+'</div>'+
+    '<div style="font-size:clamp(18px,5vw,24px);font-weight:900;color:var(--navy);margin-bottom:10px">'+q.name+'</div>'+
+    '<div style="margin-bottom:14px"><button onclick="playAnimalSound(\''+q.sound+'\')" style="font-family:Nunito,sans-serif;font-size:clamp(16px,4vw,20px);font-weight:900;padding:12px 28px;border-radius:99px;background:linear-gradient(135deg,#FF6B9D,#E67E22);border:none;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;box-shadow:0 4px 14px rgba(230,126,34,0.35)">🔊 Hear the Sound!</button></div>'+
+    '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:12px">What sound does it make?</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="as-choices-'+idx+'">'+
     choices.map(function(s){return '<button onclick="ansAS('+idx+',\''+s+'\',\''+q.sound+'\')" style="font-family:Nunito,sans-serif;font-size:clamp(14px,4vw,18px);font-weight:800;padding:14px 8px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">'+s+'</button>';}).join('')+
     '</div><div class="fb" id="as-fb-'+idx+'" style="margin-top:12px"></div></div>';
+  setTimeout(function(){ playAnimalSound(q.sound); }, 700);
   asTInt=setInterval(function(){asTLeft--;var t=document.getElementById('as-time');if(t)t.textContent=asTLeft;if(asTLeft<=0){clearInterval(asTInt);ansAS(asCQ,'__none__',asQs[asCQ].sound);}},1000);
 }
 function ansAS(idx,chosen,correct){
