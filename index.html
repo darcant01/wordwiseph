@@ -6441,23 +6441,6 @@ function launchAnimalSound(){
   document.getElementById('as-sbtn').disabled=true;
   buildASQuestion(0);sStart();
 }
-function speakAnimalSound(sound, name){
-  try{
-    if(!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    setTimeout(function(){
-      try{
-        var utt = new SpeechSynthesisUtterance(sound+'!');
-        utt.lang='en-US'; utt.rate=0.85; utt.pitch=1.1; utt.volume=1;
-        var voices=window.speechSynthesis.getVoices();
-        var v=voices.find(function(v){return v.lang==='en-US';});
-        if(v) utt.voice=v;
-        window.speechSynthesis.speak(utt);
-      }catch(e){}
-    },50);
-  }catch(e){}
-}
-
 function buildASQuestion(idx){
   asCQ=idx;var q=asQs[idx];
   var wrong=shufA(ANIMALS.filter(function(a){return a.sound!==q.sound&&a.sound!=='...';}).map(function(a){return a.sound;}));
@@ -6468,16 +6451,13 @@ function buildASQuestion(idx){
   var con=document.getElementById('as-container');if(!con)return;
   con.innerHTML='<div class="qcard" style="text-align:center">'+
     '<div style="font-size:12px;font-weight:800;color:#888780;margin-bottom:10px">'+(idx+1)+' of '+asTotal+' · <span id="as-time">12</span>s</div>'+
-    '<div style="font-size:clamp(64px,18vw,100px);margin-bottom:4px">'+q.emoji+'</div>'+
+    '<div style="font-size:clamp(64px,18vw,100px);margin-bottom:8px">'+q.emoji+'</div>'+
     '<div style="font-size:clamp(18px,5vw,24px);font-weight:900;color:var(--navy);margin-bottom:4px">'+q.name+'</div>'+
-    '<button onclick="speakAnimalSound(''+q.sound+'',''+q.name+'')" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 20px;border-radius:99px;background:#FFF0F7;border:2px solid #FF6B9D;color:#D4537E;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin-bottom:12px">🔊 Hear the sound</button>'+
-    '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:12px">What sound does it make?</div>'+
+    '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:14px">What sound does it make?</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="as-choices-'+idx+'">'+
-    choices.map(function(s){return '<button onclick="ansAS('+idx+',''+s+'',''+q.sound+'')" style="font-family:Nunito,sans-serif;font-size:clamp(14px,4vw,18px);font-weight:800;padding:14px 8px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">'+s+'</button>';}).join('')+
+    choices.map(function(s){return '<button onclick="ansAS('+idx+',\''+s+'\',\''+q.sound+'\')" style="font-family:Nunito,sans-serif;font-size:clamp(14px,4vw,18px);font-weight:800;padding:14px 8px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">'+s+'</button>';}).join('')+
     '</div><div class="fb" id="as-fb-'+idx+'" style="margin-top:12px"></div></div>';
   asTInt=setInterval(function(){asTLeft--;var t=document.getElementById('as-time');if(t)t.textContent=asTLeft;if(asTLeft<=0){clearInterval(asTInt);ansAS(asCQ,'__none__',asQs[asCQ].sound);}},1000);
-  // Auto-play the sound after a short delay
-  setTimeout(function(){ speakAnimalSound(q.sound, q.name); }, 600);
 }
 function ansAS(idx,chosen,correct){
   document.querySelectorAll('#as-choices-'+idx+' button').forEach(function(b){b.onclick=null;});
@@ -6485,16 +6465,9 @@ function ansAS(idx,chosen,correct){
   var ok=chosen===correct;asAnswered++;if(ok)asScore++;
   document.getElementById('as-score').textContent=asScore;
   var fb=document.getElementById('as-fb-'+idx);
-  if(ok){
-    if(fb){fb.textContent='✅ Correct! It says '+correct+'!';fb.className='fb show correct';}
-    sKidCorrect();
-    speakAnimalSound(correct, '');
-  } else {
-    if(fb){fb.textContent='❌ It says '+correct+'!';fb.className='fb show wrong';}
-    sKidWrong();
-    setTimeout(function(){ speakAnimalSound(correct, ''); }, 400);
-  }
-  if(asAnswered<asTotal){setTimeout(function(){asCQ++;buildASQuestion(asCQ);},1200);}
+  if(ok){if(fb){fb.textContent='✅ Correct! It says '+correct+'!';fb.className='fb show correct';}sKidCorrect();}
+  else{if(fb){fb.textContent='❌ It says '+correct+'!';fb.className='fb show wrong';}sKidWrong();}
+  if(asAnswered<asTotal){setTimeout(function(){asCQ++;buildASQuestion(asCQ);},900);}
   else{document.getElementById('as-sbtn').disabled=false;}
 }
 function showASResult(){
