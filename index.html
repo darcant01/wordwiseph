@@ -5565,14 +5565,22 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
         <div style="flex:1;background:#FFF8F0;border-radius:16px;border:2.5px solid #FFB347;padding:10px;text-align:center">
           <div style="font-size:11px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Uppercase</div>
           <canvas id="tracer-canvas" style="border-radius:10px;border:1.5px solid #FFD093;touch-action:none;display:block;margin:0 auto;background:#fff"></canvas>
-          <button id="tracer-clear-btn" style="font-family:Nunito,sans-serif;font-size:11px;font-weight:800;padding:5px 14px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin-top:7px">🗑️ Clear</button>
+          <div style="display:flex;gap:5px;justify-content:center;margin-top:6px">
+            <button id="tracer-clear-btn" style="font-family:Nunito,sans-serif;font-size:10px;font-weight:800;padding:5px 10px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">🗑️</button>
+            <button id="tracer-check-btn" style="font-family:Nunito,sans-serif;font-size:10px;font-weight:800;padding:5px 10px;border-radius:99px;border:2px solid #FFB347;background:#FFB347;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">✅ Check</button>
+          </div>
+          <div id="tracer-feedback-upper" style="font-size:10px;font-weight:800;min-height:18px;margin-top:4px"></div>
         </div>
 
         <!-- Lowercase -->
         <div style="flex:1;background:#FFF0F7;border-radius:16px;border:2.5px solid #FF6B9D;padding:10px;text-align:center">
           <div style="font-size:11px;font-weight:800;color:#D4537E;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Lowercase</div>
           <canvas id="tracer-canvas-lower" style="border-radius:10px;border:1.5px solid #FFB0CC;touch-action:none;display:block;margin:0 auto;background:#fff"></canvas>
-          <button id="tracer-clear-lower-btn" style="font-family:Nunito,sans-serif;font-size:11px;font-weight:800;padding:5px 14px;border-radius:99px;border:2px solid #FF6B9D;background:#fff;color:#D4537E;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin-top:7px">🗑️ Clear</button>
+          <div style="display:flex;gap:5px;justify-content:center;margin-top:6px">
+            <button id="tracer-clear-lower-btn" style="font-family:Nunito,sans-serif;font-size:10px;font-weight:800;padding:5px 10px;border-radius:99px;border:2px solid #FF6B9D;background:#fff;color:#D4537E;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">🗑️</button>
+            <button id="tracer-check-lower-btn" style="font-family:Nunito,sans-serif;font-size:10px;font-weight:800;padding:5px 10px;border-radius:99px;border:2px solid #FF6B9D;background:#FF6B9D;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">✅ Check</button>
+          </div>
+          <div id="tracer-feedback-lower" style="font-size:10px;font-weight:800;min-height:18px;margin-top:4px"></div>
         </div>
 
       </div>
@@ -5708,8 +5716,74 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
 // ================================================================
 (function(){
   try{
-    // Setup a single canvas with finger drawing
-    function setupCanvas(canvasId, clearBtnId, getLetter, strokeColor){
+
+    // Build reference pixel map for a letter
+    function buildRef(letter, sz){
+      var ref = document.createElement('canvas');
+      ref.width = sz; ref.height = sz;
+      var rctx = ref.getContext('2d');
+      rctx.fillStyle = '#000';
+      rctx.font = 'bold '+Math.floor(sz*0.72)+'px Nunito,Arial,sans-serif';
+      rctx.textAlign = 'center'; rctx.textBaseline = 'middle';
+      rctx.fillText(letter, sz/2, sz*0.44);
+      var raw = rctx.getImageData(0,0,sz,sz).data;
+      // Dilate reference by stroke radius so overlap is generous
+      var dilR = Math.floor(sz*0.07);
+      var refMap = new Uint8Array(sz*sz);
+      for(var i=0;i<sz*sz;i++){ if(raw[i*4+3]>40) refMap[i]=1; }
+      var dil = new Uint8Array(sz*sz);
+      for(var y=0;y<sz;y++) for(var x=0;x<sz;x++){
+        if(refMap[y*sz+x]){
+          for(var dy=-dilR;dy<=dilR;dy++) for(var dx=-dilR;dx<=dilR;dx++){
+            var ny=y+dy,nx=x+dx;
+            if(ny>=0&&ny<sz&&nx>=0&&nx<sz) dil[ny*sz+nx]=1;
+          }
+        }
+      }
+      var zone=0; for(var k=0;k<sz*sz;k++) if(dil[k]) zone++;
+      return {dil:dil, zone:zone};
+    }
+
+    // Check accuracy: compare drawn pixels against reference letter
+    function checkAccuracy(canvas, letter, feedbackId){
+      var sz = canvas.width;
+      var ctx = canvas.getContext('2d');
+      var drawn = ctx.getImageData(0,0,sz,sz).data;
+
+      // Count drawn pixels (user stroke alpha > 80)
+      var drawnPx=0, drawnMap=new Uint8Array(sz*sz);
+      for(var i=0;i<sz*sz;i++){
+        if(drawn[i*4+3]>80){ drawnPx++; drawnMap[i]=1; }
+      }
+
+      var fb = document.getElementById(feedbackId);
+      if(drawnPx < 100){
+        if(fb){ fb.style.color='#888780'; fb.textContent='☝️ Trace the letter!'; }
+        return;
+      }
+
+      var ref = buildRef(letter, sz);
+      var overlap=0;
+      for(var p=0;p<sz*sz;p++){ if(drawnMap[p]&&ref.dil[p]) overlap++; }
+
+      var precision = overlap/drawnPx;           // % of strokes ON the letter
+      var coverage  = ref.zone>0 ? overlap/ref.zone : 0; // % of letter covered
+
+      if(fb){
+        if(precision>=0.45 && coverage>=0.20){
+          fb.style.color='#1D9E75';
+          fb.textContent='🌟 Great! Accuracy: '+Math.round((precision*0.5+coverage*0.5)*100)+'%';
+        } else if(precision>=0.30){
+          fb.style.color='#BA7517';
+          fb.textContent='👍 Good! Try to cover the whole '+letter+'. Accuracy: '+Math.round(precision*100)+'%';
+        } else {
+          fb.style.color='#E24B4A';
+          fb.textContent='❌ Follow the faint '+letter+' shape! Accuracy: '+Math.round(precision*100)+'%';
+        }
+      }
+    }
+
+    function setupCanvas(canvasId, clearBtnId, checkBtnId, feedbackId, getLetter, strokeColor){
       var canvas = document.getElementById(canvasId);
       if(!canvas) return;
       var sz = Math.min(Math.floor((window.innerWidth - 80) / 2), 160);
@@ -5738,10 +5812,12 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
         ctx.restore();
         ctx.lineWidth=Math.max(8,sz*0.06); ctx.lineCap='round'; ctx.lineJoin='round';
         ctx.strokeStyle=strokeColor; ctx.setLineDash([]);
+        // Clear feedback when redrawn
+        var fb=document.getElementById(feedbackId);
+        if(fb){fb.textContent='';fb.style.color='';}
       }
 
       drawLines();
-      c2._drawLines = drawLines;
 
       var drawing = false;
       function xy(e,r){ return {x:(e.clientX-r.left)*(c2.width/r.width),y:(e.clientY-r.top)*(c2.height/r.height)}; }
@@ -5753,20 +5829,23 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
       c2.addEventListener('mouseup',     function(){drawing=false;ctx.beginPath();});
       c2.addEventListener('mouseleave',  function(){drawing=false;ctx.beginPath();});
 
+      // Clear button
       var clrBtn = document.getElementById(clearBtnId);
       if(clrBtn) clrBtn.onclick = function(){
         ctx.clearRect(0,0,sz,sz);
         drawLines();
       };
+
+      // Check button
+      var chkBtn = document.getElementById(checkBtnId);
+      if(chkBtn) chkBtn.onclick = function(){
+        checkAccuracy(c2, getLetter(), feedbackId);
+      };
     }
 
     function ltInit(){
-      var bigEl   = document.getElementById('tracer-letter-big');
-      var smallEl = document.getElementById('tracer-letter-small');
-      var bigLtr  = bigEl   ? bigEl.textContent.trim()   : 'A';
-      var smallLtr= smallEl ? smallEl.textContent.trim() : 'a';
-      setupCanvas('tracer-canvas',       'tracer-clear-btn',       function(){ return (document.getElementById('tracer-letter-big')||{textContent:'A'}).textContent.trim(); }, '#D4537E');
-      setupCanvas('tracer-canvas-lower', 'tracer-clear-lower-btn', function(){ return (document.getElementById('tracer-letter-small')||{textContent:'a'}).textContent.trim(); }, '#FF6B9D');
+      setupCanvas('tracer-canvas',       'tracer-clear-btn',       'tracer-check-btn',       'tracer-feedback-upper', function(){ return (document.getElementById('tracer-letter-big')||{textContent:'A'}).textContent.trim(); },       '#D4537E');
+      setupCanvas('tracer-canvas-lower', 'tracer-clear-lower-btn', 'tracer-check-lower-btn', 'tracer-feedback-lower', function(){ return (document.getElementById('tracer-letter-small')||{textContent:'a'}).textContent.trim(); }, '#FF6B9D');
     }
 
     var origShow = window.showTracerLetter;
@@ -5777,7 +5856,6 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
       };
     }
 
-    // Expose ltInit globally for name mode
     window._ltInit = ltInit;
 
     document.addEventListener('DOMContentLoaded',function(){ setTimeout(ltInit,500); });
