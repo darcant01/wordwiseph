@@ -4546,21 +4546,38 @@ var tracerNameLetters = [];
 var tracerNameIdx = 0;
 
 function setTracerMode(mode){
-  tracerMode = mode;
   var alphaBtn = document.getElementById('tracer-mode-alpha');
   var nameBtn  = document.getElementById('tracer-mode-name');
   var nameArea = document.getElementById('tracer-name-area');
+
+  if(mode === 'name'){
+    // Check subscription
+    var sub = CU ? (CU.subscription||'free') : 'free';
+    var hasAccess = CU && (sub==='basic'||sub==='premium');
+    if(!hasAccess){
+      if(!CU){
+        if(confirm('✍️ Trace My Name requires a subscription.\n\nLogin to your account?')){
+          navTo('login');
+        }
+      } else {
+        if(confirm('✍️ Trace My Name is available on Basic & Premium plans.\n\nUpgrade now?')){
+          navTo('pricing');
+        }
+      }
+      return; // Don't switch mode
+    }
+  }
+
+  tracerMode = mode;
   if(mode === 'alphabet'){
     if(alphaBtn){ alphaBtn.style.background='#FF6B9D'; alphaBtn.style.color='#fff'; alphaBtn.style.borderColor='#FF6B9D'; }
     if(nameBtn) { nameBtn.style.background='#fff'; nameBtn.style.color='var(--navy)'; nameBtn.style.borderColor='var(--lp)'; }
     if(nameArea) nameArea.style.display='none';
-    // Reset to A-Z mode
     tracerIdx=0; showTracerLetter(0);
   } else {
     if(alphaBtn){ alphaBtn.style.background='#fff'; alphaBtn.style.color='var(--navy)'; alphaBtn.style.borderColor='var(--lp)'; }
     if(nameBtn) { nameBtn.style.background='#FF6B9D'; nameBtn.style.color='#fff'; nameBtn.style.borderColor='#FF6B9D'; }
     if(nameArea) nameArea.style.display='block';
-    // Focus input
     setTimeout(function(){ var inp=document.getElementById('tracer-name-input'); if(inp)inp.focus(); },100);
   }
 }
@@ -5526,7 +5543,7 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
     <div id="tracer-mode-picker" style="margin-bottom:14px">
       <div style="display:flex;gap:8px">
         <button onclick="setTracerMode('alphabet')" id="tracer-mode-alpha" style="font-family:Nunito,sans-serif;flex:1;padding:10px 6px;border-radius:12px;border:2.5px solid #FF6B9D;background:#FF6B9D;color:#fff;font-size:clamp(12px,3vw,14px);font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">🔤 A-Z</button>
-        <button onclick="setTracerMode('name')" id="tracer-mode-name" style="font-family:Nunito,sans-serif;flex:2;padding:10px 6px;border-radius:12px;border:2.5px solid var(--lp);background:#fff;color:var(--navy);font-size:clamp(12px,3vw,14px);font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">✍️ Trace My Name</button>
+        <button onclick="setTracerMode('name')" id="tracer-mode-name" style="font-family:Nunito,sans-serif;flex:2;padding:10px 6px;border-radius:12px;border:2.5px solid var(--lp);background:#fff;color:var(--navy);font-size:clamp(12px,3vw,14px);font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;display:flex;align-items:center;justify-content:center;gap:6px">✍️ Trace My Name <span style="background:#BA7517;color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:99px">⚡PRO</span></button>
       </div>
       <!-- Name input (shown in name mode) -->
       <div id="tracer-name-area" style="display:none;margin-top:10px">
