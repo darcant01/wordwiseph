@@ -5335,8 +5335,8 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
   <div class="qmain" style="padding-top:0">
     <div id="tracer-game">
 
-      <!-- Nav + progress -->
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <!-- Nav + progress bar -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
         <button onclick="tracerPrev()" style="font-family:Nunito,sans-serif;font-size:20px;font-weight:900;background:var(--navy);color:#fff;border:none;border-radius:12px;width:44px;height:44px;flex-shrink:0;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">‹</button>
         <div style="flex:1">
           <div id="tracer-progress" style="font-size:12px;font-weight:800;color:#888780;text-align:center;margin-bottom:5px">Letter 1 of 26</div>
@@ -5347,46 +5347,40 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
         <button onclick="tracerNext()" style="font-family:Nunito,sans-serif;font-size:20px;font-weight:900;background:var(--navy);color:#fff;border:none;border-radius:12px;width:44px;height:44px;flex-shrink:0;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">›</button>
       </div>
 
-      <!-- Big letter display -->
-      <div style="background:linear-gradient(135deg,#FFF0F7,#F5F0FF);border-radius:20px;border:2.5px solid #FFB347;padding:16px 12px;margin-bottom:12px;text-align:center">
-        <div style="display:flex;align-items:center;justify-content:center;gap:20px">
-          <!-- Uppercase -->
+      <!-- Hidden letter values for JS -->
+      <span id="tracer-letter-big" style="display:none">A</span>
+      <span id="tracer-letter-small" style="display:none">a</span>
+
+      <!-- Two canvases side by side -->
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+
+        <!-- Uppercase -->
+        <div style="flex:1;background:#FFF8F0;border-radius:16px;border:2.5px solid #FFB347;padding:10px;text-align:center">
+          <div style="font-size:11px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Uppercase</div>
+          <canvas id="tracer-canvas" style="border-radius:10px;border:1.5px solid #FFD093;touch-action:none;display:block;margin:0 auto;background:#fff"></canvas>
+          <button id="tracer-clear-btn" style="font-family:Nunito,sans-serif;font-size:11px;font-weight:800;padding:5px 14px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin-top:7px">🗑️ Clear</button>
+        </div>
+
+        <!-- Lowercase -->
+        <div style="flex:1;background:#FFF0F7;border-radius:16px;border:2.5px solid #FF6B9D;padding:10px;text-align:center">
+          <div style="font-size:11px;font-weight:800;color:#D4537E;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Lowercase</div>
+          <canvas id="tracer-canvas-lower" style="border-radius:10px;border:1.5px solid #FFB0CC;touch-action:none;display:block;margin:0 auto;background:#fff"></canvas>
+          <button id="tracer-clear-lower-btn" style="font-family:Nunito,sans-serif;font-size:11px;font-weight:800;padding:5px 14px;border-radius:99px;border:2px solid #FF6B9D;background:#fff;color:#D4537E;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin-top:7px">🗑️ Clear</button>
+        </div>
+
+      </div>
+      <div style="text-align:center;font-size:11px;font-weight:700;color:#888780;margin-bottom:12px">☝️ Trace each letter with your finger!</div>
+
+      <!-- Word hint card -->
+      <div id="tracer-word-card" style="background:linear-gradient(135deg,#FFF0F7,#FFF8E8);border-radius:16px;border:2px solid #FFB347;padding:12px;margin-bottom:12px">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888780;margin-bottom:6px;text-align:center">Example word</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:12px">
+          <div id="tracer-word-emoji" style="font-size:clamp(28px,8vw,40px)">🍎</div>
           <div>
-            <div style="font-size:10px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Aa</div>
-            <!-- Hidden spans for JS to read -->
-          <span id="tracer-letter-big" style="display:none">A</span>
-          <span id="tracer-letter-small" style="display:none">a</span>
-          <!-- Canvas tracers: uppercase + lowercase -->
-          <div style="display:flex;gap:10px;justify-content:center;align-items:flex-start">
-
-            <!-- Uppercase canvas -->
-            <div style="text-align:center;flex:1">
-              <div style="font-size:10px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Uppercase</div>
-              <canvas id="tracer-canvas" style="border-radius:12px;border:2.5px solid #FFB347;background:#FFF8F0;touch-action:none;display:block;margin:0 auto"></canvas>
-              <button id="tracer-clear-btn" style="font-family:Nunito,sans-serif;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin-top:6px">🗑️ Clear</button>
-            </div>
-
-            <!-- Lowercase canvas -->
-            <div style="text-align:center;flex:1">
-              <div style="font-size:10px;font-weight:800;color:#D4537E;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Lowercase</div>
-              <canvas id="tracer-canvas-lower" style="border-radius:12px;border:2.5px solid #FF6B9D;background:#FFF0F7;touch-action:none;display:block;margin:0 auto"></canvas>
-              <button id="tracer-clear-lower-btn" style="font-family:Nunito,sans-serif;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;border:2px solid #FF6B9D;background:#fff;color:#D4537E;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin-top:6px">🗑️ Clear</button>
-            </div>
-
-          </div>
-          <div style="text-align:center;margin-top:8px;font-size:11px;font-weight:700;color:#888780">Trace each letter with your finger!</div>
-          </div>
-          <!-- Divider -->
-          <div style="width:1.5px;height:70px;background:var(--lp);border-radius:99px;flex-shrink:0"></div>
-          <!-- Word -->
-          <div style="flex:1;min-width:0">
-            <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888780;margin-bottom:4px">Example</div>
-            <div id="tracer-word-emoji" style="font-size:clamp(26px,7vw,36px);line-height:1;margin-bottom:3px">🍎</div>
-            <div id="tracer-word" style="font-size:clamp(15px,4vw,20px);font-weight:900;color:var(--navy)">Apple</div>
+            <div id="tracer-word" style="font-size:clamp(18px,5vw,26px);font-weight:900;color:var(--navy)">Apple</div>
+            <div id="tracer-word-letters" style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap"></div>
           </div>
         </div>
-        <!-- Letter boxes -->
-        <div id="tracer-word-letters" style="display:flex;gap:4px;justify-content:center;margin-top:10px;flex-wrap:wrap"></div>
       </div>
 
       <!-- How to write -->
@@ -5395,7 +5389,7 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
         <div id="tracer-instructions" style="font-size:clamp(12px,3vw,13px);font-weight:700;color:#3D5A7A;line-height:1.7"></div>
       </div>
 
-      <!-- Buttons -->
+      <!-- Nav buttons -->
       <div style="display:flex;gap:10px;margin-bottom:10px">
         <button onclick="tracerPrev()" class="btn" style="flex:1;background:#fff;color:var(--navy);border:2.5px solid var(--lp)">‹ Prev</button>
         <button onclick="tracerNext()" class="btn btn-pink" style="flex:2">Next ›</button>
