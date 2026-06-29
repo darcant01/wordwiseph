@@ -4540,6 +4540,109 @@ function showTracerLetter(idx){
   sClick();
 }
 
+// ── TRACER NAME MODE ──────────────────────────────────────────
+var tracerMode = 'alphabet'; // 'alphabet' or 'name'
+var tracerNameLetters = [];
+var tracerNameIdx = 0;
+
+function setTracerMode(mode){
+  tracerMode = mode;
+  var alphaBtn = document.getElementById('tracer-mode-alpha');
+  var nameBtn  = document.getElementById('tracer-mode-name');
+  var nameArea = document.getElementById('tracer-name-area');
+  if(mode === 'alphabet'){
+    if(alphaBtn){ alphaBtn.style.background='#FF6B9D'; alphaBtn.style.color='#fff'; alphaBtn.style.borderColor='#FF6B9D'; }
+    if(nameBtn) { nameBtn.style.background='#fff'; nameBtn.style.color='var(--navy)'; nameBtn.style.borderColor='var(--lp)'; }
+    if(nameArea) nameArea.style.display='none';
+    // Reset to A-Z mode
+    tracerIdx=0; showTracerLetter(0);
+  } else {
+    if(alphaBtn){ alphaBtn.style.background='#fff'; alphaBtn.style.color='var(--navy)'; alphaBtn.style.borderColor='var(--lp)'; }
+    if(nameBtn) { nameBtn.style.background='#FF6B9D'; nameBtn.style.color='#fff'; nameBtn.style.borderColor='#FF6B9D'; }
+    if(nameArea) nameArea.style.display='block';
+    // Focus input
+    setTimeout(function(){ var inp=document.getElementById('tracer-name-input'); if(inp)inp.focus(); },100);
+  }
+}
+
+function startNameTrace(){
+  var inp = document.getElementById('tracer-name-input');
+  if(!inp) return;
+  var name = inp.value.trim().toUpperCase().replace(/[^A-Z]/g,'');
+  if(name.length < 1){
+    inp.style.borderColor='#E74C3C';
+    setTimeout(function(){inp.style.borderColor='#FF6B9D';},1000);
+    return;
+  }
+  tracerNameLetters = name.split('');
+  tracerNameIdx = 0;
+  showNameLetter(0);
+}
+
+function showNameLetter(idx){
+  tracerNameIdx = idx;
+  var letter = tracerNameLetters[idx];
+  if(!letter) return;
+  var name = tracerNameLetters.join('');
+
+  // Update progress
+  var prog = document.getElementById('tracer-progress');
+  if(prog) prog.textContent = 'Letter '+(idx+1)+' of '+tracerNameLetters.length+' — '+letter+' in "'+name+'"';
+  var pbar = document.getElementById('tracer-pbar');
+  if(pbar) pbar.style.width = Math.round((idx+1)/tracerNameLetters.length*100)+'%';
+
+  // Update hidden spans for canvas
+  var big   = document.getElementById('tracer-letter-big');
+  var small = document.getElementById('tracer-letter-small');
+  if(big)   big.textContent   = letter;
+  if(small) small.textContent = letter.toLowerCase();
+
+  // Find letter data for example word
+  var d = LETTERS_DATA[letter.charCodeAt(0)-65] || LETTERS_DATA[0];
+  var emoji = document.getElementById('tracer-word-emoji');
+  var word  = document.getElementById('tracer-word');
+  var boxes = document.getElementById('tracer-word-letters');
+  var instr = document.getElementById('tracer-instructions');
+  if(emoji) emoji.textContent = d.emoji;
+  if(word)  word.textContent  = d.word;
+  if(boxes){
+    boxes.innerHTML = d.word.split('').map(function(l){
+      var isTarget = l.toUpperCase()===letter;
+      return '<div class="word-letter-box '+(isTarget?'blank':'')+'">'+( isTarget?'?':l.toUpperCase())+'</div>';
+    }).join('');
+  }
+  if(instr) instr.textContent = d.instructions;
+
+  // Show name progress dots
+  var nameDisplay = document.getElementById('tracer-name-display');
+  if(!nameDisplay){
+    // Create name display if not exists
+    var wc = document.getElementById('tracer-word-card');
+    if(wc){
+      var nd = document.createElement('div');
+      nd.id='tracer-name-display';
+      nd.style.cssText='text-align:center;margin-bottom:10px;padding:10px;background:linear-gradient(135deg,#FFF0F7,#F5F0FF);border-radius:14px;border:2px solid #FF6B9D';
+      wc.parentNode.insertBefore(nd, wc);
+      nameDisplay = nd;
+    }
+  }
+  if(nameDisplay){
+    nameDisplay.innerHTML='<div style="font-size:11px;font-weight:800;color:#888780;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Tracing your name</div>'+
+      '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">'+
+      tracerNameLetters.map(function(l,i){
+        return '<div style="width:clamp(30px,8vw,40px);height:clamp(30px,8vw,40px);border-radius:8px;background:'+(i<idx?'#27AE60':i===idx?'#FF6B9D':'var(--lp)')+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:clamp(14px,3.5vw,18px);font-weight:900;font-family:Nunito,sans-serif">'+l+'</div>';
+      }).join('')+
+      '</div>';
+  }
+
+  sClick();
+  // Reinit canvas for this letter
+  setTimeout(function(){
+    var b10 = window._ltInit;
+    if(typeof b10==='function') b10();
+  }, 60);
+}
+
 function tracerNext(){
   if(tracerIdx < 25){
     sOk();
@@ -5408,6 +5511,25 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
     <div class="hsub" style="color:rgba(255,255,255,0.9)">Learn to write A to Z!</div>
   </div>
   <div class="qmain" style="padding-top:0">
+
+    <!-- Mode picker -->
+    <div id="tracer-mode-picker" style="margin-bottom:14px">
+      <div style="display:flex;gap:8px">
+        <button onclick="setTracerMode('alphabet')" id="tracer-mode-alpha" style="font-family:Nunito,sans-serif;flex:1;padding:10px 6px;border-radius:12px;border:2.5px solid #FF6B9D;background:#FF6B9D;color:#fff;font-size:clamp(12px,3vw,14px);font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">🔤 A-Z</button>
+        <button onclick="setTracerMode('name')" id="tracer-mode-name" style="font-family:Nunito,sans-serif;flex:2;padding:10px 6px;border-radius:12px;border:2.5px solid var(--lp);background:#fff;color:var(--navy);font-size:clamp(12px,3vw,14px);font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">✍️ Trace My Name</button>
+      </div>
+      <!-- Name input (shown in name mode) -->
+      <div id="tracer-name-area" style="display:none;margin-top:10px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="tracer-name-input" type="text" maxlength="12" autocorrect="off" autocapitalize="words" spellcheck="false"
+            placeholder="Type name here..."
+            style="flex:1;font-family:Nunito,sans-serif;font-size:clamp(16px,4vw,20px);font-weight:800;padding:10px 14px;border-radius:12px;border:2.5px solid #FF6B9D;background:#FFF0F7;color:var(--navy);outline:none"/>
+          <button onclick="startNameTrace()" style="font-family:Nunito,sans-serif;font-size:14px;font-weight:800;padding:10px 16px;border-radius:12px;background:#FF6B9D;border:none;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;white-space:nowrap">Go! ›</button>
+        </div>
+        <div style="text-align:center;margin-top:6px;font-size:11px;font-weight:700;color:#888780">Type a name then tap Go!</div>
+      </div>
+    </div>
+
     <div id="tracer-game">
 
       <!-- Nav + progress bar -->
@@ -5644,6 +5766,9 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
         setTimeout(ltInit,100);
       };
     }
+
+    // Expose ltInit globally for name mode
+    window._ltInit = ltInit;
 
     document.addEventListener('DOMContentLoaded',function(){ setTimeout(ltInit,500); });
 
