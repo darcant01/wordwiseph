@@ -6441,6 +6441,65 @@ function launchAnimalSound(){
   document.getElementById('as-sbtn').disabled=true;
   buildASQuestion(0);sStart();
 }
+
+// ── ANIMAL SOUND PLAYER ────────────────────────────────────────
+// Maps each sound word to a speech phrase kids can actually hear clearly
+var ANIMAL_SOUND_PHRASES = {
+  'Meow':    'Meow! Meow!',
+  'Woof':    'Woof! Woof!',
+  'Moo':     'Mooo! Mooo!',
+  'Quack':   'Quack quack quack!',
+  'Oink':    'Oink oink!',
+  'Cluck':   'Cluck cluck cluck!',
+  'Baa':     'Baaaa! Baaaa!',
+  'Neigh':   'Neiiigh!',
+  'Roar':    'Roooaar!',
+  'Trumpet': 'Paaaaah! Paaah!',
+  'Chatter': 'Chee chee chee!',
+  'Croak':   'Ribbit ribbit!',
+  'Song':    'Woooo woooo!',
+  'Squawk':  'Squawk squawk!',
+  'Screech': 'Screeech!',
+  'Hiss':    'Sssssss!',
+  'Groan':   'Uuuurgh!',
+  'Buzz':    'Bzzzzz bzzz!',
+  'Squeak':  'Squeak squeak!',
+  'Growl':   'Grrrrowl!',
+  'Bark':    'Bark bark bark!',
+  'Hoot':    'Hoot hoot hoot!',
+  'Bleat':   'Maaah maaah!',
+  'Hum':     'Hmmm hmm hmm!'
+};
+
+function playAnimalSound(soundName){
+  try{
+    if(!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    var phrase = ANIMAL_SOUND_PHRASES[soundName] || soundName+'!';
+    setTimeout(function(){
+      try{
+        var utt = new SpeechSynthesisUtterance(phrase);
+        utt.lang = 'en-US';
+        utt.rate = 0.7;   // slower = more clear for kids
+        utt.pitch = 1.2;  // slightly higher = more fun/animal-like
+        utt.volume = 1;
+        var voices = window.speechSynthesis.getVoices();
+        // Try to pick a natural voice
+        var v = voices.find(function(v){
+          return v.lang.startsWith('en') && (
+            v.name.indexOf('Samantha')>=0 ||
+            v.name.indexOf('Karen')>=0 ||
+            v.name.indexOf('Google US')>=0 ||
+            v.name.indexOf('Microsoft Aria')>=0
+          );
+        }) || voices.find(function(v){ return v.lang==='en-US'; });
+        if(v) utt.voice = v;
+        window.speechSynthesis.speak(utt);
+      }catch(e){}
+    }, 80);
+  }catch(e){}
+}
+
 function buildASQuestion(idx){
   asCQ=idx;var q=asQs[idx];
   var wrong=shufA(ANIMALS.filter(function(a){return a.sound!==q.sound&&a.sound!=='...';}).map(function(a){return a.sound;}));
@@ -6465,9 +6524,16 @@ function ansAS(idx,chosen,correct){
   var ok=chosen===correct;asAnswered++;if(ok)asScore++;
   document.getElementById('as-score').textContent=asScore;
   var fb=document.getElementById('as-fb-'+idx);
-  if(ok){if(fb){fb.textContent='✅ Correct! It says '+correct+'!';fb.className='fb show correct';}sKidCorrect();}
-  else{if(fb){fb.textContent='❌ It says '+correct+'!';fb.className='fb show wrong';}sKidWrong();}
-  if(asAnswered<asTotal){setTimeout(function(){asCQ++;buildASQuestion(asCQ);},900);}
+  if(ok){
+    if(fb){fb.textContent='✅ Correct! '+asQs[idx].name+' says '+correct+'!';fb.className='fb show correct';}
+    sKidCorrect();
+    setTimeout(function(){ playAnimalSound(correct); }, 200);
+  } else {
+    if(fb){fb.textContent='❌ '+asQs[idx].name+' says '+correct+'!';fb.className='fb show wrong';}
+    sKidWrong();
+    setTimeout(function(){ playAnimalSound(correct); }, 400);
+  }
+  if(asAnswered<asTotal){setTimeout(function(){asCQ++;buildASQuestion(asCQ);},1500);}
   else{document.getElementById('as-sbtn').disabled=false;}
 }
 function showASResult(){
