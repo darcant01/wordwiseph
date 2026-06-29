@@ -5364,7 +5364,41 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
 
       </div>
     </div>
-  </div>
+  
+    <!-- Animal Games -->
+    <div style="margin-top:14px;margin-bottom:8px">
+      <div style="font-size:12px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;text-align:center">🐾 Animal Games</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,2vw,16px)">
+        <button onclick="startAnimalSound()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #E67E22;background:#fff;padding:clamp(14px,3vw,20px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+          <div class="game-badge" style="background:#E67E22">SOUND</div><div class="game-icon">🔊</div>
+          <div class="game-title">Animal Sound</div><div class="game-desc">What sound does it make?</div>
+        </button>
+        <button onclick="startAnimalMatch()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #8E44AD;background:#fff;padding:clamp(14px,3vw,20px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+          <div class="game-badge" style="background:#8E44AD">MATCH</div><div class="game-icon">👶</div>
+          <div class="game-title">Animal Match</div><div class="game-desc">Match the baby to its parent!</div>
+        </button>
+        <button onclick="startWhereDoILive()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #27AE60;background:#fff;padding:clamp(14px,3vw,20px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+          <div class="game-badge" style="background:#27AE60">HABITAT</div><div class="game-icon">🏠</div>
+          <div class="game-title">Where Do I Live?</div><div class="game-desc">Find the animal's home!</div>
+        </button>
+        <button onclick="startAnimalAlphabet()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #2980B9;background:#fff;padding:clamp(14px,3vw,20px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+          <div class="game-badge" style="background:#2980B9">ALPHABET</div><div class="game-icon">🔤</div>
+          <div class="game-title">Animal Alphabet</div><div class="game-desc">Which animal starts with this letter?</div>
+        </button>
+        <button onclick="startHowManyLegs()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #E74C3C;background:#fff;padding:clamp(14px,3vw,20px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+          <div class="game-badge" style="background:#E74C3C">LEGS</div><div class="game-icon">🦵</div>
+          <div class="game-title">How Many Legs?</div><div class="game-desc">Count the animal's legs!</div>
+        </button>
+        <button onclick="startBigOrSmall()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #F39C12;background:#fff;padding:clamp(14px,3vw,20px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%">
+          <div class="game-badge" style="background:#F39C12">SIZE</div><div class="game-icon">🐘</div>
+          <div class="game-title">Big or Small?</div><div class="game-desc">Which animal is bigger?</div>
+        </button>
+        <button onclick="startAnimalGroup()" style="font-family:Nunito,sans-serif;border-radius:clamp(14px,3vw,20px);border:2.5px solid #16A085;background:#fff;padding:clamp(14px,3vw,20px);text-align:center;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%;grid-column:span 2">
+          <div class="game-badge" style="background:#16A085">GROUP</div><div class="game-icon">🐾</div>
+          <div class="game-title">Animal Group</div><div class="game-desc">Mammal, Bird, Fish, Reptile or Insect?</div>
+        </button>
+      </div>
+    </div></div>
 </div>
 
 <!-- ══ LETTER TRACER ══ -->
