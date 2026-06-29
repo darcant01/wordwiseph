@@ -4644,22 +4644,32 @@ function showNameLetter(idx){
 }
 
 function tracerNext(){
+  if(tracerMode === 'name'){
+    if(tracerNameIdx < tracerNameLetters.length - 1){
+      sOk(); showNameLetter(tracerNameIdx + 1);
+    } else {
+      sWin();
+      var nd=document.getElementById('tracer-name-display');
+      if(nd) nd.style.background='linear-gradient(135deg,#D5F5E3,#E8DAEF)';
+      alert('🎉 Amazing! You traced your whole name!');
+    }
+    return;
+  }
   if(tracerIdx < 25){
-    sOk();
-    showTracerLetter(tracerIdx + 1);
+    sOk(); showTracerLetter(tracerIdx + 1);
   } else {
     sWin();
-    alert('🎉 Amazing! You learned all 26 letters of the alphabet!');
-    tracerIdx = 0;
-    showTracerLetter(0);
+    alert('🎉 Amazing! You learned all 26 letters!');
+    tracerIdx = 0; showTracerLetter(0);
   }
 }
 
 function tracerPrev(){
-  if(tracerIdx > 0){
-    sClick();
-    showTracerLetter(tracerIdx - 1);
+  if(tracerMode === 'name'){
+    if(tracerNameIdx > 0){ sClick(); showNameLetter(tracerNameIdx - 1); }
+    return;
   }
+  if(tracerIdx > 0){ sClick(); showTracerLetter(tracerIdx - 1); }
 }
 
 // ── ABC ORDER GAME ─────────────────────────────────────────────
