@@ -428,7 +428,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
   <div class="wrap">
     <div class="card">
       <div class="ctitle">Pick your level</div>
-      <div class="csub">Easy: 5 questions · Medium: 15 questions · Hard: 30 questions</div>
+      <div class="csub">Easy: 5q · Medium: 15q · Hard: 30q · Infinite: ♾️</div>
       <div class="diff-grid">
         <div class="dc easy" onclick="startQuiz('easy')">
           <div class="di">🌱</div>
@@ -446,6 +446,12 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
           <div class="dt">Hard</div>
           <div class="ds">30 questions · 10 sec each</div>
           <div class="dc-lock" id="lock-hard" style="display:none;margin-top:6px;font-size:11px;background:#FCEBEB;color:#791F1F;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
+        </div>
+        <div class="dc" id="dc-infinite" onclick="checkAccess('infinite')" style="border-color:#7F77DD;grid-column:span 3">
+          <div class="di">♾️</div>
+          <div class="dt" style="color:#7F77DD">Infinite</div>
+          <div class="ds">Endless questions · 15 sec each · How far can you go?</div>
+          <div class="dc-lock" id="lock-infinite" style="display:none;margin-top:6px;font-size:11px;background:#EEEDFE;color:#3C3489;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
         </div>
       </div>
       <div style="text-align:center;margin-top:8px">
@@ -1426,7 +1432,7 @@ function startQuiz(d){
 function updateDiffCards(){
   const sub=CU?.subscription||'free';
   const hasAccess=CU&&(sub==='basic'||sub==='premium'); // expired counts as free
-  ['medium','hard'].forEach(d=>{
+  ['medium','hard','infinite'].forEach(d=>{
     const card=document.getElementById('dc-'+d);
     const lock=document.getElementById('lock-'+d);
     if(card){
@@ -2382,7 +2388,7 @@ function startSpell(){
 function updateSpellLocks(){
   const sub=CU?.subscription||'free';
   const hasAccess=CU&&(sub==='basic'||sub==='premium');
-  ['medium','hard'].forEach(d=>{
+  ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('spell-lock-'+d);
     const card=document.querySelector('#sc-spell-pick .dc.'+d);
     if(lock) lock.style.display=hasAccess?'none':'block';
@@ -2749,7 +2755,7 @@ function startShark(){
 function updateSharkLocks(){
   const sub=CU?.subscription||'free';
   const hasAccess=CU&&(sub==='basic'||sub==='premium');
-  ['medium','hard'].forEach(d=>{
+  ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('shark-lock-'+d);
     const card=document.querySelector('#sc-shark .dc.'+d);
     if(lock)lock.style.display=hasAccess?'none':'block';
@@ -3073,7 +3079,7 @@ function startOdd(){
 function updateOddLocks(){
   const sub=CU?.subscription||'free';
   const hasAccess=CU&&(sub==='basic'||sub==='premium');
-  ['medium','hard'].forEach(d=>{
+  ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('odd-lock-'+d);
     const card=document.querySelector('#sc-odd-pick .dc.'+d);
     if(lock)lock.style.display=hasAccess?'none':'block';
@@ -3405,7 +3411,7 @@ function startScramble(){
 function updateScrambleLocks(){
   const sub=CU?.subscription||'free';
   const hasAccess=CU&&(sub==='basic'||sub==='premium');
-  ['medium','hard'].forEach(d=>{
+  ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('scramble-lock-'+d);
     const card=document.querySelector('#sc-scramble-pick .dc.'+d);
     if(lock)lock.style.display=hasAccess?'none':'block';
@@ -3950,7 +3956,7 @@ function startChain(){
 function updateChainLocks(){
   const sub=CU?.subscription||'free';
   const hasAccess=CU&&(sub==='basic'||sub==='premium');
-  ['medium','hard'].forEach(d=>{
+  ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('chain-lock-'+d);
     const card=document.querySelector('#sc-chain .dc.'+d);
     if(lock)lock.style.display=hasAccess?'none':'block';
@@ -4244,7 +4250,7 @@ function startSprint(){
 function updateSprintLocks(){
   const sub=CU?.subscription||'free';
   const hasAccess=CU&&(sub==='basic'||sub==='premium');
-  ['medium','hard'].forEach(d=>{
+  ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('sprint-lock-'+d);
     const card=document.querySelector('#sc-sprint .dc.'+d);
     if(lock)lock.style.display=hasAccess?'none':'block';
