@@ -1089,7 +1089,7 @@ function navTo(s){
   if(s==='start')  updateDiffCards();
   // Show/hide floating timer
   const ft=document.getElementById('floating-timer');
-  const gameScreens=['quiz','spell','odd','shark','scramble','chain','sprint','letter-tracer','abc-order','missing-letter','rhyme'];
+  const gameScreens=['quiz','spell','odd','shark','scramble','chain','sprint','abc-order','missing-letter','rhyme'];
   if(ft) ft.style.display=gameScreens.includes(s)?'flex':'none';
   // Show ticker on ALL pages always
   TICKER.setVisible(true);
