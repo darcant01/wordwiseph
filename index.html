@@ -5356,14 +5356,25 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
             <!-- Hidden spans for JS to read -->
           <span id="tracer-letter-big" style="display:none">A</span>
           <span id="tracer-letter-small" style="display:none">a</span>
-          <!-- Canvas tracer with break lines -->
-          <div style="text-align:center">
-            <canvas id="tracer-canvas" style="border-radius:14px;border:2.5px solid #FFB347;background:#FFF8F0;touch-action:none;display:block;margin:0 auto"></canvas>
-            <div style="display:flex;gap:8px;justify-content:center;margin-top:8px">
-              <button id="tracer-clear-btn" style="font-family:Nunito,sans-serif;font-size:12px;font-weight:800;padding:6px 14px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">🗑️ Clear</button>
+          <!-- Canvas tracers: uppercase + lowercase -->
+          <div style="display:flex;gap:10px;justify-content:center;align-items:flex-start">
+
+            <!-- Uppercase canvas -->
+            <div style="text-align:center;flex:1">
+              <div style="font-size:10px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Uppercase</div>
+              <canvas id="tracer-canvas" style="border-radius:12px;border:2.5px solid #FFB347;background:#FFF8F0;touch-action:none;display:block;margin:0 auto"></canvas>
+              <button id="tracer-clear-btn" style="font-family:Nunito,sans-serif;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;border:2px solid var(--lp);background:#fff;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin-top:6px">🗑️ Clear</button>
             </div>
-            <div style="margin-top:6px;font-size:11px;font-weight:700;color:#888780">Trace the letter with your finger!</div>
+
+            <!-- Lowercase canvas -->
+            <div style="text-align:center;flex:1">
+              <div style="font-size:10px;font-weight:800;color:#D4537E;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Lowercase</div>
+              <canvas id="tracer-canvas-lower" style="border-radius:12px;border:2.5px solid #FF6B9D;background:#FFF0F7;touch-action:none;display:block;margin:0 auto"></canvas>
+              <button id="tracer-clear-lower-btn" style="font-family:Nunito,sans-serif;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;border:2px solid #FF6B9D;background:#fff;color:#D4537E;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin-top:6px">🗑️ Clear</button>
+            </div>
+
           </div>
+          <div style="text-align:center;margin-top:8px;font-size:11px;font-weight:700;color:#888780">Trace each letter with your finger!</div>
           </div>
           <!-- Divider -->
           <div style="width:1.5px;height:70px;background:var(--lp);border-radius:99px;flex-shrink:0"></div>
@@ -5496,95 +5507,87 @@ console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.leng
 // ================================================================
 (function(){
   try{
-    var tc = null, td = false;
-
-    function ltInit(){
-      var canvas = document.getElementById('tracer-canvas');
+    // Setup a single canvas with finger drawing
+    function setupCanvas(canvasId, clearBtnId, getLetter, strokeColor){
+      var canvas = document.getElementById(canvasId);
       if(!canvas) return;
-      var sz = Math.min(window.innerWidth - 80, 260);
+      var sz = Math.min(Math.floor((window.innerWidth - 80) / 2), 160);
       canvas.width = sz; canvas.height = sz;
-      // Clone to remove stale listeners
       var c2 = canvas.cloneNode(false);
       canvas.parentNode.replaceChild(c2, canvas);
-      tc = c2.getContext('2d');
-      tc.lineWidth = Math.max(10, sz*0.05);
-      tc.lineCap = 'round'; tc.lineJoin = 'round';
-      tc.strokeStyle = '#D4537E';
-      ltDraw(c2, sz);
+      var ctx = c2.getContext('2d');
+      ctx.lineWidth = Math.max(8, sz*0.06);
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.strokeStyle = strokeColor;
 
-      // Attach clear button
-      var clrBtn = document.getElementById('tracer-clear-btn');
-      if(clrBtn) clrBtn.onclick = function(){ ltClear(c2, sz); };
+      function drawLines(){
+        ctx.save();
+        ctx.globalAlpha=0.11; ctx.fillStyle='#1D2B55';
+        ctx.font='bold '+Math.floor(sz*0.72)+'px Nunito,Arial,sans-serif';
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(getLetter(), sz/2, sz*0.44);
+        ctx.globalAlpha=1;
+        ctx.lineCap='butt'; ctx.lineWidth=1.5;
+        ctx.setLineDash([4,6]); ctx.strokeStyle='rgba(255,107,157,0.28)';
+        ctx.beginPath(); ctx.moveTo(sz*0.05,sz*0.17); ctx.lineTo(sz*0.95,sz*0.17); ctx.stroke();
+        ctx.strokeStyle='rgba(255,107,157,0.38)';
+        ctx.beginPath(); ctx.moveTo(sz*0.05,sz*0.50); ctx.lineTo(sz*0.95,sz*0.50); ctx.stroke();
+        ctx.setLineDash([]); ctx.lineWidth=2; ctx.strokeStyle='rgba(255,107,157,0.60)';
+        ctx.beginPath(); ctx.moveTo(sz*0.05,sz*0.77); ctx.lineTo(sz*0.95,sz*0.77); ctx.stroke();
+        ctx.restore();
+        ctx.lineWidth=Math.max(8,sz*0.06); ctx.lineCap='round'; ctx.lineJoin='round';
+        ctx.strokeStyle=strokeColor; ctx.setLineDash([]);
+      }
 
-      function xy(e, r){ return {x:(e.clientX-r.left)*(c2.width/r.width), y:(e.clientY-r.top)*(c2.height/r.height)}; }
-      c2.addEventListener('touchstart',  function(e){ e.preventDefault(); var p=xy(e.touches[0],c2.getBoundingClientRect()); td=true; tc.beginPath(); tc.moveTo(p.x,p.y); }, {passive:false});
-      c2.addEventListener('touchmove',   function(e){ e.preventDefault(); if(!td)return; var p=xy(e.touches[0],c2.getBoundingClientRect()); tc.lineTo(p.x,p.y); tc.stroke(); tc.beginPath(); tc.moveTo(p.x,p.y); }, {passive:false});
-      c2.addEventListener('touchend',    function(e){ e.preventDefault(); td=false; tc.beginPath(); }, {passive:false});
-      c2.addEventListener('mousedown',   function(e){ var p=xy(e,c2.getBoundingClientRect()); td=true; tc.beginPath(); tc.moveTo(p.x,p.y); });
-      c2.addEventListener('mousemove',   function(e){ if(!td)return; var p=xy(e,c2.getBoundingClientRect()); tc.lineTo(p.x,p.y); tc.stroke(); tc.beginPath(); tc.moveTo(p.x,p.y); });
-      c2.addEventListener('mouseup',     function(){ td=false; tc.beginPath(); });
-      c2.addEventListener('mouseleave',  function(){ td=false; tc.beginPath(); });
+      drawLines();
+      c2._drawLines = drawLines;
+
+      var drawing = false;
+      function xy(e,r){ return {x:(e.clientX-r.left)*(c2.width/r.width),y:(e.clientY-r.top)*(c2.height/r.height)}; }
+      c2.addEventListener('touchstart',  function(e){e.preventDefault();var p=xy(e.touches[0],c2.getBoundingClientRect());drawing=true;ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
+      c2.addEventListener('touchmove',   function(e){e.preventDefault();if(!drawing)return;var p=xy(e.touches[0],c2.getBoundingClientRect());ctx.lineTo(p.x,p.y);ctx.stroke();ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
+      c2.addEventListener('touchend',    function(e){e.preventDefault();drawing=false;ctx.beginPath();},{passive:false});
+      c2.addEventListener('mousedown',   function(e){var p=xy(e,c2.getBoundingClientRect());drawing=true;ctx.beginPath();ctx.moveTo(p.x,p.y);});
+      c2.addEventListener('mousemove',   function(e){if(!drawing)return;var p=xy(e,c2.getBoundingClientRect());ctx.lineTo(p.x,p.y);ctx.stroke();ctx.beginPath();ctx.moveTo(p.x,p.y);});
+      c2.addEventListener('mouseup',     function(){drawing=false;ctx.beginPath();});
+      c2.addEventListener('mouseleave',  function(){drawing=false;ctx.beginPath();});
+
+      var clrBtn = document.getElementById(clearBtnId);
+      if(clrBtn) clrBtn.onclick = function(){
+        ctx.clearRect(0,0,sz,sz);
+        drawLines();
+      };
     }
 
-    function ltDraw(canvas, sz){
-      var ctx = canvas.getContext('2d');
-      ctx.save();
-      // Faint guide letter
-      ctx.globalAlpha = 0.10;
-      ctx.fillStyle = '#1D2B55';
-      ctx.font = 'bold '+Math.floor(sz*0.72)+'px Nunito,Arial,sans-serif';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      var ltr = (document.getElementById('tracer-letter-big')||{textContent:'A'}).textContent || 'A';
-      ctx.fillText(ltr, sz/2, sz*0.44);
-      ctx.globalAlpha = 1;
-      // Break lines
-      ctx.lineCap = 'butt'; ctx.lineWidth = 1.5;
-      // Top dashed
-      ctx.setLineDash([5,7]); ctx.strokeStyle = 'rgba(255,107,157,0.30)';
-      ctx.beginPath(); ctx.moveTo(sz*0.05,sz*0.18); ctx.lineTo(sz*0.95,sz*0.18); ctx.stroke();
-      // Mid dashed
-      ctx.strokeStyle = 'rgba(255,107,157,0.38)';
-      ctx.beginPath(); ctx.moveTo(sz*0.05,sz*0.50); ctx.lineTo(sz*0.95,sz*0.50); ctx.stroke();
-      // Baseline solid
-      ctx.setLineDash([]); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,107,157,0.58)';
-      ctx.beginPath(); ctx.moveTo(sz*0.05,sz*0.77); ctx.lineTo(sz*0.95,sz*0.77); ctx.stroke();
-      ctx.restore();
-      // Reset stroke style for drawing
-      if(tc){ tc.lineWidth=Math.max(10,sz*0.05); tc.lineCap='round'; tc.lineJoin='round'; tc.strokeStyle='#D4537E'; tc.setLineDash([]); }
+    function ltInit(){
+      var bigEl   = document.getElementById('tracer-letter-big');
+      var smallEl = document.getElementById('tracer-letter-small');
+      var bigLtr  = bigEl   ? bigEl.textContent.trim()   : 'A';
+      var smallLtr= smallEl ? smallEl.textContent.trim() : 'a';
+      setupCanvas('tracer-canvas',       'tracer-clear-btn',       function(){ return (document.getElementById('tracer-letter-big')||{textContent:'A'}).textContent.trim(); }, '#D4537E');
+      setupCanvas('tracer-canvas-lower', 'tracer-clear-lower-btn', function(){ return (document.getElementById('tracer-letter-small')||{textContent:'a'}).textContent.trim(); }, '#FF6B9D');
     }
 
-    function ltClear(canvas, sz){
-      var ctx = canvas.getContext('2d');
-      ctx.clearRect(0,0,sz,sz);
-      ltDraw(canvas, sz);
-    }
-
-    // Hook into showTracerLetter — reinit canvas on each letter change
     var origShow = window.showTracerLetter;
-    if(typeof origShow === 'function'){
-      window.showTracerLetter = function(idx){
+    if(typeof origShow==='function'){
+      window.showTracerLetter=function(idx){
         origShow(idx);
-        setTimeout(ltInit, 100);
+        setTimeout(ltInit,100);
       };
     }
 
-    // Init on page load
-    document.addEventListener('DOMContentLoaded', function(){
-      setTimeout(ltInit, 500);
-    });
+    document.addEventListener('DOMContentLoaded',function(){ setTimeout(ltInit,500); });
 
-    // Also init when letter tracer screen becomes active
     var origNavTo = window.navTo;
-    if(typeof origNavTo === 'function'){
-      window.navTo = function(s){
+    if(typeof origNavTo==='function'){
+      window.navTo=function(s){
         origNavTo(s);
-        if(s === 'letter-tracer') setTimeout(ltInit, 200);
+        if(s==='letter-tracer') setTimeout(ltInit,200);
       };
     }
 
-  } catch(e) {
-    // Silent fail — canvas error never affects other games
-    console.warn('Tracer canvas error:', e);
+  }catch(e){
+    console.warn('Tracer canvas error:',e);
   }
 })();
 </script>
