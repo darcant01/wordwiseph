@@ -935,7 +935,19 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
     </div>
     <div id="a-pay" style="display:none">
       <div class="sectitle">Payment Requests</div>
-      <div style="font-size:13px;color:#5F5E5A;font-weight:700;margin-bottom:12px">Approve or reject GCash payment submissions. Approved payments auto-activate the user's plan.</div>
+      <div style="font-size:13px;color:#5F5E5A;font-weight:700;margin-bottom:12px">Enter the GCash reference number you received — if it matches a pending payment, it auto-approves!</div>
+
+      <!-- Admin reference matcher -->
+      <div style="background:linear-gradient(135deg,#E8F4FF,#EEF2FF);border-radius:16px;border:2px solid #B5D4F4;padding:16px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:10px">🔍 Match & Auto-Approve by Reference Number</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="admin-ref-input" type="text" maxlength="20" placeholder="Enter GCash ref number you received..."
+            style="flex:1;font-family:Nunito,sans-serif;font-size:15px;font-weight:800;padding:10px 14px;border-radius:12px;border:2px solid #B5D4F4;background:#fff;color:var(--navy);outline:none"/>
+          <button onclick="adminMatchRef()" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:10px 16px;border-radius:12px;background:var(--navy);border:none;color:#FAC775;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;white-space:nowrap">✅ Match</button>
+        </div>
+        <div id="admin-ref-result" style="margin-top:8px;font-size:13px;font-weight:800;min-height:20px"></div>
+      </div>
+
       <div style="overflow-x:auto"><table class="atable"><thead><tr><th>#</th><th>Name</th><th>Username</th><th>Plan</th><th>Amount</th><th>GCash Ref</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody id="pay-tbody"></tbody></table></div>
     </div>
   </div>
@@ -1936,7 +1948,26 @@ async function addChild(){
   setTimeout(()=>loadParent(),1000);
 }
 
-// ── ADMIN ──────────────────────────────────────────────────────
+// ── ADMIN ──
+async function adminMatchRef(){
+  const ref = document.getElementById('admin-ref-input').value.trim();
+  const res = document.getElementById('admin-ref-result');
+  if(!ref){ res.style.color='#E24B4A'; res.textContent='⚠️ Please enter a reference number!'; return; }
+  res.style.color='#888780'; res.textContent='🔍 Searching...';
+  const r = await api({action:'matchRef', reference:ref});
+  if(!r.success){
+    res.style.color='#E24B4A';
+    res.textContent='❌ ' + (r.error||'No matching pending payment found for this reference number.');
+    return;
+  }
+  res.style.color='#1D9E75';
+  res.textContent='✅ Matched! Auto-approved ' + r.plan + ' for @' + r.username + ' (' + r.name + ')';
+  document.getElementById('admin-ref-input').value='';
+  // Reload payments list
+  setTimeout(()=>loadAdminSection('pay'), 1000);
+}
+
+────────────────────────────────────────────────────
 function adminTab(sec,el){
   document.querySelectorAll('.atab').forEach(t=>t.classList.remove('on'));
   if(el)el.classList.add('on');
