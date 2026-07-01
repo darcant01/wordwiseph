@@ -1584,7 +1584,7 @@ async function showResult(){
   setTimeout(()=>document.getElementById('result')?.scrollIntoView({behavior:'smooth'}),100);
 }
 function retryQuiz(){
-  round++;
+  if(diff!=='infinite') round++;
   if(!CU&&round>5){showGuestModal();return;}
   buildQuiz();window.scrollTo({top:0,behavior:'smooth'});
 }
