@@ -788,6 +788,25 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         </div>
         <button class="btn btn-block" onclick="choosePlan('trial',10)" style="background:#F59E0B;border:2px solid #F59E0B;color:#fff;font-family:Nunito,sans-serif;font-weight:900">Try for ₱10 — 1 Day</button>
       </div>
+      <!-- 📅 WEEKLY PLAN -->
+      <div class="plan-card" style="border-color:#10B981;background:linear-gradient(135deg,#ECFDF5,#D1FAE5)">
+        <div class="plan-badge" style="background:#10B981;color:#fff">📅 WEEKLY</div>
+        <div class="plan-icon">🗓️</div>
+        <div class="plan-name" style="color:#065F46">Weekly</div>
+        <div class="plan-price" style="color:#10B981">₱35 <span>/week</span></div>
+        <div class="plan-period">7-day full access</div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="plan-feat"><span class="pi">✅</span>All 7 Brainy Games</div>
+          <div class="plan-feat"><span class="pi">✅</span>All difficulty levels</div>
+          <div class="plan-feat"><span class="pi">✅</span>🌟 Kids Corner all games</div>
+          <div class="plan-feat"><span class="pi">✅</span>🔠 Letter Tracer (all modes)</div>
+          <div class="plan-feat"><span class="pi">✅</span>Score history</div>
+          <div class="plan-feat no"><span class="pi">❌</span>Parent dashboard</div>
+          <div class="plan-feat no"><span class="pi">❌</span>Multiple children</div>
+        </div>
+        <button class="btn btn-block" onclick="choosePlan('weekly',35)" style="background:#10B981;border:2px solid #10B981;color:#fff;font-family:Nunito,sans-serif;font-weight:900">Get Weekly — ₱35/week</button>
+      </div>
       <div class="plan-card">
         <div class="plan-icon">🌱</div>
         <div class="plan-name">Free</div>
@@ -796,7 +815,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <div class="plan-divider"></div>
         <div class="plan-features">
           <div class="plan-feat"><span class="pi">✅</span>Grammar Quiz (Easy only)</div>
-          <div class="plan-feat"><span class="pi">✅</span>Kids Corner (basic games)</div>
+          <div class="plan-feat no"><span class="pi">❌</span>Kids Corner (subscription only)</div>
           <div class="plan-feat"><span class="pi">✅</span>🔠 Uppercase Letter Tracer</div>
           <div class="plan-feat"><span class="pi">✅</span>Public leaderboard</div>
           <div class="plan-feat no"><span class="pi">❌</span>Medium &amp; Hard levels</div>
@@ -966,7 +985,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
     <div style="font-size:56px;margin-bottom:10px">🔒</div>
     <div style="font-size:22px;font-weight:900;color:#1D2B55;margin-bottom:10px">5 Free Rounds Used!</div>
     <div style="font-size:14px;color:#5F5E5A;font-weight:700;line-height:1.7;margin-bottom:20px">
-      Guest players get <strong>5 free rounds</strong>.<br>
+      Guest players get <strong>4 free rounds</strong>.<br>
       Subscribe for <strong>unlimited rounds</strong> + all features!
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
@@ -983,7 +1002,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
     <div style="font-size:56px;margin-bottom:10px">🔒</div>
     <div style="font-size:22px;font-weight:900;color:#1D2B55;margin-bottom:10px">5 Free Rounds Used!</div>
     <div style="font-size:14px;color:#5F5E5A;font-weight:700;line-height:1.7;margin-bottom:20px">
-      Guest players get <strong>5 free rounds</strong>.<br>
+      Guest players get <strong>4 free rounds</strong>.<br>
       Subscribe for <strong>unlimited rounds</strong> + all features!
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
@@ -1006,7 +1025,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
     <div style="font-size:56px;margin-bottom:10px">🔒</div>
     <div style="font-size:22px;font-weight:900;color:#1D2B55;margin-bottom:10px">5 Free Rounds Used!</div>
     <div style="font-size:14px;color:#5F5E5A;font-weight:700;line-height:1.7;margin-bottom:20px">
-      Guest players get <strong>5 free rounds</strong>.<br>
+      Guest players get <strong>4 free rounds</strong>.<br>
       Subscribe for <strong>unlimited rounds</strong> + all features!
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
@@ -1427,7 +1446,7 @@ function checkAccess(d){
 }
 
 function startQuiz(d){
-  if(!CU&&round>5){showGuestModal();return;}
+  if(!CU&&round>4){showGuestModal();return;}
   diff=d;
   if(d==='infinite'){window._infScore=0;window._infPool=null;}
   navTo('quiz'); buildQuiz();
@@ -1435,7 +1454,7 @@ function startQuiz(d){
 
 function updateDiffCards(){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial'); // expired counts as free
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly'); // expired counts as free
   ['medium','hard','infinite'].forEach(d=>{
     const card=document.getElementById('dc-'+d);
     const lock=document.getElementById('lock-'+d);
@@ -1611,7 +1630,7 @@ async function showResult(){
 function retryQuiz(){
   if(diff==='infinite'){window._infScore=0;window._infPool=null;buildQuiz();window.scrollTo({top:0,behavior:'smooth'});return;}
   round++;
-  if(!CU&&round>5){showGuestModal();return;}
+  if(!CU&&round>4){showGuestModal();return;}
   buildQuiz();window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -2431,7 +2450,7 @@ function startSpell(){
 
 function updateSpellLocks(){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('spell-lock-'+d);
     const card=document.querySelector('#sc-spell-pick .dc.'+d);
@@ -2442,7 +2461,7 @@ function updateSpellLocks(){
 
 function checkSpellAccess(d){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   if(!hasAccess){
     if(!CU){
       if(confirm('Medium and Hard levels require a subscription.\nLogin or create an account to subscribe!\n\nGo to Login?')) navTo('login');
@@ -2798,7 +2817,7 @@ function startShark(){
 
 function updateSharkLocks(){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('shark-lock-'+d);
     const card=document.querySelector('#sc-shark .dc.'+d);
@@ -2809,7 +2828,7 @@ function updateSharkLocks(){
 
 function checkSharkAccess(d){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   if(!hasAccess){
     if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
     else{if(confirm('Upgrade to Basic or Premium to unlock!\nView plans?'))navTo('pricing');}
@@ -3122,7 +3141,7 @@ function startOdd(){
 
 function updateOddLocks(){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('odd-lock-'+d);
     const card=document.querySelector('#sc-odd-pick .dc.'+d);
@@ -3133,7 +3152,7 @@ function updateOddLocks(){
 
 function checkOddAccess(d){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   if(!hasAccess){
     if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
     else{if(confirm('Upgrade to Basic or Premium to unlock!\nView plans?'))navTo('pricing');}
@@ -3454,7 +3473,7 @@ function startScramble(){
 
 function updateScrambleLocks(){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('scramble-lock-'+d);
     const card=document.querySelector('#sc-scramble-pick .dc.'+d);
@@ -3465,7 +3484,7 @@ function updateScrambleLocks(){
 
 function checkScrambleAccess(d){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   if(!hasAccess){
     if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
     else{if(confirm('Upgrade to Basic or Premium to unlock!\nView plans?'))navTo('pricing');}
@@ -3999,7 +4018,7 @@ function startChain(){
 
 function updateChainLocks(){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('chain-lock-'+d);
     const card=document.querySelector('#sc-chain .dc.'+d);
@@ -4010,7 +4029,7 @@ function updateChainLocks(){
 
 function checkChainAccess(d){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   if(!hasAccess){
     if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
     else{if(confirm('Upgrade to unlock!\nView plans?'))navTo('pricing');}
@@ -4293,7 +4312,7 @@ function startSprint(){
 
 function updateSprintLocks(){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('sprint-lock-'+d);
     const card=document.querySelector('#sc-sprint .dc.'+d);
@@ -4304,7 +4323,7 @@ function updateSprintLocks(){
 
 function checkSprintAccess(d){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   if(!hasAccess){
     if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
     else{if(confirm('Upgrade to unlock!\nView plans?'))navTo('pricing');}
@@ -4534,7 +4553,22 @@ const LETTERS_DATA = [
 
 let tracerIdx = 0;
 
+function checkKidsAccess(){
+  var sub = CU ? (CU.subscription||'free') : 'free';
+  var hasAccess = CU && (sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly'||sub==='weekly');
+  if(!hasAccess){
+    if(!CU){
+      if(confirm('🌟 Kids Corner requires a subscription.\n\nCreate a free account and subscribe to unlock!\n\nGo to Login?')) navTo('login');
+    } else {
+      if(confirm('🌟 Kids Corner games require a Basic, Weekly, or Premium subscription.\n\nView plans now?')) navTo('pricing');
+    }
+    return false;
+  }
+  return true;
+}
+
 function startLetterTracer(){
+  if(!checkKidsAccess()) return;
   tracerIdx = 0;
   navTo('letter-tracer');
   buildTracerDots();
@@ -4743,6 +4777,7 @@ function tracerPrev(){
 let abcScore=0, abcTarget=0, abcTLeft=60, abcTInt=null, abcRunning=false;
 
 function startABCOrder(){
+  if(!checkKidsAccess()) return;
   navTo('abc-order');
   launchABCOrder();
 }
@@ -4845,6 +4880,7 @@ let mlQs=[], mlAns=[], mlAnswered=0, mlCQ=0;
 let mlTInt=null, mlTLeft=15, mlTTotal=15;
 
 function startMissingLetter(){
+  if(!checkKidsAccess()) return;
   navTo('missing-letter');
   launchMissingLetter();
 }
@@ -4981,6 +5017,7 @@ let rhQs=[], rhAns=[], rhAnswered=0, rhCQ=0;
 let rhTInt=null, rhTLeft=20, rhTTotal=20;
 
 function startRhymeTime(){
+  if(!checkKidsAccess()) return;
   navTo('rhyme');
   launchRhymeTime();
 }
@@ -6713,7 +6750,7 @@ function shufA(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor
 // ── 1. ANIMAL SOUND ────────────────────────────────────────────
 var asScore=0,asTotal=10,asAnswered=0,asCQ=0,asQs=[],asTInt=null,asTLeft=12;
 
-function startAnimalSound(){navTo('animal-sound');launchAnimalSound();}
+function startAnimalSound(){if(!checkKidsAccess()) return;navTo('animal-sound');launchAnimalSound();}
 function launchAnimalSound(){
   asScore=0;asAnswered=0;asCQ=0;asQs=shufA(ANIMALS.filter(function(a){return a.sound!=='...';}).slice(0,asTotal));
   document.getElementById('as-score').textContent='0';
@@ -6836,7 +6873,7 @@ function showASResult(){
 // ── 2. ANIMAL MATCH (baby to parent) ───────────────────────────
 var amScore=0,amTotal=8,amAnswered=0,amCQ=0,amQs=[];
 
-function startAnimalMatch(){navTo('animal-match');launchAnimalMatch();}
+function startAnimalMatch(){if(!checkKidsAccess()) return;navTo('animal-match');launchAnimalMatch();}
 function launchAnimalMatch(){
   amScore=0;amAnswered=0;amCQ=0;
   amQs=shufA(ANIMALS.filter(function(a){return a.baby&&a.baby!=='Calf'&&a.baby!=='Chick'&&a.baby!=='Larva';}).slice(0,amTotal));
@@ -6888,7 +6925,7 @@ function showAMResult(){
 // ── 3. WHERE DO I LIVE? ────────────────────────────────────────
 var whScore=0,whTotal=10,whAnswered=0,whCQ=0,whQs=[];
 
-function startWhereDoILive(){navTo('where-live');launchWhereDoILive();}
+function startWhereDoILive(){if(!checkKidsAccess()) return;navTo('where-live');launchWhereDoILive();}
 function launchWhereDoILive(){
   whScore=0;whAnswered=0;whCQ=0;whQs=shufA(ANIMALS).slice(0,whTotal);
   document.getElementById('wh-score').textContent='0';
@@ -6937,7 +6974,7 @@ function showWHResult(){
 // ── 4. ANIMAL ALPHABET ─────────────────────────────────────────
 var aaScore=0,aaTotal=10,aaAnswered=0,aaCQ=0,aaQs=[];
 
-function startAnimalAlphabet(){navTo('animal-alphabet');launchAnimalAlphabet();}
+function startAnimalAlphabet(){if(!checkKidsAccess()) return;navTo('animal-alphabet');launchAnimalAlphabet();}
 function launchAnimalAlphabet(){
   aaScore=0;aaAnswered=0;aaCQ=0;aaQs=shufA(ANIMALS).slice(0,aaTotal);
   document.getElementById('aa-score').textContent='0';
@@ -6985,7 +7022,7 @@ function showAAResult(){
 // ── 5. HOW MANY LEGS? ──────────────────────────────────────────
 var hlScore=0,hlTotal=10,hlAnswered=0,hlCQ=0,hlQs=[];
 
-function startHowManyLegs(){navTo('how-many-legs');launchHowManyLegs();}
+function startHowManyLegs(){if(!checkKidsAccess()) return;navTo('how-many-legs');launchHowManyLegs();}
 function launchHowManyLegs(){
   hlScore=0;hlAnswered=0;hlCQ=0;hlQs=shufA(ANIMALS).slice(0,hlTotal);
   document.getElementById('hl-score').textContent='0';
@@ -7036,7 +7073,7 @@ function showHLResult(){
 // ── 6. BIG OR SMALL? ───────────────────────────────────────────
 var bsScore=0,bsTotal=10,bsAnswered=0,bsCQ=0,bsQs=[];
 
-function startBigOrSmall(){navTo('big-or-small');launchBigOrSmall();}
+function startBigOrSmall(){if(!checkKidsAccess()) return;navTo('big-or-small');launchBigOrSmall();}
 function launchBigOrSmall(){
   bsScore=0;bsAnswered=0;bsCQ=0;
   var pairs=[];
@@ -7095,7 +7132,7 @@ function showBSResult(){
 // ── 7. ANIMAL GROUP ────────────────────────────────────────────
 var agScore=0,agTotal=10,agAnswered=0,agCQ=0,agQs=[];
 
-function startAnimalGroup(){navTo('animal-group');launchAnimalGroup();}
+function startAnimalGroup(){if(!checkKidsAccess()) return;navTo('animal-group');launchAnimalGroup();}
 function launchAnimalGroup(){
   agScore=0;agAnswered=0;agCQ=0;agQs=shufA(ANIMALS).slice(0,agTotal);
   document.getElementById('ag-score').textContent='0';
