@@ -1429,8 +1429,10 @@ function updateDiffCards(){
 
 function buildQuiz(){
   if(!BANK){showErr('dlbl','Questions loading... please tap Play again!');return;}
-  cQs=shuf(BANK[diff]).slice(0,QL[diff]||5);
-  ans=new Array(5).fill(null);
+  if(diff==='infinite'){
+    let all=[]; ['easy','medium','hard'].forEach(function(d){ if(BANK[d]) all=all.concat(BANK[d]); }); cQs=shuf(all);
+  } else { cQs=shuf(BANK[diff]).slice(0,QL[diff]||5); }
+  ans=new Array(diff==='infinite'?9999:(QL[diff]||5)).fill(null);
   answered=0;cQ=0;tTotal=TL[diff];tLeft=tTotal;
   document.getElementById('dlbl').textContent={easy:'Easy — 5 questions · 30 sec each',medium:'Medium — 15 questions · 20 sec each',hard:'Hard — 30 questions · 10 sec each'}[diff];
   document.getElementById('rpill').textContent=diff==='infinite'?'♾️ Infinite Mode':'Round '+round;
