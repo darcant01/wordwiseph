@@ -6159,7 +6159,7 @@ function shufArr(a){ var b=a.slice(); for(var i=b.length-1;i>0;i--){var j=Math.f
 // ── 1. COLOR MATCH ─────────────────────────────────────────────
 var cmScore=0, cmTotal=10, cmAnswered=0, cmCQ=0, cmQs=[], cmTInt=null, cmTLeft=12;
 
-function startColorMatch(){ navTo('color-match'); launchColorMatch(); }
+function startColorMatch(){if(!checkKidsAccess())return; navTo('color-match'); launchColorMatch(); }
 function launchColorMatch(){
   cmScore=0; cmAnswered=0; cmCQ=0; cmTLeft=12;
   cmQs = shufArr(COLORS).slice(0,cmTotal);
@@ -6232,7 +6232,7 @@ function showCMResult(){
 // ── 2. COLOR THE WORD ──────────────────────────────────────────
 var cwScore=0, cwTotal=12, cwAnswered=0, cwCQ=0, cwQs=[], cwTInt=null, cwTLeft=5;
 
-function startColorWord(){ navTo('color-word'); launchColorWord(); }
+function startColorWord(){if(!checkKidsAccess())return; navTo('color-word'); launchColorWord(); }
 function launchColorWord(){
   cwScore=0; cwAnswered=0; cwCQ=0;
   var pairs=[];
@@ -6302,7 +6302,7 @@ function showCWResult(){
 // ── 3. RAINBOW ORDER ───────────────────────────────────────────
 var roScore=0, roTapped=[], roTInt=null, roTLeft=30;
 
-function startRainbowOrder(){ navTo('rainbow-order'); launchRainbowOrder(); }
+function startRainbowOrder(){if(!checkKidsAccess())return; navTo('rainbow-order'); launchRainbowOrder(); }
 function launchRainbowOrder(){
   roScore=0; roTapped=[];
   document.getElementById('ro-score').textContent='0';
@@ -6372,7 +6372,7 @@ function showROResult(){
 // ── 4. COLOR MIXER ─────────────────────────────────────────────
 var mxScore=0, mxTotal=8, mxAnswered=0, mxCQ=0, mxQs=[];
 
-function startColorMixer(){ navTo('color-mixer'); launchColorMixer(); }
+function startColorMixer(){if(!checkKidsAccess())return; navTo('color-mixer'); launchColorMixer(); }
 function launchColorMixer(){
   mxScore=0; mxAnswered=0; mxCQ=0;
   mxQs=shufArr(MIX_QUESTIONS).slice(0,mxTotal);
@@ -6440,7 +6440,7 @@ function showMXResult(){
 // ── 5. FIND THE COLOR ──────────────────────────────────────────
 var fcScore=0, fcTotal=8, fcAnswered=0, fcCQ=0, fcQs=[], fcTInt=null, fcTLeft=15;
 
-function startFindColor(){ navTo('find-color'); launchFindColor(); }
+function startFindColor(){if(!checkKidsAccess())return; navTo('find-color'); launchFindColor(); }
 function launchFindColor(){
   fcScore=0; fcAnswered=0; fcCQ=0;
   fcQs=shufArr(Object.keys(COLOR_EMOJIS)).slice(0,fcTotal).map(function(name){
