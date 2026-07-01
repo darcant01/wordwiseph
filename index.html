@@ -1416,7 +1416,7 @@ function startQuiz(d){
 
 function updateDiffCards(){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium'); // expired counts as free
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial'); // expired counts as free
   ['medium','hard','infinite'].forEach(d=>{
     const card=document.getElementById('dc-'+d);
     const lock=document.getElementById('lock-'+d);
@@ -1812,7 +1812,8 @@ function choosePlan(plan,price){
   if(CU.role==='admin'){alert('Admin accounts do not need a subscription.');return;}
   selPlan=plan;selPrice=price;
   const h=document.getElementById('pay-hero-sub');
-  if(h)h.textContent=(plan==='basic'?'Basic Plan — ₱99':'Premium Plan — ₱199')+'/month';
+  const labels={trial:'Trial — ₱10/day (1 Day Access)',basic:'Basic Plan — ₱99/month',premium:'Premium Plan — ₱199/month'};
+  if(h)h.textContent=labels[plan]||plan;
   const ref=document.getElementById('gcash-ref');if(ref)ref.value='';
   hideErr('pay-err');
   navTo('payment');
@@ -2411,7 +2412,7 @@ function startSpell(){
 
 function updateSpellLocks(){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('spell-lock-'+d);
     const card=document.querySelector('#sc-spell-pick .dc.'+d);
@@ -2422,7 +2423,7 @@ function updateSpellLocks(){
 
 function checkSpellAccess(d){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
   if(!hasAccess){
     if(!CU){
       if(confirm('Medium and Hard levels require a subscription.\nLogin or create an account to subscribe!\n\nGo to Login?')) navTo('login');
@@ -2778,7 +2779,7 @@ function startShark(){
 
 function updateSharkLocks(){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('shark-lock-'+d);
     const card=document.querySelector('#sc-shark .dc.'+d);
@@ -2789,7 +2790,7 @@ function updateSharkLocks(){
 
 function checkSharkAccess(d){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
   if(!hasAccess){
     if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
     else{if(confirm('Upgrade to Basic or Premium to unlock!\nView plans?'))navTo('pricing');}
@@ -3102,7 +3103,7 @@ function startOdd(){
 
 function updateOddLocks(){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('odd-lock-'+d);
     const card=document.querySelector('#sc-odd-pick .dc.'+d);
@@ -3113,7 +3114,7 @@ function updateOddLocks(){
 
 function checkOddAccess(d){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
   if(!hasAccess){
     if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
     else{if(confirm('Upgrade to Basic or Premium to unlock!\nView plans?'))navTo('pricing');}
@@ -3434,7 +3435,7 @@ function startScramble(){
 
 function updateScrambleLocks(){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('scramble-lock-'+d);
     const card=document.querySelector('#sc-scramble-pick .dc.'+d);
@@ -3445,7 +3446,7 @@ function updateScrambleLocks(){
 
 function checkScrambleAccess(d){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
   if(!hasAccess){
     if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
     else{if(confirm('Upgrade to Basic or Premium to unlock!\nView plans?'))navTo('pricing');}
@@ -3979,7 +3980,7 @@ function startChain(){
 
 function updateChainLocks(){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('chain-lock-'+d);
     const card=document.querySelector('#sc-chain .dc.'+d);
@@ -3990,7 +3991,7 @@ function updateChainLocks(){
 
 function checkChainAccess(d){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
   if(!hasAccess){
     if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
     else{if(confirm('Upgrade to unlock!\nView plans?'))navTo('pricing');}
@@ -4273,7 +4274,7 @@ function startSprint(){
 
 function updateSprintLocks(){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('sprint-lock-'+d);
     const card=document.querySelector('#sc-sprint .dc.'+d);
@@ -4284,7 +4285,7 @@ function updateSprintLocks(){
 
 function checkSprintAccess(d){
   const sub=CU?.subscription||'free';
-  const hasAccess=CU&&(sub==='basic'||sub==='premium');
+  const hasAccess=CU&&(sub==='basic'||sub==='premium'||sub==='trial');
   if(!hasAccess){
     if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
     else{if(confirm('Upgrade to unlock!\nView plans?'))navTo('pricing');}
