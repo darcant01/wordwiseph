@@ -1520,9 +1520,19 @@ function ansQ(q,btn,chosen,correct){
   if(ok){card?.classList.add('correct');if(fb){fb.textContent='✓ Correct! Great job!';fb.className='fb show correct';}sOk();sCr();}
   else{card?.classList.add('wrong');if(fb){fb.textContent='✗ Not quite! Correct: '+correct;fb.className='fb show wrong';}sBad();btn.classList.add('no');}
   answered++;updP();
-  const st=document.getElementById('st'+(answered-1));if(st)st.textContent=ok?'⭐':'💫';
-  if(answered<(QL[diff]||5)){cQ++;unlockN();startTimer();}
-  else document.getElementById('sbtn').disabled=false;
+  if(diff==='infinite'){
+    const sc=ans.filter(a=>a===true).length;
+    const strk=document.getElementById('st0');if(strk)strk.textContent='🔥 Streak: '+sc;
+  } else {
+    const st=document.getElementById('st'+(answered-1));if(st)st.textContent=ok?'⭐':'💫';
+  }
+  if(diff==='infinite'){
+    if(!ok){document.getElementById('sbtn').disabled=false;return;}
+    cQ++;unlockN();startTimer();
+  } else {
+    if(answered<(QL[diff]||5)){cQ++;unlockN();startTimer();}
+    else document.getElementById('sbtn').disabled=false;
+  }
 }
 function unlockN(){
   const c=document.getElementById('qc'+cQ);
