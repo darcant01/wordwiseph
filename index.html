@@ -1387,19 +1387,14 @@ function guestModalGo(dest){
 function shuf(a){return[...a].sort(()=>Math.random()-0.5);}
 
 function checkAccess(d){
-  // Medium and Hard require active subscription
-  if(d==='medium'||d==='hard'){
+  if(d==='medium'||d==='hard'||d==='infinite'){
     const sub=CU?.subscription||'free';
-    const hasAccess=sub==='basic'||sub==='premium'; // expired = no access
+    const hasAccess=sub==='basic'||sub==='premium';
     if(!hasAccess){
       if(!CU){
-        if(confirm('Medium and Hard levels require a subscription.\n\nCreate a free account and subscribe to unlock all levels!\n\nGo to Login now?')){
-          navTo('login');
-        }
+        if(confirm('This level requires a subscription.\n\nGo to Login now?')) navTo('login');
       } else {
-        if(confirm('Medium and Hard levels require a Basic or Premium subscription.\n\nUpgrade your plan to unlock all levels!\n\nView plans now?')){
-          navTo('pricing');
-        }
+        if(confirm((d==='infinite'?'♾️ Infinite mode':'Medium and Hard levels')+' require a Basic or Premium subscription.\n\nView plans now?')) navTo('pricing');
       }
       return;
     }
