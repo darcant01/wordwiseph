@@ -1432,7 +1432,7 @@ function buildQuiz(){
   ans=new Array(5).fill(null);
   answered=0;cQ=0;tTotal=TL[diff];tLeft=tTotal;
   document.getElementById('dlbl').textContent={easy:'Easy — 5 questions · 30 sec each',medium:'Medium — 15 questions · 20 sec each',hard:'Hard — 30 questions · 10 sec each'}[diff];
-  document.getElementById('rpill').textContent='Round '+round;
+  document.getElementById('rpill').textContent=diff==='infinite'?'♾️ Infinite Mode':'Round '+round;
   document.getElementById('pbar').style.width='0%';
   document.getElementById('plbl').textContent='0 of 5 answered';
   document.getElementById('sbtn').disabled=true;
@@ -1494,6 +1494,7 @@ function autoAns(){
   if(fb){fb.textContent="⏰ Time's up! Correct: "+cQs[cQ].correct;fb.className='fb show wrong';}
   ans[cQ]=false;answered++;updP();
   const st=document.getElementById('st'+(answered-1));if(st)st.textContent='💫';
+  if(diff==='infinite'){ document.getElementById('sbtn').disabled=false; return; }
   if(answered<(QL[diff]||5)){cQ++;unlockN();startTimer();}
   else document.getElementById('sbtn').disabled=false;
 }
@@ -1516,15 +1517,30 @@ function unlockN(){
   if(c){c.style.opacity='1';c.style.pointerEvents='auto';setTimeout(()=>c.scrollIntoView({behavior:'smooth',block:'center'}),100);}
 }
 function updP(){
-  const pb=document.getElementById('pbar');if(pb)pb.style.width=Math.round(answered/(QL[diff]||5)*100)+'%';
-  const pl=document.getElementById('plbl');if(pl)pl.textContent=answered+' of '+(QL[diff]||5)+' answered';
+  const pb=document.getElementById('pbar');
+  const pl=document.getElementById('plbl');
+  if(diff==='infinite'){
+    if(pb)pb.style.width='100%';
+    const correct=ans.filter(a=>a===true).length;
+    if(pl)pl.textContent='♾️ '+answered+' answered · '+correct+' correct';
+  } else {
+    if(pb)pb.style.width=Math.round(answered/(QL[diff]||5)*100)+'%';
+    if(pl)pl.textContent=answered+' of '+(QL[diff]||5)+' answered';
+  }
 }
 async function showResult(){
   clearInterval(tInt);
   lastSco=ans.filter(a=>a).length;
-  const qTotal=QL[diff]||5;document.getElementById('rsco').textContent=lastSco+'/'+qTotal;
+  const qTotal=QL[diff]||5;
+  document.getElementById('rsco').textContent=diff==='infinite'?(lastSco+' correct'):(lastSco+'/'+qTotal);
   let stars='',msg='';
-  if(lastSco===qTotal){stars='⭐⭐⭐⭐⭐';msg='Perfect! Grammar Superstar! 🏆';sWin();setTimeout(sLevelUp,900);}
+  if(diff==='infinite'){
+    if(lastSco>=30){stars='⭐⭐⭐⭐⭐';msg='Incredible! '+lastSco+' correct in a row! 🏆';sWin();setTimeout(sLevelUp,900);}
+    else if(lastSco>=20){stars='⭐⭐⭐⭐💫';msg='Amazing! '+lastSco+' in a row!';sWin();}
+    else if(lastSco>=10){stars='⭐⭐⭐💫💫';msg='Great! '+lastSco+' correct! Keep going!';sLevelUp();}
+    else if(lastSco>=5){stars='⭐⭐💫💫💫';msg=lastSco+' correct. Can you beat it?';}
+    else{stars='⭐💫💫💫💫';msg='Keep practicing! You got '+lastSco+' correct!';}
+  } else if(lastSco===qTotal){stars='⭐⭐⭐⭐⭐';msg='Perfect! Grammar Superstar! 🏆';sWin();setTimeout(sLevelUp,900);}
   else if(lastSco>=Math.ceil(qTotal*0.8)){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost perfect!';sWin();}
   else if(lastSco>=Math.ceil(qTotal*0.6)){stars='⭐⭐⭐💫💫';msg='Good job! Keep practicing!';sLevelUp();}
   else if(lastSco>=Math.ceil(qTotal*0.4)){stars='⭐⭐💫💫💫';msg='Nice try! Review and try again!';sTU();}
