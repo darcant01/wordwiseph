@@ -614,25 +614,64 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
   <div class="hero"><div class="htitle">Join <span>WordWise!</span></div><div class="hsub">Create your free account</div></div>
   <div class="wrap" style="max-width:460px">
     <div class="card">
-      <div class="ctitle">Create Account</div>
-      <div class="err" id="rerr"></div>
-      <div class="okmsg" id="rok"></div>
-      <div class="field"><label>Full Name</label><input type="text" id="rname" placeholder="Your full name"/></div>
-      <div class="field"><label>Username</label><input type="text" id="ruser" placeholder="Choose a username"/></div>
-      <div class="field"><label>Password</label>
-        <div class="pw-wrap">
-          <input type="password" id="rpass" placeholder="Min. 4 characters"/>
-          <button class="pw-eye" onclick="togglePw('rpass',this)" type="button" tabindex="-1" aria-label="Show password">👁️</button>
+
+      <!-- Step 1: Fill in details -->
+      <div id="reg-step1">
+        <div class="ctitle">Create Account</div>
+        <div class="err" id="rerr"></div>
+        <div class="okmsg" id="rok"></div>
+        <div class="field"><label>Full Name</label><input type="text" id="rname" placeholder="Your full name"/></div>
+        <div class="field"><label>Username</label><input type="text" id="ruser" placeholder="Choose a username"/></div>
+        <div class="field"><label>Email Address</label><input type="email" id="remail" placeholder="your@email.com" style="text-transform:lowercase"/></div>
+        <div class="field"><label>Phone Number</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div style="background:var(--lp);border-radius:12px;padding:clamp(11px,2.5vw,14px) clamp(12px,3vw,14px);font-weight:800;color:var(--navy);font-size:clamp(14px,3.5vw,16px);white-space:nowrap;flex-shrink:0">🇵🇭 +63</div>
+            <input type="tel" id="rphone" placeholder="9XX XXX XXXX" maxlength="10" style="flex:1" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+          </div>
+        </div>
+        <div class="field"><label>Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="rpass" placeholder="Min. 4 characters"/>
+            <button class="pw-eye" onclick="togglePw('rpass',this)" type="button" tabindex="-1" aria-label="Show password">👁️</button>
+          </div>
+        </div>
+        <div class="field"><label>I am a...</label>
+          <select id="rtype" style="width:100%;font-family:'Nunito',sans-serif;font-size:clamp(14px,3.5vw,16px);font-weight:700;padding:clamp(11px,2.5vw,14px) clamp(12px,3vw,16px);border-radius:12px;border:2px solid var(--lp);background:#FFF8F0;color:var(--navy);outline:none;-webkit-appearance:auto">
+            <option value="kid">Kid / Student</option>
+            <option value="adult">Adult / Teacher / Parent</option>
+          </select>
+        </div>
+        <button class="btn btn-pink btn-block" onclick="doRegStep1()" style="margin-bottom:14px">Send OTP →</button>
+        <div style="text-align:center"><button class="lnk" onclick="navTo('login')">Already have an account? Login</button></div>
+      </div>
+
+      <!-- Step 2: OTP verification -->
+      <div id="reg-step2" style="display:none">
+        <div class="ctitle">Verify Your Email</div>
+        <div class="err" id="rerr2"></div>
+        <div class="okmsg" id="rok2"></div>
+        <div style="text-align:center;margin-bottom:16px">
+          <div style="font-size:40px;margin-bottom:8px">📧</div>
+          <div style="font-size:clamp(13px,3vw,15px);font-weight:700;color:#5F5E5A;line-height:1.6">
+            We sent a 6-digit OTP to<br>
+            <strong id="reg-email-display" style="color:var(--navy)"></strong>
+          </div>
+        </div>
+        <div class="field">
+          <label style="text-align:center;display:block">Enter OTP Code</label>
+          <input type="text" id="rotp" maxlength="6" placeholder="_ _ _ _ _ _"
+            style="text-align:center;font-size:clamp(24px,7vw,36px);font-weight:900;letter-spacing:8px;color:var(--navy)"
+            oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+        </div>
+        <button class="btn btn-pink btn-block" onclick="doRegVerify()" style="margin-bottom:10px">✅ Verify & Create Account</button>
+        <div style="text-align:center;margin-bottom:8px">
+          <button class="lnk" onclick="doRegResend()">Didn't receive it? Resend OTP</button>
+        </div>
+        <div style="text-align:center">
+          <button class="lnk" onclick="regBackToStep1()">← Back</button>
         </div>
       </div>
-      <div class="field"><label>I am a...</label>
-        <select id="rtype" style="width:100%;font-family:'Nunito',sans-serif;font-size:clamp(14px,3.5vw,16px);font-weight:700;padding:clamp(11px,2.5vw,14px) clamp(12px,3vw,16px);border-radius:12px;border:2px solid var(--lp);background:#FFF8F0;color:var(--navy);outline:none;-webkit-appearance:auto">
-          <option value="kid">Kid / Student</option>
-          <option value="adult">Adult / Teacher / Parent</option>
-        </select>
-      </div>
-      <button class="btn btn-pink btn-block" onclick="doReg()" style="margin-bottom:14px">Create Account</button>
-      <div style="text-align:center"><button class="lnk" onclick="navTo('login')">Already have an account? Login</button></div>
+
     </div>
   </div>
 </div>
@@ -1366,21 +1405,67 @@ function getExpiryInfo(){
   return {isActive:false, daysLeft:null, expiryStr:'', subStart};
 }
 
-async function doReg(){
+async // Registration state
+var regPending = {};
+
+async function doRegStep1(){
   hideErr('rerr'); hideOk('rok');
-  const name=document.getElementById('rname').value.trim();
-  const user=document.getElementById('ruser').value.trim();
-  const pass=document.getElementById('rpass').value.trim();
-  const type=document.getElementById('rtype').value;
-  if(!name||!user||!pass){showErr('rerr','Please fill in all fields!');return;}
-  if(pass.length<4){showErr('rerr','Password must be at least 4 characters!');return;}
-  showLoader('Creating account...');
-  const res=await api({action:'register',name,username:user,password:pass,type});
+  const name  = document.getElementById('rname').value.trim();
+  const user  = document.getElementById('ruser').value.trim();
+  const email = document.getElementById('remail').value.trim().toLowerCase();
+  const phone = document.getElementById('rphone').value.trim();
+  const pass  = document.getElementById('rpass').value.trim();
+  const type  = document.getElementById('rtype').value;
+  if(!name||!user||!email||!phone||!pass){ showErr('rerr','Please fill in all fields!'); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showErr('rerr','Please enter a valid email address!'); return; }
+  if(phone.length<10||phone[0]!=='9'){ showErr('rerr','Enter a valid PH number starting with 9 (e.g. 9171234567)'); return; }
+  if(pass.length<4){ showErr('rerr','Password must be at least 4 characters!'); return; }
+  // Store pending data
+  regPending = {name,username:user,email,phone:'+63'+phone,password:pass,type};
+  showLoader('Sending OTP to '+email+'...');
+  const res = await api({action:'sendOTP', email, name});
   hideLoader();
-  if(!res.success){showErr('rerr',res.error||'Registration failed!');return;}
-  showOk('rok','✅ Account created! You can now login.');
-  setTimeout(()=>navTo('login'),1400);
+  if(!res.success){ showErr('rerr', res.error||'Failed to send OTP. Try again!'); return; }
+  // Show step 2
+  document.getElementById('reg-step1').style.display='none';
+  document.getElementById('reg-step2').style.display='block';
+  document.getElementById('reg-email-display').textContent = email;
+  document.getElementById('rotp').value='';
+  document.getElementById('rotp').focus();
+  showOk('rok2','OTP sent! Check your email.');
 }
+
+async function doRegVerify(){
+  hideErr('rerr2'); hideOk('rok2');
+  const otp = document.getElementById('rotp').value.trim();
+  if(otp.length!==6){ showErr('rerr2','Please enter the 6-digit OTP!'); return; }
+  showLoader('Verifying OTP...');
+  const vRes = await api({action:'verifyOTP', email:regPending.email, otp});
+  if(!vRes.success){ hideLoader(); showErr('rerr2', vRes.error||'Invalid OTP! Try again.'); return; }
+  // OTP verified — create account
+  const res = await api({action:'register', ...regPending});
+  hideLoader();
+  if(!res.success){ showErr('rerr2', res.error||'Registration failed!'); return; }
+  showOk('rok2','✅ Account created! Logging you in...');
+  setTimeout(()=>{ CU=res.user; round=1; buildHdr(); updateDiffCards(); navTo('start'); }, 1400);
+}
+
+async function doRegResend(){
+  if(!regPending.email) return;
+  showLoader('Resending OTP...');
+  const res = await api({action:'sendOTP', email:regPending.email, name:regPending.name});
+  hideLoader();
+  if(res.success){ showOk('rok2','New OTP sent! Check your email.'); hideErr('rerr2'); }
+  else showErr('rerr2', res.error||'Failed to resend.');
+}
+
+function regBackToStep1(){
+  document.getElementById('reg-step1').style.display='block';
+  document.getElementById('reg-step2').style.display='none';
+  hideErr('rerr2'); hideOk('rok2');
+}
+
+function doReg(){ doRegStep1(); } // alias for any old calls
 
 async function doLogout(){
   if(CU)api({action:'logActivity',message:CU.name+' logged out'});
