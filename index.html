@@ -1449,23 +1449,28 @@ function buildQuiz(){
   }
   const con=document.getElementById('qz');
   con.innerHTML='';
-  cQs.forEach((q,i)=>{
-    const sh=shuf(q.choices);
-    const long=q.choices.some(c=>c.length>16);
-    const qt=q.blank?q.q.replace('___','<span class="qblnk">___</span>'):q.q;
-    const tag=`<span class="dtag ${diff}">${diff}</span>`;
-    const btns=sh.map(c=>{
-      const cs=c.replace(/'/g,"\'").replace(/"/g,'&quot;');
-      const cr=q.correct.replace(/'/g,"\'").replace(/"/g,'&quot;');
-      return `<button class="cbtn" onclick="ansQ(${i},this,'${cs}','${cr}')">${c}</button>`;
-    }).join('');
-    con.innerHTML+=`<div class="qcard" id="qc${i}" style="${i>0?'opacity:0.4;pointer-events:none':''}">
-      <div class="qhdr"><div class="qn">${i+1}</div><div class="qtxt">${qt}${tag}</div></div>
-      <div class="choices ${long?'c1':''}" id="ch${i}">${btns}</div>
-      <div class="fb" id="fb${i}"></div>
-      <div class="tip"><div class="tiplbl">Grammar Tip</div>${q.tip}</div>
-    </div>`;
-  });
+  if(diff==='infinite'){
+    // Infinite: render only current question, build next on demand
+    buildInfCard(0);
+  } else {
+    cQs.forEach((q,i)=>{
+      const sh=shuf(q.choices);
+      const long=q.choices.some(c=>c.length>16);
+      const qt=q.blank?q.q.replace('___','<span class="qblnk">___</span>'):q.q;
+      const tag=`<span class="dtag ${diff}">${diff}</span>`;
+      const btns=sh.map(c=>{
+        const cs=c.replace(/'/g,"\'").replace(/"/g,'&quot;');
+        const cr=q.correct.replace(/'/g,"\'").replace(/"/g,'&quot;');
+        return `<button class="cbtn" onclick="ansQ(${i},this,'${cs}','${cr}')">${c}</button>`;
+      }).join('');
+      con.innerHTML+=`<div class="qcard" id="qc${i}" style="${i>0?'opacity:0.4;pointer-events:none':''}">
+        <div class="qhdr"><div class="qn">${i+1}</div><div class="qtxt">${qt}${tag}</div></div>
+        <div class="choices ${long?'c1':''}" id="ch${i}">${btns}</div>
+        <div class="fb" id="fb${i}"></div>
+        <div class="tip"><div class="tiplbl">Grammar Tip</div>${q.tip}</div>
+      </div>`;
+    });
+  }
   startTimer();
   sStart();
   TICKER.pause(); // pause polling only during gameplay
@@ -1525,7 +1530,7 @@ function ansQ(q,btn,chosen,correct){
   }
   if(diff==='infinite'){
     if(!ok){document.getElementById('sbtn').disabled=false;return;}
-    cQ++;unlockN();startTimer();
+    cQ++;buildInfCard(cQ);startTimer();
   } else {
     if(answered<(QL[diff]||5)){cQ++;unlockN();startTimer();}
     else document.getElementById('sbtn').disabled=false;
@@ -1584,6 +1589,27 @@ function retryQuiz(){
   if(diff!=='infinite') round++;
   if(!CU&&round>5){showGuestModal();return;}
   buildQuiz();window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function buildInfCard(i){
+  const con=document.getElementById('qz');
+  if(!con||!cQs[i]) return;
+  const q=cQs[i];
+  const sh=shuf(q.choices);
+  const long=q.choices.some(c=>c.length>16);
+  const qt=q.blank?q.q.replace('___','<span class="qblnk">___</span>'):q.q;
+  const btns=sh.map(c=>{
+    const cs=c.replace(/'/g,"\'").replace(/"/g,'&quot;');
+    const cr=q.correct.replace(/'/g,"\'").replace(/"/g,'&quot;');
+    return `<button class="cbtn" onclick="ansQ(${i},this,'${cs}','${cr}')">${c}</button>`;
+  }).join('');
+  con.innerHTML=`<div class="qcard" id="qc${i}">
+    <div class="qhdr"><div class="qn">${i+1}</div><div class="qtxt">${qt}<span class="dtag" style="background:#7C3AED;color:#fff">♾️</span></div></div>
+    <div class="choices ${long?'c1':''}" id="ch${i}">${btns}</div>
+    <div class="fb" id="fb${i}"></div>
+    <div class="tip"><div class="tiplbl">Grammar Tip</div>${q.tip}</div>
+  </div>`;
+  con.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 // ── LEADERBOARD ───────────────────────────────────────────────
