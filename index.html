@@ -1691,9 +1691,8 @@ async function loadLBGame(game, diff){
     const label = game==='shark'?'words':game==='chain'?'words':'words';
     scoreDisplay = `<span class="lb-score-display">${e.score}</span><div class="lbdate">${label}</div>`;
   } else {
-    // Grammar, Spell, Odd, Scramble — scored out of a fixed total
-    const total = e.total||5;
-    scoreDisplay = `<span class="lb-score-display">${e.score}/${total}</span>`;
+    // Grammar, Spell, Odd, Scramble — just show the score
+    scoreDisplay = `<span class="lb-score-display">${e.score}</span>`;
   }
     return `<div class="lbrow ${cls[i]||''}">
       <div class="lbmedal">${medals[i]||'#'+(i+1)}</div>
