@@ -1698,7 +1698,7 @@ async function loadProfile(){
       daysLeft=Math.ceil((expDate-today)/(1000*60*60*24));
       expiryStr=expDate.toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
       if(daysLeft<=0){urgentClass='color:#E24B4A;';renewMsg='<div style="background:#FCEBEB;border:1.5px solid #E24B4A;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:700;color:#791F1F">❌ Your plan has expired. Renew now!</div>';}
-      else if(daysLeft<=7){urgentClass='color:#E24B4A;';renewMsg=`<div style="background:#FCEBEB;border:1.5px solid #E24B4A;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:700;color:#791F1F">⚠️ Expiring in <strong>${daysLeft} day${daysLeft===1?'':'s'}</strong>! Renew now.</div>`;}
+      else if(daysLeft<=7){urgentClass='color:#E24B4A;';renewMsg=`<div style="background:#FCEBEB;border:1.5px solid #E24B4A;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:700;color:#791F1F">⚠️ Expiring in <strong>${daysLeft} day${daysLeft===1?'':'s'}</strong>! <a onclick="navTo('pricing')" style="color:#BA7517;font-weight:900;text-decoration:underline;cursor:pointer">Renew now →</a></div>`;}
       else if(daysLeft<=14){urgentClass='color:#BA7517;';renewMsg=`<div style="background:#FAEEDA;border:1.5px solid #BA7517;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:700;color:#412402">📅 Expiring in <strong>${daysLeft} days</strong>. Consider renewing!</div>`;}
     }
     sc.style.display='block';
