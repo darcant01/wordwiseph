@@ -430,12 +430,6 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
           <div class="ds">30 questions · 10 sec each</div>
           <div class="dc-lock" id="lock-hard" style="display:none;margin-top:6px;font-size:11px;background:#FCEBEB;color:#791F1F;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
         </div>
-        <div class="dc" id="dc-infinite" onclick="checkAccess('infinite')" style="border-color:#7C3AED;grid-column:span 3;background:linear-gradient(135deg,#F5F3FF,#EDE9FE)">
-          <div class="di">♾️</div>
-          <div class="dt" style="color:#7C3AED">Infinite</div>
-          <div class="ds">Endless questions · 15 sec each · Wrong = Game Over!</div>
-          <div class="dc-lock" id="lock-infinite" style="display:none;margin-top:6px;font-size:11px;background:#EDE9FE;color:#4C1D95;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
-        </div>
       </div>
       <div style="text-align:center;margin-top:8px">
         <button class="btn btn-navy" style="width:100%;max-width:300px;margin-bottom:10px" onclick="navTo('games')">🎮 All Brainy Games</button>
@@ -1387,14 +1381,19 @@ function guestModalGo(dest){
 function shuf(a){return[...a].sort(()=>Math.random()-0.5);}
 
 function checkAccess(d){
-  if(d==='medium'||d==='hard'||d==='infinite'){
+  // Medium and Hard require active subscription
+  if(d==='medium'||d==='hard'){
     const sub=CU?.subscription||'free';
-    const hasAccess=sub==='basic'||sub==='premium';
+    const hasAccess=sub==='basic'||sub==='premium'; // expired = no access
     if(!hasAccess){
       if(!CU){
-        if(confirm('This level requires a subscription.\n\nGo to Login now?')) navTo('login');
+        if(confirm('Medium and Hard levels require a subscription.\n\nCreate a free account and subscribe to unlock all levels!\n\nGo to Login now?')){
+          navTo('login');
+        }
       } else {
-        if(confirm((d==='infinite'?'♾️ Infinite mode':'Medium and Hard levels')+' require a Basic or Premium subscription.\n\nView plans now?')) navTo('pricing');
+        if(confirm('Medium and Hard levels require a Basic or Premium subscription.\n\nUpgrade your plan to unlock all levels!\n\nView plans now?')){
+          navTo('pricing');
+        }
       }
       return;
     }
@@ -1429,48 +1428,37 @@ function updateDiffCards(){
 
 function buildQuiz(){
   if(!BANK){showErr('dlbl','Questions loading... please tap Play again!');return;}
-  if(diff==='infinite'){
-    let all=[]; ['easy','medium','hard'].forEach(function(d){ if(BANK[d]) all=all.concat(BANK[d]); }); cQs=shuf(all);
-  } else { cQs=shuf(BANK[diff]).slice(0,QL[diff]||5); }
-  ans=new Array(diff==='infinite'?9999:(QL[diff]||5)).fill(null);
+  cQs=shuf(BANK[diff]).slice(0,QL[diff]||5);
+  ans=new Array(5).fill(null);
   answered=0;cQ=0;tTotal=TL[diff];tLeft=tTotal;
   document.getElementById('dlbl').textContent={easy:'Easy — 5 questions · 30 sec each',medium:'Medium — 15 questions · 20 sec each',hard:'Hard — 30 questions · 10 sec each'}[diff];
-  document.getElementById('rpill').textContent=diff==='infinite'?'♾️ Infinite Mode':'Round '+round;
+  document.getElementById('rpill').textContent='Round '+round;
   document.getElementById('pbar').style.width='0%';
   document.getElementById('plbl').textContent='0 of 5 answered';
   document.getElementById('sbtn').disabled=true;
   document.getElementById('result').classList.remove('show');
   const sr=document.getElementById('strow');
   sr.innerHTML='';
-  if(diff==='infinite'){
-    sr.innerHTML='<span style="font-size:clamp(13px,3vw,15px);font-weight:800;color:var(--gold)" id="st0">🔥 Streak: 0</span>';
-  } else {
-    for(let i=0;i<(QL[diff]||5);i++){const s=document.createElement('span');s.className='star';s.id='st'+i;s.textContent='⭐';sr.appendChild(s);}
-  }
+  for(let i=0;i<(QL[diff]||5);i++){const s=document.createElement('span');s.className='star';s.id='st'+i;s.textContent='⭐';sr.appendChild(s);}
   const con=document.getElementById('qz');
   con.innerHTML='';
-  if(diff==='infinite'){
-    // Infinite: render only current question, build next on demand
-    buildInfCard(0);
-  } else {
-    cQs.forEach((q,i)=>{
-      const sh=shuf(q.choices);
-      const long=q.choices.some(c=>c.length>16);
-      const qt=q.blank?q.q.replace('___','<span class="qblnk">___</span>'):q.q;
-      const tag=`<span class="dtag ${diff}">${diff}</span>`;
-      const btns=sh.map(c=>{
-        const cs=c.replace(/'/g,"\'").replace(/"/g,'&quot;');
-        const cr=q.correct.replace(/'/g,"\'").replace(/"/g,'&quot;');
-        return `<button class="cbtn" onclick="ansQ(${i},this,'${cs}','${cr}')">${c}</button>`;
-      }).join('');
-      con.innerHTML+=`<div class="qcard" id="qc${i}" style="${i>0?'opacity:0.4;pointer-events:none':''}">
-        <div class="qhdr"><div class="qn">${i+1}</div><div class="qtxt">${qt}${tag}</div></div>
-        <div class="choices ${long?'c1':''}" id="ch${i}">${btns}</div>
-        <div class="fb" id="fb${i}"></div>
-        <div class="tip"><div class="tiplbl">Grammar Tip</div>${q.tip}</div>
-      </div>`;
-    });
-  }
+  cQs.forEach((q,i)=>{
+    const sh=shuf(q.choices);
+    const long=q.choices.some(c=>c.length>16);
+    const qt=q.blank?q.q.replace('___','<span class="qblnk">___</span>'):q.q;
+    const tag=`<span class="dtag ${diff}">${diff}</span>`;
+    const btns=sh.map(c=>{
+      const cs=c.replace(/'/g,"\'").replace(/"/g,'&quot;');
+      const cr=q.correct.replace(/'/g,"\'").replace(/"/g,'&quot;');
+      return `<button class="cbtn" onclick="ansQ(${i},this,'${cs}','${cr}')">${c}</button>`;
+    }).join('');
+    con.innerHTML+=`<div class="qcard" id="qc${i}" style="${i>0?'opacity:0.4;pointer-events:none':''}">
+      <div class="qhdr"><div class="qn">${i+1}</div><div class="qtxt">${qt}${tag}</div></div>
+      <div class="choices ${long?'c1':''}" id="ch${i}">${btns}</div>
+      <div class="fb" id="fb${i}"></div>
+      <div class="tip"><div class="tiplbl">Grammar Tip</div>${q.tip}</div>
+    </div>`;
+  });
   startTimer();
   sStart();
   TICKER.pause(); // pause polling only during gameplay
@@ -1505,9 +1493,6 @@ function autoAns(){
   document.getElementById('qc'+cQ)?.classList.add('wrong');
   if(fb){fb.textContent="⏰ Time's up! Correct: "+cQs[cQ].correct;fb.className='fb show wrong';}
   ans[cQ]=false;answered++;updP();
-  if(diff==='infinite'){
-    document.getElementById('sbtn').disabled=false; return;
-  }
   const st=document.getElementById('st'+(answered-1));if(st)st.textContent='💫';
   if(answered<(QL[diff]||5)){cQ++;unlockN();startTimer();}
   else document.getElementById('sbtn').disabled=false;
@@ -1522,49 +1507,24 @@ function ansQ(q,btn,chosen,correct){
   if(ok){card?.classList.add('correct');if(fb){fb.textContent='✓ Correct! Great job!';fb.className='fb show correct';}sOk();sCr();}
   else{card?.classList.add('wrong');if(fb){fb.textContent='✗ Not quite! Correct: '+correct;fb.className='fb show wrong';}sBad();btn.classList.add('no');}
   answered++;updP();
-  if(diff==='infinite'){
-    const sc=ans.filter(a=>a===true).length;
-    const strk=document.getElementById('st0');if(strk)strk.textContent='🔥 Streak: '+sc;
-  } else {
-    const st=document.getElementById('st'+(answered-1));if(st)st.textContent=ok?'⭐':'💫';
-  }
-  if(diff==='infinite'){
-    if(!ok){document.getElementById('sbtn').disabled=false;return;}
-    cQ++;buildInfCard(cQ);startTimer();
-  } else {
-    if(answered<(QL[diff]||5)){cQ++;unlockN();startTimer();}
-    else document.getElementById('sbtn').disabled=false;
-  }
+  const st=document.getElementById('st'+(answered-1));if(st)st.textContent=ok?'⭐':'💫';
+  if(answered<(QL[diff]||5)){cQ++;unlockN();startTimer();}
+  else document.getElementById('sbtn').disabled=false;
 }
 function unlockN(){
   const c=document.getElementById('qc'+cQ);
   if(c){c.style.opacity='1';c.style.pointerEvents='auto';setTimeout(()=>c.scrollIntoView({behavior:'smooth',block:'center'}),100);}
 }
 function updP(){
-  const pb=document.getElementById('pbar');
-  const pl=document.getElementById('plbl');
-  if(diff==='infinite'){
-    if(pb)pb.style.width='100%';
-    const correct=ans.filter(a=>a===true).length;
-    if(pl)pl.textContent='♾️ '+answered+' answered · '+correct+' correct';
-  } else {
-    if(pb)pb.style.width=Math.round(answered/(QL[diff]||5)*100)+'%';
-    if(pl)pl.textContent=answered+' of '+(QL[diff]||5)+' answered';
-  }
+  const pb=document.getElementById('pbar');if(pb)pb.style.width=Math.round(answered/(QL[diff]||5)*100)+'%';
+  const pl=document.getElementById('plbl');if(pl)pl.textContent=answered+' of '+(QL[diff]||5)+' answered';
 }
 async function showResult(){
   clearInterval(tInt);
   lastSco=ans.filter(a=>a).length;
-  const qTotal=QL[diff]||5;
-  document.getElementById('rsco').textContent=diff==='infinite'?(lastSco+' correct'):(lastSco+'/'+qTotal);
+  const qTotal=QL[diff]||5;document.getElementById('rsco').textContent=lastSco+'/'+qTotal;
   let stars='',msg='';
-  if(diff==='infinite'){
-    if(lastSco>=30){stars='⭐⭐⭐⭐⭐';msg='Incredible! '+lastSco+' correct in a row! 🏆';sWin();setTimeout(sLevelUp,900);}
-    else if(lastSco>=20){stars='⭐⭐⭐⭐💫';msg='Amazing! '+lastSco+' in a row!';sWin();}
-    else if(lastSco>=10){stars='⭐⭐⭐💫💫';msg='Great! '+lastSco+' correct! Keep going!';sLevelUp();}
-    else if(lastSco>=5){stars='⭐⭐💫💫💫';msg=lastSco+' correct. Can you beat it?';}
-    else{stars='⭐💫💫💫💫';msg='Keep practicing! You got '+lastSco+' correct!';}
-  } else if(lastSco===qTotal){stars='⭐⭐⭐⭐⭐';msg='Perfect! Grammar Superstar! 🏆';sWin();setTimeout(sLevelUp,900);}
+  if(lastSco===qTotal){stars='⭐⭐⭐⭐⭐';msg='Perfect! Grammar Superstar! 🏆';sWin();setTimeout(sLevelUp,900);}
   else if(lastSco>=Math.ceil(qTotal*0.8)){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost perfect!';sWin();}
   else if(lastSco>=Math.ceil(qTotal*0.6)){stars='⭐⭐⭐💫💫';msg='Good job! Keep practicing!';sLevelUp();}
   else if(lastSco>=Math.ceil(qTotal*0.4)){stars='⭐⭐💫💫💫';msg='Nice try! Review and try again!';sTU();}
@@ -1586,30 +1546,9 @@ async function showResult(){
   setTimeout(()=>document.getElementById('result')?.scrollIntoView({behavior:'smooth'}),100);
 }
 function retryQuiz(){
-  if(diff!=='infinite') round++;
+  round++;
   if(!CU&&round>5){showGuestModal();return;}
   buildQuiz();window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function buildInfCard(i){
-  const con=document.getElementById('qz');
-  if(!con||!cQs[i]) return;
-  const q=cQs[i];
-  const sh=shuf(q.choices);
-  const long=q.choices.some(c=>c.length>16);
-  const qt=q.blank?q.q.replace('___','<span class="qblnk">___</span>'):q.q;
-  const btns=sh.map(c=>{
-    const cs=c.replace(/'/g,"\'").replace(/"/g,'&quot;');
-    const cr=q.correct.replace(/'/g,"\'").replace(/"/g,'&quot;');
-    return `<button class="cbtn" onclick="ansQ(${i},this,'${cs}','${cr}')">${c}</button>`;
-  }).join('');
-  con.innerHTML=`<div class="qcard" id="qc${i}">
-    <div class="qhdr"><div class="qn">${i+1}</div><div class="qtxt">${qt}<span class="dtag" style="background:#7C3AED;color:#fff">♾️</span></div></div>
-    <div class="choices ${long?'c1':''}" id="ch${i}">${btns}</div>
-    <div class="fb" id="fb${i}"></div>
-    <div class="tip"><div class="tiplbl">Grammar Tip</div>${q.tip}</div>
-  </div>`;
-  con.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 // ── LEADERBOARD ───────────────────────────────────────────────
@@ -1759,7 +1698,7 @@ async function loadProfile(){
       daysLeft=Math.ceil((expDate-today)/(1000*60*60*24));
       expiryStr=expDate.toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
       if(daysLeft<=0){urgentClass='color:#E24B4A;';renewMsg='<div style="background:#FCEBEB;border:1.5px solid #E24B4A;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:700;color:#791F1F">❌ Your plan has expired. Renew now!</div>';}
-      else if(daysLeft<=7){urgentClass='color:#E24B4A;';renewMsg=`<div style="background:#FCEBEB;border:1.5px solid #E24B4A;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:700;color:#791F1F">⚠️ Expiring in <strong>${daysLeft} day${daysLeft===1?'':'s'}</strong>! <a onclick="navTo('pricing')" style="color:#BA7517;font-weight:900;text-decoration:underline;cursor:pointer">Renew now →</a></div>`;}
+      else if(daysLeft<=7){urgentClass='color:#E24B4A;';renewMsg=`<div style="background:#FCEBEB;border:1.5px solid #E24B4A;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:700;color:#791F1F">⚠️ Expiring in <strong>${daysLeft} day${daysLeft===1?'':'s'}</strong>! Renew now.</div>`;}
       else if(daysLeft<=14){urgentClass='color:#BA7517;';renewMsg=`<div style="background:#FAEEDA;border:1.5px solid #BA7517;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;font-weight:700;color:#412402">📅 Expiring in <strong>${daysLeft} days</strong>. Consider renewing!</div>`;}
     }
     sc.style.display='block';
