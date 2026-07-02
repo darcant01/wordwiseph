@@ -2338,6 +2338,16 @@ document.addEventListener('DOMContentLoaded',function(){
   loadLBGame('grammar','easy');
   // Start ticker after page fully loaded
   setTimeout(()=>TICKER.start(), 2000);
+  // Auto-trigger plan from landing page
+  setTimeout(function(){
+    var plan=localStorage.getItem('wwplan');
+    if(plan){
+      localStorage.removeItem('wwplan');
+      var prices={free:0,trial:10,weekly:35,basic:99,premium:199};
+      if(plan==='free'){navTo('pricing');}
+      else if(prices[plan]){navTo('pricing');setTimeout(function(){choosePlan(plan,prices[plan]);},400);}
+    }
+  },600);
 });
 
 </script>
