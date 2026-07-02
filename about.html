@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>About Us — WordWise PH</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#1D2B55;
+  --pink:#D4537E;
+  --gold:#FAC775;
+  --light:#F9F8FF;
+  --card:#fff;
+  --muted:#888780;
+  --radius:14px;
+}
+body{font-family:'Nunito',sans-serif;background:var(--light);color:var(--navy);min-height:100vh}
+
+/* ── HEADER ── */
+header{
+  background:var(--navy);
+  padding:0 clamp(16px,5vw,48px);
+  height:62px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.logo{font-size:clamp(18px,4vw,22px);font-weight:900;color:#fff;cursor:pointer;text-decoration:none}
+.logo span{color:var(--gold)}
+.nav-links{display:flex;gap:8px;align-items:center}
+.nav-btn{
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;
+  padding:7px 14px;border-radius:99px;
+  border:2px solid rgba(255,255,255,0.3);
+  background:transparent;color:#fff;
+  cursor:pointer;text-decoration:none;
+  transition:all 0.15s;
+}
+.nav-btn:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.6)}
+.nav-btn.primary{background:var(--pink);border-color:var(--pink);color:#fff}
+.nav-btn.primary:hover{background:#c0456e;border-color:#c0456e}
+
+/* ── HERO ── */
+.hero{
+  background:linear-gradient(135deg,var(--navy) 0%,#2D3F7A 60%,#3B2569 100%);
+  padding:clamp(48px,10vw,80px) clamp(16px,5vw,48px);
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 70% 30%,rgba(212,83,126,0.18) 0%,transparent 60%),
+              radial-gradient(ellipse at 20% 80%,rgba(250,199,117,0.12) 0%,transparent 50%);
+}
+.hero-tag{
+  display:inline-block;
+  background:rgba(212,83,126,0.25);
+  border:1.5px solid rgba(212,83,126,0.5);
+  color:var(--pink);color:#FFB0CC;
+  font-size:12px;font-weight:800;
+  padding:5px 14px;border-radius:99px;
+  letter-spacing:1px;text-transform:uppercase;
+  margin-bottom:18px;position:relative;z-index:1;
+}
+.hero h1{
+  font-size:clamp(28px,7vw,52px);font-weight:900;
+  color:#fff;line-height:1.15;
+  position:relative;z-index:1;margin-bottom:14px;
+}
+.hero h1 span{color:var(--gold)}
+.hero p{
+  font-size:clamp(14px,3vw,18px);color:rgba(255,255,255,0.78);
+  max-width:520px;margin:0 auto;line-height:1.65;
+  position:relative;z-index:1;
+}
+.hero-flags{font-size:clamp(24px,5vw,36px);margin-top:20px;position:relative;z-index:1}
+
+/* ── MAIN CONTENT ── */
+main{max-width:720px;margin:0 auto;padding:clamp(24px,5vw,48px) clamp(16px,4vw,24px)}
+
+/* ── SECTION CARDS ── */
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  border:1.5px solid #EAEAEA;
+  padding:clamp(20px,4vw,32px);
+  margin-bottom:20px;
+}
+.card-title{
+  font-size:clamp(16px,4vw,20px);font-weight:900;color:var(--navy);
+  margin-bottom:18px;display:flex;align-items:center;gap:10px;
+}
+.card-title .icon{font-size:clamp(22px,5vw,28px)}
+
+/* ── MISSION ── */
+.mission-text{
+  font-size:clamp(14px,3vw,16px);color:#444;
+  line-height:1.75;text-align:center;
+}
+.mission-highlight{
+  display:inline-block;margin-top:16px;
+  background:linear-gradient(135deg,#FFF0F7,#F0F4FF);
+  border:1.5px solid #FFB0CC;border-radius:12px;
+  padding:12px 20px;font-size:clamp(13px,3vw,15px);
+  font-weight:800;color:var(--navy);line-height:1.5;
+}
+
+/* ── GAMES GRID ── */
+.games-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;
+}
+.game-tile{
+  background:var(--light);border-radius:12px;
+  padding:16px 12px;text-align:center;
+  border:1.5px solid #EAEAEA;
+  transition:transform 0.15s,border-color 0.15s;
+}
+.game-tile:hover{transform:translateY(-2px);border-color:var(--pink)}
+.game-tile .emoji{font-size:28px;margin-bottom:8px}
+.game-tile .name{font-size:12px;font-weight:900;color:var(--navy)}
+.game-tile .desc{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+
+/* ── TEAM ── */
+.team-card{
+  display:flex;align-items:flex-start;gap:16px;
+  padding:16px;background:var(--light);
+  border-radius:12px;margin-bottom:14px;
+}
+.avatar{
+  width:56px;height:56px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--pink),var(--navy));
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;
+}
+.team-name{font-size:15px;font-weight:900;color:var(--navy)}
+.team-role{font-size:12px;color:var(--pink);font-weight:700;margin-top:2px}
+.team-bio{font-size:12px;color:#555;margin-top:6px;line-height:1.6}
+.contact-row{
+  margin-top:14px;background:var(--light);border-radius:10px;
+  padding:12px 16px;display:flex;flex-wrap:wrap;gap:14px;
+  font-size:12px;color:#555;align-items:center;
+}
+.contact-row a{color:var(--pink);text-decoration:none;font-weight:700}
+.contact-row a:hover{text-decoration:underline}
+
+/* ── VALUES ── */
+.values-list{display:flex;flex-direction:column;gap:14px}
+.value-item{display:flex;align-items:flex-start;gap:14px}
+.value-icon{
+  width:44px;height:44px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;
+}
+.value-name{font-size:14px;font-weight:900;color:var(--navy)}
+.value-desc{font-size:12px;color:#666;margin-top:3px;line-height:1.5}
+
+/* ── STATS ── */
+.stats-row{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:12px;text-align:center;
+}
+.stat{padding:16px 8px}
+.stat-num{font-size:clamp(22px,5vw,32px);font-weight:900;color:var(--pink)}
+.stat-label{font-size:11px;color:var(--muted);font-weight:700;margin-top:3px}
+
+/* ── CTA ── */
+.cta-card{
+  background:linear-gradient(135deg,var(--navy),#2D3F7A);
+  border-radius:var(--radius);padding:clamp(24px,5vw,36px);
+  text-align:center;margin-bottom:20px;
+}
+.cta-card h2{color:#fff;font-size:clamp(18px,4vw,24px);font-weight:900;margin-bottom:8px}
+.cta-card p{color:rgba(255,255,255,0.75);font-size:clamp(13px,3vw,15px);margin-bottom:20px}
+.cta-btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.btn-pink{
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;
+  padding:12px 24px;border-radius:99px;
+  background:var(--pink);border:none;color:#fff;
+  cursor:pointer;text-decoration:none;display:inline-block;
+  transition:transform 0.15s,background 0.15s;
+}
+.btn-pink:hover{background:#c0456e;transform:scale(1.03)}
+.btn-outline{
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;
+  padding:12px 24px;border-radius:99px;
+  background:transparent;border:2px solid rgba(255,255,255,0.4);
+  color:#fff;cursor:pointer;text-decoration:none;display:inline-block;
+  transition:all 0.15s;
+}
+.btn-outline:hover{background:rgba(255,255,255,0.1);border-color:#fff}
+
+/* ── FOOTER ── */
+footer{
+  text-align:center;padding:24px 16px;
+  color:var(--muted);font-size:12px;
+  border-top:1px solid #EAEAEA;
+  background:#fff;
+}
+footer a{color:var(--pink);text-decoration:none}
+
+@media(max-width:480px){
+  .nav-links .nav-btn:not(.primary){display:none}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .games-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="index.html" class="logo">WordWise<span>PH</span></a>
+  <nav class="nav-links">
+    <a href="index.html" class="nav-btn">🎮 Play Now</a>
+    <a href="index.html#pricing" class="nav-btn">💳 Plans</a>
+    <a href="index.html" class="nav-btn primary">Get Started</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">About WordWise PH</div>
+  <h1>Learning English<br><span>the fun way</span></h1>
+  <p>A game-based English learning platform built for Filipino kids — joyful, affordable, and always improving.</p>
+  <div class="hero-flags">🇵🇭 ❤️ 📚</div>
+</section>
+
+<!-- MAIN -->
+<main>
+
+  <!-- STATS -->
+  <div class="card" style="margin-top:-1px;border-radius:0 0 var(--radius) var(--radius)">
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-num">16+</div>
+        <div class="stat-label">Kids Corner Games</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">1,045</div>
+        <div class="stat-label">Grammar Questions</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">₱0</div>
+        <div class="stat-label">To Start Playing</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MISSION -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🌟</span> Our Mission</div>
+    <p class="mission-text">
+      WordWise PH was built with one goal: to give every Filipino child a joyful, engaging, and affordable way to build confidence in English — one game at a time.
+    </p>
+    <div style="text-align:center">
+      <div class="mission-highlight">
+        "Every child deserves to love learning."
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT WE OFFER -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🎮</span> What We Offer</div>
+    <div class="games-grid">
+      <div class="game-tile">
+        <div class="emoji">📝</div>
+        <div class="name">Grammar Quiz</div>
+        <div class="desc">1,045 questions · 4 difficulty modes</div>
+      </div>
+      <div class="game-tile">
+        <div class="emoji">🔤</div>
+        <div class="name">Spell It Right</div>
+        <div class="desc">Listen & spell correctly</div>
+      </div>
+      <div class="game-tile">
+        <div class="emoji">🦈</div>
+        <div class="name">Shark Typing</div>
+        <div class="desc">Type fast or the shark wins</div>
+      </div>
+      <div class="game-tile">
+        <div class="emoji">🎯</div>
+        <div class="name">Odd One Out</div>
+        <div class="desc">Spot the word that doesn't belong</div>
+      </div>
+      <div class="game-tile">
+        <div class="emoji">✏️</div>
+        <div class="name">Letter Tracer</div>
+        <div class="desc">A–Z with accuracy checking</div>
+      </div>
+      <div class="game-tile">
+        <div class="emoji">🐾</div>
+        <div class="name">Animal Games</div>
+        <div class="desc">7 games with real sounds</div>
+      </div>
+      <div class="game-tile">
+        <div class="emoji">🎨</div>
+        <div class="name">Color Games</div>
+        <div class="desc">5 colorful learning games</div>
+      </div>
+      <div class="game-tile">
+        <div class="emoji">🏆</div>
+        <div class="name">Leaderboards</div>
+        <div class="desc">Compete with friends & family</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHO WE ARE -->
+  <div class="card">
+    <div class="card-title"><span class="icon">👨‍💻</span> Who We Are</div>
+    <div class="team-card">
+      <div class="avatar">👨‍🏫</div>
+      <div>
+        <div class="team-name">Darwin C.</div>
+        <div class="team-role">Founder &amp; Developer</div>
+        <div class="team-bio">
+          A passionate educator and developer who wanted to create something meaningful for Filipino children. WordWise PH was born from the belief that great learning tools should be accessible to every family — not just those who can afford expensive tutoring.
+        </div>
+      </div>
+    </div>
+    <div class="contact-row">
+      <span>📍 Philippines</span>
+      <span>📧 <a href="mailto:darcant01@gmail.com">darcant01@gmail.com</a></span>
+      <span>💬 <a href="https://t.me/wordwiseph_support_bot" target="_blank">@wordwiseph_support_bot</a></span>
+      <span>💳 GCash: 0931-762-5402</span>
+    </div>
+  </div>
+
+  <!-- VALUES -->
+  <div class="card">
+    <div class="card-title"><span class="icon">💛</span> Our Values</div>
+    <div class="values-list">
+      <div class="value-item">
+        <div class="value-icon" style="background:#FFF0F7">🎯</div>
+        <div>
+          <div class="value-name">Child-Centered Learning</div>
+          <div class="value-desc">Every game, animation, and sound is designed with kids in mind — simple enough for beginners, rewarding enough to keep going.</div>
+        </div>
+      </div>
+      <div class="value-item">
+        <div class="value-icon" style="background:#F0F8FF">🇵🇭</div>
+        <div>
+          <div class="value-name">Made for Filipinos</div>
+          <div class="value-desc">Built locally, priced affordably in Philippine Pesos, and tailored to how Filipino kids learn English at home and at school.</div>
+        </div>
+      </div>
+      <div class="value-item">
+        <div class="value-icon" style="background:#F0FFF4">🔒</div>
+        <div>
+          <div class="value-name">Safe &amp; Ad-Free</div>
+          <div class="value-desc">No ads, no distractions, no data sold. WordWise PH is a clean, safe space where your child can focus on learning.</div>
+        </div>
+      </div>
+      <div class="value-item">
+        <div class="value-icon" style="background:#FFFBEA">📈</div>
+        <div>
+          <div class="value-name">Always Improving</div>
+          <div class="value-desc">We listen to parents and teachers and continuously add new games, fix bugs, and improve the experience based on real feedback.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-card">
+    <h2>Ready to start learning? 🚀</h2>
+    <p>Join thousands of Filipino kids already playing WordWise PH — start free, upgrade anytime.</p>
+    <div class="cta-btns">
+      <a href="index.html" class="btn-pink">🎮 Play for Free</a>
+      <a href="index.html" class="btn-outline">💳 View Plans</a>
+    </div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 WordWise PH · Made with ❤️ in the Philippines</p>
+  <p style="margin-top:6px">
+    <a href="index.html">Home</a> &nbsp;·&nbsp;
+    <a href="https://t.me/wordwiseph_support_bot" target="_blank">Support</a> &nbsp;·&nbsp;
+    <a href="mailto:darcant01@gmail.com">Contact</a>
+  </p>
+</footer>
+
+</body>
+</html>
