@@ -4662,7 +4662,7 @@ function setTracerMode(mode){
   if(mode === 'name'){
     // Check subscription
     var sub = CU ? (CU.subscription||'free') : 'free';
-    var hasAccess = CU && (sub==='basic'||sub==='premium');
+    var hasAccess = CU && (sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
     if(!hasAccess){
       if(!CU){
         if(confirm('✍️ Trace My Name requires a subscription.\n\nLogin to your account?')){
