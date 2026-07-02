@@ -675,29 +675,99 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 </div>
 
 <!-- ══ REGISTER ══ -->
-<div id="sc-register" class="screen">
-  <div class="hero"><div class="htitle">Join <span>WordWise!</span></div><div class="hsub">Create your free account</div></div>
-  <div class="wrap" style="max-width:460px">
-    <div class="card">
-      <div class="ctitle">Create Account</div>
+<div id="sc-register" class="screen" style="background:#F4F6FF;min-height:100vh;display:flex;flex-direction:column">
+
+  <!-- Top bar -->
+  <div style="background:linear-gradient(135deg,#0F1A3E,#1D2B55,#2B1F5E);padding:clamp(32px,6vw,52px) 20px clamp(28px,5vw,44px);text-align:center;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 80% at 40% 50%,rgba(250,199,117,0.15) 0%,transparent 70%)"></div>
+    <div style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,0.05) 1px,transparent 1px);background-size:28px 28px"></div>
+    <div style="font-size:clamp(26px,6vw,40px);font-weight:900;color:#fff;position:relative;z-index:1;line-height:1.1">
+      Join <span style="color:#FAC775">WordWise!</span> 🚀
+    </div>
+    <div style="font-size:clamp(13px,3vw,15px);color:rgba(255,255,255,0.6);margin-top:8px;position:relative;z-index:1">Create your free account in seconds</div>
+  </div>
+
+  <!-- Register card -->
+  <div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding:clamp(20px,4vw,40px) 16px">
+    <div style="background:#fff;border-radius:24px;border:1.5px solid #EAEDF5;padding:clamp(24px,5vw,36px);width:100%;max-width:420px;box-shadow:0 8px 40px rgba(29,43,85,0.1)">
+
+      <!-- Logo -->
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:20px;font-weight:900;color:#1D2B55;display:inline-block">WordWise<span style="color:#D4537E">PH</span></div>
+      </div>
+
       <div class="err" id="rerr"></div>
       <div class="okmsg" id="rok"></div>
-      <div class="field"><label>Full Name</label><input type="text" id="rname" placeholder="Your full name"/></div>
-      <div class="field"><label>Username</label><input type="text" id="ruser" placeholder="Choose a username"/></div>
-      <div class="field"><label>Password</label>
-        <div class="pw-wrap">
-          <input type="password" id="rpass" placeholder="Min. 4 characters"/>
-          <button class="pw-eye" onclick="togglePw('rpass',this)" type="button" tabindex="-1" aria-label="Show password">👁️</button>
+
+      <!-- Full Name -->
+      <div style="margin-bottom:14px">
+        <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Full Name</label>
+        <div style="position:relative">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px">📛</span>
+          <input type="text" id="rname" placeholder="Your full name"
+            style="width:100%;padding:13px 14px 13px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
+            onfocus="this.style.borderColor=\'#D4537E\';this.style.background=\'#fff\'"
+            onblur="this.style.borderColor=\'#E8EAF0\';this.style.background=\'#F9FAFB\'"/>
         </div>
       </div>
-      <div class="field"><label>I am a...</label>
-        <select id="rtype" style="width:100%;font-family:'Nunito',sans-serif;font-size:clamp(14px,3.5vw,16px);font-weight:700;padding:clamp(11px,2.5vw,14px) clamp(12px,3vw,16px);border-radius:12px;border:2px solid var(--lp);background:#FFF8F0;color:var(--navy);outline:none;-webkit-appearance:auto">
-          <option value="kid">Kid / Student</option>
-          <option value="adult">Adult / Teacher / Parent</option>
-        </select>
+
+      <!-- Username -->
+      <div style="margin-bottom:14px">
+        <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Username</label>
+        <div style="position:relative">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px">👤</span>
+          <input type="text" id="ruser" placeholder="Choose a username"
+            style="width:100%;padding:13px 14px 13px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
+            onfocus="this.style.borderColor=\'#D4537E\';this.style.background=\'#fff\'"
+            onblur="this.style.borderColor=\'#E8EAF0\';this.style.background=\'#F9FAFB\'"/>
+        </div>
       </div>
-      <button class="btn btn-pink btn-block" onclick="doReg()" style="margin-bottom:14px">Create Account</button>
-      <div style="text-align:center"><button class="lnk" onclick="navTo('login')">Already have an account? Login</button></div>
+
+      <!-- Password -->
+      <div style="margin-bottom:14px">
+        <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Password</label>
+        <div class="pw-wrap" style="position:relative">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;z-index:1">🔒</span>
+          <input type="password" id="rpass" placeholder="Min. 4 characters"
+            style="width:100%;padding:13px 44px 13px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
+            onfocus="this.style.borderColor=\'#D4537E\';this.style.background=\'#fff\'"
+            onblur="this.style.borderColor=\'#E8EAF0\';this.style.background=\'#F9FAFB\'"/>
+          <button class="pw-eye" onclick="togglePw(\'rpass\',this)" type="button" tabindex="-1" aria-label="Show password"
+            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;padding:4px">👁️</button>
+        </div>
+      </div>
+
+      <!-- Account type -->
+      <div style="margin-bottom:22px">
+        <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">I am a...</label>
+        <div style="position:relative">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;z-index:1">🎓</span>
+          <select id="rtype"
+            style="width:100%;padding:13px 14px 13px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;-webkit-appearance:auto;box-sizing:border-box;cursor:pointer">
+            <option value="kid">Kid / Student</option>
+            <option value="adult">Adult / Teacher / Parent</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Create button -->
+      <button onclick="doReg()"
+        style="width:100%;padding:15px;border-radius:99px;background:linear-gradient(135deg,#D4537E,#c0456e);border:none;color:#fff;font-family:Nunito,sans-serif;font-size:16px;font-weight:900;cursor:pointer;transition:all 0.2s;box-shadow:0 6px 20px rgba(212,83,126,0.35);margin-bottom:16px"
+        onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 10px 28px rgba(212,83,126,0.45)\'"
+        onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 6px 20px rgba(212,83,126,0.35)\'">
+        Create Account
+      </button>
+
+      <!-- Login link -->
+      <div style="text-align:center">
+        <button onclick="navTo(\'login\')"
+          style="background:none;border:none;color:#9CA3AF;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;cursor:pointer"
+          onmouseover="this.style.color=\'#D4537E\'"
+          onmouseout="this.style.color=\'#9CA3AF\'">
+          Already have an account? <span style="color:#D4537E;font-weight:900;text-decoration:underline;text-underline-offset:3px">Login</span>
+        </button>
+      </div>
+
     </div>
   </div>
 </div>
