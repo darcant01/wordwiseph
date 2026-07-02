@@ -1163,9 +1163,10 @@ function buildHdr(){
     const adm=CU.role==='admin'?`<button class="hbtn" onclick="navTo('admin')">Admin</button>`:'';
     const par=(CU.type==='adult'&&CU.role!=='admin')?`<button class="hbtn" onclick="navTo('parent')">My Children</button>`:'';
     const pln=CU.role!=='admin'?`<button class="hbtn" onclick="navTo('pricing')">Plans</button>`:'';
-    r.innerHTML=`${sb}${play}${lb}${adm}${par}${pln}<div class="upill" onclick="navTo('profile')"><div class="uav">${ini}</div><div class="uname">${CU.name.split(' ')[0]} ${sub}</div></div>`;
+    const abt=`<button class="hbtn" onclick="navTo('about')">ℹ️ About</button>`;
+    r.innerHTML=`${sb}${play}${lb}${adm}${par}${pln}${abt}<div class="upill" onclick="navTo('profile')"><div class="uav">${ini}</div><div class="uname">${CU.name.split(' ')[0]} ${sub}</div></div>`;
   }else{
-    r.innerHTML=`${sb}${play}${lb}<button class="hbtn" onclick="navTo('pricing')">Plans</button><button class="hbtn" onclick="navTo('login')">Login</button>`;
+    r.innerHTML=`${sb}${play}${lb}<button class="hbtn" onclick="navTo('pricing')">Plans</button><button class="hbtn" onclick="navTo('about')">ℹ️ About</button><button class="hbtn" onclick="navTo('login')">Login</button>`;
   }
 }
 
