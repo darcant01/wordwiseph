@@ -7,9 +7,8 @@
 <meta name="description" content="Trace uppercase and lowercase letters A to Z with guided break lines. Get instant accuracy feedback and build proper letter formation from the start."/>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
 <style>
-
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--navy:#1D2B55;--navy2:#243366;--pink:#D4537E;--pink2:#c0456e;--gold:#FAC775;--light:#F4F6FF;--muted:#6B7280;--r:16px}
+:root{--navy:#1D2B55;--pink:#D4537E;--pink2:#c0456e;--gold:#FAC775;--light:#F4F6FF;--muted:#6B7280;--accent:#FAC775}
 html{scroll-behavior:smooth}
 body{font-family:"Nunito",sans-serif;background:#fff;color:var(--navy);overflow-x:hidden}
 a{text-decoration:none;color:inherit}
@@ -28,62 +27,64 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(29,43,85,0.9
 .mob-menu.open{display:flex}
 .mob-link{font-size:14px;font-weight:800;padding:12px 16px;border-radius:12px;color:rgba(255,255,255,0.85);cursor:pointer;transition:background 0.15s}
 .mob-link:hover{background:rgba(255,255,255,0.08);color:#fff}
-.hero{min-height:52vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px clamp(16px,5vw,48px) 56px;position:relative;overflow:hidden;text-align:center}
-.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 60% at 70% 30%,var(--accent-glow,rgba(212,83,126,0.2)) 0%,transparent 70%)}
+.hero{min-height:55vh;background:linear-gradient(145deg,#2B1A00,#1D2B55,#2B1A00);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px clamp(16px,5vw,48px) 56px;position:relative;overflow:hidden;text-align:center}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 60% at 70% 30%,#FAC77533 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 20% 80%,rgba(250,199,117,0.08) 0%,transparent 60%)}
 .hero::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,0.05) 1px,transparent 1px);background-size:32px 32px}
-.hero-badge{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:800;padding:6px 16px;border-radius:99px;margin-bottom:20px;position:relative;z-index:1;animation:fadeUp 0.5s ease both}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:#FAC77522;border:1.5px solid #FAC77566;color:#FAC775;font-size:12px;font-weight:800;padding:6px 16px;border-radius:99px;margin-bottom:18px;position:relative;z-index:1;animation:fadeUp 0.5s ease both}
 .hero-emoji{font-size:clamp(52px,12vw,80px);margin-bottom:14px;position:relative;z-index:1;animation:fadeUp 0.5s ease both;filter:drop-shadow(0 8px 24px rgba(0,0,0,0.3))}
 .hero h1{font-size:clamp(28px,6vw,54px);font-weight:900;color:#fff;line-height:1.1;position:relative;z-index:1;animation:fadeUp 0.6s 0.1s ease both}
-.hero-sub{font-size:clamp(14px,2.5vw,17px);color:rgba(255,255,255,0.68);max-width:500px;margin:14px auto 0;line-height:1.65;position:relative;z-index:1;animation:fadeUp 0.6s 0.2s ease both}
-.hero-btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:28px;position:relative;z-index:1;animation:fadeUp 0.6s 0.3s ease both}
-.btn-play{font-family:"Nunito",sans-serif;font-size:clamp(14px,3vw,16px);font-weight:900;padding:14px 32px;border-radius:99px;border:none;color:#fff;cursor:pointer;transition:all 0.2s}
+.hero-sub{font-size:clamp(14px,2.5vw,17px);color:rgba(255,255,255,0.68);max-width:500px;margin:12px auto 0;line-height:1.65;position:relative;z-index:1;animation:fadeUp 0.6s 0.2s ease both}
+.hero-btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:26px;position:relative;z-index:1;animation:fadeUp 0.6s 0.3s ease both}
+.btn-play{font-family:"Nunito",sans-serif;font-size:clamp(14px,3vw,16px);font-weight:900;padding:13px 30px;border-radius:99px;background:#FAC775;border:none;color:#fff;cursor:pointer;transition:all 0.2s;box-shadow:0 8px 28px #FAC77555}
 .btn-play:hover{transform:translateY(-2px);filter:brightness(1.1)}
-.btn-back{font-family:"Nunito",sans-serif;font-size:clamp(14px,3vw,16px);font-weight:900;padding:14px 32px;border-radius:99px;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.3);color:#fff;cursor:pointer;transition:all 0.2s}
-.btn-back:hover{background:rgba(255,255,255,0.18);border-color:#fff}
+.btn-ghost{font-family:"Nunito",sans-serif;font-size:clamp(14px,3vw,16px);font-weight:900;padding:13px 30px;border-radius:99px;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.3);color:#fff;cursor:pointer;transition:all 0.2s}
+.btn-ghost:hover{background:rgba(255,255,255,0.18);border-color:#fff}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-main{max-width:820px;margin:0 auto;padding:clamp(32px,6vw,56px) clamp(16px,4vw,24px)}
-.card{background:#fff;border-radius:20px;border:1.5px solid #EAEDF5;padding:clamp(22px,4vw,32px);margin-bottom:18px;box-shadow:0 4px 20px rgba(29,43,85,0.05)}
-.eyebrow{font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+main{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,52px) clamp(16px,4vw,24px)}
+.card{background:#fff;border-radius:20px;border:1.5px solid #EAEDF5;padding:clamp(20px,4vw,32px);margin-bottom:18px;box-shadow:0 4px 20px rgba(29,43,85,0.05)}
+.eyebrow{font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
 .card-h2{font-size:clamp(18px,4vw,24px);font-weight:900;color:var(--navy);margin-bottom:10px}
 .card-p{font-size:clamp(13px,2.5vw,15px);color:var(--muted);line-height:1.75}
+.meta-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.meta-box{background:var(--light);border-radius:12px;padding:14px 16px;border:1.5px solid #E8EAF0}
+.meta-label{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.meta-value{font-size:13px;font-weight:800;color:var(--navy)}
 .modes-list{display:flex;flex-direction:column;gap:10px;margin-top:16px}
 .mode-card{display:flex;align-items:center;gap:14px;background:var(--light);border-radius:12px;padding:14px 16px;border:1.5px solid #E8EAF0;transition:all 0.15s}
-.mode-card:hover{transform:translateX(4px)}
+.mode-card:hover{border-color:var(--accent);transform:translateX(4px)}
 .mode-icon{font-size:22px;width:44px;height:44px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
 .mode-name{font-size:14px;font-weight:900;color:var(--navy)}
 .mode-detail{font-size:12px;color:var(--muted);margin-top:2px}
 .skills-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .skill-pill{background:var(--light);border:1.5px solid #E8EAF0;border-radius:99px;padding:7px 14px;font-size:12px;font-weight:800;color:var(--navy)}
-.tip-box{border-radius:14px;padding:16px 18px;margin-top:16px;display:flex;gap:12px;align-items:flex-start}
-.meta-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-.meta-box{background:var(--light);border-radius:12px;padding:14px 16px;border:1.5px solid #E8EAF0}
-.meta-label{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
-.meta-value{font-size:13px;font-weight:800;color:var(--navy)}
-.cta-card{border-radius:20px;padding:clamp(28px,5vw,44px);text-align:center;margin-bottom:18px;position:relative;overflow:hidden}
-.cta-card::before{content:"";position:absolute;inset:0;pointer-events:none}
+.tip-box{background:#FAC77511;border:1.5px solid #FAC77533;border-radius:14px;padding:16px 18px;margin-top:16px;display:flex;gap:12px;align-items:flex-start}
+.tip-icon{font-size:20px;flex-shrink:0}
+.tip-text{font-size:13px;font-weight:700;color:var(--navy);line-height:1.6}
+.cta-card{background:linear-gradient(145deg,#2B1A00,#1D2B55,#2B1A00);border-radius:20px;padding:clamp(28px,5vw,44px);text-align:center;margin-bottom:18px;position:relative;overflow:hidden}
+.cta-card::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,#FAC77533 0%,transparent 60%);pointer-events:none}
 .cta-card h2{color:#fff;font-size:clamp(20px,4vw,28px);font-weight:900;margin-bottom:8px;position:relative;z-index:1}
 .cta-card p{color:rgba(255,255,255,0.7);font-size:clamp(13px,2.5vw,15px);margin-bottom:22px;position:relative;z-index:1}
-.other-games{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:16px}
-.other-tile{background:var(--light);border-radius:14px;padding:16px 12px;text-align:center;border:1.5px solid #E8EAF0;cursor:pointer;transition:all 0.2s;display:block}
+.other-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:16px}
+.other-tile{background:var(--light);border-radius:14px;padding:16px 12px;text-align:center;border:1.5px solid #E8EAF0;cursor:pointer;transition:all 0.2s;display:block;position:relative;overflow:hidden}
+.other-tile::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--tc,var(--pink))}
 .other-tile:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(29,43,85,0.1)}
 .ot-emoji{font-size:26px;margin-bottom:6px}
 .ot-name{font-size:12px;font-weight:900;color:var(--navy)}
 footer{background:var(--navy);padding:clamp(28px,5vw,44px) clamp(16px,5vw,48px)}
-.footer-inner{max-width:900px;margin:0 auto}
+.footer-inner{max-width:820px;margin:0 auto}
 .footer-top{display:flex;flex-wrap:wrap;gap:24px;justify-content:space-between;align-items:flex-start;margin-bottom:22px}
 .footer-logo{font-size:20px;font-weight:900;color:#fff}
 .footer-logo span{color:var(--gold)}
 .footer-tagline{font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px}
 .footer-links{display:flex;flex-wrap:wrap;gap:6px}
-.footer-link{font-size:13px;font-weight:700;color:rgba(255,255,255,0.55);padding:6px 12px;border-radius:8px;cursor:pointer;transition:all 0.15s;border:none;background:none;font-family:"Nunito",sans-serif}
+.footer-link{font-size:13px;font-weight:700;color:rgba(255,255,255,0.55);padding:6px 12px;border-radius:8px;cursor:pointer;transition:all 0.15s}
 .footer-link:hover{color:#fff;background:rgba(255,255,255,0.08)}
 .footer-bottom{border-top:1px solid rgba(255,255,255,0.1);padding-top:16px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:12px;color:rgba(255,255,255,0.3)}
 .footer-bottom a{color:rgba(255,255,255,0.45)}
 .footer-bottom a:hover{color:#fff}
 .reveal{opacity:0;transform:translateY(20px);transition:opacity 0.55s ease,transform 0.55s ease}
 .reveal.visible{opacity:1;transform:none}
-@media(max-width:768px){.nav-links{display:none}.ham{display:flex}.meta-row{grid-template-columns:1fr 1fr}}
-
+@media(max-width:768px){.nav-links{display:none}.ham{display:flex}}
 </style>
 </head>
 <body>
@@ -106,19 +107,19 @@ footer{background:var(--navy);padding:clamp(28px,5vw,44px) clamp(16px,5vw,48px)}
   <div class="mob-link" onclick="location.href='app.html'">👤 Login</div>
   <div class="mob-link" style="background:var(--pink);color:#fff;border-radius:12px;text-align:center" onclick="location.href='app.html'">🚀 Play Free</div>
 </div>
-<section class="hero" style="background:linear-gradient(145deg,#0F1A3E,#2B1A00,#1D2B55)">
-  <div class="hero-badge" style="background:#FAC77522;border:1.5px solid #FAC77566;color:#FAC775">Kids Corner 🌟</div>
+<section class="hero">
+  <div class="hero-badge">Kids Corner</div>
   <div class="hero-emoji">✏️</div>
   <h1>Letter Tracer</h1>
   <p class="hero-sub">Trace every letter. Build real handwriting.</p>
   <div class="hero-btns">
-    <button class="btn-play" style="background:#FAC775;box-shadow:0 8px 28px #FAC77555" onclick="location.href='app.html'">▶ Play Now</button>
-    <button class="btn-back" onclick="location.href='index.html#games'">← All Games</button>
+    <button class="btn-play" onclick="startGame()">▶ Play Now</button>
+    <button class="btn-ghost" onclick="location.href='index.html#games'">← All Games</button>
   </div>
 </section>
 <main>
   <div class="card reveal">
-    <div class="eyebrow" style="color:#FAC775">About This Game</div>
+    <div class="eyebrow">About This Game</div>
     <h2 class="card-h2">Letter Tracer</h2>
     <p class="card-p">Trace uppercase and lowercase letters A to Z with guided break lines. Get instant accuracy feedback and build proper letter formation from the start.</p>
     <div class="meta-row">
@@ -127,29 +128,25 @@ footer{background:var(--navy);padding:clamp(28px,5vw,44px) clamp(16px,5vw,48px)}
     </div>
   </div>
   <div class="card reveal">
-    <div class="eyebrow" style="color:#FAC775">Game Modes</div>
+    <div class="eyebrow">Game Modes</div>
     <h2 class="card-h2">Choose your difficulty</h2>
-    <div class="modes-list"><div class="mode-card"><div class="mode-icon">🔠</div><div><div class="mode-name">Uppercase A–Z</div><div class="mode-detail">Trace capital letters with guide</div></div></div><div class="mode-card"><div class="mode-icon">🔡</div><div><div class="mode-name">Lowercase a–z</div><div class="mode-detail">Trace small letters · Basic/Premium</div></div></div><div class="mode-card"><div class="mode-icon">✍️</div><div><div class="mode-name">Trace My Name</div><div class="mode-detail">Spell and trace your own name · Basic/Premium</div></div></div></div>
+    <div class="modes-list"><div class="mode-card"><div class="mode-icon">🔠</div><div><div class="mode-name">Uppercase A–Z</div><div class="mode-detail">Trace capital letters with guide — Free</div></div></div><div class="mode-card"><div class="mode-icon">🔡</div><div><div class="mode-name">Lowercase a–z</div><div class="mode-detail">Trace small letters — Basic & Premium</div></div></div><div class="mode-card"><div class="mode-icon">✍️</div><div><div class="mode-name">Trace My Name</div><div class="mode-detail">Spell and trace your own name — Basic & Premium</div></div></div></div>
   </div>
   <div class="card reveal">
-    <div class="eyebrow" style="color:#FAC775">Skills</div>
-    <h2 class="card-h2">What you'll learn</h2>
+    <div class="eyebrow">What You'll Learn</div>
+    <h2 class="card-h2">Skills this game builds</h2>
     <div class="skills-wrap"><div class="skill-pill">Handwriting</div><div class="skill-pill">Letter recognition</div><div class="skill-pill">Fine motor skills</div><div class="skill-pill">Focus</div></div>
-    <div class="tip-box" style="background:#FAC77511;border:1.5px solid #FAC77533">
-      <div style="font-size:20px;flex-shrink:0">💡</div>
-      <div style="font-size:13px;font-weight:700;color:var(--navy);line-height:1.6"><b>Pro tip:</b> Follow the guide letter underneath. Go slowly and stay within the lines for a high accuracy score!</div>
-    </div>
+    <div class="tip-box"><div class="tip-icon">💡</div><div class="tip-text"><b>Pro tip:</b> Follow the guide letter underneath. Go slowly and stay within the lines for a high accuracy score!</div></div>
   </div>
-  <div class="cta-card reveal" style="background:linear-gradient(145deg,#0F1A3E,#2B1A00,#1D2B55)">
-    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,#FAC77533 0%,transparent 60%);pointer-events:none"></div>
-    <h2>✏️ Ready to play?</h2>
+  <div class="cta-card reveal">
+    <h2>Ready to play? ✏️</h2>
     <p>Jump in and start improving your English — it's free to try!</p>
-    <button class="btn-play" style="background:#FAC775;box-shadow:0 6px 20px #FAC77555" onclick="location.href='app.html'">▶ Play Letter Tracer Now</button>
+    <button class="btn-play" onclick="startGame()">▶ Play Letter Tracer Now</button>
   </div>
   <div class="card reveal">
-    <div class="eyebrow" style="color:#FAC775">More Games</div>
+    <div class="eyebrow">Explore More Games</div>
     <h2 class="card-h2">Keep learning</h2>
-    <div class="other-games" id="other-games"></div>
+    <div class="other-grid" id="other-grid"></div>
   </div>
 </main>
 <footer>
@@ -172,31 +169,15 @@ footer{background:var(--navy);padding:clamp(28px,5vw,44px) clamp(16px,5vw,48px)}
   </div>
 </footer>
 <script>
-
 function toggleMob(){document.getElementById("mob-menu").classList.toggle("open")}
 document.addEventListener("click",function(e){var m=document.getElementById("mob-menu"),h=document.getElementById("ham");if(m&&h&&!m.contains(e.target)&&!h.contains(e.target))m.classList.remove("open")});
-var observer=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add("visible")})},{threshold:0.1});
+var observer=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add("visible")});},{threshold:0.1});
 document.querySelectorAll(".reveal").forEach(function(el){observer.observe(el)});
 window.addEventListener("scroll",function(){var nav=document.querySelector("nav");if(nav)nav.style.boxShadow=window.scrollY>20?"0 4px 24px rgba(0,0,0,0.25)":"none"});
-var allGames=[
-  {id:"grammar",emoji:"📝",name:"Grammar Quiz"},
-  {id:"spell",emoji:"🔤",name:"Spell It Right"},
-  {id:"shark",emoji:"🦈",name:"Shark Typing"},
-  {id:"odd",emoji:"🎯",name:"Odd One Out"},
-  {id:"scramble",emoji:"🔀",name:"Word Scramble"},
-  {id:"chain",emoji:"🔗",name:"Word Chain"},
-  {id:"sprint",emoji:"🏃",name:"Word Sprint"},
-  {id:"tracer",emoji:"✏️",name:"Letter Tracer"},
-];
-function loadOtherGames(current){
-  var el=document.getElementById("other-games");
-  if(!el)return;
-  el.innerHTML=allGames.filter(function(g){return g.id!==current}).map(function(g){
-    return '<a href="game-'+g.id+'.html" class="other-tile"><div class="ot-emoji">'+g.emoji+'</div><div class="ot-name">'+g.name+'</div></a>';
-  }).join("");
-}
-
-loadOtherGames("tracer");
+function startGame(){localStorage.setItem("wwgame","tracer");location.href="app.html";}
+var ALL_GAMES=[{id:"grammar",emoji:"📝",name:"Grammar Quiz",color:"#D4537E"},{id:"spell",emoji:"🔤",name:"Spell It Right",color:"#4ECDC4"},{id:"shark",emoji:"🦈",name:"Shark Typing",color:"#1D9E75"},{id:"odd",emoji:"🎯",name:"Odd One Out",color:"#F59E0B"},{id:"scramble",emoji:"🔀",name:"Word Scramble",color:"#8B5CF6"},{id:"chain",emoji:"🔗",name:"Word Chain",color:"#EC4899"},{id:"sprint",emoji:"🏃",name:"Word Sprint",color:"#06B6D4"},{id:"tracer",emoji:"✏️",name:"Letter Tracer",color:"#FAC775"}];
+var grid=document.getElementById("other-grid");
+grid.innerHTML=ALL_GAMES.filter(function(g){return g.id!=="tracer"}).map(function(g){return'<a href="game-'+g.id+'.html" class="other-tile" style="--tc:'+g.color+'"><div class="ot-emoji">'+g.emoji+'</div><div class="ot-name">'+g.name+'</div></a>';}).join("");
 </script>
 </body>
 </html>
