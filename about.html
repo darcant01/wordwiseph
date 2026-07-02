@@ -105,13 +105,23 @@ footer{background:var(--navy);padding:clamp(28px,5vw,44px) clamp(16px,5vw,48px)}
 <nav>
   <a href="index.html" class="nav-logo">WordWise<span>PH</span></a>
   <div class="nav-links">
-    <button class="nav-link" onclick="location.href='index.html#games'">Games</button>
-    <button class="nav-link" onclick="location.href='app.html#pricing'">💳 Pricing</button>
+    <button class="nav-link" onclick="location.href='index.html#games'">🎮 Games</button>
+    <button class="nav-link" onclick="location.href='pricing.html'">💳 Pricing</button>
     <button class="nav-link active">About</button>
     <button class="nav-link" onclick="location.href='app.html'">Login</button>
     <button class="nav-cta" onclick="location.href='app.html'">Play Free →</button>
   </div>
   <div class="ham" onclick="toggleMob()" id="ham"><span></span><span></span><span></span></div>
+</nav>
+
+<div class="mob-menu" id="mob-menu">
+  <div class="mob-link" onclick="location.href='index.html'">🏠 Home</div>
+  <div class="mob-link" onclick="location.href='index.html#games'">🎮 Games</div>
+  <div class="mob-link" onclick="location.href='pricing.html'">💳 Pricing</div>
+  <div class="mob-link" onclick="location.href='about.html'">ℹ️ About</div>
+  <div class="mob-link" onclick="location.href='app.html'">👤 Login</div>
+  <div class="mob-link" style="background:var(--pink);color:#fff;border-radius:12px;text-align:center" onclick="location.href='app.html'">🚀 Play Free</div>
+</div>v class="ham" onclick="toggleMob()" id="ham"><span></span><span></span><span></span></div>
 </nav>
 <div class="mob-menu" id="mob-menu">
   <div class="mob-link" onclick="location.href='index.html#games'">🎮 Games</div>
@@ -199,11 +209,14 @@ footer{background:var(--navy);padding:clamp(28px,5vw,44px) clamp(16px,5vw,48px)}
 <footer>
   <div class="footer-inner">
     <div class="footer-top">
-      <div><div class="footer-logo">WordWise<span>PH</span></div><div class="footer-tagline">English learning for every child 🌍</div></div>
+      <div>
+        <div class="footer-logo">WordWise<span>PH</span></div>
+        <div class="footer-tagline">Fun English learning for every child 🌍</div>
+      </div>
       <div class="footer-links">
         <span class="footer-link" onclick="location.href='index.html'">Home</span>
         <span class="footer-link" onclick="location.href='index.html#games'">Games</span>
-        <span class="footer-link" onclick="location.href='app.html#pricing'">💳 Pricing</span>
+        <span class="footer-link" onclick="location.href='pricing.html'">Pricing</span>
         <span class="footer-link" onclick="location.href='about.html'">About</span>
         <a class="footer-link" href="https://t.me/wordwiseph_support_bot" target="_blank">Support</a>
         <a class="footer-link" href="mailto:darcant01@gmail.com">Contact</a>
