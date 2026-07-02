@@ -4824,6 +4824,13 @@ function launchABCOrder(){
     const el=document.getElementById('abc-time');
     if(el)el.textContent=abcTLeft;
     if(abcTLeft<=10)sUrg();
+    // Sync floating timer
+    const ft=document.getElementById('floating-timer');
+    const fn=document.getElementById('ft-num');
+    if(ft&&fn){
+      fn.textContent=abcTLeft;
+      fn.style.color=abcTLeft<=5?'#E24B4A':abcTLeft<=24?'#EF9F27':'#FAC775';
+    }
     if(abcTLeft<=0){clearInterval(abcTInt);endABCOrder();}
   },1000);
 }
