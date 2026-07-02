@@ -5344,14 +5344,26 @@ function showRhymeResult(){
 </script>
 
 <script>
-// Load grammar questions from external file
-fetch('questions.json')
-  .then(r => r.json())
-  .then(data => {
-    BANK = data;
-    console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.length,0), 'questions loaded');
-  })
-  .catch(e => console.error('Failed to load questions:', e));
+// Load grammar questions — with localStorage cache for instant repeat visits
+(function(){
+  var CACHE_KEY='ww_questions_v1';
+  try{
+    var cached=localStorage.getItem(CACHE_KEY);
+    if(cached){
+      BANK=JSON.parse(cached);
+      console.log('✅ Questions loaded from cache:', Object.values(BANK).reduce((s,a)=>s+a.length,0));
+    }
+  }catch(e){}
+  // Always fetch fresh in background (updates cache)
+  fetch('questions.json')
+    .then(r => r.json())
+    .then(data => {
+      BANK = data;
+      try{localStorage.setItem(CACHE_KEY, JSON.stringify(data));}catch(e){}
+      console.log('✅ WordWise PH ready!', Object.values(BANK).reduce((s,a)=>s+a.length,0), 'questions loaded');
+    })
+    .catch(e => console.error('Failed to load questions:', e));
+})();
 </script>
 
 
