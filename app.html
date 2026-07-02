@@ -782,121 +782,116 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 </div>
 
 <!-- ══ PRICING ══ -->
-<div id="sc-pricing" class="screen" style="background:#F4F6FF;min-height:100vh;padding:0">
-
-  <!-- Hero bar -->
-  <div style="background:linear-gradient(145deg,#0F1A3E,#1D2B55,#2B1F5E);padding:clamp(28px,6vw,48px) clamp(16px,5vw,40px) clamp(24px,5vw,40px);text-align:center;position:relative;overflow:hidden">
-    <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 60% at 70% 30%,rgba(212,83,126,0.18) 0%,transparent 70%);"></div>
-    <div style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,0.05) 1px,transparent 1px);background-size:32px 32px"></div>
-    <div style="display:inline-block;background:rgba(250,199,117,0.15);border:1.5px solid rgba(250,199,117,0.35);color:#FAC775;font-size:12px;font-weight:800;padding:5px 16px;border-radius:99px;margin-bottom:12px;position:relative;z-index:1">💳 Simple Pricing</div>
-    <div style="font-size:clamp(24px,6vw,42px);font-weight:900;color:#fff;position:relative;z-index:1;line-height:1.1">Choose Your <span style="color:#D4537E">Plan</span></div>
-    <div style="font-size:clamp(13px,3vw,16px);color:rgba(255,255,255,0.65);margin-top:8px;position:relative;z-index:1">Start free · Upgrade anytime · Pay via GCash</div>
-  </div>
-
-  <!-- Plan cards -->
-  <div style="max-width:1100px;margin:0 auto;padding:clamp(20px,4vw,36px) clamp(12px,4vw,24px)">
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:clamp(10px,2vw,16px);margin-bottom:20px">
+<div id="sc-pricing" class="screen">
+  <div class="hero"><div class="htitle">Choose Your <span>Plan</span></div><div class="hsub">Unlock unlimited learning for your child!</div></div>
+  <div class="wrap">
+    <div class="plan-grid">
 
       <!-- FREE -->
-      <div style="background:#fff;border-radius:18px;border:1.5px solid #EAEDF5;padding:clamp(16px,3vw,24px);display:flex;flex-direction:column;gap:0;box-shadow:0 4px 16px rgba(29,43,85,0.05);transition:all 0.2s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(29,43,85,0.12)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(29,43,85,0.05)'">
-        <div style="font-size:clamp(28px,6vw,36px);margin-bottom:10px">🌱</div>
-        <div style="font-size:clamp(16px,4vw,20px);font-weight:900;color:#1D2B55;margin-bottom:4px">Free</div>
-        <div style="font-size:clamp(22px,5vw,30px);font-weight:900;color:#6B7280">₱0 <span style="font-size:13px;font-weight:700;color:#9CA3AF">/forever</span></div>
-        <div style="font-size:12px;font-weight:700;color:#9CA3AF;margin-bottom:14px">No payment needed</div>
-        <div style="height:1px;background:#F0F0F0;margin-bottom:14px"></div>
-        <div style="display:flex;flex-direction:column;gap:7px;flex:1;margin-bottom:16px">
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ Grammar Quiz — Easy only</div>
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ 4 free game rounds</div>
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ Public leaderboard</div>
-          <div style="font-size:12px;font-weight:700;color:#9CA3AF">❌ Medium &amp; Hard levels</div>
-          <div style="font-size:12px;font-weight:700;color:#9CA3AF">❌ All 7 Brainy Games</div>
-          <div style="font-size:12px;font-weight:700;color:#9CA3AF">❌ Kids Corner games</div>
+      <div class="plan-card" style="border:2px solid #D3D1C7;background:#F9F8F5">
+        <div class="plan-icon">🌱</div>
+        <div class="plan-name" style="color:#5F5E5A">Free</div>
+        <div class="plan-price" style="color:#5F5E5A">₱0 <span style="font-size:14px;color:#888780">/forever</span></div>
+        <div class="plan-period" style="color:#888780">No payment needed</div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="plan-feat"><span class="pi">✅</span>Grammar Quiz — Easy only</div>
+          <div class="plan-feat"><span class="pi">✅</span>4 free game rounds</div>
+          <div class="plan-feat"><span class="pi">✅</span>Public leaderboard</div>
+          <div class="plan-feat no"><span class="pi">❌</span>Medium &amp; Hard levels</div>
+          <div class="plan-feat no"><span class="pi">❌</span>All 7 Brainy Games</div>
+          <div class="plan-feat no"><span class="pi">❌</span>Kids Corner games</div>
+          <div class="plan-feat no"><span class="pi">❌</span>Parent dashboard</div>
         </div>
-        <button onclick="navTo('start')" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:900;padding:11px;border-radius:99px;background:#fff;border:2px solid #D1D5DB;color:#6B7280;cursor:pointer;width:100%;transition:all 0.2s" onmouseover="this.style.borderColor='#1D2B55';this.style.color='#1D2B55'" onmouseout="this.style.borderColor='#D1D5DB';this.style.color='#6B7280'">Continue Free</button>
+        <button class="btn btn-block" onclick="navTo('start')" style="background:#fff;color:#5F5E5A;border:2px solid #D3D1C7;font-family:Nunito,sans-serif;font-weight:800">Continue Free</button>
       </div>
 
       <!-- TRIAL -->
-      <div style="background:linear-gradient(160deg,#FFFBEB,#FEF3C7);border-radius:18px;border:2px solid #F59E0B;padding:clamp(16px,3vw,24px);display:flex;flex-direction:column;position:relative;box-shadow:0 4px 20px rgba(245,158,11,0.15);transition:all 0.2s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 14px 36px rgba(245,158,11,0.25)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(245,158,11,0.15)'">
-        <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#F59E0B;color:#fff;font-size:10px;font-weight:900;padding:4px 14px;border-radius:99px;white-space:nowrap">⚡ TRY IT!</div>
-        <div style="font-size:clamp(28px,6vw,36px);margin-bottom:10px;margin-top:8px">🌤️</div>
-        <div style="font-size:clamp(16px,4vw,20px);font-weight:900;color:#92400E;margin-bottom:4px">Trial</div>
-        <div style="font-size:clamp(22px,5vw,30px);font-weight:900;color:#F59E0B">₱10 <span style="font-size:13px;font-weight:700;color:#B45309">/day</span></div>
-        <div style="font-size:12px;font-weight:700;color:#B45309;margin-bottom:14px">Just 1 day — test everything!</div>
-        <div style="height:1px;background:rgba(245,158,11,0.2);margin-bottom:14px"></div>
-        <div style="display:flex;flex-direction:column;gap:7px;flex:1;margin-bottom:16px">
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ All 7 Brainy Games</div>
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ All difficulty levels</div>
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ Kids Corner all games</div>
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ Letter Tracer all modes</div>
-          <div style="font-size:12px;font-weight:700;color:#9CA3AF">❌ Parent dashboard</div>
-          <div style="font-size:12px;font-weight:700;color:#9CA3AF">❌ Multiple children</div>
+      <div class="plan-card" style="border:2px solid #F59E0B;background:linear-gradient(160deg,#FFFBEB,#FEF3C7)">
+        <div class="plan-badge" style="background:#F59E0B;color:#fff">⚡ TRY IT!</div>
+        <div class="plan-icon">🌤️</div>
+        <div class="plan-name" style="color:#92400E">Trial</div>
+        <div class="plan-price" style="color:#F59E0B">₱10 <span style="font-size:14px;color:#B45309">/day</span></div>
+        <div class="plan-period" style="color:#B45309">Just 1 day — test everything!</div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="plan-feat"><span class="pi">✅</span>All 7 Brainy Games</div>
+          <div class="plan-feat"><span class="pi">✅</span>All difficulty levels</div>
+          <div class="plan-feat"><span class="pi">✅</span>Kids Corner all games</div>
+          <div class="plan-feat"><span class="pi">✅</span>Letter Tracer all modes</div>
+          <div class="plan-feat no"><span class="pi">❌</span>Parent dashboard</div>
+          <div class="plan-feat no"><span class="pi">❌</span>Multiple children</div>
         </div>
-        <button onclick="choosePlan('trial',10)" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:900;padding:11px;border-radius:99px;background:#F59E0B;border:none;color:#fff;cursor:pointer;width:100%;transition:all 0.2s;box-shadow:0 4px 14px rgba(245,158,11,0.4)" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">Try for ₱10 — 1 Day</button>
+        <button class="btn btn-block" onclick="choosePlan('trial',10)" style="background:#F59E0B;border:2px solid #F59E0B;color:#fff;font-family:Nunito,sans-serif;font-weight:800">Try for ₱10 — 1 Day</button>
       </div>
 
       <!-- WEEKLY -->
-      <div style="background:linear-gradient(160deg,#ECFDF5,#D1FAE5);border-radius:18px;border:2px solid #10B981;padding:clamp(16px,3vw,24px);display:flex;flex-direction:column;position:relative;box-shadow:0 4px 20px rgba(16,185,129,0.12);transition:all 0.2s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 14px 36px rgba(16,185,129,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(16,185,129,0.12)'">
-        <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#10B981;color:#fff;font-size:10px;font-weight:900;padding:4px 14px;border-radius:99px;white-space:nowrap">📅 WEEKLY</div>
-        <div style="font-size:clamp(28px,6vw,36px);margin-bottom:10px;margin-top:8px">🗓️</div>
-        <div style="font-size:clamp(16px,4vw,20px);font-weight:900;color:#065F46;margin-bottom:4px">Weekly</div>
-        <div style="font-size:clamp(22px,5vw,30px);font-weight:900;color:#10B981">₱35 <span style="font-size:13px;font-weight:700;color:#059669">/week</span></div>
-        <div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:14px">7 days full access</div>
-        <div style="height:1px;background:rgba(16,185,129,0.2);margin-bottom:14px"></div>
-        <div style="display:flex;flex-direction:column;gap:7px;flex:1;margin-bottom:16px">
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ All 7 Brainy Games</div>
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ All difficulty levels</div>
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ Kids Corner all games</div>
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ Letter Tracer all modes</div>
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ Score history</div>
-          <div style="font-size:12px;font-weight:700;color:#9CA3AF">❌ Parent dashboard</div>
+      <div class="plan-card" style="border:2px solid #10B981;background:linear-gradient(160deg,#ECFDF5,#D1FAE5)">
+        <div class="plan-badge" style="background:#10B981;color:#fff">📅 WEEKLY</div>
+        <div class="plan-icon">🗓️</div>
+        <div class="plan-name" style="color:#065F46">Weekly</div>
+        <div class="plan-price" style="color:#10B981">₱35 <span style="font-size:14px;color:#059669">/week</span></div>
+        <div class="plan-period" style="color:#059669">7 days full access</div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="plan-feat"><span class="pi">✅</span>All 7 Brainy Games</div>
+          <div class="plan-feat"><span class="pi">✅</span>All difficulty levels</div>
+          <div class="plan-feat"><span class="pi">✅</span>Kids Corner all games</div>
+          <div class="plan-feat"><span class="pi">✅</span>Letter Tracer all modes</div>
+          <div class="plan-feat"><span class="pi">✅</span>Score history</div>
+          <div class="plan-feat no"><span class="pi">❌</span>Parent dashboard</div>
+          <div class="plan-feat no"><span class="pi">❌</span>Multiple children</div>
         </div>
-        <button onclick="choosePlan('weekly',35)" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:900;padding:11px;border-radius:99px;background:#10B981;border:none;color:#fff;cursor:pointer;width:100%;transition:all 0.2s;box-shadow:0 4px 14px rgba(16,185,129,0.35)" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">Get Weekly — ₱35</button>
+        <button class="btn btn-block" onclick="choosePlan('weekly',35)" style="background:#10B981;border:2px solid #10B981;color:#fff;font-family:Nunito,sans-serif;font-weight:800">Get Weekly — ₱35</button>
       </div>
 
       <!-- BASIC -->
-      <div style="background:#fff;border-radius:18px;border:2.5px solid #D4537E;padding:clamp(16px,3vw,24px);display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 4px rgba(212,83,126,0.1),0 8px 28px rgba(212,83,126,0.2);transition:all 0.2s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 0 0 4px rgba(212,83,126,0.15),0 16px 40px rgba(212,83,126,0.3)'" onmouseout="this.style.transform='';this.style.boxShadow='0 0 0 4px rgba(212,83,126,0.1),0 8px 28px rgba(212,83,126,0.2)'">
-        <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#D4537E;color:#fff;font-size:10px;font-weight:900;padding:4px 14px;border-radius:99px;white-space:nowrap">⭐ MOST POPULAR</div>
-        <div style="font-size:clamp(28px,6vw,36px);margin-bottom:10px;margin-top:8px">🔥</div>
-        <div style="font-size:clamp(16px,4vw,20px);font-weight:900;color:#1D2B55;margin-bottom:4px">Basic</div>
-        <div style="font-size:clamp(22px,5vw,30px);font-weight:900;color:#D4537E">₱99 <span style="font-size:13px;font-weight:700;color:#9CA3AF">/mo</span></div>
-        <div style="font-size:12px;font-weight:700;color:#D4537E;margin-bottom:14px">Best value for 1 child</div>
-        <div style="height:1px;background:#FFE4EE;margin-bottom:14px"></div>
-        <div style="display:flex;flex-direction:column;gap:7px;flex:1;margin-bottom:16px">
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ All 7 Brainy Games</div>
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ 1,045 Grammar questions</div>
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ Kids Corner — all games</div>
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ Letter Tracer + Trace My Name</div>
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ Full score history</div>
-          <div style="font-size:12px;font-weight:700;color:#374151">✅ Parent dashboard (1 child)</div>
-          <div style="font-size:12px;font-weight:700;color:#9CA3AF">❌ Multiple children</div>
+      <div class="plan-card popular" style="border:2px solid #FF6B9D;background:#fff">
+        <div class="plan-badge">⭐ MOST POPULAR</div>
+        <div class="plan-icon">⚡</div>
+        <div class="plan-name">Basic</div>
+        <div class="plan-price">₱99 <span>/mo</span></div>
+        <div class="plan-period">Best value for 1 child</div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="plan-feat"><span class="pi">✅</span>All 7 Brainy Games unlocked</div>
+          <div class="plan-feat"><span class="pi">✅</span>1,045 Grammar questions</div>
+          <div class="plan-feat"><span class="pi">✅</span>Easy, Medium &amp; Hard levels</div>
+          <div class="plan-feat"><span class="pi">✅</span>Kids Corner — all games</div>
+          <div class="plan-feat"><span class="pi">✅</span>Full score history</div>
+          <div class="plan-feat"><span class="pi">✅</span>Parent dashboard (1 child)</div>
+          <div class="plan-feat"><span class="pi">✅</span>Lowercase Letter Tracer</div>
+          <div class="plan-feat"><span class="pi">✅</span>✍️ Trace My Name</div>
+          <div class="plan-feat no"><span class="pi">❌</span>Multiple children</div>
         </div>
-        <button onclick="choosePlan('basic',99)" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:900;padding:11px;border-radius:99px;background:#D4537E;border:none;color:#fff;cursor:pointer;width:100%;transition:all 0.2s;box-shadow:0 4px 16px rgba(212,83,126,0.4)" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">Get Basic — ₱99/mo</button>
+        <button class="btn btn-pink btn-block" onclick="choosePlan('basic',99)">Get Basic — ₱99/mo</button>
       </div>
 
       <!-- PREMIUM -->
-      <div style="background:linear-gradient(160deg,#1D2B55,#2D1B69);border-radius:18px;border:2px solid #7C3AED;padding:clamp(16px,3vw,24px);display:flex;flex-direction:column;position:relative;box-shadow:0 8px 32px rgba(124,58,237,0.25);transition:all 0.2s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 48px rgba(124,58,237,0.35)'" onmouseout="this.style.transform='';this.style.boxShadow='0 8px 32px rgba(124,58,237,0.25)'">
-        <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#FAC775,#FF8E53);color:#1D2B55;font-size:10px;font-weight:900;padding:4px 14px;border-radius:99px;white-space:nowrap">👑 PREMIUM</div>
-        <div style="font-size:clamp(28px,6vw,36px);margin-bottom:10px;margin-top:8px">👑</div>
-        <div style="font-size:clamp(16px,4vw,20px);font-weight:900;color:#FAC775;margin-bottom:4px">Premium</div>
-        <div style="font-size:clamp(22px,5vw,30px);font-weight:900;color:#fff">₱199 <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.45)">/mo</span></div>
-        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.55);margin-bottom:14px">For families — up to 5 children</div>
-        <div style="height:1px;background:rgba(255,255,255,0.1);margin-bottom:14px"></div>
-        <div style="display:flex;flex-direction:column;gap:7px;flex:1;margin-bottom:16px">
-          <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.9)">✅ Everything in Basic</div>
-          <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.9)">✅ Up to 5 child accounts</div>
-          <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.9)">✅ Advanced parent dashboard</div>
-          <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.9)">✅ Detailed progress reports</div>
-          <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.9)">✅ Priority support</div>
-          <div style="font-size:12px;font-weight:700;color:#FAC775">⭐ Early access to new features</div>
+      <div class="plan-card" style="border:2px solid #7C3AED;background:linear-gradient(160deg,#1D2B55,#2D1B69);color:#fff">
+        <div class="plan-badge" style="background:linear-gradient(90deg,#FAC775,#FF8E53);color:#1D2B55">🔥 PREMIUM</div>
+        <div class="plan-icon">👑</div>
+        <div class="plan-name" style="color:#FAC775">Premium</div>
+        <div class="plan-price" style="color:#fff">₱199 <span style="font-size:14px;color:#B5D4F4">/mo</span></div>
+        <div class="plan-period" style="color:#B5D4F4">For families — up to 5 children</div>
+        <div class="plan-divider" style="border-color:rgba(255,255,255,0.15)"></div>
+        <div class="plan-features">
+          <div class="plan-feat" style="color:#fff"><span class="pi">✅</span>Everything in Basic</div>
+          <div class="plan-feat" style="color:#fff"><span class="pi">✅</span>Up to 5 child accounts</div>
+          <div class="plan-feat" style="color:#fff"><span class="pi">✅</span>🔡 Lowercase Letter Tracer</div>
+          <div class="plan-feat" style="color:#fff"><span class="pi">✅</span>✍️ Trace My Name (PRO)</div>
+          <div class="plan-feat" style="color:#fff"><span class="pi">✅</span>Advanced parent dashboard</div>
+          <div class="plan-feat" style="color:#fff"><span class="pi">✅</span>Detailed progress reports</div>
+          <div class="plan-feat" style="color:#fff"><span class="pi">✅</span>Priority support</div>
+          <div class="plan-feat" style="color:#FAC775"><span class="pi">⭐</span>Early access to new features</div>
         </div>
-        <button onclick="choosePlan('premium',199)" style="font-family:Nunito,sans-serif;font-size:13px;font-weight:900;padding:11px;border-radius:99px;background:linear-gradient(90deg,#FAC775,#FF8E53);border:none;color:#1D2B55;cursor:pointer;width:100%;transition:all 0.2s;box-shadow:0 4px 16px rgba(250,199,117,0.4)" onmouseover="this.style.filter='brightness(1.08)'" onmouseout="this.style.filter=''">👑 Get Premium — ₱199/mo</button>
+        <button class="btn btn-block" onclick="choosePlan('premium',199)" style="background:linear-gradient(90deg,#FAC775,#FF8E53);border:none;color:#1D2B55;font-family:Nunito,sans-serif;font-weight:900;font-size:clamp(14px,3.5vw,16px)">👑 Get Premium — ₱199/mo</button>
       </div>
 
     </div>
-    <div style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#9CA3AF;font-weight:700;padding-bottom:20px">🔒 Secure payment via GCash · Cancel anytime · No hidden fees</div>
+    <div style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780;margin-top:4px">🔒 Secure payment via GCash · Cancel anytime · No hidden fees</div>
   </div>
 </div>
-
 
 <!-- ══ PAYMENT ══ -->
 <div id="sc-payment" class="screen">
