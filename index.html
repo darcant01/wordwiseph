@@ -322,6 +322,54 @@ section{padding:clamp(48px,8vw,90px) clamp(16px,5vw,48px)}
   box-shadow:0 8px 30px rgba(212,83,126,0.4);
 }
 .btn-pricing:hover{background:var(--pink2);transform:translateY(-2px)}
+
+/* ── NEW PLAN CARDS ── */
+.plans-grid-new{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:14px;margin-bottom:28px;
+}
+.plan-card-new{
+  display:flex;flex-direction:column;gap:14px;
+  background:rgba(255,255,255,0.06);
+  border:1.5px solid rgba(255,255,255,0.15);
+  border-radius:16px;padding:18px 16px;
+  text-decoration:none;color:#fff;
+  transition:all 0.2s;cursor:pointer;
+  position:relative;overflow:hidden;
+}
+.plan-card-new:hover{background:rgba(255,255,255,0.11);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,0.3)}
+.popular-card{
+  background:linear-gradient(145deg,#1D2B55,#2D1B69) !important;
+  border-color:var(--pink) !important;
+  box-shadow:0 8px 32px rgba(212,83,126,0.25);
+}
+.pcn-badge{
+  position:absolute;top:0;left:0;right:0;
+  background:var(--pink);color:#fff;
+  font-size:11px;font-weight:900;
+  padding:5px;text-align:center;
+  border-radius:14px 14px 0 0;
+}
+.popular-card .pcn-top{margin-top:18px}
+.pcn-top{display:flex;align-items:center;gap:12px}
+.pcn-emoji{font-size:28px}
+.pcn-name{font-size:16px;font-weight:900;color:#fff}
+.pcn-price{font-size:20px;font-weight:900;color:rgba(255,255,255,0.9)}
+.pcn-price span{font-size:12px;color:rgba(255,255,255,0.45);font-weight:700}
+.pcn-features{display:flex;flex-direction:column;gap:6px;flex:1}
+.pcn-feat{font-size:12px;font-weight:700;color:rgba(255,255,255,0.75);line-height:1.4}
+.pcn-feat.muted{color:rgba(255,255,255,0.35)}
+.pcn-btn{
+  font-family:"Nunito",sans-serif;font-size:12px;font-weight:900;
+  padding:9px 14px;border-radius:99px;text-align:center;
+  background:rgba(255,255,255,0.1);color:#fff;
+  border:1.5px solid rgba(255,255,255,0.2);
+  transition:all 0.15s;
+}
+.plan-card-new:hover .pcn-btn{filter:brightness(1.1)}
+@media(max-width:900px){.plans-grid-new{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.plans-grid-new{grid-template-columns:1fr}}
 .pricing-note{font-size:12px;color:rgba(255,255,255,0.4);margin-top:14px}
 
 /* ══ TESTIMONIAL / TRUST ══ */
@@ -748,35 +796,101 @@ footer{
     <div class="eyebrow">Simple Pricing</div>
     <h2 class="section-h2">Plans that fit <span style="color:var(--gold)">every family</span></h2>
     <p class="section-p">Start free and upgrade anytime. Pay via GCash — no credit card needed.</p>
-    <div class="plans-row">
-      <div class="plan-pill">
-        <div class="plan-emoji">🌱</div>
-        <div class="plan-name-p">Free</div>
-        <div class="plan-price-p">₱0 <span>forever</span></div>
-      </div>
-      <div class="plan-pill">
-        <div class="plan-emoji">⚡</div>
-        <div class="plan-name-p">Trial</div>
-        <div class="plan-price-p">₱10 <span>/day</span></div>
-      </div>
-      <div class="plan-pill">
-        <div class="plan-emoji">🗓️</div>
-        <div class="plan-name-p">Weekly</div>
-        <div class="plan-price-p">₱35 <span>/week</span></div>
-      </div>
-      <div class="plan-pill featured">
-        <div class="plan-emoji">⭐</div>
-        <div class="plan-name-p">Basic</div>
-        <div class="plan-price-p">₱99 <span>/mo</span></div>
-        <div class="plan-tag">Most Popular</div>
-      </div>
-      <div class="plan-pill">
-        <div class="plan-emoji">👑</div>
-        <div class="plan-name-p">Premium</div>
-        <div class="plan-price-p">₱199 <span>/mo</span></div>
-      </div>
+
+    <div class="plans-grid-new">
+
+      <!-- FREE -->
+      <a href="app.html#pricing" class="plan-card-new">
+        <div class="pcn-top">
+          <div class="pcn-emoji">🌱</div>
+          <div>
+            <div class="pcn-name">Free</div>
+            <div class="pcn-price">₱0 <span>forever</span></div>
+          </div>
+        </div>
+        <div class="pcn-features">
+          <div class="pcn-feat">✅ Grammar Quiz — Easy only</div>
+          <div class="pcn-feat">✅ 4 game rounds</div>
+          <div class="pcn-feat muted">❌ Kids Corner</div>
+          <div class="pcn-feat muted">❌ All difficulty levels</div>
+        </div>
+        <div class="pcn-btn">Get Started Free</div>
+      </a>
+
+      <!-- TRIAL -->
+      <a href="app.html#pricing" class="plan-card-new" style="border-color:#F59E0B">
+        <div class="pcn-top">
+          <div class="pcn-emoji">⚡</div>
+          <div>
+            <div class="pcn-name">Trial</div>
+            <div class="pcn-price" style="color:#F59E0B">₱10 <span>/day</span></div>
+          </div>
+        </div>
+        <div class="pcn-features">
+          <div class="pcn-feat">✅ All 7 Brainy Games</div>
+          <div class="pcn-feat">✅ All difficulty levels</div>
+          <div class="pcn-feat">✅ Kids Corner</div>
+          <div class="pcn-feat">✅ Letter Tracer all modes</div>
+        </div>
+        <div class="pcn-btn" style="background:rgba(245,158,11,0.12);color:#F59E0B;border:1.5px solid rgba(245,158,11,0.3)">Try for ₱10</div>
+      </a>
+
+      <!-- WEEKLY -->
+      <a href="app.html#pricing" class="plan-card-new" style="border-color:#10B981">
+        <div class="pcn-top">
+          <div class="pcn-emoji">🗓️</div>
+          <div>
+            <div class="pcn-name">Weekly</div>
+            <div class="pcn-price" style="color:#10B981">₱35 <span>/week</span></div>
+          </div>
+        </div>
+        <div class="pcn-features">
+          <div class="pcn-feat">✅ All 7 Brainy Games</div>
+          <div class="pcn-feat">✅ All difficulty levels</div>
+          <div class="pcn-feat">✅ Kids Corner</div>
+          <div class="pcn-feat">✅ Score history</div>
+        </div>
+        <div class="pcn-btn" style="background:rgba(16,185,129,0.12);color:#10B981;border:1.5px solid rgba(16,185,129,0.3)">Get Weekly</div>
+      </a>
+
+      <!-- BASIC -->
+      <a href="app.html#pricing" class="plan-card-new popular-card">
+        <div class="pcn-badge">⭐ Most Popular</div>
+        <div class="pcn-top">
+          <div class="pcn-emoji">🔥</div>
+          <div>
+            <div class="pcn-name" style="color:#fff">Basic</div>
+            <div class="pcn-price" style="color:#FAC775">₱99 <span style="color:rgba(255,255,255,0.5)">/mo</span></div>
+          </div>
+        </div>
+        <div class="pcn-features">
+          <div class="pcn-feat" style="color:rgba(255,255,255,0.9)">✅ All 7 Brainy Games</div>
+          <div class="pcn-feat" style="color:rgba(255,255,255,0.9)">✅ Kids Corner — all 16 games</div>
+          <div class="pcn-feat" style="color:rgba(255,255,255,0.9)">✅ Letter Tracer + Trace My Name</div>
+          <div class="pcn-feat" style="color:rgba(255,255,255,0.9)">✅ Parent dashboard (1 child)</div>
+        </div>
+        <div class="pcn-btn" style="background:var(--pink);color:#fff;border:none">Get Basic — ₱99/mo</div>
+      </a>
+
+      <!-- PREMIUM -->
+      <a href="app.html#pricing" class="plan-card-new" style="border-color:#7C3AED">
+        <div class="pcn-top">
+          <div class="pcn-emoji">👑</div>
+          <div>
+            <div class="pcn-name">Premium</div>
+            <div class="pcn-price" style="color:#7C3AED">₱199 <span>/mo</span></div>
+          </div>
+        </div>
+        <div class="pcn-features">
+          <div class="pcn-feat">✅ Everything in Basic</div>
+          <div class="pcn-feat">✅ Up to 5 child accounts</div>
+          <div class="pcn-feat">✅ Advanced parent dashboard</div>
+          <div class="pcn-feat">✅ Priority support</div>
+        </div>
+        <div class="pcn-btn" style="background:rgba(124,58,237,0.12);color:#7C3AED;border:1.5px solid rgba(124,58,237,0.3)">Get Premium</div>
+      </a>
+
     </div>
-    <button class="btn-pricing" onclick="location.href='app.html'">View full plan details →</button>
     <div class="pricing-note">🔒 Secure payment via GCash · Cancel anytime · No hidden fees</div>
   </div>
 </section>
@@ -784,7 +898,7 @@ footer{
 <!-- FINAL CTA -->
 <section class="final-cta">
   <h2>Ready to start? 🚀</h2>
-  <p>Join Filipino kids already learning with WordWise PH.<br>It's free to start — no credit card, no commitment.</p>
+  <p>Start learning today — no credit card, no commitment.</p>
   <button class="btn-final" onclick="location.href='app.html'">Play for Free Now</button>
 </section>
 
