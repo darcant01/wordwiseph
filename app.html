@@ -2363,15 +2363,7 @@ document.addEventListener('DOMContentLoaded',function(){
   buildHdr();
   updateDiffCards();
   loadLBGame('grammar','easy');
-  // Start ticker after page fully loaded
   setTimeout(()=>TICKER.start(), 2000);
-  // Hash-based routing — runs AFTER header is built
-  setTimeout(function(){
-    var hash = window.location.hash.replace('#','');
-    if(hash && document.getElementById('sc-'+hash)){
-      navTo(hash);
-    }
-  }, 100);
 });
 
 </script>
