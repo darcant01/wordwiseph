@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Blog — English Learning Tips for Parents | WordWise PH</title>
+<meta name="description" content="Practical English grammar tips, learning guides, and activities for Filipino parents and teachers. Help your child master English the fun way."/>
+<link rel="icon" type="image/png" href="favicon.png"/>
+<meta property="og:title" content="WordWise PH Blog — English Learning Tips for Parents"/>
+<meta property="og:description" content="Practical grammar tips and guides for Filipino parents and teachers."/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--navy:#1D2B55;--pink:#D4537E;--pink2:#c0456e;--gold:#FAC775;--light:#F4F6FF;--muted:#6B7280}
+html{scroll-behavior:smooth}
+body{font-family:"Nunito",sans-serif;background:#fff;color:var(--navy);overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(29,43,85,0.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.08);height:64px;display:flex;align-items:center;padding:0 clamp(16px,5vw,48px);justify-content:space-between}
+.nav-logo{font-size:clamp(18px,4vw,22px);font-weight:900;color:#fff}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-link{font-size:13px;font-weight:800;padding:8px 14px;border-radius:99px;color:rgba(255,255,255,0.8);border:none;background:none;cursor:pointer;transition:all 0.15s;font-family:"Nunito",sans-serif}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,0.1)}
+.nav-link.active{color:#fff;background:rgba(255,255,255,0.12)}
+.nav-cta{background:var(--pink);color:#fff;padding:9px 20px;border-radius:99px;font-size:13px;font-weight:900;font-family:"Nunito",sans-serif;border:none;cursor:pointer;transition:all 0.15s}
+.nav-cta:hover{background:var(--pink2);transform:scale(1.04)}
+.ham{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px}
+.ham span{width:22px;height:2.5px;background:#fff;border-radius:2px}
+.mob-menu{display:none;position:fixed;top:64px;left:0;right:0;background:var(--navy);padding:16px;z-index:199;border-bottom:1px solid rgba(255,255,255,0.1);flex-direction:column;gap:8px}
+.mob-menu.open{display:flex}
+.mob-link{font-size:14px;font-weight:800;padding:12px 16px;border-radius:12px;color:rgba(255,255,255,0.85);cursor:pointer}
+.mob-link:hover{background:rgba(255,255,255,0.08);color:#fff}
+footer{background:var(--navy);padding:clamp(28px,5vw,44px) clamp(16px,5vw,48px);margin-top:40px}
+.footer-inner{max-width:800px;margin:0 auto}
+.footer-top{display:flex;flex-wrap:wrap;gap:24px;justify-content:space-between;align-items:flex-start;margin-bottom:22px}
+.footer-logo{font-size:20px;font-weight:900;color:#fff}
+.footer-logo span{color:var(--gold)}
+.footer-tagline{font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px}
+.footer-links{display:flex;flex-wrap:wrap;gap:6px}
+.footer-link{font-size:13px;font-weight:700;color:rgba(255,255,255,0.55);padding:6px 12px;border-radius:8px;cursor:pointer;transition:all 0.15s}
+.footer-link:hover{color:#fff;background:rgba(255,255,255,0.08)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.1);padding-top:16px;font-size:12px;color:rgba(255,255,255,0.3)}
+@media(max-width:768px){.nav-links{display:none}.ham{display:flex}}
+.hero-bar{background:linear-gradient(135deg,#0F1A3E,#1D2B55,#2B1F5E);padding:100px clamp(16px,5vw,48px) 48px;text-align:center;position:relative;overflow:hidden}
+.hero-bar::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 60% at 70% 30%,rgba(212,83,126,0.18) 0%,transparent 70%)}
+.hero-bar h1{font-size:clamp(26px,6vw,44px);font-weight:900;color:#fff;position:relative;z-index:1}
+.hero-bar h1 span{color:var(--gold)}
+.hero-bar p{font-size:clamp(13px,2.5vw,16px);color:rgba(255,255,255,0.65);margin-top:8px;position:relative;z-index:1}
+main{max-width:760px;margin:0 auto;padding:clamp(28px,5vw,48px) clamp(16px,4vw,24px)}
+.post-card{display:block;background:#fff;border-radius:18px;border:1.5px solid #EAEDF5;padding:clamp(20px,4vw,28px);margin-bottom:16px;transition:all 0.2s;cursor:pointer}
+.post-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(29,43,85,0.1);border-color:var(--pink)}
+.post-tag{display:inline-block;font-size:11px;font-weight:900;padding:3px 12px;border-radius:99px;background:#FFF0F7;color:var(--pink);margin-bottom:10px}
+.post-title{font-size:clamp(17px,4vw,22px);font-weight:900;color:var(--navy);line-height:1.3;margin-bottom:8px}
+.post-excerpt{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:12px}
+.post-meta{font-size:12px;color:#9CA3AF;font-weight:700}
+.coming{opacity:0.55;cursor:default}
+.coming:hover{transform:none;box-shadow:none;border-color:#EAEDF5}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">WordWise<span>PH</span></a>
+  <div class="nav-links">
+    <button class="nav-link" onclick="location.href='index.html#games'">🎮 Games</button>
+    <button class="nav-link" onclick="location.href='index.html#pricing'">💳 Pricing</button>
+    <button class="nav-link active">📚 Blog</button>
+    <button class="nav-link" onclick="location.href='about.html'">About</button>
+    <button class="nav-cta" onclick="location.href='app.html'">Play Free →</button>
+  </div>
+  <div class="ham" onclick="toggleMob()" id="ham"><span></span><span></span><span></span></div>
+</nav>
+<div class="mob-menu" id="mob-menu">
+  <div class="mob-link" onclick="location.href='index.html'">🏠 Home</div>
+  <div class="mob-link" onclick="location.href='index.html#games'">🎮 Games</div>
+  <div class="mob-link" onclick="location.href='index.html#pricing'">💳 Pricing</div>
+  <div class="mob-link" style="color:#fff;font-weight:900">📚 Blog</div>
+  <div class="mob-link" onclick="location.href='about.html'">ℹ️ About</div>
+  <div class="mob-link" style="background:var(--pink);color:#fff;border-radius:12px;text-align:center" onclick="location.href='app.html'">🚀 Play Free</div>
+</div>
+<div class="hero-bar">
+  <h1>WordWise <span>Blog</span> 📚</h1>
+  <p>English learning tips for parents and teachers</p>
+</div>
+<main>
+  <a href="blog-grammar-mistakes.html" class="post-card">
+    <div class="post-tag">✍️ Grammar Tips</div>
+    <div class="post-title">10 Common English Grammar Mistakes Filipino Kids Make (And How to Fix Them)</div>
+    <div class="post-excerpt">From "he/she" mix-ups to "open the light" — discover why these errors happen and simple ways to correct them at home, no tutor needed.</div>
+    <div class="post-meta">📖 8 min read · July 2026</div>
+  </a>
+  <div class="post-card coming"><div class="post-tag">🏠 Home Learning</div><div class="post-title">How to Teach English Grammar to Your Child at Home — No Tutor Needed</div><div class="post-excerpt">Coming soon</div></div>
+  <div class="post-card coming"><div class="post-tag">📋 Grade Guide</div><div class="post-title">Grade 1–6 English Grammar Topics: What Your Child Should Know Per Grade</div><div class="post-excerpt">Coming soon</div></div>
+  <div class="post-card coming"><div class="post-tag">🎮 Learning Methods</div><div class="post-title">English Grammar Games vs. Workbooks: Which Helps Kids Learn Faster?</div><div class="post-excerpt">Coming soon</div></div>
+  <div class="post-card coming"><div class="post-tag">💡 Parent Guide</div><div class="post-title">Why Is My Child Struggling with English? 7 Signs and Simple Solutions</div><div class="post-excerpt">Coming soon</div></div>
+</main>
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div><div class="footer-logo">WordWise<span>PH</span></div><div class="footer-tagline">Fun English learning for every child 🌍</div></div>
+      <div class="footer-links">
+        <span class="footer-link" onclick="location.href='index.html'">Home</span>
+        <span class="footer-link" onclick="location.href='blog.html'">Blog</span>
+        <span class="footer-link" onclick="location.href='about.html'">About</span>
+        <a class="footer-link" href="https://t.me/wordwiseph_support_bot" target="_blank">Support</a>
+      </div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 WordWise PH · Made with ❤️ for every child</span></div>
+  </div>
+</footer><script>
+function toggleMob(){document.getElementById("mob-menu").classList.toggle("open")}
+document.addEventListener("click",function(e){var m=document.getElementById("mob-menu"),h=document.getElementById("ham");if(m&&h&&!m.contains(e.target)&&!h.contains(e.target))m.classList.remove("open")});
+window.addEventListener("scroll",function(){var n=document.querySelector("nav");if(n)n.style.boxShadow=window.scrollY>20?"0 4px 24px rgba(0,0,0,0.25)":"none"});
+</script>
+</body>
+</html>
