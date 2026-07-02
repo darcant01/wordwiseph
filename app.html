@@ -407,6 +407,21 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 .chat-fab:active{transform:scale(0.96)}
 .chat-fab-dot{width:8px;height:8px;background:#4ADE80;border-radius:50%;animation:pulse-dot 2s infinite}
 @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(1.2)}}
+
+/* ── APP FOOTER ── */
+.app-footer{background:var(--navy);padding:clamp(28px,5vw,44px) clamp(16px,5vw,48px);margin-top:auto}
+.app-footer-inner{max-width:900px;margin:0 auto}
+.app-footer-top{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
+.app-footer-logo{font-size:20px;font-weight:900;color:#fff}
+.app-footer-logo span{color:var(--gold)}
+.app-footer-tagline{font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px}
+.app-footer-links{display:flex;flex-wrap:wrap;gap:6px}
+.app-footer-link{font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);padding:5px 12px;border-radius:8px;cursor:pointer;border:none;background:none;font-family:Nunito,sans-serif;transition:all 0.15s}
+.app-footer-link:hover{color:#fff;background:rgba(255,255,255,0.08)}
+.app-footer-bottom{border-top:1px solid rgba(255,255,255,0.1);padding-top:16px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:11px;color:rgba(255,255,255,0.3)}
+.app-footer-bottom a{color:rgba(255,255,255,0.4);text-decoration:none}
+.app-footer-bottom a:hover{color:#fff}
+@media(max-width:480px){.app-footer-top{flex-direction:column}}
 </style>
 </head>
 <body>
@@ -1161,6 +1176,13 @@ function navTo(s){
   TICKER.setVisible(true);
   TICKER.resume();
   window.scrollTo({top:0,behavior:'smooth'});
+  // Show footer on non-game screens
+  var gameScreens2=['quiz','spell','odd','shark','scramble','chain','sprint',
+    'abc-order','missing-letter','rhyme','tracer','color-match','color-word',
+    'rainbow-order','color-mixer','find-color','animal-sound','animal-match',
+    'animal-habitat','animal-alphabet','animal-legs','animal-size','animal-group'];
+  var footerEl=document.getElementById('app-footer');
+  if(footerEl) footerEl.style.display=gameScreens2.includes(s)?'none':'block';
 }
 
 // ── HEADER ───────────────────────────────────────────────────
@@ -2674,6 +2696,13 @@ function retrySpell(){
   spellRound++;
   buildSpell();
   window.scrollTo({top:0,behavior:'smooth'});
+  // Show footer on non-game screens
+  var gameScreens2=['quiz','spell','odd','shark','scramble','chain','sprint',
+    'abc-order','missing-letter','rhyme','tracer','color-match','color-word',
+    'rainbow-order','color-mixer','find-color','animal-sound','animal-match',
+    'animal-habitat','animal-alphabet','animal-legs','animal-size','animal-group'];
+  var footerEl=document.getElementById('app-footer');
+  if(footerEl) footerEl.style.display=gameScreens2.includes(s)?'none':'block';
 }
 </script>
 
@@ -3388,6 +3417,13 @@ function retryOdd(){
   oddRound++;
   buildOdd();
   window.scrollTo({top:0,behavior:'smooth'});
+  // Show footer on non-game screens
+  var gameScreens2=['quiz','spell','odd','shark','scramble','chain','sprint',
+    'abc-order','missing-letter','rhyme','tracer','color-match','color-word',
+    'rainbow-order','color-mixer','find-color','animal-sound','animal-match',
+    'animal-habitat','animal-alphabet','animal-legs','animal-size','animal-group'];
+  var footerEl=document.getElementById('app-footer');
+  if(footerEl) footerEl.style.display=gameScreens2.includes(s)?'none':'block';
 }
 
 </script>
@@ -3856,6 +3892,13 @@ function retryScramble(){
   scrambleRound++;
   buildScramble();
   window.scrollTo({top:0,behavior:'smooth'});
+  // Show footer on non-game screens
+  var gameScreens2=['quiz','spell','odd','shark','scramble','chain','sprint',
+    'abc-order','missing-letter','rhyme','tracer','color-match','color-word',
+    'rainbow-order','color-mixer','find-color','animal-sound','animal-match',
+    'animal-habitat','animal-alphabet','animal-legs','animal-size','animal-group'];
+  var footerEl=document.getElementById('app-footer');
+  if(footerEl) footerEl.style.display=gameScreens2.includes(s)?'none':'block';
 }
 
 </script>
@@ -7226,6 +7269,35 @@ function showAGResult(){
 }
 
 </script>
+
+
+<!-- ══ APP FOOTER ══ -->
+<footer class="app-footer" id="app-footer" style="display:none">
+  <div class="app-footer-inner">
+    <div class="app-footer-top">
+      <div>
+        <div class="app-footer-logo">WordWise<span>PH</span></div>
+        <div class="app-footer-tagline">Fun English learning for every child 🌍</div>
+      </div>
+      <div class="app-footer-links">
+        <button class="app-footer-link" onclick="navTo('start')">🏠 Home</button>
+        <button class="app-footer-link" onclick="navTo('games')">🎮 Games</button>
+        <button class="app-footer-link" onclick="navTo('pricing')">💳 Pricing</button>
+        <button class="app-footer-link" onclick="navTo('lb')">🏆 Leaderboard</button>
+        <a class="app-footer-link" href="https://t.me/wordwiseph_support_bot" target="_blank">💬 Support</a>
+        <a class="app-footer-link" href="about.html" target="_blank">ℹ️ About</a>
+      </div>
+    </div>
+    <div class="app-footer-bottom">
+      <span>© 2026 WordWise PH · Made with ❤️ for every child</span>
+      <span>
+        <a href="https://t.me/wordwiseph_support_bot" target="_blank">@wordwiseph_support_bot</a>
+        &nbsp;·&nbsp;
+        <a href="mailto:darcant01@gmail.com">darcant01@gmail.com</a>
+      </span>
+    </div>
+  </div>
+</footer>
 
 </body>
 </html>
