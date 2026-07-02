@@ -4,391 +4,223 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>About Us — WordWise PH</title>
+<meta name="description" content="Learn about WordWise PH — an English learning platform built for Filipino kids by a Filipino developer."/>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --navy:#1D2B55;
-  --pink:#D4537E;
-  --gold:#FAC775;
-  --light:#F9F8FF;
-  --card:#fff;
-  --muted:#888780;
-  --radius:14px;
-}
-body{font-family:'Nunito',sans-serif;background:var(--light);color:var(--navy);min-height:100vh}
-
-/* ── HEADER ── */
-header{
-  background:var(--navy);
-  padding:0 clamp(16px,5vw,48px);
-  height:62px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  position:sticky;top:0;z-index:100;
-}
-.logo{font-size:clamp(18px,4vw,22px);font-weight:900;color:#fff;cursor:pointer;text-decoration:none}
-.logo span{color:var(--gold)}
-.nav-links{display:flex;gap:8px;align-items:center}
-.nav-btn{
-  font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;
-  padding:7px 14px;border-radius:99px;
-  border:2px solid rgba(255,255,255,0.3);
-  background:transparent;color:#fff;
-  cursor:pointer;text-decoration:none;
-  transition:all 0.15s;
-}
-.nav-btn:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.6)}
-.nav-btn.primary{background:var(--pink);border-color:var(--pink);color:#fff}
-.nav-btn.primary:hover{background:#c0456e;border-color:#c0456e}
-
-/* ── HERO ── */
-.hero{
-  background:linear-gradient(135deg,var(--navy) 0%,#2D3F7A 60%,#3B2569 100%);
-  padding:clamp(48px,10vw,80px) clamp(16px,5vw,48px);
-  text-align:center;
-  position:relative;
-  overflow:hidden;
-}
-.hero::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse at 70% 30%,rgba(212,83,126,0.18) 0%,transparent 60%),
-              radial-gradient(ellipse at 20% 80%,rgba(250,199,117,0.12) 0%,transparent 50%);
-}
-.hero-tag{
-  display:inline-block;
-  background:rgba(212,83,126,0.25);
-  border:1.5px solid rgba(212,83,126,0.5);
-  color:var(--pink);color:#FFB0CC;
-  font-size:12px;font-weight:800;
-  padding:5px 14px;border-radius:99px;
-  letter-spacing:1px;text-transform:uppercase;
-  margin-bottom:18px;position:relative;z-index:1;
-}
-.hero h1{
-  font-size:clamp(28px,7vw,52px);font-weight:900;
-  color:#fff;line-height:1.15;
-  position:relative;z-index:1;margin-bottom:14px;
-}
-.hero h1 span{color:var(--gold)}
-.hero p{
-  font-size:clamp(14px,3vw,18px);color:rgba(255,255,255,0.78);
-  max-width:520px;margin:0 auto;line-height:1.65;
-  position:relative;z-index:1;
-}
-.hero-flags{font-size:clamp(24px,5vw,36px);margin-top:20px;position:relative;z-index:1}
-
-/* ── MAIN CONTENT ── */
-main{max-width:720px;margin:0 auto;padding:clamp(24px,5vw,48px) clamp(16px,4vw,24px)}
-
-/* ── SECTION CARDS ── */
-.card{
-  background:var(--card);
-  border-radius:var(--radius);
-  border:1.5px solid #EAEAEA;
-  padding:clamp(20px,4vw,32px);
-  margin-bottom:20px;
-}
-.card-title{
-  font-size:clamp(16px,4vw,20px);font-weight:900;color:var(--navy);
-  margin-bottom:18px;display:flex;align-items:center;gap:10px;
-}
-.card-title .icon{font-size:clamp(22px,5vw,28px)}
-
-/* ── MISSION ── */
-.mission-text{
-  font-size:clamp(14px,3vw,16px);color:#444;
-  line-height:1.75;text-align:center;
-}
-.mission-highlight{
-  display:inline-block;margin-top:16px;
-  background:linear-gradient(135deg,#FFF0F7,#F0F4FF);
-  border:1.5px solid #FFB0CC;border-radius:12px;
-  padding:12px 20px;font-size:clamp(13px,3vw,15px);
-  font-weight:800;color:var(--navy);line-height:1.5;
-}
-
-/* ── GAMES GRID ── */
-.games-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-  gap:12px;
-}
-.game-tile{
-  background:var(--light);border-radius:12px;
-  padding:16px 12px;text-align:center;
-  border:1.5px solid #EAEAEA;
-  transition:transform 0.15s,border-color 0.15s;
-}
-.game-tile:hover{transform:translateY(-2px);border-color:var(--pink)}
-.game-tile .emoji{font-size:28px;margin-bottom:8px}
-.game-tile .name{font-size:12px;font-weight:900;color:var(--navy)}
-.game-tile .desc{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
-
-/* ── TEAM ── */
-.team-card{
-  display:flex;align-items:flex-start;gap:16px;
-  padding:16px;background:var(--light);
-  border-radius:12px;margin-bottom:14px;
-}
-.avatar{
-  width:56px;height:56px;border-radius:50%;flex-shrink:0;
-  background:linear-gradient(135deg,var(--pink),var(--navy));
-  display:flex;align-items:center;justify-content:center;
-  font-size:26px;
-}
-.team-name{font-size:15px;font-weight:900;color:var(--navy)}
-.team-role{font-size:12px;color:var(--pink);font-weight:700;margin-top:2px}
-.team-bio{font-size:12px;color:#555;margin-top:6px;line-height:1.6}
-.contact-row{
-  margin-top:14px;background:var(--light);border-radius:10px;
-  padding:12px 16px;display:flex;flex-wrap:wrap;gap:14px;
-  font-size:12px;color:#555;align-items:center;
-}
-.contact-row a{color:var(--pink);text-decoration:none;font-weight:700}
-.contact-row a:hover{text-decoration:underline}
-
-/* ── VALUES ── */
-.values-list{display:flex;flex-direction:column;gap:14px}
-.value-item{display:flex;align-items:flex-start;gap:14px}
-.value-icon{
-  width:44px;height:44px;border-radius:12px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  font-size:22px;
-}
-.value-name{font-size:14px;font-weight:900;color:var(--navy)}
-.value-desc{font-size:12px;color:#666;margin-top:3px;line-height:1.5}
-
-/* ── STATS ── */
-.stats-row{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:12px;text-align:center;
-}
-.stat{padding:16px 8px}
-.stat-num{font-size:clamp(22px,5vw,32px);font-weight:900;color:var(--pink)}
-.stat-label{font-size:11px;color:var(--muted);font-weight:700;margin-top:3px}
-
-/* ── CTA ── */
-.cta-card{
-  background:linear-gradient(135deg,var(--navy),#2D3F7A);
-  border-radius:var(--radius);padding:clamp(24px,5vw,36px);
-  text-align:center;margin-bottom:20px;
-}
-.cta-card h2{color:#fff;font-size:clamp(18px,4vw,24px);font-weight:900;margin-bottom:8px}
-.cta-card p{color:rgba(255,255,255,0.75);font-size:clamp(13px,3vw,15px);margin-bottom:20px}
-.cta-btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
-.btn-pink{
-  font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;
-  padding:12px 24px;border-radius:99px;
-  background:var(--pink);border:none;color:#fff;
-  cursor:pointer;text-decoration:none;display:inline-block;
-  transition:transform 0.15s,background 0.15s;
-}
-.btn-pink:hover{background:#c0456e;transform:scale(1.03)}
-.btn-outline{
-  font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;
-  padding:12px 24px;border-radius:99px;
-  background:transparent;border:2px solid rgba(255,255,255,0.4);
-  color:#fff;cursor:pointer;text-decoration:none;display:inline-block;
-  transition:all 0.15s;
-}
-.btn-outline:hover{background:rgba(255,255,255,0.1);border-color:#fff}
-
-/* ── FOOTER ── */
-footer{
-  text-align:center;padding:24px 16px;
-  color:var(--muted);font-size:12px;
-  border-top:1px solid #EAEAEA;
-  background:#fff;
-}
-footer a{color:var(--pink);text-decoration:none}
-
-@media(max-width:480px){
-  .nav-links .nav-btn:not(.primary){display:none}
-  .stats-row{grid-template-columns:1fr 1fr}
-  .games-grid{grid-template-columns:1fr 1fr}
-}
+:root{--navy:#1D2B55;--navy2:#243366;--pink:#D4537E;--pink2:#c0456e;--gold:#FAC775;--light:#F4F6FF;--muted:#6B7280;--r:16px}
+html{scroll-behavior:smooth}
+body{font-family:"Nunito",sans-serif;background:#fff;color:var(--navy);overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(29,43,85,0.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.08);height:64px;display:flex;align-items:center;padding:0 clamp(16px,5vw,48px);justify-content:space-between}
+.nav-logo{font-size:clamp(18px,4vw,22px);font-weight:900;color:#fff}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-link{font-size:13px;font-weight:800;padding:8px 14px;border-radius:99px;color:rgba(255,255,255,0.8);border:none;background:none;cursor:pointer;transition:all 0.15s;font-family:"Nunito",sans-serif}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,0.1)}
+.nav-link.active{color:#fff;background:rgba(255,255,255,0.12)}
+.nav-cta{background:var(--pink);color:#fff;padding:9px 20px;border-radius:99px;font-size:13px;font-weight:900;font-family:"Nunito",sans-serif;border:none;cursor:pointer;transition:all 0.15s}
+.nav-cta:hover{background:var(--pink2);transform:scale(1.04)}
+.ham{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px}
+.ham span{width:22px;height:2.5px;background:#fff;border-radius:2px}
+.mob-menu{display:none;position:fixed;top:64px;left:0;right:0;background:var(--navy);padding:16px;z-index:199;border-bottom:1px solid rgba(255,255,255,0.1);flex-direction:column;gap:8px}
+.mob-menu.open{display:flex}
+.mob-link{font-size:14px;font-weight:800;padding:12px 16px;border-radius:12px;color:rgba(255,255,255,0.85);cursor:pointer;transition:background 0.15s}
+.mob-link:hover{background:rgba(255,255,255,0.08);color:#fff}
+.hero{min-height:52vh;background:linear-gradient(145deg,#0F1A3E 0%,var(--navy) 45%,#2B1F5E 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px clamp(16px,5vw,48px) 60px;position:relative;overflow:hidden;text-align:center}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 55% 60% at 80% 20%,rgba(212,83,126,0.2) 0%,transparent 70%),radial-gradient(ellipse 45% 50% at 15% 80%,rgba(250,199,117,0.12) 0%,transparent 60%)}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,0.05) 1px,transparent 1px);background-size:32px 32px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:7px;background:rgba(250,199,117,0.15);border:1.5px solid rgba(250,199,117,0.35);color:var(--gold);font-size:12px;font-weight:800;padding:6px 16px;border-radius:99px;margin-bottom:20px;position:relative;z-index:1;animation:fadeUp 0.5s ease both}
+.hero h1{font-size:clamp(30px,7vw,58px);font-weight:900;color:#fff;line-height:1.1;position:relative;z-index:1;animation:fadeUp 0.6s 0.1s ease both}
+.hero h1 span{color:var(--pink)}
+.hero-sub{font-size:clamp(14px,2.5vw,18px);color:rgba(255,255,255,0.68);max-width:480px;margin:16px auto 0;line-height:1.65;position:relative;z-index:1;animation:fadeUp 0.6s 0.2s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+main{max-width:860px;margin:0 auto;padding:clamp(32px,6vw,60px) clamp(16px,4vw,24px)}
+.card{background:#fff;border-radius:20px;border:1.5px solid #EAEDF5;padding:clamp(22px,4vw,34px);margin-bottom:18px;box-shadow:0 4px 20px rgba(29,43,85,0.05)}
+.eyebrow{font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--pink);margin-bottom:10px}
+.card-h2{font-size:clamp(20px,4vw,26px);font-weight:900;color:var(--navy);margin-bottom:10px}
+.card-h2 span{color:var(--pink)}
+.card-p{font-size:clamp(13px,2.5vw,15px);color:var(--muted);line-height:1.75}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}
+.stat-box{background:var(--light);border-radius:14px;padding:18px 10px;text-align:center;border:1.5px solid #E8EAF0}
+.sb-num{font-size:clamp(22px,4vw,32px);font-weight:900;color:var(--pink)}
+.sb-label{font-size:11px;font-weight:700;color:var(--muted);margin-top:4px}
+.mission-quote{margin-top:20px;background:linear-gradient(135deg,rgba(212,83,126,0.06),rgba(29,43,85,0.03));border-left:4px solid var(--pink);border-radius:0 12px 12px 0;padding:16px 20px;font-size:clamp(14px,3vw,16px);font-weight:800;color:var(--navy);font-style:italic;line-height:1.5}
+.founder-row{display:flex;align-items:flex-start;gap:20px}
+.founder-avatar{width:68px;height:68px;border-radius:20px;flex-shrink:0;background:linear-gradient(135deg,var(--pink),var(--navy));display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 8px 24px rgba(212,83,126,0.25)}
+.founder-name{font-size:20px;font-weight:900;color:var(--navy)}
+.founder-role{display:inline-block;margin-top:4px;font-size:12px;font-weight:900;padding:3px 12px;border-radius:99px;background:rgba(212,83,126,0.1);color:var(--pink)}
+.founder-bio{font-size:14px;color:var(--muted);line-height:1.7;margin-top:10px}
+.contact-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.contact-pill{display:inline-flex;align-items:center;gap:6px;background:var(--light);border:1.5px solid #E8EAF0;border-radius:99px;padding:7px 14px;font-size:12px;font-weight:800;color:var(--navy);transition:all 0.15s}
+.contact-pill:hover{border-color:var(--pink);color:var(--pink)}
+.story-line{display:flex;flex-direction:column;gap:0;margin-top:20px;position:relative}
+.story-line::before{content:"";position:absolute;left:19px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--pink),var(--navy));opacity:0.15}
+.story-item{display:flex;gap:16px;padding-bottom:24px;position:relative}
+.story-dot{width:40px;height:40px;border-radius:50%;flex-shrink:0;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 4px 12px rgba(29,43,85,0.2);position:relative;z-index:1}
+.story-title{font-size:14px;font-weight:900;color:var(--navy);margin-bottom:4px;padding-top:8px}
+.story-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.offer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:20px}
+.offer-tile{border-radius:14px;padding:18px 14px;border:1.5px solid #EAEDF5;transition:all 0.2s;position:relative;overflow:hidden}
+.offer-tile::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--c,var(--pink))}
+.offer-tile:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(29,43,85,0.1);border-color:var(--c,var(--pink))}
+.ot-emoji{font-size:26px;margin-bottom:8px}
+.ot-name{font-size:13px;font-weight:900;color:var(--navy)}
+.ot-desc{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5}
+.values-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.value-card{background:var(--light);border-radius:14px;padding:18px 16px;border:1.5px solid #E8EAF0;transition:all 0.15s}
+.value-card:hover{border-color:var(--pink);transform:translateY(-2px)}
+.vc-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.vc-icon{font-size:20px;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vc-name{font-size:13px;font-weight:900;color:var(--navy)}
+.vc-desc{font-size:12px;color:var(--muted);line-height:1.6}
+.cta-card{background:linear-gradient(135deg,var(--navy),#2D3F7A);border-radius:20px;padding:clamp(28px,5vw,44px);text-align:center;margin-bottom:18px;position:relative;overflow:hidden}
+.cta-card::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,rgba(212,83,126,0.2) 0%,transparent 60%);pointer-events:none}
+.cta-card h2{color:#fff;font-size:clamp(20px,4vw,28px);font-weight:900;margin-bottom:8px;position:relative;z-index:1}
+.cta-card p{color:rgba(255,255,255,0.7);font-size:clamp(13px,2.5vw,15px);margin-bottom:22px;position:relative;z-index:1}
+.cta-btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;position:relative;z-index:1}
+.btn-primary{font-family:"Nunito",sans-serif;font-size:14px;font-weight:900;padding:13px 28px;border-radius:99px;background:var(--pink);border:none;color:#fff;cursor:pointer;transition:all 0.2s;box-shadow:0 6px 20px rgba(212,83,126,0.4)}
+.btn-primary:hover{background:var(--pink2);transform:translateY(-2px)}
+.btn-ghost{font-family:"Nunito",sans-serif;font-size:14px;font-weight:900;padding:13px 28px;border-radius:99px;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.3);color:#fff;cursor:pointer;transition:all 0.2s}
+.btn-ghost:hover{background:rgba(255,255,255,0.18);border-color:#fff}
+footer{background:var(--navy);padding:clamp(28px,5vw,44px) clamp(16px,5vw,48px)}
+.footer-inner{max-width:860px;margin:0 auto}
+.footer-top{display:flex;flex-wrap:wrap;gap:24px;justify-content:space-between;align-items:flex-start;margin-bottom:22px}
+.footer-logo{font-size:20px;font-weight:900;color:#fff}
+.footer-logo span{color:var(--gold)}
+.footer-tagline{font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px}
+.footer-links{display:flex;flex-wrap:wrap;gap:6px}
+.footer-link{font-size:13px;font-weight:700;color:rgba(255,255,255,0.55);padding:6px 12px;border-radius:8px;cursor:pointer;transition:all 0.15s}
+.footer-link:hover{color:#fff;background:rgba(255,255,255,0.08)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.1);padding-top:16px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:12px;color:rgba(255,255,255,0.3)}
+.footer-bottom a{color:rgba(255,255,255,0.45)}
+.footer-bottom a:hover{color:#fff}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity 0.55s ease,transform 0.55s ease}
+.reveal.visible{opacity:1;transform:none}
+@media(max-width:768px){.nav-links{display:none}.ham{display:flex}.founder-row{flex-direction:column;align-items:center;text-align:center}.contact-pills{justify-content:center}.values-grid{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.offer-grid{grid-template-columns:1fr 1fr}.stats-row{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
-
-<!-- HEADER -->
-<header>
-  <a href="index.html" class="logo">WordWise<span>PH</span></a>
-  <nav class="nav-links">
-    <a href="index.html" class="nav-btn">🎮 Play Now</a>
-    <a href="index.html#pricing" class="nav-btn">💳 Plans</a>
-    <a href="index.html" class="nav-btn primary">Get Started</a>
-  </nav>
-</header>
-
-<!-- HERO -->
+<nav>
+  <a href="home.html" class="nav-logo">WordWise<span>PH</span></a>
+  <div class="nav-links">
+    <button class="nav-link" onclick="location.href='home.html#games'">Games</button>
+    <button class="nav-link" onclick="location.href='home.html#pricing'">Pricing</button>
+    <button class="nav-link active">About</button>
+    <button class="nav-link" onclick="location.href='index.html'">Login</button>
+    <button class="nav-cta" onclick="location.href='index.html'">Play Free →</button>
+  </div>
+  <div class="ham" onclick="toggleMob()" id="ham"><span></span><span></span><span></span></div>
+</nav>
+<div class="mob-menu" id="mob-menu">
+  <div class="mob-link" onclick="location.href='home.html#games'">🎮 Games</div>
+  <div class="mob-link" onclick="location.href='home.html#pricing'">💳 Pricing</div>
+  <div class="mob-link" style="color:#fff;font-weight:900">ℹ️ About us</div>
+  <div class="mob-link" onclick="location.href='index.html'">👤 Login</div>
+  <div class="mob-link" style="background:var(--pink);color:#fff;border-radius:12px;text-align:center" onclick="location.href='index.html'">🚀 Play for Free</div>
+</div>
 <section class="hero">
-  <div class="hero-tag">About WordWise PH</div>
-  <h1>Learning English<br><span>the fun way</span></h1>
-  <p>A game-based English learning platform built for Filipino kids — joyful, affordable, and always improving.</p>
-  <div class="hero-flags">🇵🇭 ❤️ 📚</div>
+  <div class="hero-eyebrow">🇵🇭 Our Story</div>
+  <h1>Built for kids.<br><span>By a Filipino developer.</span></h1>
+  <p class="hero-sub">WordWise PH started as one idea — that learning English should feel like playing, not studying.</p>
 </section>
-
-<!-- MAIN -->
 <main>
-
-  <!-- STATS -->
-  <div class="card" style="margin-top:-1px;border-radius:0 0 var(--radius) var(--radius)">
+  <div class="card reveal">
+    <div class="eyebrow">Mission</div>
+    <h2 class="card-h2">Why WordWise PH <span>exists</span></h2>
+    <p class="card-p">English is one of the most important skills a Filipino child can develop — yet most learning tools are either too expensive, too boring, or not built with Filipino kids in mind. WordWise PH was created to change that.</p>
     <div class="stats-row">
-      <div class="stat">
-        <div class="stat-num">16+</div>
-        <div class="stat-label">Kids Corner Games</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">1,045</div>
-        <div class="stat-label">Grammar Questions</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">₱0</div>
-        <div class="stat-label">To Start Playing</div>
-      </div>
+      <div class="stat-box"><div class="sb-num">16+</div><div class="sb-label">Learning Games</div></div>
+      <div class="stat-box"><div class="sb-num">1,045</div><div class="sb-label">Grammar Questions</div></div>
+      <div class="stat-box"><div class="sb-num">₱0</div><div class="sb-label">To Start Playing</div></div>
+      <div class="stat-box"><div class="sb-num">A–Z</div><div class="sb-label">Letter Tracer</div></div>
     </div>
+    <div class="mission-quote">"Every Filipino child deserves a fun, affordable, and safe place to learn English."</div>
   </div>
-
-  <!-- MISSION -->
-  <div class="card">
-    <div class="card-title"><span class="icon">🌟</span> Our Mission</div>
-    <p class="mission-text">
-      WordWise PH was built with one goal: to give every Filipino child a joyful, engaging, and affordable way to build confidence in English — one game at a time.
-    </p>
-    <div style="text-align:center">
-      <div class="mission-highlight">
-        "Every child deserves to love learning."
-      </div>
-    </div>
-  </div>
-
-  <!-- WHAT WE OFFER -->
-  <div class="card">
-    <div class="card-title"><span class="icon">🎮</span> What We Offer</div>
-    <div class="games-grid">
-      <div class="game-tile">
-        <div class="emoji">📝</div>
-        <div class="name">Grammar Quiz</div>
-        <div class="desc">1,045 questions · 4 difficulty modes</div>
-      </div>
-      <div class="game-tile">
-        <div class="emoji">🔤</div>
-        <div class="name">Spell It Right</div>
-        <div class="desc">Listen & spell correctly</div>
-      </div>
-      <div class="game-tile">
-        <div class="emoji">🦈</div>
-        <div class="name">Shark Typing</div>
-        <div class="desc">Type fast or the shark wins</div>
-      </div>
-      <div class="game-tile">
-        <div class="emoji">🎯</div>
-        <div class="name">Odd One Out</div>
-        <div class="desc">Spot the word that doesn't belong</div>
-      </div>
-      <div class="game-tile">
-        <div class="emoji">✏️</div>
-        <div class="name">Letter Tracer</div>
-        <div class="desc">A–Z with accuracy checking</div>
-      </div>
-      <div class="game-tile">
-        <div class="emoji">🐾</div>
-        <div class="name">Animal Games</div>
-        <div class="desc">7 games with real sounds</div>
-      </div>
-      <div class="game-tile">
-        <div class="emoji">🎨</div>
-        <div class="name">Color Games</div>
-        <div class="desc">5 colorful learning games</div>
-      </div>
-      <div class="game-tile">
-        <div class="emoji">🏆</div>
-        <div class="name">Leaderboards</div>
-        <div class="desc">Compete with friends & family</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- WHO WE ARE -->
-  <div class="card">
-    <div class="card-title"><span class="icon">👨‍💻</span> Who We Are</div>
-    <div class="team-card">
-      <div class="avatar">👨‍💻</div>
-      <div>
-        <div class="team-name">Darwin C.</div>
-        <div class="team-role">Founder &amp; Developer</div>
-        <div class="team-bio">
-          A developer with a vision — WordWise PH started as an idea to make English learning genuinely fun for Filipino kids. Darwin built the entire platform from scratch, combining his love for coding with a simple belief: that the right app can make a big difference in a child's learning journey.
-        </div>
-      </div>
-    </div>
-    <div class="contact-row">
-      <span>📍 Philippines</span>
-      <span>📧 <a href="mailto:darcant01@gmail.com">darcant01@gmail.com</a></span>
-      <span>💬 <a href="https://t.me/wordwiseph_support_bot" target="_blank">@wordwiseph_support_bot</a></span>
-      <span>💳 GCash: 0931-762-5402</span>
-    </div>
-  </div>
-
-  <!-- VALUES -->
-  <div class="card">
-    <div class="card-title"><span class="icon">💛</span> Our Values</div>
-    <div class="values-list">
-      <div class="value-item">
-        <div class="value-icon" style="background:#FFF0F7">🎯</div>
-        <div>
-          <div class="value-name">Child-Centered Learning</div>
-          <div class="value-desc">Every game, animation, and sound is designed with kids in mind — simple enough for beginners, rewarding enough to keep going.</div>
-        </div>
-      </div>
-      <div class="value-item">
-        <div class="value-icon" style="background:#F0F8FF">🇵🇭</div>
-        <div>
-          <div class="value-name">Made for Filipinos</div>
-          <div class="value-desc">Built locally, priced affordably in Philippine Pesos, and tailored to how Filipino kids learn English at home and at school.</div>
-        </div>
-      </div>
-      <div class="value-item">
-        <div class="value-icon" style="background:#F0FFF4">🔒</div>
-        <div>
-          <div class="value-name">Safe &amp; Ad-Free</div>
-          <div class="value-desc">No ads, no distractions, no data sold. WordWise PH is a clean, safe space where your child can focus on learning.</div>
-        </div>
-      </div>
-      <div class="value-item">
-        <div class="value-icon" style="background:#FFFBEA">📈</div>
-        <div>
-          <div class="value-name">Always Improving</div>
-          <div class="value-desc">We listen to parents and teachers and continuously add new games, fix bugs, and improve the experience based on real feedback.</div>
+  <div class="card reveal">
+    <div class="eyebrow">The Developer</div>
+    <div class="founder-row">
+      <div class="founder-avatar">👨‍💻</div>
+      <div style="flex:1">
+        <div class="founder-name">Darwin C.</div>
+        <div class="founder-role">Founder &amp; Developer</div>
+        <div class="founder-bio">Not an educator — just a developer with an idea and the drive to build it. Darwin created WordWise PH from scratch, designing every game, writing every question, and building every feature himself. The platform was born from a simple observation: Filipino kids needed an English learning tool that was genuinely fun, locally priced, and built just for them.</div>
+        <div class="contact-pills">
+          <div class="contact-pill">📍 Philippines</div>
+          <div class="contact-pill"><a href="mailto:darcant01@gmail.com">📧 darcant01@gmail.com</a></div>
+          <div class="contact-pill"><a href="https://t.me/wordwiseph_support_bot" target="_blank">💬 @wordwiseph_support_bot</a></div>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- CTA -->
-  <div class="cta-card">
+  <div class="card reveal">
+    <div class="eyebrow">How it started</div>
+    <h2 class="card-h2">The <span>WordWise PH</span> story</h2>
+    <div class="story-line">
+      <div class="story-item"><div class="story-dot">💡</div><div><div class="story-title">The idea</div><div class="story-desc">Darwin noticed that English learning apps for kids were either too expensive for Filipino families or just not engaging enough to keep kids coming back.</div></div></div>
+      <div class="story-item"><div class="story-dot">🛠️</div><div><div class="story-title">Building from scratch</div><div class="story-desc">Every game, every question, every animation — built by hand. No team, no funding, just code and a clear vision of what kids actually enjoy.</div></div></div>
+      <div class="story-item"><div class="story-dot">🎮</div><div><div class="story-title">7 Brainy Games launched</div><div class="story-desc">Grammar Quiz, Spell It Right, Shark Typing, Odd One Out, Word Scramble, Word Chain, and Word Sprint — all live and free to try.</div></div></div>
+      <div class="story-item"><div class="story-dot">🌟</div><div><div class="story-title">Kids Corner added</div><div class="story-desc">16 games for younger learners — Letter Tracer with accuracy checking, Animal Games with real sounds, Color Games, and more.</div></div></div>
+      <div class="story-item" style="padding-bottom:0"><div class="story-dot" style="background:var(--pink)">🚀</div><div><div class="story-title">Still growing</div><div class="story-desc">New games, features, and better tools — driven by feedback from real Filipino families. The mission stays the same.</div></div></div>
+    </div>
+  </div>
+  <div class="card reveal">
+    <div class="eyebrow">What We Offer</div>
+    <h2 class="card-h2">Everything your child needs to <span>learn English</span></h2>
+    <div class="offer-grid">
+      <div class="offer-tile" style="--c:#D4537E"><div class="ot-emoji">📝</div><div class="ot-name">Grammar Quiz</div><div class="ot-desc">1,045 questions · 4 modes</div></div>
+      <div class="offer-tile" style="--c:#1D9E75"><div class="ot-emoji">🦈</div><div class="ot-name">Shark Typing</div><div class="ot-desc">Speed &amp; spelling together</div></div>
+      <div class="offer-tile" style="--c:#FAC775"><div class="ot-emoji">✏️</div><div class="ot-name">Letter Tracer</div><div class="ot-desc">A–Z with accuracy check</div></div>
+      <div class="offer-tile" style="--c:#7F77DD"><div class="ot-emoji">🐾</div><div class="ot-name">Animal Games</div><div class="ot-desc">7 games with real sounds</div></div>
+      <div class="offer-tile" style="--c:#06B6D4"><div class="ot-emoji">🎨</div><div class="ot-name">Color Games</div><div class="ot-desc">5 colorful vocab games</div></div>
+      <div class="offer-tile" style="--c:#F59E0B"><div class="ot-emoji">🏆</div><div class="ot-name">Leaderboards</div><div class="ot-desc">Compete with friends</div></div>
+    </div>
+  </div>
+  <div class="card reveal">
+    <div class="eyebrow">Our Values</div>
+    <h2 class="card-h2">What we <span>stand for</span></h2>
+    <div class="values-grid">
+      <div class="value-card"><div class="vc-top"><div class="vc-icon" style="background:#FFF0F7">🎯</div><div class="vc-name">Child-Centered</div></div><div class="vc-desc">Every design decision starts with one question: will a Filipino kid enjoy this?</div></div>
+      <div class="value-card"><div class="vc-top"><div class="vc-icon" style="background:#F0F8FF">🇵🇭</div><div class="vc-name">Made for Filipinos</div></div><div class="vc-desc">Priced in pesos, built locally, designed with the Filipino learning context in mind.</div></div>
+      <div class="value-card"><div class="vc-top"><div class="vc-icon" style="background:#F0FFF4">🚫</div><div class="vc-name">No Ads, Ever</div></div><div class="vc-desc">No ads, no data sold, no distractions. A clean focused space for kids to learn.</div></div>
+      <div class="value-card"><div class="vc-top"><div class="vc-icon" style="background:#FFFBEA">📈</div><div class="vc-name">Always Improving</div></div><div class="vc-desc">New games and features added regularly, shaped by real feedback from Filipino families.</div></div>
+    </div>
+  </div>
+  <div class="cta-card reveal">
     <h2>Ready to start learning? 🚀</h2>
-    <p>Join thousands of Filipino kids already playing WordWise PH — start free, upgrade anytime.</p>
+    <p>Try WordWise PH for free — no credit card, no commitment.<br>Just fun English learning for your child.</p>
     <div class="cta-btns">
-      <a href="index.html" class="btn-pink">🎮 Play for Free</a>
-      <a href="index.html" class="btn-outline">💳 View Plans</a>
+      <button class="btn-primary" onclick="location.href='index.html'">🎮 Play for Free</button>
+      <button class="btn-ghost" onclick="location.href='home.html#pricing'">💳 View Plans</button>
     </div>
   </div>
-
 </main>
-
-<!-- FOOTER -->
 <footer>
-  <p>© 2026 WordWise PH · Made with ❤️ in the Philippines</p>
-  <p style="margin-top:6px">
-    <a href="index.html">Home</a> &nbsp;·&nbsp;
-    <a href="https://t.me/wordwiseph_support_bot" target="_blank">Support</a> &nbsp;·&nbsp;
-    <a href="mailto:darcant01@gmail.com">Contact</a>
-  </p>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div><div class="footer-logo">WordWise<span>PH</span></div><div class="footer-tagline">English learning for Filipino kids 🇵🇭</div></div>
+      <div class="footer-links">
+        <span class="footer-link" onclick="location.href='home.html'">Home</span>
+        <span class="footer-link" onclick="location.href='home.html#games'">Games</span>
+        <span class="footer-link" onclick="location.href='home.html#pricing'">Pricing</span>
+        <span class="footer-link" onclick="location.href='about.html'">About</span>
+        <a class="footer-link" href="https://t.me/wordwiseph_support_bot" target="_blank">Support</a>
+        <a class="footer-link" href="mailto:darcant01@gmail.com">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 WordWise PH · Made with ❤️ in the Philippines</span>
+      <span><a href="https://t.me/wordwiseph_support_bot" target="_blank">@wordwiseph_support_bot</a> · <a href="mailto:darcant01@gmail.com">darcant01@gmail.com</a></span>
+    </div>
+  </div>
 </footer>
-
+<script>
+function toggleMob(){document.getElementById("mob-menu").classList.toggle("open")}
+document.addEventListener("click",e=>{const m=document.getElementById("mob-menu");const h=document.getElementById("ham");if(!m.contains(e.target)&&!h.contains(e.target))m.classList.remove("open")});
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add("visible")})},{threshold:0.1});
+document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
+window.addEventListener("scroll",()=>{document.querySelector("nav").style.boxShadow=window.scrollY>20?"0 4px 24px rgba(0,0,0,0.25)":"none"});
+</script>
 </body>
 </html>
