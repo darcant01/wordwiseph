@@ -1126,6 +1126,14 @@ function hideLoader(){
 }
 
 // ── NAVIGATION ───────────────────────────────────────────────
+// Hash-based routing — app.html#pricing goes straight to pricing screen
+window.addEventListener('load', function(){
+  var hash = window.location.hash.replace('#','');
+  if(hash && document.getElementById('sc-'+hash)){
+    navTo(hash);
+  }
+});
+
 function navTo(s){
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   const el=document.getElementById('sc-'+s);
