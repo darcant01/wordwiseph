@@ -587,23 +587,88 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 </div>
 
 <!-- ══ LOGIN ══ -->
-<div id="sc-login" class="screen">
-  <div class="hero"><div class="htitle">Welcome <span>Back!</span></div><div class="hsub">Login to save your scores</div></div>
-  <div class="wrap" style="max-width:460px">
-    <div class="card">
-      <div class="ctitle">Login</div>
+<div id="sc-login" class="screen" style="background:#F4F6FF;min-height:100vh;display:flex;flex-direction:column">
+
+  <!-- Top bar -->
+  <div style="background:linear-gradient(135deg,#0F1A3E,#1D2B55,#2B1F5E);padding:clamp(32px,6vw,52px) 20px clamp(28px,5vw,44px);text-align:center;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 80% at 60% 50%,rgba(212,83,126,0.2) 0%,transparent 70%)"></div>
+    <div style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,0.05) 1px,transparent 1px);background-size:28px 28px"></div>
+    <div style="font-size:clamp(26px,6vw,40px);font-weight:900;color:#fff;position:relative;z-index:1;line-height:1.1">
+      Welcome <span style="color:#D4537E">Back!</span> 👋
+    </div>
+    <div style="font-size:clamp(13px,3vw,15px);color:rgba(255,255,255,0.6);margin-top:8px;position:relative;z-index:1">Login to save your scores and unlock games</div>
+  </div>
+
+  <!-- Login card -->
+  <div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding:clamp(20px,4vw,40px) 16px">
+    <div style="background:#fff;border-radius:24px;border:1.5px solid #EAEDF5;padding:clamp(24px,5vw,36px);width:100%;max-width:420px;box-shadow:0 8px 40px rgba(29,43,85,0.1)">
+
+      <!-- Logo -->
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:20px;font-weight:900;color:#1D2B55;display:inline-block">WordWise<span style="color:#D4537E">PH</span></div>
+      </div>
+
       <div class="err" id="lerr"></div>
-      <div class="field"><label>Username</label><input type="text" id="luser" placeholder="Your username"/></div>
-      <div class="field"><label>Password</label>
-        <div class="pw-wrap">
-          <input type="password" id="lpass" placeholder="Your password"/>
-          <button class="pw-eye" onclick="togglePw('lpass',this)" type="button" tabindex="-1" aria-label="Show password">👁️</button>
+
+      <!-- Username field -->
+      <div style="margin-bottom:16px">
+        <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Username</label>
+        <div style="position:relative">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px">👤</span>
+          <input type="text" id="luser" placeholder="Enter your username"
+            style="width:100%;padding:13px 14px 13px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
+            onfocus="this.style.borderColor='#D4537E';this.style.background='#fff'"
+            onblur="this.style.borderColor='#E8EAF0';this.style.background='#F9FAFB'"/>
         </div>
       </div>
-      <button class="btn btn-pink btn-block" onclick="doLogin()" style="margin-bottom:14px">Login</button>
-      <div class="divider">or</div>
-      <button class="btn btn-out btn-block" onclick="navTo('register')" style="margin-bottom:14px">Create an Account</button>
-      <div style="text-align:center"><button class="lnk" onclick="guestPlay()">Continue as Guest</button></div>
+
+      <!-- Password field -->
+      <div style="margin-bottom:24px">
+        <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Password</label>
+        <div class="pw-wrap" style="position:relative">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;z-index:1">🔒</span>
+          <input type="password" id="lpass" placeholder="Enter your password"
+            style="width:100%;padding:13px 44px 13px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
+            onfocus="this.style.borderColor='#D4537E';this.style.background='#fff'"
+            onblur="this.style.borderColor='#E8EAF0';this.style.background='#F9FAFB'"
+            onkeydown="if(event.key==='Enter')doLogin()"/>
+          <button class="pw-eye" onclick="togglePw('lpass',this)" type="button" tabindex="-1" aria-label="Show password"
+            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;padding:4px">👁️</button>
+        </div>
+      </div>
+
+      <!-- Login button -->
+      <button onclick="doLogin()"
+        style="width:100%;padding:15px;border-radius:99px;background:linear-gradient(135deg,#D4537E,#c0456e);border:none;color:#fff;font-family:Nunito,sans-serif;font-size:16px;font-weight:900;cursor:pointer;transition:all 0.2s;box-shadow:0 6px 20px rgba(212,83,126,0.35);margin-bottom:16px"
+        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 28px rgba(212,83,126,0.45)'"
+        onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(212,83,126,0.35)'">
+        Login
+      </button>
+
+      <!-- Divider -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="flex:1;height:1px;background:#EAEDF5"></div>
+        <span style="font-size:12px;font-weight:700;color:#9CA3AF">or</span>
+        <div style="flex:1;height:1px;background:#EAEDF5"></div>
+      </div>
+
+      <!-- Create account -->
+      <button onclick="navTo('register')"
+        style="width:100%;padding:14px;border-radius:99px;background:#fff;border:2px solid #D4537E;color:#D4537E;font-family:Nunito,sans-serif;font-size:15px;font-weight:900;cursor:pointer;transition:all 0.2s;margin-bottom:14px"
+        onmouseover="this.style.background='#FFF0F5'"
+        onmouseout="this.style.background='#fff'">
+        Create an Account
+      </button>
+
+      <!-- Guest -->
+      <div style="text-align:center">
+        <button onclick="guestPlay()"
+          style="background:none;border:none;color:#9CA3AF;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px"
+          onmouseover="this.style.color='#1D2B55'"
+          onmouseout="this.style.color='#9CA3AF'">
+          Continue as Guest
+        </button>
+      </div>
 
     </div>
   </div>
