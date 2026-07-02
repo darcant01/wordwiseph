@@ -424,102 +424,41 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 
 <!-- ══ START ══ -->
 <div id="sc-start" class="screen active">
-  <!-- Hero -->
-  <div style="background:linear-gradient(145deg,#0F1A3E,#1D2B55,#2B1F5E);padding:clamp(24px,5vw,40px) clamp(16px,5vw,40px);text-align:center;position:relative;overflow:hidden">
-    <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 60% at 70% 30%,rgba(212,83,126,0.18) 0%,transparent 70%)"></div>
-    <div style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,0.05) 1px,transparent 1px);background-size:32px 32px"></div>
-    <div style="font-size:clamp(22px,6vw,38px);font-weight:900;color:#fff;position:relative;z-index:1;line-height:1.15">WordWise <span style="color:#D4537E">PH</span></div>
-    <div style="font-size:clamp(12px,2.5vw,15px);color:rgba(255,255,255,0.6);margin-top:6px;position:relative;z-index:1">Race the clock · Earn stars · Top the leaderboard!</div>
-  </div>
-
-  <div class="wrap" style="padding-top:20px">
-
-    <!-- BRAINY GAMES -->
-    <div style="margin-bottom:20px">
-      <div style="font-size:clamp(13px,3vw,15px);font-weight:900;color:var(--navy);margin-bottom:12px;display:flex;align-items:center;gap:8px">
-        <span style="background:var(--navy);color:#FAC775;border-radius:8px;padding:3px 10px;font-size:11px">🧠 BRAINY GAMES</span>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
-        <div onclick="navTo('games')" style="background:#fff;border-radius:14px;border:1.5px solid #E8EAF0;padding:16px 12px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#D4537E';this.style.boxShadow='0 8px 20px rgba(212,83,126,0.15)'" onmouseout="this.style.transform='';this.style.borderColor='#E8EAF0';this.style.boxShadow=''">
-          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#D4537E"></div>
-          <div style="font-size:28px;margin-bottom:8px">📝</div>
-          <div style="font-size:12px;font-weight:900;color:var(--navy)">Grammar Quiz</div>
-          <div style="font-size:10px;color:#888780;margin-top:3px">1,045 questions</div>
+  <div class="hero"><div class="htitle">WordWise <span>Grammar!</span></div><div class="hsub">Race the clock · Earn stars · Top the leaderboard!</div></div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">Pick your level</div>
+      <div class="csub">Easy: 5 questions · Medium: 15 questions · Hard: 30 questions</div>
+      <div class="diff-grid">
+        <div class="dc easy" onclick="startQuiz('easy')">
+          <div class="di">🌱</div>
+          <div class="dt">Easy</div>
+          <div class="ds">5 questions · 30 sec each</div>
         </div>
-        <div onclick="startSpell?startSpell():navTo('games')" style="background:#fff;border-radius:14px;border:1.5px solid #E8EAF0;padding:16px 12px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#4ECDC4';this.style.boxShadow='0 8px 20px rgba(78,205,196,0.15)'" onmouseout="this.style.transform='';this.style.borderColor='#E8EAF0';this.style.boxShadow=''">
-          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#4ECDC4"></div>
-          <div style="font-size:28px;margin-bottom:8px">🔤</div>
-          <div style="font-size:12px;font-weight:900;color:var(--navy)">Spell It Right</div>
-          <div style="font-size:10px;color:#888780;margin-top:3px">Listen & spell</div>
+        <div class="dc medium" id="dc-medium" onclick="checkAccess('medium')">
+          <div class="di">⚡</div>
+          <div class="dt">Medium</div>
+          <div class="ds">15 questions · 20 sec each</div>
+          <div class="dc-lock" id="lock-medium" style="display:none;margin-top:6px;font-size:11px;background:#FAEEDA;color:#412402;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
         </div>
-        <div onclick="navTo('games')" style="background:#fff;border-radius:14px;border:1.5px solid #E8EAF0;padding:16px 12px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#1D9E75';this.style.boxShadow='0 8px 20px rgba(29,158,117,0.15)'" onmouseout="this.style.transform='';this.style.borderColor='#E8EAF0';this.style.boxShadow=''">
-          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#1D9E75"></div>
-          <div style="font-size:28px;margin-bottom:8px">🦈</div>
-          <div style="font-size:12px;font-weight:900;color:var(--navy)">Shark Typing</div>
-          <div style="font-size:10px;color:#888780;margin-top:3px">Type fast!</div>
+        <div class="dc hard" id="dc-hard" onclick="checkAccess('hard')">
+          <div class="di">🔥</div>
+          <div class="dt">Hard</div>
+          <div class="ds">30 questions · 10 sec each</div>
+          <div class="dc-lock" id="lock-hard" style="display:none;margin-top:6px;font-size:11px;background:#FCEBEB;color:#791F1F;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
         </div>
-        <div onclick="navTo('games')" style="background:#fff;border-radius:14px;border:1.5px solid #E8EAF0;padding:16px 12px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#F59E0B';this.style.boxShadow='0 8px 20px rgba(245,158,11,0.15)'" onmouseout="this.style.transform='';this.style.borderColor='#E8EAF0';this.style.boxShadow=''">
-          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#F59E0B"></div>
-          <div style="font-size:28px;margin-bottom:8px">🎯</div>
-          <div style="font-size:12px;font-weight:900;color:var(--navy)">Odd One Out</div>
-          <div style="font-size:10px;color:#888780;margin-top:3px">Find the odd word</div>
-        </div>
-        <div onclick="navTo('games')" style="background:#fff;border-radius:14px;border:1.5px solid #E8EAF0;padding:16px 12px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#8B5CF6';this.style.boxShadow='0 8px 20px rgba(139,92,246,0.15)'" onmouseout="this.style.transform='';this.style.borderColor='#E8EAF0';this.style.boxShadow=''">
-          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#8B5CF6"></div>
-          <div style="font-size:28px;margin-bottom:8px">🔀</div>
-          <div style="font-size:12px;font-weight:900;color:var(--navy)">Word Scramble</div>
-          <div style="font-size:10px;color:#888780;margin-top:3px">Unscramble it!</div>
-        </div>
-        <div onclick="navTo('games')" style="background:#fff;border-radius:14px;border:1.5px solid #E8EAF0;padding:16px 12px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#EC4899';this.style.boxShadow='0 8px 20px rgba(236,72,153,0.15)'" onmouseout="this.style.transform='';this.style.borderColor='#E8EAF0';this.style.boxShadow=''">
-          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#EC4899"></div>
-          <div style="font-size:28px;margin-bottom:8px">🔗</div>
-          <div style="font-size:12px;font-weight:900;color:var(--navy)">Word Chain</div>
-          <div style="font-size:10px;color:#888780;margin-top:3px">Link the words</div>
-        </div>
-        <div onclick="navTo('games')" style="background:#fff;border-radius:14px;border:1.5px solid #E8EAF0;padding:16px 12px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden" onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='#06B6D4';this.style.boxShadow='0 8px 20px rgba(6,182,212,0.15)'" onmouseout="this.style.transform='';this.style.borderColor='#E8EAF0';this.style.boxShadow=''">
-          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#06B6D4"></div>
-          <div style="font-size:28px;margin-bottom:8px">🏃</div>
-          <div style="font-size:12px;font-weight:900;color:var(--navy)">Word Sprint</div>
-          <div style="font-size:10px;color:#888780;margin-top:3px">60 second sprint</div>
+        <div class="dc" id="dc-infinite" onclick="checkAccess('infinite')" style="border-color:#7C3AED;grid-column:span 3;background:linear-gradient(135deg,#F5F3FF,#EDE9FE)">
+          <div class="di">♾️</div>
+          <div class="dt" style="color:#7C3AED">Infinite</div>
+          <div class="ds">Endless · 15 sec each · Wrong = Game Over!</div>
+          <div class="dc-lock" id="lock-infinite" style="display:none;margin-top:6px;font-size:11px;background:#EDE9FE;color:#4C1D95;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div>
         </div>
       </div>
+      <div style="text-align:center;margin-top:8px">
+        <button class="btn btn-navy" style="width:100%;max-width:300px;margin-bottom:10px" onclick="navTo('games')">🎮 All Brainy Games</button>
+      </div>
+      <p style="text-align:center;font-size:clamp(11px,2.5vw,13px);color:#888780">Login to save your scores · <button class="lnk" onclick="navTo('pricing')">See subscription plans</button></p>
     </div>
-
-    <!-- KIDS CORNER -->
-    <div style="margin-bottom:20px">
-      <div style="font-size:clamp(13px,3vw,15px);font-weight:900;color:var(--navy);margin-bottom:12px">
-        <span style="background:#D4537E;color:#fff;border-radius:8px;padding:3px 10px;font-size:11px">🌟 KIDS CORNER</span>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
-        <div onclick="startKidsCorner?startKidsCorner():navTo('kids')" style="background:linear-gradient(135deg,#FFF0F7,#FFE4F0);border-radius:14px;border:1.5px solid #FFB0CC;padding:16px 12px;text-align:center;cursor:pointer;transition:all 0.2s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 20px rgba(212,83,126,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-          <div style="font-size:28px;margin-bottom:8px">✏️</div>
-          <div style="font-size:12px;font-weight:900;color:var(--navy)">Letter Tracer</div>
-          <div style="font-size:10px;color:#D4537E;margin-top:3px">A–Z tracing</div>
-        </div>
-        <div onclick="navTo('kids')" style="background:linear-gradient(135deg,#FFF0F7,#FFE4F0);border-radius:14px;border:1.5px solid #FFB0CC;padding:16px 12px;text-align:center;cursor:pointer;transition:all 0.2s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 20px rgba(212,83,126,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-          <div style="font-size:28px;margin-bottom:8px">🐾</div>
-          <div style="font-size:12px;font-weight:900;color:var(--navy)">Animal Games</div>
-          <div style="font-size:10px;color:#D4537E;margin-top:3px">7 games + sounds</div>
-        </div>
-        <div onclick="navTo('kids')" style="background:linear-gradient(135deg,#FFF0F7,#FFE4F0);border-radius:14px;border:1.5px solid #FFB0CC;padding:16px 12px;text-align:center;cursor:pointer;transition:all 0.2s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 20px rgba(212,83,126,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-          <div style="font-size:28px;margin-bottom:8px">🎨</div>
-          <div style="font-size:12px;font-weight:900;color:var(--navy)">Color Games</div>
-          <div style="font-size:10px;color:#D4537E;margin-top:3px">5 colorful games</div>
-        </div>
-        <div onclick="navTo('kids')" style="background:linear-gradient(135deg,#FFF0F7,#FFE4F0);border-radius:14px;border:1.5px solid #FFB0CC;padding:16px 12px;text-align:center;cursor:pointer;transition:all 0.2s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 20px rgba(212,83,126,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-          <div style="font-size:28px;margin-bottom:8px">🔤</div>
-          <div style="font-size:12px;font-weight:900;color:var(--navy)">ABC Order</div>
-          <div style="font-size:10px;color:#D4537E;margin-top:3px">Sort the alphabet</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- QUICK LINKS -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
-      <button class="btn btn-navy" style="flex:1;min-width:120px" onclick="navTo('lb')">🏆 Leaderboard</button>
-      <button class="btn" style="flex:1;min-width:120px;border-color:var(--pink);color:var(--pink)" onclick="navTo('pricing')">💳 View Plans</button>
-    </div>
-    <p style="text-align:center;font-size:clamp(11px,2.5vw,12px);color:#888780">Login to save your scores and unlock all games</p>
   </div>
 </div>
 
