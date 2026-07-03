@@ -716,8 +716,8 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
           <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px">📛</span>
           <input type="text" id="rname" placeholder="Your full name"
             style="width:100%;padding:13px 14px 13px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
-            onfocus="this.style.borderColor=\'#D4537E\';this.style.background=\'#fff\'"
-            onblur="this.style.borderColor=\'#E8EAF0\';this.style.background=\'#F9FAFB\'"/>
+            onfocus="this.style.borderColor='#D4537E';this.style.background='#fff'"
+            onblur="this.style.borderColor='#E8EAF0';this.style.background='#F9FAFB'"/>
         </div>
       </div>
 
@@ -728,8 +728,8 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
           <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px">👤</span>
           <input type="text" id="ruser" placeholder="Choose a username"
             style="width:100%;padding:13px 14px 13px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
-            onfocus="this.style.borderColor=\'#D4537E\';this.style.background=\'#fff\'"
-            onblur="this.style.borderColor=\'#E8EAF0\';this.style.background=\'#F9FAFB\'"/>
+            onfocus="this.style.borderColor='#D4537E';this.style.background='#fff'"
+            onblur="this.style.borderColor='#E8EAF0';this.style.background='#F9FAFB'"/>
         </div>
       </div>
 
@@ -740,9 +740,9 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
           <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;z-index:1">🔒</span>
           <input type="password" id="rpass" placeholder="Min. 4 characters"
             style="width:100%;padding:13px 44px 13px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
-            onfocus="this.style.borderColor=\'#D4537E\';this.style.background=\'#fff\'"
-            onblur="this.style.borderColor=\'#E8EAF0\';this.style.background=\'#F9FAFB\'"/>
-          <button class="pw-eye" onclick="togglePw(\'rpass\',this)" type="button" tabindex="-1" aria-label="Show password"
+            onfocus="this.style.borderColor='#D4537E';this.style.background='#fff'"
+            onblur="this.style.borderColor='#E8EAF0';this.style.background='#F9FAFB'"/>
+          <button class="pw-eye" onclick="togglePw('rpass',this)" type="button" tabindex="-1" aria-label="Show password"
             style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;padding:4px">👁️</button>
         </div>
       </div>
@@ -763,17 +763,17 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <!-- Create button -->
       <button onclick="doReg()"
         style="width:100%;padding:15px;border-radius:99px;background:linear-gradient(135deg,#D4537E,#c0456e);border:none;color:#fff;font-family:Nunito,sans-serif;font-size:16px;font-weight:900;cursor:pointer;transition:all 0.2s;box-shadow:0 6px 20px rgba(212,83,126,0.35);margin-bottom:16px"
-        onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 10px 28px rgba(212,83,126,0.45)\'"
-        onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 6px 20px rgba(212,83,126,0.35)\'">
+        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 28px rgba(212,83,126,0.45)'"
+        onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(212,83,126,0.35)'">
         Create Account
       </button>
 
       <!-- Login link -->
       <div style="text-align:center">
-        <button onclick="navTo(\'login\')"
+        <button onclick="navTo('login')"
           style="background:none;border:none;color:#9CA3AF;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;cursor:pointer"
-          onmouseover="this.style.color=\'#D4537E\'"
-          onmouseout="this.style.color=\'#9CA3AF\'">
+          onmouseover="this.style.color='#D4537E'"
+          onmouseout="this.style.color='#9CA3AF'">
           Already have an account? <span style="color:#D4537E;font-weight:900;text-decoration:underline;text-underline-offset:3px">Login</span>
         </button>
       </div>
@@ -1680,8 +1680,8 @@ function buildQuiz(){
     const qt=q.blank?q.q.replace('___','<span class="qblnk">___</span>'):q.q;
     const tag=`<span class="dtag ${diff}">${diff}</span>`;
     const btns=sh.map(c=>{
-      const cs=c.replace(/'/g,"\'").replace(/"/g,'&quot;');
-      const cr=q.correct.replace(/'/g,"\'").replace(/"/g,'&quot;');
+      const cs=c.replace(/'/g,"'").replace(/"/g,'&quot;');
+      const cr=q.correct.replace(/'/g,"'").replace(/"/g,'&quot;');
       return `<button class="cbtn" onclick="ansQ(${i},this,'${cs}','${cr}')">${c}</button>`;
     }).join('');
     con.innerHTML+=`<div class="qcard" id="qc${i}" style="${i>0?'opacity:0.4;pointer-events:none':''}">
@@ -2692,8 +2692,8 @@ function buildSpell(){
   spellQs.forEach((q,i)=>{
     const sh=shuf(q.choices);
     const btns=sh.map(c=>{
-      const cs=c.replace(/'/g,"\'");
-      const cr=q.correct.replace(/'/g,"\'");
+      const cs=c.replace(/'/g,"'");
+      const cr=q.correct.replace(/'/g,"'");
       return `<button class="spell-btn" onclick="ansSpell(${i},this,'${cs}','${cr}')">${c}</button>`;
     }).join('');
     con.innerHTML+=`<div class="qcard" id="sqc${i}" style="${i>0?'opacity:0.4;pointer-events:none':''}">
@@ -3174,7 +3174,7 @@ async function endShark(){
   const fs=document.getElementById('shark-final-score');if(fs)fs.textContent=sharkScore;
   let stars='',msg='',icon='🦈';
   if(sharkScore>=30){stars='⭐⭐⭐⭐⭐';msg='Incredible! You outswam the shark!';icon='🏆';sWin();setTimeout(sLevelUp,900);}
-  else if(sharkScore>=20){stars='⭐⭐⭐⭐💫';msg='Amazing speed! The shark couldn\'t catch you!';icon='🎉';sWin();}
+  else if(sharkScore>=20){stars='⭐⭐⭐⭐💫';msg='Amazing speed! The shark couldn't catch you!';icon='🎉';sWin();}
   else if(sharkScore>=12){stars='⭐⭐⭐💫💫';msg='Great typing! Keep practicing!';}
   else if(sharkScore>=6){stars='⭐⭐💫💫💫';msg='Good effort! The shark was hungry today!';}
   else{stars='⭐💫💫💫💫';msg='Practice makes perfect! Try again!';icon='😅';}
@@ -3389,8 +3389,8 @@ function buildOdd(){
   oddQs.forEach((q,i)=>{
     const sh=shuf([...q.words]);
     const btns=sh.map(w=>{
-      const ws=w.replace(/'/g,"\\'").replace(/"/g,'&quot;');
-      const odds=q.odd.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      const ws=w.replace(/'/g,"\'").replace(/"/g,'&quot;');
+      const odds=q.odd.replace(/'/g,"\'").replace(/"/g,'&quot;');
       return `<button class="spell-btn" style="font-size:clamp(14px,3.5vw,19px);letter-spacing:0" onclick="ansOdd(${i},this,'${ws}','${odds}')">${w}</button>`;
     }).join('');
 
@@ -3868,7 +3868,7 @@ function checkScrambleAnswer(qIdx){
       const slot=document.getElementById('sc-slot-'+qIdx+'-'+i);
       if(slot)slot.textContent=l.toUpperCase();
     });
-    if(fb){fb.textContent='✗ It\'s "'+q.word.toUpperCase()+'"! Try to remember it!';fb.className='fb show wrong';}
+    if(fb){fb.textContent='✗ It's "'+q.word.toUpperCase()+'"! Try to remember it!';fb.className='fb show wrong';}
     sBad();
   }
 
@@ -3932,7 +3932,7 @@ function timeUpScramble(){
     }
   });
   const fb=document.getElementById('sc-fb-'+scrambleCQ);
-  if(fb){fb.textContent='⏰ Time\'s up! The word was "'+q.word.toUpperCase()+'"';fb.className='fb show wrong';}
+  if(fb){fb.textContent='⏰ Time's up! The word was "'+q.word.toUpperCase()+'"';fb.className='fb show wrong';}
   scrambleAns[scrambleCQ]=false;
   scrambleAnswered++;
   updScrambleP();
@@ -4395,7 +4395,7 @@ async function endChain(){
 
   let stars='',msg='',icon='⛓️';
   if(chainScore>=20){stars='⭐⭐⭐⭐⭐';msg='Unbelievable! Word Chain Legend! 🏆';icon='🏆';sWin();setTimeout(sLevelUp,900);}
-  else if(chainScore>=15){stars='⭐⭐⭐⭐💫';msg='Amazing chain! You\'re a vocabulary pro!';sWin();}
+  else if(chainScore>=15){stars='⭐⭐⭐⭐💫';msg='Amazing chain! You're a vocabulary pro!';sWin();}
   else if(chainScore>=10){stars='⭐⭐⭐💫💫';msg='Great chain! Keep expanding your vocabulary!';sLevelUp();}
   else if(chainScore>=5) {stars='⭐⭐💫💫💫';msg='Good start! Try to keep the chain going longer!';}
   else                   {stars='⭐💫💫💫💫';msg='Keep practicing! Every word counts!';}
@@ -5160,7 +5160,7 @@ function ansML(idx,btn,chosen,correct){
   mlAns[idx]=ok;
   const fb=document.getElementById(`mlfb${idx}`);
   if(ok){if(fb){fb.textContent='✅ Correct! The letter is '+correct+'!';fb.className='fb show correct';}sOk();sCr();}
-  else{btn.classList.add('wrong');if(fb){fb.textContent='❌ It\'s '+correct+'!';fb.className='fb show wrong';}sBad();}
+  else{btn.classList.add('wrong');if(fb){fb.textContent='❌ It's '+correct+'!';fb.className='fb show wrong';}sBad();}
   mlAnswered++;
   document.getElementById('ml-score').textContent=mlAns.filter(a=>a).length;
   if(mlAnswered<10){setTimeout(()=>{mlCQ++;buildMLQuestion(mlCQ);startMLTimer();},900);}
@@ -6386,7 +6386,7 @@ function buildCMQuestion(idx){
     '</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" id="cm-choices-'+idx+'">'+
     choices.map(function(c){
-      return '<button onclick="ansCM('+idx+',\''+c.name+'\',\''+q.name+'\')" style="font-family:Nunito,sans-serif;height:clamp(70px,18vw,90px);border-radius:16px;border:3px solid transparent;background:'+c.hex+';cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;box-shadow:0 4px 12px rgba(0,0,0,0.15)"></button>';
+      return '<button onclick="ansCM('+idx+',''+c.name+'',''+q.name+'')" style="font-family:Nunito,sans-serif;height:clamp(70px,18vw,90px);border-radius:16px;border:3px solid transparent;background:'+c.hex+';cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;box-shadow:0 4px 12px rgba(0,0,0,0.15)"></button>';
     }).join('')+
     '</div>'+
     '<div class="fb" id="cm-fb-'+idx+'" style="margin-top:12px"></div>'+
@@ -6523,7 +6523,7 @@ function buildROGrid(){
   var shuffled=shufArr(RAINBOW_ORDER.slice());
   grid.innerHTML=shuffled.map(function(name){
     var c=COLORS.find(function(x){return x.name===name;});
-    return '<button id="ro-btn-'+name+'" onclick="tapROColor(\''+name+'\')" style="font-family:Nunito,sans-serif;height:clamp(60px,15vw,80px);border-radius:14px;background:'+c.hex+';border:3px solid transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;font-size:clamp(11px,3vw,14px);font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.4)">'+name+'</button>';
+    return '<button id="ro-btn-'+name+'" onclick="tapROColor(''+name+'')" style="font-family:Nunito,sans-serif;height:clamp(60px,15vw,80px);border-radius:14px;background:'+c.hex+';border:3px solid transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;font-size:clamp(11px,3vw,14px);font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.4)">'+name+'</button>';
   }).join('');
   var tgt=document.getElementById('ro-target');
   if(tgt)tgt.textContent=RAINBOW_ORDER[0];
@@ -6605,7 +6605,7 @@ function buildMXQuestion(idx){
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="mx-choices-'+idx+'">'+
     choices.map(function(name){
       var cc=COLORS.find(function(c){return c.name===name;});
-      return '<button onclick="ansMX('+idx+',\''+name+'\',\''+q.result+'\')" style="font-family:Nunito,sans-serif;padding:12px 8px;border-radius:14px;background:'+(cc?cc.hex:'#ccc')+';border:3px solid transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;font-size:clamp(12px,3vw,15px);font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.4)">'+name+'</button>';
+      return '<button onclick="ansMX('+idx+',''+name+'',''+q.result+'')" style="font-family:Nunito,sans-serif;padding:12px 8px;border-radius:14px;background:'+(cc?cc.hex:'#ccc')+';border:3px solid transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;font-size:clamp(12px,3vw,15px);font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.4)">'+name+'</button>';
     }).join('')+
     '</div>'+
     '<div class="fb" id="mx-fb-'+idx+'" style="margin-top:12px"></div>'+
@@ -7029,10 +7029,10 @@ function buildASQuestion(idx){
     '<div style="font-size:12px;font-weight:800;color:#888780;margin-bottom:10px">'+(idx+1)+' of '+asTotal+' · <span id="as-time">12</span>s</div>'+
     '<div style="font-size:clamp(56px,15vw,84px);margin-bottom:6px">'+q.emoji+'</div>'+
     '<div style="font-size:clamp(18px,5vw,24px);font-weight:900;color:var(--navy);margin-bottom:10px">'+q.name+'</div>'+
-    '<div style="margin-bottom:14px"><button onclick="playAnimalSound(\''+q.sound+'\')" style="font-family:Nunito,sans-serif;font-size:clamp(16px,4vw,20px);font-weight:900;padding:12px 28px;border-radius:99px;background:linear-gradient(135deg,#FF6B9D,#E67E22);border:none;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;box-shadow:0 4px 14px rgba(230,126,34,0.35)">🔊 Hear the Sound!</button></div>'+
+    '<div style="margin-bottom:14px"><button onclick="playAnimalSound(''+q.sound+'')" style="font-family:Nunito,sans-serif;font-size:clamp(16px,4vw,20px);font-weight:900;padding:12px 28px;border-radius:99px;background:linear-gradient(135deg,#FF6B9D,#E67E22);border:none;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;box-shadow:0 4px 14px rgba(230,126,34,0.35)">🔊 Hear the Sound!</button></div>'+
     '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:12px">What sound does it make?</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="as-choices-'+idx+'">'+
-    choices.map(function(s){return '<button onclick="ansAS('+idx+',\''+s+'\',\''+q.sound+'\')" style="font-family:Nunito,sans-serif;font-size:clamp(14px,4vw,18px);font-weight:800;padding:14px 8px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">'+s+'</button>';}).join('')+
+    choices.map(function(s){return '<button onclick="ansAS('+idx+',''+s+'',''+q.sound+'')" style="font-family:Nunito,sans-serif;font-size:clamp(14px,4vw,18px);font-weight:800;padding:14px 8px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">'+s+'</button>';}).join('')+
     '</div><div class="fb" id="as-fb-'+idx+'" style="margin-top:12px"></div></div>';
   setTimeout(function(){ playAnimalSound(q.sound); }, 700);
   asTInt=setInterval(function(){asTLeft--;var t=document.getElementById('as-time');if(t)t.textContent=asTLeft;if(asTLeft<=0){clearInterval(asTInt);ansAS(asCQ,'__none__',asQs[asCQ].sound);}},1000);
@@ -7095,7 +7095,7 @@ function buildAMQuestion(idx){
     '<div style="font-size:clamp(16px,4vw,20px);font-weight:900;color:var(--navy);margin-bottom:4px">Baby: <span style="color:var(--pink)">'+q.baby+'</span></div>'+
     '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:14px">Which animal is its parent?</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="am-choices-'+idx+'">'+
-    choices.map(function(a){return '<button onclick="ansAM('+idx+',\''+a.name+'\',\''+q.name+'\')" style="font-family:Nunito,sans-serif;font-size:clamp(28px,8vw,40px);padding:14px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation" title="'+a.name+'">'+a.emoji+'</button>';}).join('')+
+    choices.map(function(a){return '<button onclick="ansAM('+idx+',''+a.name+'',''+q.name+'')" style="font-family:Nunito,sans-serif;font-size:clamp(28px,8vw,40px);padding:14px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation" title="'+a.name+'">'+a.emoji+'</button>';}).join('')+
     '</div><div class="fb" id="am-fb-'+idx+'" style="margin-top:12px"></div></div>';
 }
 function ansAM(idx,chosen,correct){
@@ -7144,7 +7144,7 @@ function buildWHQuestion(idx){
     '<div style="font-size:clamp(18px,5vw,24px);font-weight:900;color:var(--navy);margin-bottom:4px">'+q.name+'</div>'+
     '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:14px">Where do I live?</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="wh-choices-'+idx+'">'+
-    choices.map(function(h){return '<button onclick="ansWH('+idx+',\''+h+'\',\''+q.habitat+'\')" style="font-family:Nunito,sans-serif;font-size:clamp(13px,3.5vw,16px);font-weight:800;padding:14px 8px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">'+(HABITAT_EMOJIS[h]||'🏠')+' '+h+'</button>';}).join('')+
+    choices.map(function(h){return '<button onclick="ansWH('+idx+',''+h+'',''+q.habitat+'')" style="font-family:Nunito,sans-serif;font-size:clamp(13px,3.5vw,16px);font-weight:800;padding:14px 8px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">'+(HABITAT_EMOJIS[h]||'🏠')+' '+h+'</button>';}).join('')+
     '</div><div class="fb" id="wh-fb-'+idx+'" style="margin-top:12px"></div></div>';
 }
 function ansWH(idx,chosen,correct){
@@ -7192,7 +7192,7 @@ function buildAAQuestion(idx){
     '<div style="font-size:clamp(56px,16vw,90px);font-weight:900;color:var(--navy);margin-bottom:6px">'+q.name[0]+'</div>'+
     '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:14px">Which animal starts with <strong>'+q.name[0]+'</strong>?</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="aa-choices-'+idx+'">'+
-    choices.map(function(a){return '<button onclick="ansAA('+idx+',\''+a.name+'\',\''+q.name+'\')" style="font-family:Nunito,sans-serif;padding:12px 8px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation"><div style="font-size:clamp(28px,8vw,40px)">'+a.emoji+'</div><div style="font-size:clamp(11px,3vw,14px);font-weight:800;color:var(--navy);margin-top:4px">'+a.name+'</div></button>';}).join('')+
+    choices.map(function(a){return '<button onclick="ansAA('+idx+',''+a.name+'',''+q.name+'')" style="font-family:Nunito,sans-serif;padding:12px 8px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation"><div style="font-size:clamp(28px,8vw,40px)">'+a.emoji+'</div><div style="font-size:clamp(11px,3vw,14px);font-weight:800;color:var(--navy);margin-top:4px">'+a.name+'</div></button>';}).join('')+
     '</div><div class="fb" id="aa-fb-'+idx+'" style="margin-top:12px"></div></div>';
 }
 function ansAA(idx,chosen,correct){
@@ -7298,7 +7298,7 @@ function buildBSQuestion(idx){
     '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:16px">Which animal is BIGGER?</div>'+
     '<div style="display:flex;gap:12px;justify-content:center" id="bs-choices-'+idx+'">'+
     [a,b].map(function(animal){
-      return '<button onclick="ansBS('+idx+',\''+animal.name+'\',\''+bigger.name+'\')" style="font-family:Nunito,sans-serif;flex:1;padding:16px 8px;border-radius:16px;background:#FFF8F0;border:2.5px solid var(--lp);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;text-align:center">'+
+      return '<button onclick="ansBS('+idx+',''+animal.name+'',''+bigger.name+'')" style="font-family:Nunito,sans-serif;flex:1;padding:16px 8px;border-radius:16px;background:#FFF8F0;border:2.5px solid var(--lp);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;text-align:center">'+
         '<div style="font-size:clamp(40px,11vw,60px)">'+animal.emoji+'</div>'+
         '<div style="font-size:clamp(13px,3.5vw,16px);font-weight:800;color:var(--navy);margin-top:6px">'+animal.name+'</div>'+
         '</button>';
@@ -7351,7 +7351,7 @@ function buildAGQuestion(idx){
     '<div style="font-size:clamp(18px,5vw,24px);font-weight:900;color:var(--navy);margin-bottom:4px">'+q.name+'</div>'+
     '<div style="font-size:13px;font-weight:700;color:#888780;margin-bottom:14px">What animal group am I?</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="ag-choices-'+idx+'">'+
-    choices.map(function(g){return '<button onclick="ansAG('+idx+',\''+g+'\',\''+q.group+'\')" style="font-family:Nunito,sans-serif;font-size:clamp(13px,3.5vw,16px);font-weight:800;padding:14px 8px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">'+(GROUP_EMOJIS[g]||'🐾')+' '+g+'</button>';}).join('')+
+    choices.map(function(g){return '<button onclick="ansAG('+idx+',''+g+'',''+q.group+'')" style="font-family:Nunito,sans-serif;font-size:clamp(13px,3.5vw,16px);font-weight:800;padding:14px 8px;border-radius:14px;background:#FFF8F0;border:2.5px solid var(--lp);color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">'+(GROUP_EMOJIS[g]||'🐾')+' '+g+'</button>';}).join('')+
     '</div><div class="fb" id="ag-fb-'+idx+'" style="margin-top:12px"></div></div>';
 }
 function ansAG(idx,chosen,correct){
