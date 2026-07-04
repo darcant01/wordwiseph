@@ -1086,9 +1086,35 @@ function hideLoader(){
 }
 
 // ── NAVIGATION ───────────────────────────────────────────────
+// Stop all running games — clears timers so sounds stop when leaving a game
+function stopAllGames(){
+  try{clearInterval(tInt)}catch(e){}
+  try{clearInterval(spellTInt)}catch(e){}
+  try{clearInterval(oddTInt)}catch(e){}
+  try{clearInterval(sharkTInt)}catch(e){}
+  try{clearInterval(sharkWordTimer)}catch(e){}
+  try{clearInterval(scrambleTInt)}catch(e){}
+  try{clearInterval(chainTInt)}catch(e){}
+  try{clearInterval(chainTimerBarInt)}catch(e){}
+  try{clearInterval(sprintTInt)}catch(e){}
+  try{clearInterval(abcTInt)}catch(e){}
+  try{clearInterval(mlTInt)}catch(e){}
+  try{clearInterval(rhTInt)}catch(e){}
+  try{clearInterval(cmTInt)}catch(e){}
+  try{clearInterval(cwTInt)}catch(e){}
+  try{clearInterval(roTInt)}catch(e){}
+  try{clearInterval(fcTInt)}catch(e){}
+  try{clearInterval(asTInt)}catch(e){}
+  try{abcRunning=false}catch(e){}
+  try{chainRunning=false}catch(e){}
+  try{sharkRunning=false}catch(e){}
+  try{sprintRunning=false}catch(e){}
+}
+
 function navTo(s){
   if(s==='login' && document.getElementById('login-modal')){openLoginModal();return;}
   if(s==='register' && document.getElementById('register-modal')){closeLoginModal();openRegisterModal();return;}
+  stopAllGames();
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   const el=document.getElementById('sc-'+s);
   if(el)el.classList.add('active');
