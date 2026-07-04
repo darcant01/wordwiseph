@@ -1274,6 +1274,7 @@ function hideLoader(){
 // ── NAVIGATION ───────────────────────────────────────────────
 function navTo(s){
   if(s==='login' && document.getElementById('login-modal')){openLoginModal();return;}
+  if(s==='register' && document.getElementById('register-modal')){closeLoginModal();openRegisterModal();return;}
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   const el=document.getElementById('sc-'+s);
   if(el)el.classList.add('active');
@@ -7464,6 +7465,8 @@ function showAGResult(){
 
 <script>
 function openLoginModal(){
+  var rm=document.getElementById('register-modal');
+  if(rm)rm.style.display='none';
   var m=document.getElementById('login-modal');
   if(!m)return;
   m.style.display='flex';
@@ -7482,7 +7485,7 @@ function closeLoginModal(){
   m.style.display='none';
   document.body.style.overflow='';
 }
-function modalToRegister(){closeLoginModal();navTo('register');}
+function modalToRegister(){closeLoginModal();openRegisterModal();}
 function modalGuest(){closeLoginModal();guestPlay();}
 async function doLoginModal(){
   var u=document.getElementById('ml-user').value.trim();
@@ -7507,8 +7510,160 @@ async function doLoginModal(){
 }
 // ESC key closes modal
 document.addEventListener('keydown',function(e){
-  if(e.key==='Escape')closeLoginModal();
+  if(e.key==='Escape'){closeLoginModal();closeRegisterModal();}
 });
+</script>
+
+
+<!-- ══ REGISTER MODAL ══ -->
+<div id="register-modal" onclick="if(event.target===this)closeRegisterModal()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,26,62,0.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px;overflow-y:auto">
+  <div style="background:#fff;border-radius:24px;border:1.5px solid #EAEDF5;padding:clamp(24px,5vw,36px);width:100%;max-width:400px;box-shadow:0 24px 80px rgba(15,26,62,0.5);position:relative;animation:modalPop 0.25s ease;margin:auto">
+
+    <!-- Close button -->
+    <button onclick="closeRegisterModal()" aria-label="Close" style="position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;background:#F4F6FF;border:none;color:#6B7280;font-size:16px;font-weight:900;cursor:pointer;font-family:Nunito,sans-serif;transition:all 0.15s" onmouseover="this.style.background='#FFE4EE';this.style.color='#D4537E'" onmouseout="this.style.background='#F4F6FF';this.style.color='#6B7280'">✕</button>
+
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:6px">
+      <div style="font-size:20px;font-weight:900;color:#1D2B55;display:inline-block">WordWise<span style="color:#D4537E">PH</span></div>
+    </div>
+    <div style="text-align:center;font-size:clamp(18px,4vw,22px);font-weight:900;color:#1D2B55;margin-bottom:2px">Join WordWise! 🚀</div>
+    <div style="text-align:center;font-size:12px;color:#9CA3AF;font-weight:700;margin-bottom:20px">Create your free account in seconds</div>
+
+    <div class="err" id="mr-err"></div>
+    <div class="okmsg" id="mr-ok"></div>
+
+    <!-- Full Name -->
+    <div style="margin-bottom:12px">
+      <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Full Name</label>
+      <div style="position:relative">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px">📛</span>
+        <input type="text" id="mr-name" placeholder="Your full name"
+          style="width:100%;padding:12px 14px 12px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
+          onfocus="this.style.borderColor='#D4537E';this.style.background='#fff'"
+          onblur="this.style.borderColor='#E8EAF0';this.style.background='#F9FAFB'"/>
+      </div>
+    </div>
+
+    <!-- Username -->
+    <div style="margin-bottom:12px">
+      <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Username</label>
+      <div style="position:relative">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px">👤</span>
+        <input type="text" id="mr-user" placeholder="Choose a username" autocomplete="username"
+          style="width:100%;padding:12px 14px 12px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
+          onfocus="this.style.borderColor='#D4537E';this.style.background='#fff'"
+          onblur="this.style.borderColor='#E8EAF0';this.style.background='#F9FAFB'"/>
+      </div>
+    </div>
+
+    <!-- Password -->
+    <div style="margin-bottom:12px">
+      <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Password</label>
+      <div class="pw-wrap" style="position:relative">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;z-index:1">🔒</span>
+        <input type="password" id="mr-pass" placeholder="Min. 4 characters" autocomplete="new-password"
+          style="width:100%;padding:12px 44px 12px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
+          onfocus="this.style.borderColor='#D4537E';this.style.background='#fff'"
+          onblur="this.style.borderColor='#E8EAF0';this.style.background='#F9FAFB'"
+          onkeydown="if(event.key==='Enter')doRegModal()"/>
+        <button class="pw-eye" onclick="togglePw('mr-pass',this)" type="button" tabindex="-1" aria-label="Show password"
+          style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;padding:4px">👁️</button>
+      </div>
+    </div>
+
+    <!-- Account type -->
+    <div style="margin-bottom:18px">
+      <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">I am a...</label>
+      <div style="position:relative">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;z-index:1">🎓</span>
+        <select id="mr-type"
+          style="width:100%;padding:12px 14px 12px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;-webkit-appearance:auto;box-sizing:border-box;cursor:pointer">
+          <option value="kid">Kid / Student</option>
+          <option value="adult">Adult / Teacher / Parent</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Create button -->
+    <button onclick="doRegModal()"
+      style="width:100%;padding:15px;border-radius:99px;background:linear-gradient(135deg,#D4537E,#c0456e);border:none;color:#fff;font-family:Nunito,sans-serif;font-size:16px;font-weight:900;cursor:pointer;transition:all 0.2s;box-shadow:0 6px 20px rgba(212,83,126,0.35);margin-bottom:14px"
+      onmouseover="this.style.transform='translateY(-2px)'"
+      onmouseout="this.style.transform=''">
+      Create Account
+    </button>
+
+    <!-- Login link -->
+    <div style="text-align:center">
+      <button onclick="closeRegisterModal();openLoginModal()"
+        style="background:none;border:none;color:#9CA3AF;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;cursor:pointer"
+        onmouseover="this.querySelector('span').style.color='#c0456e'"
+        onmouseout="this.querySelector('span').style.color='#D4537E'">
+        Already have an account? <span style="color:#D4537E;font-weight:900;text-decoration:underline;text-underline-offset:3px">Login</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function openRegisterModal(){
+  var m=document.getElementById('register-modal');
+  if(!m)return;
+  m.style.display='flex';
+  document.body.style.overflow='hidden';
+  var e=document.getElementById('mr-err');
+  var o=document.getElementById('mr-ok');
+  if(e){e.textContent='';e.classList.remove('show');}
+  if(o){o.textContent='';o.classList.remove('show');}
+  ['mr-name','mr-user','mr-pass'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.value='';
+  });
+  setTimeout(function(){var n=document.getElementById('mr-name');if(n)n.focus();},150);
+}
+function closeRegisterModal(){
+  var m=document.getElementById('register-modal');
+  if(!m)return;
+  m.style.display='none';
+  if(document.getElementById('login-modal').style.display!=='flex'){
+    document.body.style.overflow='';
+  }
+}
+async function doRegModal(){
+  var me=document.getElementById('mr-err');
+  var mo=document.getElementById('mr-ok');
+  if(me){me.textContent='';me.classList.remove('show');}
+  if(mo){mo.textContent='';mo.classList.remove('show');}
+  var name=document.getElementById('mr-name').value.trim();
+  var user=document.getElementById('mr-user').value.trim();
+  var pass=document.getElementById('mr-pass').value.trim();
+  var type=document.getElementById('mr-type').value;
+  if(!name||!user||!pass){
+    if(me){me.textContent='Please fill in all fields!';me.classList.add('show');}
+    return;
+  }
+  if(pass.length<4){
+    if(me){me.textContent='Password must be at least 4 characters!';me.classList.add('show');}
+    return;
+  }
+  document.getElementById('rname').value=name;
+  document.getElementById('ruser').value=user;
+  document.getElementById('rpass').value=pass;
+  document.getElementById('rtype').value=type;
+  await doReg();
+  var rok=document.getElementById('rok');
+  if(rok && rok.classList.contains('show')){
+    if(mo){mo.textContent='✅ Account created! You can now login.';mo.classList.add('show');}
+    // doReg auto-opens login modal after 1.4s; close this one just before
+    setTimeout(closeRegisterModal, 1300);
+  } else {
+    var rerr=document.getElementById('rerr');
+    if(me){
+      me.textContent=(rerr&&rerr.textContent)?rerr.textContent:'Registration failed!';
+      me.classList.add('show');
+    }
+  }
+}
 </script>
 
 </body>
