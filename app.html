@@ -2607,7 +2607,7 @@ function autoAnsSpell(){
   spellAns[spellCQ]=false; spellAnswered++; updSpellP();
   const st=document.getElementById('ssp'+Math.min(spellAnswered-1,14));if(st)st.textContent='💫';
   if(spellAnswered<total){spellCQ++;unlockSpellN();startSpellTimer();}
-  else{const sb=document.getElementById('spell-sbtn');if(sb)sb.disabled=false;}
+  else{const sb=document.getElementById('spell-sbtn');if(sb)sb.disabled=false;setTimeout(showSpellResult,1200);}
 }
 
 function ansSpell(q,btn,chosen,correct){
@@ -2623,7 +2623,7 @@ function ansSpell(q,btn,chosen,correct){
   const total=SPELL_QL[spellDiff];
   const st=document.getElementById('ssp'+Math.min(spellAnswered-1,14));if(st)st.textContent=ok?'⭐':'💫';
   if(spellAnswered<total){spellCQ++;unlockSpellN();startSpellTimer();}
-  else{const sb=document.getElementById('spell-sbtn');if(sb)sb.disabled=false;}
+  else{const sb=document.getElementById('spell-sbtn');if(sb)sb.disabled=false;setTimeout(showSpellResult,1200);}
 }
 
 function unlockSpellN(){
@@ -2638,6 +2638,7 @@ function updSpellP(){
 }
 
 async function showSpellResult(){
+  if(document.getElementById('spell-result').classList.contains('show'))return;
   clearInterval(spellTInt);
   const total=SPELL_QL[spellDiff];
   spellLastSco=spellAns.filter(a=>a).length;
@@ -2665,7 +2666,7 @@ async function showSpellResult(){
     ?`<div style="font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:14px">✅ Score saved! ${spellLastSco}/${total} (${pct}%)</div>`
     :`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:10px">Login to save your score!</p><div style="display:flex;gap:8px;justify-content:center"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up</button></div></div>`;
 
-  const res=document.getElementById('spell-result');if(res)res.classList.add('show');
+  const res=document.getElementById('spell-result');if(res)res.classList.add('show');openGameResultModal('spell-result');
   const sb=document.getElementById('spell-sbtn');if(sb)sb.disabled=true;
   setTimeout(()=>document.getElementById('spell-result')?.scrollIntoView({behavior:'smooth'}),100);
 }
@@ -3310,7 +3311,7 @@ function autoAnsOdd(){
   oddAns[oddCQ]=false; oddAnswered++; updOddP();
   const st=document.getElementById('ost'+Math.min(oddAnswered-1,14));if(st)st.textContent='💫';
   if(oddAnswered<total){oddCQ++;unlockOddN();startOddTimer();}
-  else{const sb=document.getElementById('odd-sbtn');if(sb)sb.disabled=false;}
+  else{const sb=document.getElementById('odd-sbtn');if(sb)sb.disabled=false;setTimeout(showOddResult,1200);}
 }
 
 function ansOdd(q,btn,chosen,odd){
@@ -3334,7 +3335,7 @@ function ansOdd(q,btn,chosen,odd){
   const total=ODD_QL[oddDiff];
   const st=document.getElementById('ost'+Math.min(oddAnswered-1,14));if(st)st.textContent=ok?'⭐':'💫';
   if(oddAnswered<total){oddCQ++;unlockOddN();startOddTimer();}
-  else{const sb=document.getElementById('odd-sbtn');if(sb)sb.disabled=false;}
+  else{const sb=document.getElementById('odd-sbtn');if(sb)sb.disabled=false;setTimeout(showOddResult,1200);}
 }
 
 function unlockOddN(){
@@ -3349,6 +3350,7 @@ function updOddP(){
 }
 
 async function showOddResult(){
+  if(document.getElementById('odd-result').classList.contains('show'))return;
   clearInterval(oddTInt);
   const total=ODD_QL[oddDiff];
   oddLastSco=oddAns.filter(a=>a).length;
@@ -3379,7 +3381,7 @@ async function showOddResult(){
     ?`<div style="font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:14px">✅ Score saved! ${oddLastSco}/${total} (${pct}%)</div>`
     :`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:10px">Login to save your score!</p><div style="display:flex;gap:8px;justify-content:center"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up</button></div></div>`;
 
-  const res=document.getElementById('odd-result');if(res)res.classList.add('show');
+  const res=document.getElementById('odd-result');if(res)res.classList.add('show');openGameResultModal('odd-result');
   const sb=document.getElementById('odd-sbtn');if(sb)sb.disabled=true;
   setTimeout(()=>document.getElementById('odd-result')?.scrollIntoView({behavior:'smooth'}),100);
 }
@@ -3749,6 +3751,7 @@ function checkScrambleAnswer(qIdx){
     const sbtn=document.getElementById('scramble-sbtn');
     if(sbtn)sbtn.disabled=false;
     TICKER.resume();
+    setTimeout(showScrambleResult,1200);
   }
 }
 
@@ -3808,6 +3811,7 @@ function timeUpScramble(){
     const sbtn=document.getElementById('scramble-sbtn');
     if(sbtn)sbtn.disabled=false;
     TICKER.resume();
+    setTimeout(showScrambleResult,1200);
   }
 }
 
@@ -3818,6 +3822,7 @@ function updScrambleP(){
 }
 
 async function showScrambleResult(){
+  if(document.getElementById('scramble-result').classList.contains('show'))return;
   clearInterval(scrambleTInt);
   const total=SCRAMBLE_QL[scrambleDiff];
   scrambleLastSco=scrambleAns.filter(a=>a).length;
@@ -3847,7 +3852,7 @@ async function showScrambleResult(){
     ?`<div style="font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:14px">✅ Score saved! ${scrambleLastSco}/${total} (${pct}%)</div>`
     :`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:10px">Login to save your score!</p><div style="display:flex;gap:8px;justify-content:center"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up</button></div></div>`;
 
-  const res=document.getElementById('scramble-result');if(res)res.classList.add('show');
+  const res=document.getElementById('scramble-result');if(res)res.classList.add('show');openGameResultModal('scramble-result');
   const sbtn=document.getElementById('scramble-sbtn');if(sbtn)sbtn.disabled=true;
   setTimeout(()=>document.getElementById('scramble-result')?.scrollIntoView({behavior:'smooth'}),100);
 }
@@ -5007,7 +5012,7 @@ function autoML(){
   mlAns[mlCQ]=false; mlAnswered++;
   document.getElementById('ml-score').textContent=mlAns.filter(a=>a).length;
   if(mlAnswered<10){setTimeout(()=>{mlCQ++;buildMLQuestion(mlCQ);startMLTimer();},1000);}
-  else{const sb=document.getElementById('ml-sbtn');if(sb)sb.disabled=false;}
+  else{const sb=document.getElementById('ml-sbtn');if(sb)sb.disabled=false;setTimeout(showMLResult,1200);}
 }
 
 function ansML(idx,btn,chosen,correct){
@@ -5022,10 +5027,11 @@ function ansML(idx,btn,chosen,correct){
   mlAnswered++;
   document.getElementById('ml-score').textContent=mlAns.filter(a=>a).length;
   if(mlAnswered<10){setTimeout(()=>{mlCQ++;buildMLQuestion(mlCQ);startMLTimer();},900);}
-  else{const sb=document.getElementById('ml-sbtn');if(sb)sb.disabled=false;}
+  else{const sb=document.getElementById('ml-sbtn');if(sb)sb.disabled=false;setTimeout(showMLResult,1200);}
 }
 
 function showMLResult(){
+  if(document.getElementById('ml-result').classList.contains('show'))return;
   clearInterval(mlTInt);
   const score=mlAns.filter(a=>a).length;
   const pct=Math.round(score/10*100);
@@ -5037,7 +5043,7 @@ function showMLResult(){
   else{stars='⭐⭐💫💫💫';msg='Keep trying! You can do it!';}
   document.getElementById('ml-rstr').textContent=stars;
   document.getElementById('ml-rmsg').textContent=msg;
-  document.getElementById('ml-result').classList.add('show');
+  document.getElementById('ml-result').classList.add('show');openGameResultModal('ml-result');
   document.getElementById('ml-sbtn').disabled=true;
 }
 
@@ -5167,7 +5173,7 @@ function submitRhyme(idx){
   if(rhAnswered<8){
     setTimeout(()=>{rhCQ++;rhSelected=[];buildRhymeQ(rhCQ);startRhymeTimer();},1200);
   } else {
-    const sbtn=document.getElementById('rh-sbtn');if(sbtn)sbtn.disabled=false;
+    const sbtn=document.getElementById('rh-sbtn');if(sbtn)sbtn.disabled=false;setTimeout(showRhymeResult,1200);
   }
 }
 
@@ -5184,6 +5190,7 @@ function startRhymeTimer(){
 }
 
 function showRhymeResult(){
+  if(document.getElementById('rh-result').classList.contains('show'))return;
   clearInterval(rhTInt);
   const score=rhAns.filter(a=>a).length;
   const pct=Math.round(score/8*100);
@@ -5195,7 +5202,7 @@ function showRhymeResult(){
   else{stars='⭐⭐💫💫💫';msg='Keep practicing! Rhyming is fun!';}
   document.getElementById('rh-rstr').textContent=stars;
   document.getElementById('rh-rmsg').textContent=msg;
-  document.getElementById('rh-result').classList.add('show');
+  document.getElementById('rh-result').classList.add('show');openGameResultModal('rh-result');
   document.getElementById('rh-sbtn').disabled=true;
 }
 
@@ -6261,7 +6268,7 @@ function ansCM(idx,chosen,correct){
   if(ok){if(fb){fb.textContent='✅ Correct! That is '+correct+'!';fb.className='fb show correct';}sKidCorrect();}
   else{if(fb){fb.textContent='❌ That is '+chosen+'! The answer is '+correct+'!';fb.className='fb show wrong';}sKidWrong();}
   if(cmAnswered<cmTotal){setTimeout(function(){cmCQ++;buildCMQuestion(cmCQ);startCMTimer();},1000);}
-  else{document.getElementById('cm-sbtn').disabled=false;}
+  else{document.getElementById('cm-sbtn').disabled=false;setTimeout(showCMResult,1200);}
 }
 function startCMTimer(){
   clearInterval(cmTInt); cmTLeft=12;
@@ -6273,6 +6280,7 @@ function startCMTimer(){
   },1000);
 }
 function showCMResult(){
+  if(document.getElementById('cm-result').classList.contains('show'))return;
   clearInterval(cmTInt);
   var pct=Math.round(cmScore/cmTotal*100);
   document.getElementById('cm-rsco').textContent=cmScore+'/'+cmTotal;
@@ -6283,7 +6291,7 @@ function showCMResult(){
   else{stars='⭐⭐💫💫💫';msg='Keep practicing! Colors are fun!';}
   document.getElementById('cm-rstr').textContent=stars;
   document.getElementById('cm-rmsg').textContent=msg;
-  document.getElementById('cm-result').classList.add('show');
+  document.getElementById('cm-result').classList.add('show');openGameResultModal('cm-result');
   document.getElementById('cm-sbtn').disabled=true;
 }
 
@@ -6341,9 +6349,10 @@ function ansCW(idx,answer){
   if(ok){if(fb){fb.textContent='✅ Correct! '+msg;fb.className='fb show correct';}sKidCorrect();}
   else{if(fb){fb.textContent='❌ '+msg;fb.className='fb show wrong';}sKidWrong();}
   if(cwAnswered<cwTotal){setTimeout(function(){cwCQ++;buildCWQuestion(cwCQ);},900);}
-  else{document.getElementById('cw-sbtn').disabled=false;}
+  else{document.getElementById('cw-sbtn').disabled=false;setTimeout(showCWResult,1200);}
 }
 function showCWResult(){
+  if(document.getElementById('cw-result').classList.contains('show'))return;
   var pct=Math.round(cwScore/cwTotal*100);
   document.getElementById('cw-rsco').textContent=cwScore+'/'+cwTotal;
   var stars='',msg='';
@@ -6353,7 +6362,7 @@ function showCWResult(){
   else{stars='⭐⭐💫💫💫';msg='Keep trying! Focus on the color!';}
   document.getElementById('cw-rstr').textContent=stars;
   document.getElementById('cw-rmsg').textContent=msg;
-  document.getElementById('cw-result').classList.add('show');
+  document.getElementById('cw-result').classList.add('show');openGameResultModal('cw-result');
   document.getElementById('cw-sbtn').disabled=true;
 }
 
@@ -6398,7 +6407,7 @@ function tapROColor(name){
     if(roTapped.length>=RAINBOW_ORDER.length){
       clearInterval(roTInt); sKidFinish();
       if(fb){fb.textContent='🌈 Perfect Rainbow! You did it!';fb.style.color='#27AE60';}
-      document.getElementById('ro-sbtn').disabled=false;
+      document.getElementById('ro-sbtn').disabled=false;setTimeout(showROResult,1200);
     } else {
       var tgt=document.getElementById('ro-target');
       if(tgt)tgt.textContent=RAINBOW_ORDER[roTapped.length];
@@ -6410,9 +6419,10 @@ function tapROColor(name){
   }
 }
 function endROGame(){
-  document.getElementById('ro-sbtn').disabled=false;
+  document.getElementById('ro-sbtn').disabled=false;setTimeout(showROResult,1200);
 }
 function showROResult(){
+  if(document.getElementById('ro-result').classList.contains('show'))return;
   clearInterval(roTInt);
   var pct=Math.round(roScore/RAINBOW_ORDER.length*100);
   document.getElementById('ro-rsco').textContent=roScore+'/'+RAINBOW_ORDER.length;
@@ -6423,7 +6433,7 @@ function showROResult(){
   else{stars='⭐⭐💫💫💫';msg='Remember: Red Orange Yellow Green Blue Indigo Violet!';}
   document.getElementById('ro-rstr').textContent=stars;
   document.getElementById('ro-rmsg').textContent=msg;
-  document.getElementById('ro-result').classList.add('show');
+  document.getElementById('ro-result').classList.add('show');openGameResultModal('ro-result');
   document.getElementById('ro-sbtn').disabled=true;
 }
 
@@ -6479,9 +6489,10 @@ function ansMX(idx,chosen,correct){
   if(ok){if(fb){fb.textContent='✅ Correct! '+mxQs[idx].a+' + '+mxQs[idx].b+' = '+correct+'!';fb.className='fb show correct';}sKidCorrect();}
   else{if(fb){fb.textContent='❌ The answer is '+correct+'!';fb.className='fb show wrong';}sKidWrong();}
   if(mxAnswered<mxTotal){setTimeout(function(){mxCQ++;buildMXQuestion(mxCQ);},1000);}
-  else{document.getElementById('mx-sbtn').disabled=false;}
+  else{document.getElementById('mx-sbtn').disabled=false;setTimeout(showMXResult,1200);}
 }
 function showMXResult(){
+  if(document.getElementById('mx-result').classList.contains('show'))return;
   var pct=Math.round(mxScore/mxTotal*100);
   document.getElementById('mx-rsco').textContent=mxScore+'/'+mxTotal;
   var stars='',msg='';
@@ -6491,7 +6502,7 @@ function showMXResult(){
   else{stars='⭐⭐💫💫💫';msg='Keep practicing! Mix and learn!';}
   document.getElementById('mx-rstr').textContent=stars;
   document.getElementById('mx-rmsg').textContent=msg;
-  document.getElementById('mx-result').classList.add('show');
+  document.getElementById('mx-result').classList.add('show');openGameResultModal('mx-result');
   document.getElementById('mx-sbtn').disabled=true;
 }
 
@@ -6575,9 +6586,10 @@ function submitFC(idx){
   if(allCorrect){if(fb){fb.textContent='🌟 Perfect! All '+fcQs[idx].name+' things found!';fb.className='fb show correct';}sKidStar();}
   else{if(fb){fb.textContent='❌ Some were missed! Orange = missed, Red = wrong';fb.className='fb show wrong';}sKidWrong();}
   if(fcAnswered<fcTotal){setTimeout(function(){fcCQ++;buildFCQuestion(fcCQ);},1200);}
-  else{document.getElementById('fc-sbtn').disabled=false;}
+  else{document.getElementById('fc-sbtn').disabled=false;setTimeout(showFCResult,1200);}
 }
 function showFCResult(){
+  if(document.getElementById('fc-result').classList.contains('show'))return;
   var pct=Math.round(fcScore/fcTotal*100);
   document.getElementById('fc-rsco').textContent=fcScore+'/'+fcTotal;
   var stars='',msg='';
@@ -6587,7 +6599,7 @@ function showFCResult(){
   else{stars='⭐⭐💫💫💫';msg='Keep practicing! Colors are everywhere!';}
   document.getElementById('fc-rstr').textContent=stars;
   document.getElementById('fc-rmsg').textContent=msg;
-  document.getElementById('fc-result').classList.add('show');
+  document.getElementById('fc-result').classList.add('show');openGameResultModal('fc-result');
   document.getElementById('fc-sbtn').disabled=true;
 }
 
@@ -6911,9 +6923,10 @@ function ansAS(idx,chosen,correct){
     setTimeout(function(){ playAnimalSound(correct); }, 400);
   }
   if(asAnswered<asTotal){setTimeout(function(){asCQ++;buildASQuestion(asCQ);},1500);}
-  else{document.getElementById('as-sbtn').disabled=false;}
+  else{document.getElementById('as-sbtn').disabled=false;setTimeout(showASResult,1200);}
 }
 function showASResult(){
+  if(document.getElementById('as-result').classList.contains('show'))return;
   clearInterval(asTInt);
   var pct=Math.round(asScore/asTotal*100);
   document.getElementById('as-rsco').textContent=asScore+'/'+asTotal;
@@ -6924,7 +6937,7 @@ function showASResult(){
   else{stars='⭐⭐💫💫💫';msg='Keep practicing! Animals are fun!';}
   document.getElementById('as-rstr').textContent=stars;
   document.getElementById('as-rmsg').textContent=msg;
-  document.getElementById('as-result').classList.add('show');
+  document.getElementById('as-result').classList.add('show');openGameResultModal('as-result');
   document.getElementById('as-sbtn').disabled=true;
 }
 
@@ -6964,9 +6977,10 @@ function ansAM(idx,chosen,correct){
   if(ok){if(fb){fb.textContent='✅ Correct! '+q.baby+' → '+correct+'!';fb.className='fb show correct';}sKidCorrect();}
   else{if(fb){fb.textContent='❌ The parent is '+correct+'!';fb.className='fb show wrong';}sKidWrong();}
   if(amAnswered<amTotal){setTimeout(function(){amCQ++;buildAMQuestion(amCQ);},900);}
-  else{document.getElementById('am-sbtn').disabled=false;}
+  else{document.getElementById('am-sbtn').disabled=false;setTimeout(showAMResult,1200);}
 }
 function showAMResult(){
+  if(document.getElementById('am-result').classList.contains('show'))return;
   var pct=Math.round(amScore/amTotal*100);
   document.getElementById('am-rsco').textContent=amScore+'/'+amTotal;
   var stars='',msg='';
@@ -6976,7 +6990,7 @@ function showAMResult(){
   else{stars='⭐⭐💫💫💫';msg='Keep trying! Practice makes perfect!';}
   document.getElementById('am-rstr').textContent=stars;
   document.getElementById('am-rmsg').textContent=msg;
-  document.getElementById('am-result').classList.add('show');
+  document.getElementById('am-result').classList.add('show');openGameResultModal('am-result');
   document.getElementById('am-sbtn').disabled=true;
 }
 
@@ -7013,9 +7027,10 @@ function ansWH(idx,chosen,correct){
   if(ok){if(fb){fb.textContent='✅ Correct! The '+(HABITAT_EMOJIS[correct]||'')+' '+correct+'!';fb.className='fb show correct';}sKidCorrect();}
   else{if(fb){fb.textContent='❌ It lives in the '+correct+'!';fb.className='fb show wrong';}sKidWrong();}
   if(whAnswered<whTotal){setTimeout(function(){whCQ++;buildWHQuestion(whCQ);},900);}
-  else{document.getElementById('wh-sbtn').disabled=false;}
+  else{document.getElementById('wh-sbtn').disabled=false;setTimeout(showWHResult,1200);}
 }
 function showWHResult(){
+  if(document.getElementById('wh-result').classList.contains('show'))return;
   var pct=Math.round(whScore/whTotal*100);
   document.getElementById('wh-rsco').textContent=whScore+'/'+whTotal;
   var stars='',msg='';
@@ -7025,7 +7040,7 @@ function showWHResult(){
   else{stars='⭐⭐💫💫💫';msg='Keep learning animal homes!';}
   document.getElementById('wh-rstr').textContent=stars;
   document.getElementById('wh-rmsg').textContent=msg;
-  document.getElementById('wh-result').classList.add('show');
+  document.getElementById('wh-result').classList.add('show');openGameResultModal('wh-result');
   document.getElementById('wh-sbtn').disabled=true;
 }
 
@@ -7061,9 +7076,10 @@ function ansAA(idx,chosen,correct){
   if(ok){if(fb){fb.textContent='✅ Correct! '+correct+' starts with '+correct[0]+'!';fb.className='fb show correct';}sKidCorrect();}
   else{if(fb){fb.textContent='❌ '+correct+' starts with '+correct[0]+'!';fb.className='fb show wrong';}sKidWrong();}
   if(aaAnswered<aaTotal){setTimeout(function(){aaCQ++;buildAAQuestion(aaCQ);},900);}
-  else{document.getElementById('aa-sbtn').disabled=false;}
+  else{document.getElementById('aa-sbtn').disabled=false;setTimeout(showAAResult,1200);}
 }
 function showAAResult(){
+  if(document.getElementById('aa-result').classList.contains('show'))return;
   var pct=Math.round(aaScore/aaTotal*100);
   document.getElementById('aa-rsco').textContent=aaScore+'/'+aaTotal;
   var stars='',msg='';
@@ -7073,7 +7089,7 @@ function showAAResult(){
   else{stars='⭐⭐💫💫💫';msg='Keep practicing animals and letters!';}
   document.getElementById('aa-rstr').textContent=stars;
   document.getElementById('aa-rmsg').textContent=msg;
-  document.getElementById('aa-result').classList.add('show');
+  document.getElementById('aa-result').classList.add('show');openGameResultModal('aa-result');
   document.getElementById('aa-sbtn').disabled=true;
 }
 
@@ -7112,9 +7128,10 @@ function ansHL(idx,chosen,correct){
   if(ok){if(fb){fb.textContent='✅ Correct! '+correct+legWord+'!';fb.className='fb show correct';}sKidCorrect();}
   else{if(fb){fb.textContent='❌ It has '+correct+legWord+'!';fb.className='fb show wrong';}sKidWrong();}
   if(hlAnswered<hlTotal){setTimeout(function(){hlCQ++;buildHLQuestion(hlCQ);},900);}
-  else{document.getElementById('hl-sbtn').disabled=false;}
+  else{document.getElementById('hl-sbtn').disabled=false;setTimeout(showHLResult,1200);}
 }
 function showHLResult(){
+  if(document.getElementById('hl-result').classList.contains('show'))return;
   var pct=Math.round(hlScore/hlTotal*100);
   document.getElementById('hl-rsco').textContent=hlScore+'/'+hlTotal;
   var stars='',msg='';
@@ -7124,7 +7141,7 @@ function showHLResult(){
   else{stars='⭐⭐💫💫💫';msg='Keep practicing! Count those legs!';}
   document.getElementById('hl-rstr').textContent=stars;
   document.getElementById('hl-rmsg').textContent=msg;
-  document.getElementById('hl-result').classList.add('show');
+  document.getElementById('hl-result').classList.add('show');openGameResultModal('hl-result');
   document.getElementById('hl-sbtn').disabled=true;
 }
 
@@ -7171,9 +7188,10 @@ function ansBS(idx,chosen,correct){
   if(ok){if(fb){fb.textContent='✅ Correct! '+correct+' is bigger!';fb.className='fb show correct';}sKidCorrect();}
   else{if(fb){fb.textContent='❌ '+correct+' is bigger!';fb.className='fb show wrong';}sKidWrong();}
   if(bsAnswered<bsTotal){setTimeout(function(){bsCQ++;buildBSQuestion(bsCQ);},900);}
-  else{document.getElementById('bs-sbtn').disabled=false;}
+  else{document.getElementById('bs-sbtn').disabled=false;setTimeout(showBSResult,1200);}
 }
 function showBSResult(){
+  if(document.getElementById('bs-result').classList.contains('show'))return;
   var pct=Math.round(bsScore/bsTotal*100);
   document.getElementById('bs-rsco').textContent=bsScore+'/'+bsTotal;
   var stars='',msg='';
@@ -7183,7 +7201,7 @@ function showBSResult(){
   else{stars='⭐⭐💫💫💫';msg='Keep learning animal sizes!';}
   document.getElementById('bs-rstr').textContent=stars;
   document.getElementById('bs-rmsg').textContent=msg;
-  document.getElementById('bs-result').classList.add('show');
+  document.getElementById('bs-result').classList.add('show');openGameResultModal('bs-result');
   document.getElementById('bs-sbtn').disabled=true;
 }
 
@@ -7220,9 +7238,10 @@ function ansAG(idx,chosen,correct){
   if(ok){if(fb){fb.textContent='✅ Correct! It is a '+(GROUP_EMOJIS[correct]||'')+' '+correct+'!';fb.className='fb show correct';}sKidCorrect();}
   else{if(fb){fb.textContent='❌ It is a '+correct+'!';fb.className='fb show wrong';}sKidWrong();}
   if(agAnswered<agTotal){setTimeout(function(){agCQ++;buildAGQuestion(agCQ);},900);}
-  else{document.getElementById('ag-sbtn').disabled=false;}
+  else{document.getElementById('ag-sbtn').disabled=false;setTimeout(showAGResult,1200);}
 }
 function showAGResult(){
+  if(document.getElementById('ag-result').classList.contains('show'))return;
   var pct=Math.round(agScore/agTotal*100);
   document.getElementById('ag-rsco').textContent=agScore+'/'+agTotal;
   var stars='',msg='';
@@ -7232,7 +7251,7 @@ function showAGResult(){
   else{stars='⭐⭐💫💫💫';msg='Keep learning animal groups!';}
   document.getElementById('ag-rstr').textContent=stars;
   document.getElementById('ag-rmsg').textContent=msg;
-  document.getElementById('ag-result').classList.add('show');
+  document.getElementById('ag-result').classList.add('show');openGameResultModal('ag-result');
   document.getElementById('ag-sbtn').disabled=true;
 }
 
@@ -7347,7 +7366,7 @@ async function doLoginModal(){
 }
 // ESC key closes modal
 document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){closeLoginModal();closeRegisterModal();try{closeResultModal()}catch(x){}}
+  if(e.key==='Escape'){closeLoginModal();closeRegisterModal();try{closeResultModal()}catch(x){}try{closeGameResultModal()}catch(x){}}
 });
 </script>
 
@@ -7532,6 +7551,42 @@ function closeResultModal(){
     document.body.style.overflow='';
   }
 }
+</script>
+
+
+<!-- ══ UNIVERSAL GAME RESULT MODAL ══ -->
+<div id="g-result-modal" onclick="if(event.target===this)closeGameResultModal()" style="display:none;position:fixed;inset:0;z-index:9990;background:rgba(15,26,62,0.78);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px;overflow-y:auto">
+  <div style="background:linear-gradient(160deg,#1D2B55,#2D3F7A);border-radius:24px;border:1.5px solid rgba(250,199,117,0.3);padding:clamp(22px,5vw,32px);width:100%;max-width:420px;box-shadow:0 24px 80px rgba(15,26,62,0.6);position:relative;animation:modalPop 0.25s ease;margin:auto;text-align:center">
+    <button onclick="closeGameResultModal()" aria-label="Close" style="position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.1);border:none;color:rgba(255,255,255,0.7);font-size:16px;font-weight:900;cursor:pointer;font-family:Nunito,sans-serif;transition:all 0.15s;z-index:2" onmouseover="this.style.background='rgba(255,255,255,0.2)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.7)'">✕</button>
+    <div style="font-size:13px;font-weight:900;color:#FAC775;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">🎉 Round Complete!</div>
+    <div id="grm-body"></div>
+  </div>
+</div>
+
+<script>
+function openGameResultModal(panelId){
+  var panel=document.getElementById(panelId);
+  var m=document.getElementById('g-result-modal');
+  var body=document.getElementById('grm-body');
+  if(!panel||!m||!body)return;
+  body.innerHTML=panel.innerHTML;
+  m.style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function closeGameResultModal(){
+  var m=document.getElementById('g-result-modal');
+  if(!m)return;
+  m.style.display='none';
+  var lm=document.getElementById('login-modal');
+  var rm=document.getElementById('register-modal');
+  if((!lm||lm.style.display!=='flex')&&(!rm||rm.style.display!=='flex')){
+    document.body.style.overflow='';
+  }
+}
+// Any action button clicked inside the modal also closes it
+document.getElementById('grm-body').addEventListener('click',function(e){
+  if(e.target.closest('button'))setTimeout(closeGameResultModal,50);
+});
 </script>
 
 </body>
