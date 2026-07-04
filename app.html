@@ -597,192 +597,6 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
   </div>
 </div>
 
-<!-- ══ LOGIN ══ -->
-<div id="sc-login" class="screen" style="background:#F4F6FF;min-height:100vh;display:flex;flex-direction:column">
-
-  <!-- Top bar -->
-  <div style="background:linear-gradient(135deg,#0F1A3E,#1D2B55,#2B1F5E);padding:clamp(32px,6vw,52px) 20px clamp(28px,5vw,44px);text-align:center;position:relative;overflow:hidden">
-    <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 80% at 60% 50%,rgba(212,83,126,0.2) 0%,transparent 70%)"></div>
-    <div style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,0.05) 1px,transparent 1px);background-size:28px 28px"></div>
-    <div style="font-size:clamp(26px,6vw,40px);font-weight:900;color:#fff;position:relative;z-index:1;line-height:1.1">
-      Welcome <span style="color:#D4537E">Back!</span> 👋
-    </div>
-    <div style="font-size:clamp(13px,3vw,15px);color:rgba(255,255,255,0.6);margin-top:8px;position:relative;z-index:1">Login to save your scores and unlock games</div>
-  </div>
-
-  <!-- Login card -->
-  <div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding:clamp(20px,4vw,40px) 16px">
-    <div style="background:#fff;border-radius:24px;border:1.5px solid #EAEDF5;padding:clamp(24px,5vw,36px);width:100%;max-width:420px;box-shadow:0 8px 40px rgba(29,43,85,0.1)">
-
-      <!-- Logo -->
-      <div style="text-align:center;margin-bottom:24px">
-        <div style="font-size:20px;font-weight:900;color:#1D2B55;display:inline-block">WordWise<span style="color:#D4537E">PH</span></div>
-      </div>
-
-      <div class="err" id="lerr"></div>
-
-      <!-- Username field -->
-      <div style="margin-bottom:16px">
-        <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Username</label>
-        <div style="position:relative">
-          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px">👤</span>
-          <input type="text" id="luser" placeholder="Enter your username"
-            style="width:100%;padding:13px 14px 13px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
-            onfocus="this.style.borderColor='#D4537E';this.style.background='#fff'"
-            onblur="this.style.borderColor='#E8EAF0';this.style.background='#F9FAFB'"/>
-        </div>
-      </div>
-
-      <!-- Password field -->
-      <div style="margin-bottom:24px">
-        <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Password</label>
-        <div class="pw-wrap" style="position:relative">
-          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;z-index:1">🔒</span>
-          <input type="password" id="lpass" placeholder="Enter your password"
-            style="width:100%;padding:13px 44px 13px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
-            onfocus="this.style.borderColor='#D4537E';this.style.background='#fff'"
-            onblur="this.style.borderColor='#E8EAF0';this.style.background='#F9FAFB'"
-            onkeydown="if(event.key==='Enter')doLogin()"/>
-          <button class="pw-eye" onclick="togglePw('lpass',this)" type="button" tabindex="-1" aria-label="Show password"
-            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;padding:4px">👁️</button>
-        </div>
-      </div>
-
-      <!-- Login button -->
-      <button onclick="doLogin()"
-        style="width:100%;padding:15px;border-radius:99px;background:linear-gradient(135deg,#D4537E,#c0456e);border:none;color:#fff;font-family:Nunito,sans-serif;font-size:16px;font-weight:900;cursor:pointer;transition:all 0.2s;box-shadow:0 6px 20px rgba(212,83,126,0.35);margin-bottom:16px"
-        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 28px rgba(212,83,126,0.45)'"
-        onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(212,83,126,0.35)'">
-        Login
-      </button>
-
-      <!-- Divider -->
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-        <div style="flex:1;height:1px;background:#EAEDF5"></div>
-        <span style="font-size:12px;font-weight:700;color:#9CA3AF">or</span>
-        <div style="flex:1;height:1px;background:#EAEDF5"></div>
-      </div>
-
-      <!-- Create account -->
-      <button onclick="navTo('register')"
-        style="width:100%;padding:14px;border-radius:99px;background:#fff;border:2px solid #D4537E;color:#D4537E;font-family:Nunito,sans-serif;font-size:15px;font-weight:900;cursor:pointer;transition:all 0.2s;margin-bottom:14px"
-        onmouseover="this.style.background='#FFF0F5'"
-        onmouseout="this.style.background='#fff'">
-        Create an Account
-      </button>
-
-      <!-- Guest -->
-      <div style="text-align:center">
-        <button onclick="guestPlay()"
-          style="background:none;border:none;color:#9CA3AF;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px"
-          onmouseover="this.style.color='#1D2B55'"
-          onmouseout="this.style.color='#9CA3AF'">
-          Continue as Guest
-        </button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- ══ REGISTER ══ -->
-<div id="sc-register" class="screen" style="background:#F4F6FF;min-height:100vh;display:flex;flex-direction:column">
-
-  <!-- Top bar -->
-  <div style="background:linear-gradient(135deg,#0F1A3E,#1D2B55,#2B1F5E);padding:clamp(32px,6vw,52px) 20px clamp(28px,5vw,44px);text-align:center;position:relative;overflow:hidden">
-    <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 80% at 40% 50%,rgba(250,199,117,0.15) 0%,transparent 70%)"></div>
-    <div style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,0.05) 1px,transparent 1px);background-size:28px 28px"></div>
-    <div style="font-size:clamp(26px,6vw,40px);font-weight:900;color:#fff;position:relative;z-index:1;line-height:1.1">
-      Join <span style="color:#FAC775">WordWise!</span> 🚀
-    </div>
-    <div style="font-size:clamp(13px,3vw,15px);color:rgba(255,255,255,0.6);margin-top:8px;position:relative;z-index:1">Create your free account in seconds</div>
-  </div>
-
-  <!-- Register card -->
-  <div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding:clamp(20px,4vw,40px) 16px">
-    <div style="background:#fff;border-radius:24px;border:1.5px solid #EAEDF5;padding:clamp(24px,5vw,36px);width:100%;max-width:420px;box-shadow:0 8px 40px rgba(29,43,85,0.1)">
-
-      <!-- Logo -->
-      <div style="text-align:center;margin-bottom:24px">
-        <div style="font-size:20px;font-weight:900;color:#1D2B55;display:inline-block">WordWise<span style="color:#D4537E">PH</span></div>
-      </div>
-
-      <div class="err" id="rerr"></div>
-      <div class="okmsg" id="rok"></div>
-
-      <!-- Full Name -->
-      <div style="margin-bottom:14px">
-        <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Full Name</label>
-        <div style="position:relative">
-          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px">📛</span>
-          <input type="text" id="rname" placeholder="Your full name"
-            style="width:100%;padding:13px 14px 13px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
-            onfocus="this.style.borderColor='#D4537E';this.style.background='#fff'"
-            onblur="this.style.borderColor='#E8EAF0';this.style.background='#F9FAFB'"/>
-        </div>
-      </div>
-
-      <!-- Username -->
-      <div style="margin-bottom:14px">
-        <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Username</label>
-        <div style="position:relative">
-          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px">👤</span>
-          <input type="text" id="ruser" placeholder="Choose a username"
-            style="width:100%;padding:13px 14px 13px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
-            onfocus="this.style.borderColor='#D4537E';this.style.background='#fff'"
-            onblur="this.style.borderColor='#E8EAF0';this.style.background='#F9FAFB'"/>
-        </div>
-      </div>
-
-      <!-- Password -->
-      <div style="margin-bottom:14px">
-        <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">Password</label>
-        <div class="pw-wrap" style="position:relative">
-          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;z-index:1">🔒</span>
-          <input type="password" id="rpass" placeholder="Min. 4 characters"
-            style="width:100%;padding:13px 44px 13px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;transition:border 0.2s;box-sizing:border-box"
-            onfocus="this.style.borderColor='#D4537E';this.style.background='#fff'"
-            onblur="this.style.borderColor='#E8EAF0';this.style.background='#F9FAFB'"/>
-          <button class="pw-eye" onclick="togglePw('rpass',this)" type="button" tabindex="-1" aria-label="Show password"
-            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;padding:4px">👁️</button>
-        </div>
-      </div>
-
-      <!-- Account type -->
-      <div style="margin-bottom:22px">
-        <label style="font-size:13px;font-weight:800;color:#1D2B55;display:block;margin-bottom:6px">I am a...</label>
-        <div style="position:relative">
-          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;z-index:1">🎓</span>
-          <select id="rtype"
-            style="width:100%;padding:13px 14px 13px 40px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;-webkit-appearance:auto;box-sizing:border-box;cursor:pointer">
-            <option value="kid">Kid / Student</option>
-            <option value="adult">Adult / Teacher / Parent</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Create button -->
-      <button onclick="doReg()"
-        style="width:100%;padding:15px;border-radius:99px;background:linear-gradient(135deg,#D4537E,#c0456e);border:none;color:#fff;font-family:Nunito,sans-serif;font-size:16px;font-weight:900;cursor:pointer;transition:all 0.2s;box-shadow:0 6px 20px rgba(212,83,126,0.35);margin-bottom:16px"
-        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 28px rgba(212,83,126,0.45)'"
-        onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(212,83,126,0.35)'">
-        Create Account
-      </button>
-
-      <!-- Login link -->
-      <div style="text-align:center">
-        <button onclick="navTo('login')"
-          style="background:none;border:none;color:#9CA3AF;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;cursor:pointer"
-          onmouseover="this.style.color='#D4537E'"
-          onmouseout="this.style.color='#9CA3AF'">
-          Already have an account? <span style="color:#D4537E;font-weight:900;text-decoration:underline;text-underline-offset:3px">Login</span>
-        </button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
 <!-- ══ QUIZ ══ -->
 <div id="sc-quiz" class="screen">
   <div class="qhero">
@@ -1515,15 +1329,16 @@ function hideOk(id){const e=document.getElementById(id);if(e)e.classList.remove(
 
 // ── AUTH ─────────────────────────────────────────────────────
 async function doLogin(){
-  hideErr('lerr');
-  const u=document.getElementById('luser').value.trim();
-  const p=document.getElementById('lpass').value.trim();
-  if(!u||!p){showErr('lerr','Please fill in both fields!');return;}
+  hideErr('ml-err');
+  const u=document.getElementById('ml-user').value.trim();
+  const p=document.getElementById('ml-pass').value.trim();
+  if(!u||!p){showErr('ml-err','Please fill in both fields!');return;}
   showLoader('Logging in...');
   const res=await api({action:'login',username:u,password:p});
   hideLoader();
-  if(!res.success){showErr('lerr',res.error||'Wrong username or password!');return;}
+  if(!res.success){showErr('ml-err',res.error||'Wrong username or password!');return;}
   CU=res.user;
+  closeLoginModal();
   round=1;
   buildHdr();
   updateDiffCards();
@@ -1563,18 +1378,18 @@ function getExpiryInfo(){
 }
 
 async function doReg(){
-  hideErr('rerr'); hideOk('rok');
-  const name=document.getElementById('rname').value.trim();
-  const user=document.getElementById('ruser').value.trim();
-  const pass=document.getElementById('rpass').value.trim();
-  const type=document.getElementById('rtype').value;
-  if(!name||!user||!pass){showErr('rerr','Please fill in all fields!');return;}
-  if(pass.length<4){showErr('rerr','Password must be at least 4 characters!');return;}
+  hideErr('mr-err'); hideOk('mr-ok');
+  const name=document.getElementById('mr-name').value.trim();
+  const user=document.getElementById('mr-user').value.trim();
+  const pass=document.getElementById('mr-pass').value.trim();
+  const type=document.getElementById('mr-type').value;
+  if(!name||!user||!pass){showErr('mr-err','Please fill in all fields!');return;}
+  if(pass.length<4){showErr('mr-err','Password must be at least 4 characters!');return;}
   showLoader('Creating account...');
   const res=await api({action:'register',name,username:user,password:pass,type});
   hideLoader();
-  if(!res.success){showErr('rerr',res.error||'Registration failed!');return;}
-  showOk('rok','✅ Account created! You can now login.');
+  if(!res.success){showErr('mr-err',res.error||'Registration failed!');return;}
+  showOk('mr-ok','✅ Account created! You can now login.');
   setTimeout(()=>navTo('login'),1400);
 }
 
@@ -7488,25 +7303,7 @@ function closeLoginModal(){
 function modalToRegister(){closeLoginModal();openRegisterModal();}
 function modalGuest(){closeLoginModal();guestPlay();}
 async function doLoginModal(){
-  var u=document.getElementById('ml-user').value.trim();
-  var p=document.getElementById('ml-pass').value.trim();
-  var me=document.getElementById('ml-err');
-  if(!u||!p){
-    if(me){me.textContent='Please fill in both fields!';me.classList.add('show');}
-    return;
-  }
-  document.getElementById('luser').value=u;
-  document.getElementById('lpass').value=p;
   await doLogin();
-  if(CU && CU.username){
-    closeLoginModal();
-  } else {
-    var le=document.getElementById('lerr');
-    if(me){
-      me.textContent=(le&&le.textContent)?le.textContent:'Wrong username or password!';
-      me.classList.add('show');
-    }
-  }
 }
 // ESC key closes modal
 document.addEventListener('keydown',function(e){
@@ -7630,39 +7427,7 @@ function closeRegisterModal(){
   }
 }
 async function doRegModal(){
-  var me=document.getElementById('mr-err');
-  var mo=document.getElementById('mr-ok');
-  if(me){me.textContent='';me.classList.remove('show');}
-  if(mo){mo.textContent='';mo.classList.remove('show');}
-  var name=document.getElementById('mr-name').value.trim();
-  var user=document.getElementById('mr-user').value.trim();
-  var pass=document.getElementById('mr-pass').value.trim();
-  var type=document.getElementById('mr-type').value;
-  if(!name||!user||!pass){
-    if(me){me.textContent='Please fill in all fields!';me.classList.add('show');}
-    return;
-  }
-  if(pass.length<4){
-    if(me){me.textContent='Password must be at least 4 characters!';me.classList.add('show');}
-    return;
-  }
-  document.getElementById('rname').value=name;
-  document.getElementById('ruser').value=user;
-  document.getElementById('rpass').value=pass;
-  document.getElementById('rtype').value=type;
   await doReg();
-  var rok=document.getElementById('rok');
-  if(rok && rok.classList.contains('show')){
-    if(mo){mo.textContent='✅ Account created! You can now login.';mo.classList.add('show');}
-    // doReg auto-opens login modal after 1.4s; close this one just before
-    setTimeout(closeRegisterModal, 1300);
-  } else {
-    var rerr=document.getElementById('rerr');
-    if(me){
-      me.textContent=(rerr&&rerr.textContent)?rerr.textContent:'Registration failed!';
-      me.classList.add('show');
-    }
-  }
 }
 </script>
 
