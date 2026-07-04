@@ -2301,6 +2301,14 @@ document.addEventListener('DOMContentLoaded',function(){
   loadLBGame('grammar','easy');
   // Start ticker after page fully loaded
   setTimeout(()=>TICKER.start(), 2000);
+  // Auto-open login popup if ?login=1 (from landing page Login button)
+  try{
+    var qp=new URLSearchParams(window.location.search);
+    if(qp.get('login')==='1'){
+      history.replaceState(null,'',window.location.pathname);
+      setTimeout(openLoginModal, 400);
+    }
+  }catch(e){}
   // Auto-trigger plan from landing page
   setTimeout(function(){
     var plan=localStorage.getItem('wwplan');
