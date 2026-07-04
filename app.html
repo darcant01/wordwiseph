@@ -1569,10 +1569,10 @@ function autoAns(){
   document.getElementById('qc'+cQ)?.classList.add('wrong');
   if(fb){fb.textContent="⏰ Time's up! Correct: "+cQs[cQ].correct;fb.className='fb show wrong';}
   ans[cQ]=false;answered++;updP();
-  if(diff==='infinite'){document.getElementById('sbtn').disabled=false;return;}
+  if(diff==='infinite'){document.getElementById('sbtn').disabled=false;setTimeout(function(){showResult();},1200);return;}
   const st=document.getElementById('st'+(answered-1));if(st)st.textContent='💫';
   if(answered<(QL[diff]||5)){cQ++;unlockN();startTimer();}
-  else document.getElementById('sbtn').disabled=false;
+  else{document.getElementById('sbtn').disabled=false;setTimeout(function(){showResult();},1200);}
 }
 function ansQ(q,btn,chosen,correct){
   const btns=document.getElementById('ch'+q)?.querySelectorAll('.cbtn');
@@ -1587,12 +1587,12 @@ function ansQ(q,btn,chosen,correct){
   if(diff==='infinite'){
     if(ok) window._infScore=(window._infScore||0)+1;
     var strk=document.getElementById('st0');if(strk)strk.textContent='🔥 Streak: '+(window._infScore||0);
-    if(!ok){document.getElementById('sbtn').disabled=false;return;}
+    if(!ok){document.getElementById('sbtn').disabled=false;setTimeout(function(){showResult();},1200);return;}
     setTimeout(function(){buildQuiz();},600);
   } else {
     var st=document.getElementById('st'+(answered-1));if(st)st.textContent=ok?'⭐':'💫';
     if(answered<(QL[diff]||5)){cQ++;unlockN();startTimer();}
-    else document.getElementById('sbtn').disabled=false;
+    else{document.getElementById('sbtn').disabled=false;setTimeout(function(){showResult();},1200);}
   }
 }
 function unlockN(){
@@ -1610,6 +1610,7 @@ function updP(){
   }
 }
 async function showResult(){
+  if(document.getElementById('result').classList.contains('show'))return;
   clearInterval(tInt);
   lastSco=ans.filter(a=>a).length;
   const qTotal=QL[diff]||5;
@@ -1641,7 +1642,12 @@ async function showResult(){
     :`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:10px">Login to save your score permanently!</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up Free</button></div></div>`;
   document.getElementById('result').classList.add('show');
   document.getElementById('sbtn').disabled=true;
-  setTimeout(()=>document.getElementById('result')?.scrollIntoView({behavior:'smooth'}),100);
+  // Fill and auto-open the result popup
+  var rmS=document.getElementById('rm-sco');if(rmS)rmS.textContent=document.getElementById('rsco').textContent;
+  var rmT=document.getElementById('rm-str');if(rmT)rmT.textContent=document.getElementById('rstr').textContent;
+  var rmM=document.getElementById('rm-msg');if(rmM)rmM.textContent=document.getElementById('rmsg').textContent;
+  var rmV=document.getElementById('rm-save');if(rmV&&sa)rmV.innerHTML=sa.innerHTML;
+  openResultModal();
 }
 function retryQuiz(){
   if(diff==='infinite'){window._infScore=0;window._infPool=null;buildQuiz();window.scrollTo({top:0,behavior:'smooth'});return;}
@@ -7341,7 +7347,7 @@ async function doLoginModal(){
 }
 // ESC key closes modal
 document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){closeLoginModal();closeRegisterModal();}
+  if(e.key==='Escape'){closeLoginModal();closeRegisterModal();try{closeResultModal()}catch(x){}}
 });
 </script>
 
@@ -7462,6 +7468,69 @@ function closeRegisterModal(){
 }
 async function doRegModal(){
   await doReg();
+}
+</script>
+
+
+<!-- ══ QUIZ RESULT MODAL ══ -->
+<div id="result-modal" onclick="if(event.target===this)closeResultModal()" style="display:none;position:fixed;inset:0;z-index:9990;background:rgba(15,26,62,0.78);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px;overflow-y:auto">
+  <div style="background:linear-gradient(160deg,#1D2B55,#2D3F7A);border-radius:24px;border:1.5px solid rgba(250,199,117,0.3);padding:clamp(24px,5vw,36px);width:100%;max-width:400px;box-shadow:0 24px 80px rgba(15,26,62,0.6);position:relative;animation:modalPop 0.25s ease;margin:auto;text-align:center">
+
+    <!-- Close button -->
+    <button onclick="closeResultModal()" aria-label="Close" style="position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.1);border:none;color:rgba(255,255,255,0.7);font-size:16px;font-weight:900;cursor:pointer;font-family:Nunito,sans-serif;transition:all 0.15s" onmouseover="this.style.background='rgba(255,255,255,0.2)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.7)'">✕</button>
+
+    <div style="font-size:13px;font-weight:900;color:#FAC775;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">🎉 Round Complete!</div>
+    <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:14px">Your score</div>
+
+    <div id="rm-sco" style="font-size:clamp(34px,8vw,48px);font-weight:900;color:#fff;line-height:1.1"></div>
+    <div id="rm-str" style="font-size:clamp(22px,5vw,28px);margin:10px 0 6px"></div>
+    <div id="rm-msg" style="font-size:clamp(14px,3vw,16px);font-weight:800;color:#FAC775;margin-bottom:16px"></div>
+
+    <div id="rm-save"></div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button onclick="closeResultModal();retryQuiz()"
+        style="width:100%;padding:14px;border-radius:99px;background:linear-gradient(90deg,#FAC775,#FF8E53);border:none;color:#1D2B55;font-family:Nunito,sans-serif;font-size:15px;font-weight:900;cursor:pointer;transition:all 0.2s;box-shadow:0 6px 20px rgba(250,199,117,0.35)"
+        onmouseover="this.style.transform='translateY(-2px)'"
+        onmouseout="this.style.transform=''">
+        🔄 New Round!
+      </button>
+      <div style="display:flex;gap:10px">
+        <button onclick="closeResultModal();navTo('start')"
+          style="flex:1;padding:12px;border-radius:99px;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.25);color:#fff;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;transition:all 0.2s"
+          onmouseover="this.style.background='rgba(255,255,255,0.18)'"
+          onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+          🎮 Change Level
+        </button>
+        <button onclick="closeResultModal();navTo('lb')"
+          style="flex:1;padding:12px;border-radius:99px;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.25);color:#fff;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;transition:all 0.2s"
+          onmouseover="this.style.background='rgba(255,255,255,0.18)'"
+          onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+          🏆 Leaderboard
+        </button>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);margin-top:14px">New random questions every round!</div>
+
+  </div>
+</div>
+
+<script>
+function openResultModal(){
+  var m=document.getElementById('result-modal');
+  if(!m)return;
+  m.style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function closeResultModal(){
+  var m=document.getElementById('result-modal');
+  if(!m)return;
+  m.style.display='none';
+  var lm=document.getElementById('login-modal');
+  var rm=document.getElementById('register-modal');
+  if((!lm||lm.style.display!=='flex')&&(!rm||rm.style.display!=='flex')){
+    document.body.style.overflow='';
+  }
 }
 </script>
 
