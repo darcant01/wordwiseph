@@ -418,6 +418,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 .chat-fab-dot{width:8px;height:8px;background:#4ADE80;border-radius:50%;animation:pulse-dot 2s infinite}
 @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(1.2)}}
 @keyframes modalPop{from{opacity:0;transform:scale(0.92) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0.7}}
 </style>
 </head>
 <body>
@@ -7508,6 +7509,12 @@ async function doRegModal(){
     <div id="rm-save"></div>
 
     <div style="display:flex;flex-direction:column;gap:10px">
+      <button onclick="shareScore('rm-sco','Grammar Quiz')"
+        style="width:100%;padding:12px;border-radius:99px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(250,199,117,0.4);color:#FAC775;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;transition:all 0.2s"
+        onmouseover="this.style.background='rgba(250,199,117,0.15)'"
+        onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+        📤 Share My Score
+      </button>
       <button onclick="closeResultModal();retryQuiz()"
         style="width:100%;padding:14px;border-radius:99px;background:linear-gradient(90deg,#FAC775,#FF8E53);border:none;color:#1D2B55;font-family:Nunito,sans-serif;font-size:15px;font-weight:900;cursor:pointer;transition:all 0.2s;box-shadow:0 6px 20px rgba(250,199,117,0.35)"
         onmouseover="this.style.transform='translateY(-2px)'"
@@ -7540,6 +7547,8 @@ function openResultModal(){
   if(!m)return;
   m.style.display='flex';
   document.body.style.overflow='hidden';
+  var st=document.getElementById('rm-str');
+  if(st&&st.textContent.indexOf('\u2b50\u2b50\u2b50\u2b50\u2b50')>-1)setTimeout(confettiBurst,300);
 }
 function closeResultModal(){
   var m=document.getElementById('result-modal');
@@ -7560,6 +7569,12 @@ function closeResultModal(){
     <button onclick="closeGameResultModal()" aria-label="Close" style="position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.1);border:none;color:rgba(255,255,255,0.7);font-size:16px;font-weight:900;cursor:pointer;font-family:Nunito,sans-serif;transition:all 0.15s;z-index:2" onmouseover="this.style.background='rgba(255,255,255,0.2)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.7)'">✕</button>
     <div style="font-size:13px;font-weight:900;color:#FAC775;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">🎉 Round Complete!</div>
     <div id="grm-body"></div>
+    <button onclick="event.stopPropagation();shareFromGameModal()"
+      style="width:100%;padding:12px;border-radius:99px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(250,199,117,0.4);color:#FAC775;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;margin-top:10px;transition:all 0.2s"
+      onmouseover="this.style.background='rgba(250,199,117,0.15)'"
+      onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+      📤 Share My Score
+    </button>
   </div>
 </div>
 
@@ -7572,6 +7587,7 @@ function openGameResultModal(panelId){
   body.innerHTML=panel.innerHTML;
   m.style.display='flex';
   document.body.style.overflow='hidden';
+  if(body.textContent.indexOf('\u2b50\u2b50\u2b50\u2b50\u2b50')>-1)setTimeout(confettiBurst,300);
 }
 function closeGameResultModal(){
   var m=document.getElementById('g-result-modal');
@@ -7587,6 +7603,53 @@ function closeGameResultModal(){
 document.getElementById('grm-body').addEventListener('click',function(e){
   if(e.target.closest('button'))setTimeout(closeGameResultModal,50);
 });
+</script>
+
+
+<script>
+// ── Confetti burst for perfect scores ──
+function confettiBurst(){
+  var colors=['#D4537E','#FAC775','#1D9E75','#4ECDC4','#8B5CF6','#FF8E53'];
+  var c=document.createElement('div');
+  c.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:10001;overflow:hidden';
+  document.body.appendChild(c);
+  for(var i=0;i<50;i++){
+    var p=document.createElement('div');
+    var size=6+Math.random()*8;
+    var left=Math.random()*100;
+    var dur=1.8+Math.random()*1.6;
+    var delay=Math.random()*0.4;
+    var col=colors[Math.floor(Math.random()*colors.length)];
+    var round=Math.random()>0.5?'50%':'2px';
+    p.style.cssText='position:absolute;top:-20px;left:'+left+'vw;width:'+size+'px;height:'+size+'px;background:'+col+';border-radius:'+round+';animation:confettiFall '+dur+'s '+delay+'s ease-in forwards';
+    c.appendChild(p);
+  }
+  setTimeout(function(){c.remove();},4200);
+}
+// ── Share score ──
+function shareScore(scoElId,gameName){
+  var el=document.getElementById(scoElId);
+  var sco=el?el.textContent.trim():'';
+  var msg='I scored '+sco+' on '+gameName+' at WordWise PH! \ud83c\udfc6 Can you beat me? https://wordwiseph.com';
+  if(navigator.share){
+    navigator.share({text:msg}).catch(function(){});
+  }else if(navigator.clipboard){
+    navigator.clipboard.writeText(msg).then(function(){
+      alert('\u2705 Copied! Paste it to your friends \ud83d\udcac');
+    }).catch(function(){prompt('Copy your score message:',msg);});
+  }else{
+    prompt('Copy your score message:',msg);
+  }
+}
+function shareFromGameModal(){
+  var body=document.getElementById('grm-body');
+  var sco='';
+  if(body){var s=body.querySelector('.rsco');if(s)sco=s.textContent.trim();}
+  var msg='I scored '+(sco||'big')+' at WordWise PH! \ud83c\udfc6 Can you beat me? https://wordwiseph.com';
+  if(navigator.share){navigator.share({text:msg}).catch(function(){});}
+  else if(navigator.clipboard){navigator.clipboard.writeText(msg).then(function(){alert('\u2705 Copied! Paste it to your friends \ud83d\udcac');}).catch(function(){prompt('Copy your score message:',msg);});}
+  else{prompt('Copy your score message:',msg);}
+}
 </script>
 
 </body>
