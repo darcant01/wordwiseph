@@ -956,6 +956,15 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div class="card" id="live-users"></div>
       <div class="sectitle" style="margin-top:16px">Plan Breakdown</div>
       <div class="sgrid" id="live-plans"></div>
+      <div class="sectitle" style="margin-top:16px">📢 Announcement to All Users</div>
+      <div class="card" style="padding:14px">
+        <textarea id="ann-input" rows="2" maxlength="200" placeholder="e.g. 🛠️ Upgrade tonight 2–4 AM — games stay playable, accounts are safe!" style="width:100%;border:1.5px solid #E8EAF0;border-radius:12px;padding:10px 12px;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;color:#1D2B55;resize:vertical;box-sizing:border-box"></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button onclick="adminPublishAnn()" style="flex:1;padding:10px;border-radius:99px;background:var(--pink);border:none;color:#fff;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer">📢 Publish</button>
+          <button onclick="adminClearAnn()" style="padding:10px 18px;border-radius:99px;background:#fff;border:1.5px solid #E8EAF0;color:#6B7280;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer">Clear</button>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:#9CA3AF;margin-top:8px">Shows as a banner to every user within ~15 sec. Each user can dismiss it. Requires backend v4.1.</div>
+      </div>
       <div id="live-updated" style="font-size:11px;font-weight:700;color:#9CA3AF;text-align:center;margin-top:10px"></div>
     </div>
 
@@ -2326,6 +2335,7 @@ const TICKER = {
         const idx = Math.floor(Date.now()/15000) % diffs.length;
         const diff = diffs[idx];
         const res = await api({action:'getScores', diff});
+        if(res&&res.ann)showAnnouncementBanner(res.ann);
         if(!res.success || !res.scores?.length) return;
         const latest = res.scores[0];
         const key = diff + '_' + latest.username + '_' + latest.date + '_' + latest.score;
@@ -7750,7 +7760,7 @@ function shareFromGameModal(){
 
 <script>
 // ── AUTO-UPDATE CHECKER ──
-var APP_VERSION='2026.07.05.2';
+var APP_VERSION='2026.07.05.3';
 function checkForUpdate(){
   fetch('version.json?t='+Date.now(),{cache:'no-store'})
     .then(function(r){return r.json();})
@@ -7774,6 +7784,56 @@ document.addEventListener('DOMContentLoaded',function(){
   setTimeout(checkForUpdate,3000);
   setInterval(checkForUpdate,10*60*1000);
 });
+</script>
+
+
+<script>
+// ── ANNOUNCEMENT BANNER (admin-controlled, arrives via ticker poll) ──
+function showAnnouncementBanner(ann){
+  if(!ann||!ann.text)return;
+  try{if(localStorage.getItem('ann_dismissed')===String(ann.id))return;}catch(e){}
+  var ex=document.getElementById('ann-banner');
+  if(ex){
+    if(ex.getAttribute('data-ann')===String(ann.id))return;
+    ex.remove();
+  }
+  var b=document.createElement('div');
+  b.id='ann-banner';
+  b.setAttribute('data-ann',String(ann.id));
+  b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:10004;background:linear-gradient(90deg,#1D2B55,#2D3F7A);color:#fff;padding:12px 48px 12px 16px;font-family:Nunito,sans-serif;font-size:13px;font-weight:800;text-align:center;box-shadow:0 -4px 20px rgba(0,0,0,0.3)';
+  var icon=document.createTextNode('\ud83d\udce2 ');
+  var span=document.createElement('span');
+  span.textContent=ann.text;
+  var x=document.createElement('button');
+  x.textContent='\u2715';
+  x.setAttribute('aria-label','Dismiss');
+  x.style.cssText='position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-weight:900;cursor:pointer;font-family:Nunito,sans-serif';
+  x.onclick=function(){try{localStorage.setItem('ann_dismissed',String(ann.id));}catch(e){}b.remove();};
+  b.appendChild(icon);b.appendChild(span);b.appendChild(x);
+  document.body.appendChild(b);
+}
+// ── ADMIN: publish/clear announcement ──
+async function adminPublishAnn(){
+  var t=document.getElementById('ann-input').value.trim();
+  if(!t){alert('Write an announcement first!');return;}
+  var pw=prompt('Confirm admin password:');
+  if(!pw)return;
+  showLoader('Publishing...');
+  var res=await api({action:'setAnnouncement',username:CU.username,password:pw,text:t});
+  hideLoader();
+  if(res.success){alert('\u2705 Announcement is LIVE! Users will see it within ~15 seconds.');}
+  else{alert('\u274c '+(res.error||'Failed'));}
+}
+async function adminClearAnn(){
+  if(!confirm('Remove the current announcement for all users?'))return;
+  var pw=prompt('Confirm admin password:');
+  if(!pw)return;
+  showLoader('Clearing...');
+  var res=await api({action:'setAnnouncement',username:CU.username,password:pw,text:''});
+  hideLoader();
+  if(res.success){document.getElementById('ann-input').value='';alert('\u2705 Announcement removed.');}
+  else{alert('\u274c '+(res.error||'Failed'));}
+}
 </script>
 
 </body>
