@@ -8093,7 +8093,7 @@ async function sendChat(){
   try{
     await fetch("https://api.telegram.org/bot8898030018:AAGbiyas66mmdE-cFI08F_WDkeZCupOIz1g/sendMessage",{
       method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({chat_id:"5559542103",text:"<b>&#x1F4AC; Live Chat</b>\n\n&#x1F464; "+name+(uname?" (@"+uname+")":"")+"\n&#x1F4CB; Session: "+session+"\n\n"+text,parse_mode:"HTML"})
+      body:JSON.stringify({chat_id:"5559542103",text:"<b>&#x1F4AC; Live Chat</b>\n\n&#x1F464; "+name+(uname?" (@"+uname+")":"(Guest)")+"\nSession: "+session+"\n\n<b>Message:</b>\n"+text+"\n\n<i>Reply to this message to respond!</i>",parse_mode:"HTML"})
     });
   }catch(e){}
 }
