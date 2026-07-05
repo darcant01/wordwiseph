@@ -1077,7 +1077,14 @@ async function _ann(){
 async function _logAct(m){ try{ await SB.from('activity').insert({m:m}); }catch(e){} }
 async function _tg(payload){
   try{
-    fetch('https://ahtyjglufrvtfnhkooux.supabase.co/functions/v1/telegram_webhook',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    fetch('https://ahtyjglufrvtfnhkooux.supabase.co/functions/v1/telegram_webhook',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer sb_publishable_AylXCLg2W3sQzQSn5sH7Xg_k4ZQblM7'
+      },
+      body:JSON.stringify(payload)
+    });
   }catch(e){ console.warn('TG:',e); }
 }
 const _PLAN_DAYS={trial:1,weekly:7,basic:30,premium:30};
