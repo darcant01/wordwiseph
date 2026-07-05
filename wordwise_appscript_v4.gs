@@ -1,4 +1,4 @@
-// WordWise PH — Full Backend v4 (adds API usage tracking + quota alerts)
+// WordWise PH — Full Backend v4.1 (quota alerts + announcements)
 // Paste this ENTIRE file into your Apps Script editor
 
 const SHEET_USERS    = "Users";
@@ -43,6 +43,36 @@ function getApiUsageToday() {
     var key = "req_" + Utilities.formatDate(new Date(), "GMT+8", "yyyy-MM-dd");
     return Number(props.getProperty(key)) || 0;
   } catch(e) { return 0; }
+}
+
+function getAnnouncement() {
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var t = props.getProperty("ann_text") || "";
+    if (!t) return null;
+    return { id: props.getProperty("ann_id") || "0", text: t };
+  } catch(e) { return null; }
+}
+
+function setAnnouncement(p) {
+  var rows = getSheet(SHEET_USERS).getDataRange().getValues();
+  var ok = false;
+  for (var i = 1; i < rows.length; i++) {
+    if (String(rows[i][2]) === String(p.username) &&
+        String(rows[i][3]) === String(p.password) &&
+        String(rows[i][5]) === "admin") { ok = true; break; }
+  }
+  if (!ok) return { success:false, error:"Not authorized" };
+  var props = PropertiesService.getScriptProperties();
+  var text = (p.text || "").trim();
+  if (text) {
+    props.setProperty("ann_text", text);
+    props.setProperty("ann_id", String(Date.now()));
+  } else {
+    props.deleteProperty("ann_text");
+    props.deleteProperty("ann_id");
+  }
+  return { success:true, active: !!text };
 }
 
 function cleanOldCounters() {
@@ -232,6 +262,7 @@ function doGet(e) {
       case "getProfile":         result = getProfile(p); break;
       case "logActivity":        result = logActivity(p); break;
       case "adminData":          result = getAdminData(); break;
+      case "setAnnouncement":    result = setAnnouncement(p); break;
       case "clearActivity":      result = clearActivity(); break;
       case "submitPayment":      result = submitPayment(p); break;
       case "getPendingPayments": result = getPendingPayments(); break;
@@ -359,7 +390,7 @@ function getScores(p) {
       scores.push({name:rows[i][1], username:rows[i][2], type:rows[i][3], score:Number(rows[i][4])||0, diff:rows[i][5], stars:rows[i][6], date:rows[i][7], total:Number(rows[i][8])||5});
   }
   scores.sort(function(a,b){return b.score-a.score;});
-  return {success:true, scores:scores.slice(0,10)};
+  return {success:true, scores:scores.slice(0,10), ann: getAnnouncement()};
 }
 
 function getAllTimeScores(p) {
