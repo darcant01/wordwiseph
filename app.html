@@ -7735,5 +7735,34 @@ function shareFromGameModal(){
 }
 </script>
 
+
+<script>
+// ── AUTO-UPDATE CHECKER ──
+var APP_VERSION='2026.07.05.1';
+function checkForUpdate(){
+  fetch('version.json?t='+Date.now(),{cache:'no-store'})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d.v&&d.v!==APP_VERSION)showUpdateBanner();
+    }).catch(function(){});
+}
+function showUpdateBanner(){
+  if(document.getElementById('upd-banner'))return;
+  var b=document.createElement('div');
+  b.id='upd-banner';
+  b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:10005;background:linear-gradient(90deg,#D4537E,#c0456e);color:#fff;padding:10px 14px;display:flex;align-items:center;justify-content:center;gap:12px;font-family:Nunito,sans-serif;font-size:13px;font-weight:800;box-shadow:0 4px 20px rgba(0,0,0,0.3)';
+  b.innerHTML='\ud83d\udd04 A new version of WordWise is ready! <button onclick="updateApp()" style="background:#fff;color:#D4537E;border:none;border-radius:99px;padding:7px 18px;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer">Update Now</button>';
+  document.body.appendChild(b);
+}
+function updateApp(){
+  var u=location.pathname+'?v='+Date.now();
+  location.replace(u);
+}
+document.addEventListener('DOMContentLoaded',function(){
+  setTimeout(checkForUpdate,3000);
+  setInterval(checkForUpdate,10*60*1000);
+});
+</script>
+
 </body>
 </html>
