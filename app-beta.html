@@ -1077,22 +1077,7 @@ async function _ann(){
 async function _logAct(m){ try{ await SB.from('activity').insert({m:m}); }catch(e){} }
 async function _tg(payload){
   try{
-    var pE={trial:'\u26a1',weekly:'\ud83d\udcc5',basic:'\u2b50',premium:'\ud83d\udc51'};
-    var e=pE[payload.plan]||'\ud83d\udcb3';
-    var plan=payload.plan?(payload.plan.charAt(0).toUpperCase()+payload.plan.slice(1)):'';
-    var text='';
-    if(payload.type==='new_payment'){
-      text='\ud83d\udd14 New Payment Received!\n\nUser: @'+payload.username+'\n'+e+' Plan: '+plan+'\n\u20b1 Amount: \u20b1'+payload.amount+'\nGCash Ref: '+payload.reference+'\n\nApprove at: https://wordwiseph.com/app-beta.html';
-    }else if(payload.type==='payment_approved'){
-      text='\u2705 Payment Approved!\n\nUser: @'+payload.username+'\nPlan: '+plan+'\n\ud83c\udf89 Account activated!';
-    }else if(payload.type==='payment_rejected'){
-      text='\u274c Payment Rejected\n\nUser: @'+payload.username+'\nPlan: '+plan;
-    }
-    if(!text)return;
-    await fetch('https://api.telegram.org/bot8898030018:AAGbiyas66mmdE-cFI08F_WDkeZCupOIz1g/sendMessage',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({chat_id:'5559542103',text:text})
-    });
+    fetch('https://ahtyjglufrvtfnhkooux.supabase.co/functions/v1/telegram_webhook',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   }catch(e){ console.warn('TG:',e); }
 }
 const _PLAN_DAYS={trial:1,weekly:7,basic:30,premium:30};
@@ -1178,10 +1163,10 @@ async function api(data){
     }
 
     if(a==='submitPayment'){
-      const {error}=await SB.from('payments').insert({username:data.username,name:data.name||data.username,plan:data.plan,amount:Number(data.price)||0,gcash_ref:data.reference||'',status:'pending'});
+      const {data:ins,error}=await SB.from('payments').insert({username:data.username,name:data.name||data.username,plan:data.plan,amount:Number(data.price)||0,gcash_ref:data.reference||'',status:'pending'}).select('id').single();
       if(error){console.error('Payment insert error:',error);return {success:false,error:'Could not submit: '+(error.message||error.code||'Check Supabase RLS policies')};}
       _logAct(data.username+' \u2013 submitted payment for '+data.plan);
-      _tg({type:'new_payment',username:data.username,plan:data.plan,amount:data.price||data.amount||0,reference:data.reference||''});
+      _tg({type:'new_payment',username:data.username,plan:data.plan,amount:data.price||data.amount||0,reference:data.reference||'',payment_id:(ins&&ins.id)||''});
       return {success:true,message:'Payment submitted! We will verify and activate your plan shortly.'};
     }
 
