@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Printable Worksheets for Kids — WordWise PH Shop</title>
 <meta name="description" content="Personalized printable PDFs for Filipino kids — name tracers, alphabet, numbers, sight words, sentence writing and more. Pay via GCash, delivered same day!"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="icon" type="image/png" href="favicon.png"/>
 <meta property="og:title" content="WordWise PH Printables — Learning PDFs for Kids"/>
 <meta property="og:description" content="Personalized tracing sheets, alphabet packs, sight words and more. Pay via GCash!"/>
@@ -318,12 +319,80 @@ footer a:hover{color:#fff}
 <script>
 function toggleMob(){document.getElementById("mob-menu").classList.toggle("open")}
 document.addEventListener("click",function(e){var m=document.getElementById("mob-menu"),h=document.getElementById("ham");if(m&&h&&!m.contains(e.target)&&!h.contains(e.target))m.classList.remove("open");});
-function orderNow(product, price){
-  var msg="Hi! I want to order: "+product+" (&#x20B1;"+price+"). My child's name is: ___";
-  var url="https://t.me/wordwiseph_support_bot?start=order_"+encodeURIComponent(product.toLowerCase().replace(/\s+/g,"_"));
-  if(confirm("Order "+product+" for &#x20B1;"+price+"?\n\nYou will be taken to our Telegram to complete the order.\n\n(Your order details will be copied to clipboard)")){
-    try{navigator.clipboard.writeText("Hi! I want to order: "+product+" (&#x20B1;"+price+"). My child's name is: ___");}catch(e){}
-    window.open(url,"_blank");
+var SB_PRINT=supabase.createClient("https://ahtyjglufrvtfnhkooux.supabase.co","sb_publishable_AylXCLg2W3sQzQSn5sH7Xg_k4ZQblM7");
+
+// Slug lookup
+var SLUGS={
+  "My Name Tracer":"name-tracer","Alphabet Mastery Pack":"alphabet-pack",
+  "Numbers and Counting Pack":"numbers-pack","Sight Words Pack":"sight-words",
+  "Sentence Writing Starter":"sentence-writing","Pattern Tracing for Beginners":"pattern-tracing",
+  "Shapes and Patterns":"shapes-patterns","Days Months and Seasons":"days-months",
+  "Addition and Subtraction Drills":"math-drills","Coloring and Vocabulary Pages":"coloring-vocab",
+  "Grammar Fix-It Cards":"grammar-fix-it","Ultimate Learning Bundle":"ultimate-bundle"
+};
+
+function getSlug(product){
+  var key=product.replace(/[&]/g,"and").replace(/[^a-zA-Z0-9 ]/g,"").trim();
+  return SLUGS[key]||product.toLowerCase().replace(/[^a-z0-9]+/g,"-");
+}
+
+async function orderNow(product, price){
+  var slug=getSlug(product);
+  // Check if already purchased
+  var {data:session}=await SB_PRINT.auth.getSession();
+  var username=null;
+  try{
+    var stored=localStorage.getItem("ww_cu");
+    if(stored){var cu=JSON.parse(stored);username=cu.username;}
+  }catch(e){}
+  if(username){
+    var {data:existing}=await SB_PRINT.from("purchases").select("id").eq("username",username).eq("product_slug",slug).limit(1);
+    if(existing&&existing.length){
+      alert("You already own "+product+"!\n\nGo to wordwiseph.com/app.html → My Profile → My Downloads to access it.");
+      return;
+    }
+  }
+  // Name tracer needs child name
+  var childName="";
+  if(slug==="name-tracer"||slug==="ultimate-bundle"){
+    childName=prompt("What is your child's first name? (for the Name Tracer)");
+    if(childName===null)return;
+    childName=childName.trim();
+    if(!childName){alert("Please enter your child's name.");return;}
+  }
+  var msg="Hi! I want to order: "+product+" (\u20b1"+price+").";
+  if(childName)msg+=" My child's name is: "+childName+".";
+  msg+="\nGCash to: 0931-762-5402 (WordWise PH / Darcant)";
+  if(confirm("Order "+product+" for \u20b1"+price+"?\n\nYou will be sent to our support to complete the order.")){
+    try{navigator.clipboard.writeText(msg);}catch(e){}
+    // Save order info to Supabase for tracking
+    if(username){
+      await SB_PRINT.from("payments").insert({
+        username:username,
+        name:username,
+        plan:slug,
+        amount:Number(price)||0,
+        gcash_ref:"pending",
+        status:"pending",
+        payment_type:"printable",
+        product_slug:slug,
+        product_name:product,
+        child_name:childName
+      });
+      // Notify admin via Telegram
+      var tgMsg="<b>\ud83d\udda8\ufe0f New Printable Order!</b>\n\n<b>User:</b> @"+username+"\n<b>Product:</b> "+product+"\n<b>Price:</b> \u20b1"+price+(childName?"\n<b>Child:</b> "+childName:"")+"\n\n<i>User will send GCash payment to 0931-762-5402</i>\n\nOnce verified, tap Approve below:";
+      try{
+        await fetch("https://api.telegram.org/bot8898030018:AAGbiyas66mmdE-cFI08F_WDkeZCupOIz1g/sendMessage",{
+          method:"POST",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({chat_id:"5559542103",text:tgMsg,parse_mode:"HTML",
+            reply_markup:{inline_keyboard:[[
+              {text:"\u2705 Approve",callback_data:"printable_approve|pending_id|"+username+"|"+slug+"|"+product+(childName?"|"+childName:"")},
+              {text:"\u274c Reject",callback_data:"printable_reject|pending_id|"+username+"|"+slug+"|"+product}
+            ]]}})
+        });
+      }catch(e){}
+    }
+    window.open("https://t.me/wordwiseph_support_bot?start=order_"+encodeURIComponent(slug),"_blank");
   }
 }
 </script>
