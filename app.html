@@ -1163,6 +1163,20 @@ async function api(data){
       };
     }
 
+    if(a==='deleteUser'){
+      const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
+      if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
+      if(data.username===data.adminUsername)return {success:false,error:'Cannot delete your own account!'};
+      await SB.from('scores').delete().eq('username',data.username);
+      await SB.from('payments').delete().eq('username',data.username);
+      try{await SB.from('purchases').delete().eq('username',data.username);}catch(e){}
+      await SB.from('support_messages').delete().eq('session_id',data.username);
+      await SB.from('children').delete().eq('parent_username',data.username);
+      const {error:delErr}=await SB.from('users').delete().eq('username',data.username);
+      if(delErr)return {success:false,error:delErr.message};
+      await SB.from('activity').insert({m:'Admin deleted account: @'+data.username});
+      return {success:true};
+    }
     if(a==='getPurchases'){
       const {data:rows}=await SB.from('purchases').select('*').eq('username',data.username).order('granted_at',{ascending:false});
       return {success:true,purchases:rows||[]};
@@ -2317,8 +2331,11 @@ async function loadAdmin(sec){
       } else if(isActive&&!u.subExpiry){
         expDisplay=`<button class="pay-approve-btn approve" style="font-size:10px;padding:3px 8px" onclick="adminSetExpiry('${u.username}','${u.subscription}')">📅 Set</button>`;
       }
-      return `<tr><td>${i+1}</td><td>${u.name}</td><td>@${u.username}</td><td>${u.type}</td><td><span class="rbdg ${u.role}">${u.role}</span></td><td><span class="sub-status ${isActive?'active':u.subscription==='pending'?'pending':'free'}">${u.subscription||'free'}</span></td><td style="font-size:12px">${expDisplay}</td><td>${u.rounds}</td><td>${u.best}/5</td><td>${u.joined}</td></tr>`;
-    }).join('')||'<tr><td colspan="10" style="text-align:center;color:#888780">No users.</td></tr>';
+      const dBtn=u.role==='admin'?'<span style="font-size:10px;color:#9CA3AF">admin</span>':`<button data-del="${u.username}" style="padding:3px 8px;border-radius:6px;background:#FFF0F0;border:1px solid #FFCCCC;color:#E24B4A;font-family:Nunito,sans-serif;font-size:10px;font-weight:900;cursor:pointer">Del</button>`;
+      return `<tr><td>${i+1}</td><td>${u.name}</td><td>@${u.username}</td><td>${u.type}</td><td><span class="rbdg ${u.role}">${u.role}</span></td><td><span class="sub-status ${isActive?'active':u.subscription==='pending'?'pending':'free'}">${u.subscription||'free'}</span></td><td style="font-size:12px">${expDisplay}</td><td>${u.rounds}</td><td>${u.best}/5</td><td>${u.joined}</td><td>${dBtn}</td></tr>`;
+    }).join('')||'<tr><td colspan="11" style="text-align:center;color:#888780">No users.</td></tr>';
+    // Wire delete buttons
+    document.getElementById('utbody').addEventListener('click',function(e){var b=e.target.closest('[data-del]');if(b)adminDeleteUser(b.getAttribute('data-del'));});
   }else if(sec==='sc'){
     const sb=document.getElementById('stbody');
     if(sb)sb.innerHTML=scores.slice().reverse().map((s,i)=>`<tr><td>${i+1}</td><td>${s.name}</td><td>${s.score}/5</td><td><span class="dc2 ${s.diff}">${s.diff}</span></td><td>${s.stars}</td><td>${s.date}</td></tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:#888780">No scores.</td></tr>';
@@ -2347,6 +2364,14 @@ async function loadAdminPayments(){
           :'—'}</td>
       </tr>`).join('')
     :'<tr><td colspan="9" style="text-align:center;color:#888780;padding:16px">No payment requests yet.</td></tr>';
+}
+async function adminDeleteUser(u){
+  if(!confirm('Delete @'+u+'? This removes all their data and cannot be undone.'))return;
+  if(prompt('Type DELETE to confirm:')!=='DELETE'){alert('Cancelled.');return;}
+  showLoader('Deleting...');
+  const r=await api({action:'deleteUser',adminUsername:CU.username,username:u});
+  hideLoader();
+  if(r.success){alert('Done! @'+u+' has been deleted.');loadAdmin('us');}else{alert('Error: '+(r.error||'Failed'));}
 }
 async function adminSetExpiry(username, plan){
   const days = prompt('Set subscription for @'+username+'\nHow many days from today?\n(e.g. 30 for one month)', '30');
