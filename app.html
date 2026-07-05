@@ -6,6 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="icon" type="image/png" href="favicon.png"/>
 <meta property="og:title" content="Play WordWise PH — English Learning Games"/>
 <meta property="og:description" content="Play Grammar Quiz, Shark Typing, Word Scramble and more. Login to save your scores and compete on the leaderboard!"/>
@@ -422,17 +423,18 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 </style>
 </head>
 <body>
+
 <div class="hdr">
   <div class="logo" onclick="navTo('start')">WordWise<span>PH</span></div>
   <div class="hdr-right" id="hdr-right"></div>
 </div>
 
 <!-- Floating Support Chat Button -->
-<a href="https://t.me/wordwiseph_support_bot" target="_blank" class="chat-fab" id="chat-fab">
-  <span style="font-size:18px">💬</span>
+<button onclick="toggleChat()" class="chat-fab" id="chat-fab" aria-label="Chat Support">
+  <span style="font-size:18px" id="chat-fab-icon">&#x1F4AC;</span>
   <span>Chat Support</span>
-  <div class="chat-fab-dot"></div>
-</a>
+  <div class="chat-fab-dot" id="chat-fab-dot"></div>
+</button>
 
 <!-- ══ START ══ -->
 <div id="sc-start" class="screen active">
@@ -881,18 +883,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div style="font-size:12px;color:#888780;font-weight:700;margin-top:6px">Found in your GCash SMS or app notification</div>
     </div>
     <div class="pay-step">
-      <div class="pay-title"><span class="pay-num">3</span>Upload your receipt screenshot</div>
-      <div class="upload-box" id="upload-box" onclick="document.getElementById('receipt-file').click()">
-        <input type="file" id="receipt-file" accept="image/*" style="display:none" onchange="previewReceipt(this)"/>
-        <div class="upload-icon">📸</div>
-        <div class="upload-label">Tap to upload receipt</div>
-        <div class="upload-sub">JPG, PNG, or screenshot from your GCash app</div>
-        <img id="receipt-preview" class="upload-preview" alt="Receipt preview"/>
-      </div>
-      <div style="font-size:12px;color:#888780;font-weight:700;margin-top:8px;text-align:center">Optional but helps us verify faster!</div>
-    </div>
-    <div class="pay-step">
-      <div class="pay-title"><span class="pay-num">4</span>Submit for verification</div>
+      <div class="pay-title"><span class="pay-num">3</span>Submit for verification</div>
       <div style="font-size:13px;color:#5F5E5A;font-weight:700;margin-bottom:12px;line-height:1.6">Our admin verifies within <strong>24 hours</strong> and activates your plan.</div>
       <div class="err" id="pay-err"></div>
       <button class="btn btn-pink btn-block" onclick="submitPayment()">Submit Payment</button>
@@ -1061,7 +1052,6 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 // ================================================================
 // WORDWISE PH — GAS-ONLY BACKEND (no localStorage)
 // ================================================================
-const GAS = "https://script.google.com/macros/s/AKfycbxiqMtg-i59DJLGVYvSW-tJhR31MlW1XLdND2Out_OocJLrf_zcKOT6DWFWyFWRpkNFlQ/exec";
 let CU=null, snd=true, round=1, diff='easy';
 let selPlan=null, selPrice=0, aLB='easy';
 const TL={easy:30,medium:20,hard:10,infinite:15};
@@ -1070,21 +1060,184 @@ let cQs=[], ans=[], answered=0, tInt=null, tLeft=30, tTotal=30, cQ=0, lastSco=0;
 let aCtx=null, BANK=null;
 
 // ── API ──────────────────────────────────────────────────────
+// ═══ SUPABASE ADAPTER — replaces GAS api(), same call signature & response shapes ═══
+const SB = supabase.createClient("https://ahtyjglufrvtfnhkooux.supabase.co", "sb_publishable_AylXCLg2W3sQzQSn5sH7Xg_k4ZQblM7");
+function _d(ts){ try{ return new Date(ts).toLocaleDateString(); }catch(e){ return ''; } }
+function _userOut(u){ return {id:u.id,name:u.name,username:u.username,type:u.type,role:u.role,joined:u.joined,rounds:u.rounds||0,best:u.best||0,subscription:u.subscription||'free',subStart:u.sub_start||'',subExpiry:u.sub_expiry||''}; }
+async function _ann(){
+  try{
+    const {data}=await SB.from('settings').select('key,value').in('key',['ann_text','ann_id']);
+    if(!data)return null;
+    const t=(data.find(x=>x.key==='ann_text')||{}).value;
+    if(!t)return null;
+    return {id:(data.find(x=>x.key==='ann_id')||{}).value||'0', text:t};
+  }catch(e){ return null; }
+}
+async function _logAct(m){ try{ await SB.from('activity').insert({m:m}); }catch(e){} }
+async function _tg(payload){
+  try{
+    fetch('https://ahtyjglufrvtfnhkooux.supabase.co/functions/v1/telegram_webhook',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer sb_publishable_AylXCLg2W3sQzQSn5sH7Xg_k4ZQblM7'
+      },
+      body:JSON.stringify(payload)
+    });
+  }catch(e){ console.warn('TG:',e); }
+}
+const _PLAN_DAYS={trial:1,weekly:7,basic:30,premium:30};
+
 async function api(data){
   try{
-    const params = new URLSearchParams();
-    Object.entries(data).forEach(([k,v]) => params.append(k, v));
-    const url = GAS + '?' + params.toString();
-    const r = await fetch(url, {redirect:'follow'});
-    const text = await r.text();
-    try{ return JSON.parse(text); }
-    catch(e){ 
-      console.error('API response:', text.slice(0,300));
-      return {success:false, error:'Server error. Please try again.'}; 
+    const a=data.action;
+
+    if(a==='login'){
+      const {data:rows,error}=await SB.from('users').select('*').eq('username',data.username).eq('password',data.password).limit(1);
+      if(error)throw error;
+      if(!rows||!rows.length)return {success:false,error:'Wrong username or password!'};
+      _logAct(rows[0].username+' \u2013 logged in');
+      return {success:true,user:_userOut(rows[0])};
     }
+
+    if(a==='register'){
+      const {data:ex}=await SB.from('users').select('id').eq('username',data.username).limit(1);
+      if(ex&&ex.length)return {success:false,error:'Username already taken!'};
+      const {error}=await SB.from('users').insert({name:data.name,username:data.username,password:data.password,type:data.type||'kid'});
+      if(error)return {success:false,error:'Registration failed!'};
+      _logAct(data.username+' \u2013 joined WordWise');
+      return {success:true};
+    }
+
+    if(a==='saveScore'){
+      const {error}=await SB.from('scores').insert({username:data.username,name:data.name,diff:data.diff,score:Number(data.score)||0,total:Number(data.total)||0,stars:data.stars||''});
+      if(error)return {success:false,error:'Could not save score'};
+      try{ await SB.rpc('bump_user_stats',{u:data.username,s:Number(data.score)||0}); }catch(e){}
+      _logAct(data.username+' \u2013 scored '+data.score+'/'+data.total+' ('+data.diff+')');
+      return {success:true};
+    }
+
+    if(a==='getScores'){
+      const [{data:rows},ann]=await Promise.all([
+        SB.from('scores').select('*').eq('diff',data.diff).order('created_at',{ascending:false}).limit(10),
+        _ann()
+      ]);
+      const scores=(rows||[]).map(s=>({name:s.name||s.username,username:s.username,score:s.score,total:s.total,stars:s.stars,date:_d(s.created_at),diff:s.diff}));
+      return {success:true,scores:scores,ann:ann};
+    }
+
+    if(a==='getAllTimeScores'){
+      const {data:rows}=await SB.from('scores').select('*').order('score',{ascending:false}).order('created_at',{ascending:false}).limit(10);
+      const scores=(rows||[]).map(s=>({name:s.name||s.username,username:s.username,score:s.score,total:s.total,stars:s.stars,date:_d(s.created_at),diff:s.diff}));
+      return {success:true,scores:scores};
+    }
+
+    if(a==='getProfile'){
+      const {data:rows,error}=await SB.from('users')
+        .select('subscription,sub_start,sub_expiry,rounds,best')
+        .eq('username',data.username).limit(1);
+      if(error||!rows||!rows.length)return {success:false};
+      const u=rows[0];
+      return {
+        success:true,
+        subscription: u.subscription||'free',
+        subStart:     u.sub_start||'',
+        subExpiry:    u.sub_expiry||'',
+        rounds:       u.rounds||0,
+        best:         u.best||0
+      };
+    }
+
+    if(a==='checkPlan'){
+      const {data:cp}=await SB.from('users').select('subscription,sub_expiry').eq('username',data.username).limit(1);
+      if(!cp||!cp.length)return {success:false};
+      return {success:true,subscription:cp[0].subscription||'free',subExpiry:cp[0].sub_expiry||''};
+    }
+
+    if(a==='logActivity'){ await _logAct(data.message||''); return {success:true}; }
+
+    if(a==='clearActivity'){
+      await SB.from('activity').delete().gt('id',0);
+      return {success:true};
+    }
+
+    if(a==='adminData'){
+      const [u,s,ac]=await Promise.all([
+        SB.from('users').select('*').order('joined',{ascending:false}),
+        SB.from('scores').select('*').order('created_at',{ascending:false}).limit(100),
+        SB.from('activity').select('m,t').order('t',{ascending:false}).limit(50)
+      ]);
+      return {success:true,
+        users:(u.data||[]).map(_userOut),
+        scores:(s.data||[]).map(x=>({name:x.name||x.username,username:x.username,score:x.score,total:x.total,stars:x.stars,diff:x.diff,date:_d(x.created_at)})),
+        activity:(ac.data||[]).map(x=>({m:x.m,t:x.t}))
+      };
+    }
+
+    if(a==='submitPayment'){
+      const {data:ins,error}=await SB.from('payments').insert({username:data.username,name:data.name||data.username,plan:data.plan,amount:Number(data.price)||0,gcash_ref:data.reference||'',status:'pending'}).select('id').single();
+      if(error){console.error('Payment insert error:',error);return {success:false,error:'Could not submit: '+(error.message||error.code||'Check Supabase RLS policies')};}
+      _logAct(data.username+' \u2013 submitted payment for '+data.plan);
+      _tg({type:'new_payment',username:data.username,plan:data.plan,amount:data.price||data.amount||0,reference:data.reference||'',payment_id:(ins&&ins.id)||''});
+      return {success:true,message:'Payment submitted! We will verify and activate your plan shortly.'};
+    }
+
+    if(a==='getPendingPayments'){
+      const {data:rows}=await SB.from('payments').select('*').eq('status','pending').order('created_at',{ascending:false});
+      const payments=(rows||[]).map(p=>({id:p.id,username:p.username,name:p.username,plan:p.plan,amount:p.amount,price:p.amount,reference:p.gcash_ref,ref:p.gcash_ref,gcash_ref:p.gcash_ref,status:p.status,date:_d(p.created_at)}));
+      return {success:true,payments:payments};
+    }
+
+    if(a==='approvePayment'){
+      const approve=String(data.approve)==='true';
+      await SB.from('payments').update({status:approve?'approved':'rejected',approved_at:new Date().toISOString()})
+        .eq('username',data.username).eq('gcash_ref',data.reference).eq('status','pending');
+      if(approve){
+        const days=_PLAN_DAYS[data.plan]||30;
+        const start=new Date(); const exp=new Date(Date.now()+days*86400000);
+        await SB.from('users').update({subscription:data.plan,sub_start:start.toISOString(),sub_expiry:exp.toISOString()}).eq('username',data.username);
+        _logAct(data.username+' \u2013 '+data.plan+' plan activated');
+        _tg({type:'payment_approved',username:data.username,plan:data.plan});
+      }
+      if(!approve)_tg({type:'payment_rejected',username:data.username,plan:data.plan});
+      return {success:true};
+    }
+
+    if(a==='setExpiry'){
+      await SB.from('users').update({subscription:data.plan,sub_start:new Date(data.subStart).toISOString(),sub_expiry:new Date(data.subExpiry).toISOString()}).eq('username',data.username);
+      return {success:true};
+    }
+
+    if(a==='addChild'){
+      const {data:kid}=await SB.from('users').select('name,username').eq('username',data.childUsername).limit(1);
+      if(!kid||!kid.length)return {success:false,error:'Could not link. Check the username and try again.'};
+      const {error}=await SB.from('children').insert({parent_username:data.parentUsername,child_username:kid[0].username,child_name:kid[0].name});
+      if(error)return {success:false,error:'Already linked or limit reached.'};
+      return {success:true};
+    }
+
+    if(a==='getChildren'){
+      const {data:rows}=await SB.from('children').select('*').eq('parent_username',data.parentUsername);
+      const children=(rows||[]).map(k=>({username:k.child_username,name:k.child_name,childUsername:k.child_username,childName:k.child_name}));
+      return {success:true,children:children};
+    }
+
+    if(a==='setAnnouncement'){
+      const {data:adm}=await SB.from('users').select('id').eq('username',data.username).eq('password',data.password).eq('role','admin').limit(1);
+      if(!adm||!adm.length)return {success:false,error:'Not authorized'};
+      const text=(data.text||'').trim();
+      if(text){
+        await SB.from('settings').upsert([{key:'ann_text',value:text},{key:'ann_id',value:String(Date.now())}]);
+      }else{
+        await SB.from('settings').delete().in('key',['ann_text','ann_id']);
+      }
+      return {success:true,active:!!text};
+    }
+
+    return {success:false,error:'Unknown action: '+a};
   }catch(e){
-    console.error('API error:', e);
-    return {success:false, error:'Connection error. Check your internet.'};
+    console.error('Supabase error:',e);
+    console.error('Supabase api() error:',e); return {success:false,error:'Connection error: '+(e.message||String(e))};
   }
 }
 
@@ -1390,6 +1543,7 @@ async function doLogin(){
   if(!res.success){showErr('ml-err',res.error||'Wrong username or password!');return;}
   CU=res.user;
   closeLoginModal();
+  startPlanPoll();
   round=1;
   buildHdr();
   updateDiffCards();
@@ -1445,7 +1599,7 @@ async function doReg(){
 }
 
 async function doLogout(){
-  if(CU)api({action:'logActivity',message:CU.name+' logged out'});
+  stopPlanPoll();if(CU)api({action:'logActivity',message:CU.name+' logged out'});
   CU=null; round=1; buildHdr(); updateDiffCards(); navTo('start');
 }
 
@@ -1806,8 +1960,11 @@ async function loadProfile(){
   if(!CU){navTo('login');return;}
   const ps=document.getElementById('psub');if(ps)ps.textContent='Welcome back, '+CU.name+'!';
   const pst=document.getElementById('pstats');if(pst)pst.innerHTML='<div class="scard"><div class="snum">...</div><div class="slbll">Loading</div></div>';
-  const res=await api({action:'getProfile',username:CU.username});
-  const my=res.success?res.scores:[];
+  const [res, scRes]=await Promise.all([
+    api({action:'getProfile',username:CU.username}),
+    api({action:'getScores',diff:'easy'})
+  ]);
+  const my=[];
   // Use API response first, fall back to CU object
   const sub=res.subscription||CU.subscription||'free';
   const subStart=res.subStart||CU.subStart||'';
@@ -1820,8 +1977,8 @@ async function loadProfile(){
   // Subscription card
   const sc=document.getElementById('psub-card');
   if(sc){
-    const subMap={free:'🌱 Free Plan',basic:'⚡ Basic Plan',premium:'🔥 Premium Plan',pending:'⏳ Payment Pending',expired:'❌ Plan Expired'};
-    const isActive=sub==='basic'||sub==='premium';
+    const subMap={free:'🌱 Free Plan',trial:'⚡ Trial Plan',weekly:'📅 Weekly Plan',basic:'⭐ Basic Plan',premium:'👑 Premium Plan',pending:'⏳ Payment Pending',expired:'❌ Plan Expired'};
+    const isActive=['trial','weekly','basic','premium'].includes(sub);
     let daysLeft=null,expiryStr='',urgentClass='',renewMsg='';
     if(isActive&&subExpiry){
       const expDate=new Date(subExpiry),today=new Date();today.setHours(0,0,0,0);
@@ -1836,7 +1993,7 @@ async function loadProfile(){
       <div class="sectitle">My Subscription</div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px">
         <div>
-          <span class="sub-status ${sub==='pending'?'pending':isActive?'active':sub==='expired'?'expired':'free'}" style="font-size:14px;padding:6px 14px">${subMap[sub]||'🌱 Free Plan'}</span>
+          <span class="sub-status ${sub==='pending'?'pending':['basic','premium'].includes(sub)?'active':['trial','weekly'].includes(sub)?'active':sub==='expired'?'expired':'free'}" style="font-size:14px;padding:6px 14px">${subMap[sub]||'🌱 Free Plan'}</span>
           ${subStart?`<div style="font-size:12px;color:#888780;font-weight:700;margin-top:6px">Started: ${subStart}</div>`:''}
         </div>
         <button class="btn btn-pink btn-sm" onclick="navTo('pricing')">${isActive?'Renew / Upgrade':'Upgrade Plan'}</button>
@@ -1862,10 +2019,10 @@ async function loadProfile(){
 
       ${isActive&&!subExpiry?`
         <div style="background:#EEEDFE;border:1.5px solid #7F77DD;border-radius:12px;padding:14px;margin-top:4px">
-          <div style="font-size:14px;font-weight:800;color:#3C3489;margin-bottom:6px">📅 Expiry date not set yet</div>
+          <div style="font-size:14px;font-weight:800;color:#3C3489;margin-bottom:6px">📅 Expiry date loading...</div>
           <div style="font-size:13px;color:#534AB7;font-weight:700;line-height:1.6">
-            Your plan is active! The admin needs to add your expiry date in the Google Sheet.<br>
-            Contact admin at <strong>darcant01@gmail.com</strong> to set your expiry date.
+            Your plan is active! Expiry info will appear here shortly.<br>
+            Questions? Message us on <strong>Telegram: @wordwiseph_support_bot</strong>
           </div>
         </div>
       `:''}
@@ -1902,22 +2059,7 @@ function choosePlan(plan,price){
   navTo('payment');
 }
 
-function previewReceipt(input){
-  const file=input.files[0];if(!file)return;
-  const prev=document.getElementById('receipt-preview');
-  const box=document.getElementById('upload-box');
-  const reader=new FileReader();
-  reader.onload=function(e){
-    if(prev){prev.src=e.target.result;prev.style.display='block';}
-    if(box){
-      box.classList.add('has-file');
-      const icon=box.querySelector('.upload-icon');if(icon)icon.textContent='✅';
-      const lbl=box.querySelector('.upload-label');if(lbl)lbl.textContent='Receipt uploaded!';
-      const sub=box.querySelector('.upload-sub');if(sub)sub.textContent=file.name;
-    }
-  };
-  reader.readAsDataURL(file);
-}
+
 
 async function submitPayment(){
   hideErr('pay-err');
@@ -1925,39 +2067,15 @@ async function submitPayment(){
   if(!CU){showErr('pay-err','Please login first!');return;}
   if(!ref||ref.length<6){showErr('pay-err','Please enter your GCash reference number (min 6 digits)!');return;}
   if(!selPlan){showErr('pay-err','No plan selected. Please go back and choose a plan!');return;}
-  const fileInput=document.getElementById('receipt-file');
-  let receiptB64='';
-  if(fileInput?.files[0]){
-    showLoader('Reading receipt...');
-    receiptB64=await new Promise(resolve=>{
-      const reader=new FileReader();
-      reader.onload=e=>resolve(e.target.result);
-      reader.onerror=()=>resolve('');
-      reader.readAsDataURL(fileInput.files[0]);
-    });
-  }
   showLoader('Submitting payment...');
-  const payload={action:'submitPayment',username:CU.username,name:CU.name,plan:selPlan,price:selPrice,reference:ref,hasReceipt:receiptB64?'yes':'no',date:new Date().toLocaleDateString()};
-  let res;
-  if(receiptB64){
-    try{
-      const r=await fetch(GAS,{method:'POST',body:JSON.stringify({...payload,receipt:receiptB64}),headers:{'Content-Type':'text/plain'},redirect:'follow'});
-      const t=await r.text();
-      try{res=JSON.parse(t);}catch(e){res=await api(payload);}
-    }catch(e){res=await api(payload);}
-  }else{
-    res=await api(payload);
-  }
+  const payload={action:'submitPayment',username:CU.username,name:CU.name,plan:selPlan,price:selPrice,reference:ref,date:new Date().toLocaleDateString()};
+  const res=await api(payload);
   hideLoader();
   if(!res.success){showErr('pay-err',res.error||'Submission failed. Please try again.');return;}
   CU.subscription='pending';buildHdr();
-  if(fileInput)fileInput.value='';
-  const prev=document.getElementById('receipt-preview');if(prev){prev.style.display='none';prev.src='';}
-  const box=document.getElementById('upload-box');
-  if(box){box.classList.remove('has-file');const icon=box.querySelector('.upload-icon');if(icon)icon.textContent='📸';const lbl=box.querySelector('.upload-label');if(lbl)lbl.textContent='Tap to upload receipt';const sub2=box.querySelector('.upload-sub');if(sub2)sub2.textContent='JPG, PNG, or screenshot from GCash';}
   const ref2=document.getElementById('gcash-ref');if(ref2)ref2.value='';
   selPlan=null;selPrice=0;
-  alert('✅ Payment submitted!'+(receiptB64?'\n📸 Receipt uploaded!':'')+'\n\nOur admin will verify within 24 hours.\nThank you for subscribing to WordWise PH!');
+  alert('✅ Payment submitted!\n\nOur admin will verify within 24 hours.\nThank you for subscribing to WordWise PH!');
   navTo('profile');
 }
 
@@ -2217,9 +2335,10 @@ async function handlePayment(username,plan,reference,approve){
       // Calculate 30-day expiry and show it to admin
       const start = new Date();
       const expiry = new Date();
-      expiry.setDate(expiry.getDate()+30);
+      const planDaysMap={trial:1,weekly:7,basic:30,premium:30};
+      expiry.setDate(expiry.getDate()+(planDaysMap[plan]||30));
       const fmt = d => d.toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
-      alert('✅ Plan activated for @'+username+'!\n\n📅 Subscription: '+plan.toUpperCase()+'\n🗓️ Start: '+fmt(start)+'\n⏰ Expires: '+fmt(expiry)+'\n\nThe expiry date has been saved in Google Sheets.');
+      alert('✅ Plan activated for @'+username+'!\n\n📅 Plan: '+plan.charAt(0).toUpperCase()+plan.slice(1)+'\n🗓️ Starts: '+fmt(start)+'\n⏰ Expires: '+fmt(expiry)+'\n\nUser can now access all '+plan+' features. ✨');
     } else {
       alert('❌ Payment rejected for @'+username+'.');
     }
@@ -7760,7 +7879,7 @@ function shareFromGameModal(){
 
 <script>
 // ── AUTO-UPDATE CHECKER ──
-var APP_VERSION='2026.07.05.3';
+var APP_VERSION='2026.07.06.1';
 function checkForUpdate(){
   fetch('version.json?t='+Date.now(),{cache:'no-store'})
     .then(function(r){return r.json();})
@@ -7834,7 +7953,160 @@ async function adminClearAnn(){
   if(res.success){document.getElementById('ann-input').value='';alert('\u2705 Announcement removed.');}
   else{alert('\u274c '+(res.error||'Failed'));}
 }
+
+// ── PLAN ACTIVATION NOTIFIER ──
+var _planPollTimer=null;
+function startPlanPoll(){
+  if(_planPollTimer)return;
+  _planPollTimer=setInterval(async function(){
+    if(!CU||!CU.username)return;
+    var prev=CU.subscription||'free';
+    try{
+      var r=await api({action:'checkPlan',username:CU.username});
+      if(!r.success)return;
+      var next=r.subscription||'free';
+      if(next!==prev&&next!=='free'&&next!=='pending'){
+        CU.subscription=next;
+        if(r.subExpiry)CU.subExpiry=r.subExpiry;
+        buildHdr();
+        showPlanBanner(next);
+      }
+    }catch(e){}
+  },20000);
+}
+function stopPlanPoll(){clearInterval(_planPollTimer);_planPollTimer=null;}
+function showPlanBanner(plan){
+  var labels={trial:'Trial',weekly:'Weekly',basic:'Basic',premium:'Premium'};
+  var emojis={trial:'\u26a1',weekly:'\ud83d\udcc5',basic:'\u2b50',premium:'\ud83d\udc51'};
+  var label=labels[plan]||plan;
+  var em=emojis[plan]||'\ud83c\udf89';
+  var old=document.getElementById('plan-banner');if(old)old.remove();
+  var b=document.createElement('div');
+  b.id='plan-banner';
+  b.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:10006;background:linear-gradient(135deg,#10B981,#059669);color:#fff;padding:16px 28px 16px 20px;border-radius:16px;font-family:Nunito,sans-serif;font-size:15px;font-weight:900;text-align:center;box-shadow:0 8px 32px rgba(16,185,129,0.5);animation:modalPop 0.35s ease;min-width:260px;max-width:90vw;cursor:pointer';
+  b.innerHTML=em+' <b>'+label+' Plan Activated!</b><br><span style="font-size:12px;font-weight:700;opacity:0.9">Your subscription is now active. Enjoy! \ud83c\udf89</span>';
+  b.onclick=function(){b.remove();navTo('profile');};
+  document.body.appendChild(b);
+  setTimeout(function(){if(b.parentElement){b.remove();navTo('profile');}},4000);
+}
 </script>
 
+<style>
+#chat-widget{position:fixed;bottom:80px;left:18px;width:clamp(280px,90vw,360px);background:#fff;border-radius:20px;box-shadow:0 12px 48px rgba(0,0,0,0.18);z-index:10003;display:none;flex-direction:column;overflow:hidden;border:1.5px solid #EAEDF5;animation:modalPop 0.25s ease;max-height:70vh}
+#chat-header{background:linear-gradient(135deg,#1D2B55,#2D3F7A);padding:14px 16px;display:flex;align-items:center;gap:10px}
+#chat-header h3{color:#fff;font-size:14px;font-weight:900;margin:0}
+#chat-header p{color:rgba(255,255,255,0.65);font-size:11px;font-weight:700;margin:2px 0 0}
+#chat-close{background:rgba(255,255,255,0.12);border:none;color:#fff;width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer;font-family:Nunito,sans-serif;font-weight:900;flex-shrink:0}
+#chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:180px;max-height:340px;background:#F9FAFB}
+.chat-msg{max-width:85%;padding:9px 13px;border-radius:14px;font-size:13px;font-weight:700;line-height:1.5;word-break:break-word}
+.chat-msg.user{align-self:flex-end;background:linear-gradient(135deg,#1D2B55,#2D3F7A);color:#fff;border-radius:14px 14px 4px 14px}
+.chat-msg.admin{align-self:flex-start;background:#fff;color:#1D2B55;border:1.5px solid #EAEDF5;border-radius:14px 14px 14px 4px}
+.chat-msg.system{align-self:center;background:#FFF8E7;color:#92600A;font-size:11px;border-radius:99px;padding:5px 14px}
+.chat-time{font-size:10px;opacity:0.55;margin-top:3px;text-align:right}
+#chat-input-row{display:flex;gap:8px;padding:10px 12px;border-top:1.5px solid #EAEDF5;background:#fff}
+#chat-input{flex:1;border:1.5px solid #E8EAF0;border-radius:12px;padding:9px 12px;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;color:#1D2B55;background:#F9FAFB;outline:none;resize:none;max-height:80px}
+#chat-input:focus{border-color:#1D2B55;background:#fff}
+#chat-send{background:linear-gradient(135deg,#D4537E,#c0456e);border:none;color:#fff;border-radius:12px;padding:9px 14px;font-size:16px;cursor:pointer;flex-shrink:0}
+</style>
+<div id="chat-widget">
+  <div id="chat-header">
+    <div style="width:36px;height:36px;border-radius:50%;background:rgba(250,199,117,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">&#x1F393;</div>
+    <div id="chat-header-info" style="flex:1">
+      <h3>WordWise PH Support</h3>
+      <p>&#x25CF; Online &mdash; usually replies in minutes</p>
+    </div>
+    <button id="chat-close" onclick="toggleChat()">&#x2715;</button>
+  </div>
+  <div id="chat-messages"></div>
+  <div id="chat-input-row">
+    <textarea id="chat-input" rows="1" placeholder="Type a message..."></textarea>
+    <button id="chat-send" onclick="sendChat()">&#x27A4;</button>
+  </div>
+</div><script>
+var CHAT_SB=supabase.createClient("https://ahtyjglufrvtfnhkooux.supabase.co","sb_publishable_AylXCLg2W3sQzQSn5sH7Xg_k4ZQblM7");
+var _chatSession=null,_chatOpen=false,_chatTimer=null,_chatLastId=0;
+function _getChatSession(){
+  if(_chatSession)return _chatSession;
+  if(CU&&CU.username){_chatSession=CU.username;return _chatSession;}
+  var s=localStorage.getItem("ww_chat_sid");
+  if(!s){s="guest_"+Date.now()+"_"+Math.random().toString(36).slice(2,7);localStorage.setItem("ww_chat_sid",s);}
+  return(_chatSession=s);
+}
+function toggleChat(){
+  _chatOpen=!_chatOpen;
+  var w=document.getElementById("chat-widget");
+  var icon=document.getElementById("chat-fab-icon");
+  var dot=document.getElementById("chat-fab-dot");
+  if(_chatOpen){
+    w.style.display="flex";
+    if(icon)icon.innerHTML="&#x2715;";
+    if(dot)dot.style.display="none";
+    _initChat();
+  }else{
+    w.style.display="none";
+    if(icon)icon.innerHTML="&#x1F4AC;";
+    clearInterval(_chatTimer);
+  }
+}
+async function _initChat(){
+  var el=document.getElementById("chat-messages");if(!el)return;
+  el.innerHTML="";
+  var session=_getChatSession();
+  var r=await CHAT_SB.from("support_messages").select("*").eq("session_id",session).order("created_at",{ascending:true}).limit(50);
+  if(!r.data||!r.data.length){
+    _appendMsg("system","Hi! How can we help you today?");
+    _appendMsg("system","Type your question and we will reply shortly!");
+  }else{
+    r.data.forEach(function(m){_appendMsg(m.role==="admin"?"admin":"user",m.message,m.created_at);});
+    _chatLastId=r.data[r.data.length-1].id;
+  }
+  _scrollChat();
+  clearInterval(_chatTimer);
+  _chatTimer=setInterval(_pollChat,5000);
+  var inp=document.getElementById("chat-input");
+  if(inp){
+    inp.onkeydown=function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat();}};
+    inp.oninput=function(){this.style.height="auto";this.style.height=Math.min(this.scrollHeight,80)+"px";};
+  }
+}
+function _appendMsg(role,text,ts){
+  var el=document.getElementById("chat-messages");if(!el)return;
+  var d=document.createElement("div");
+  d.className="chat-msg "+role;
+  var time=ts?new Date(ts).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";
+  d.innerHTML=text.replace(/\n/g,"<br>")+(time?"<div class=\"chat-time\">"+time+"</div>":"");
+  el.appendChild(d);
+}
+function _scrollChat(){var el=document.getElementById("chat-messages");if(el)el.scrollTop=el.scrollHeight;}
+async function sendChat(){
+  var inp=document.getElementById("chat-input");
+  var text=(inp?inp.value:"").trim();
+  if(!text)return;
+  if(inp){inp.value="";inp.style.height="auto";}
+  var session=_getChatSession();
+  var name=CU?CU.name:"Guest";
+  var uname=CU?CU.username:null;
+  _appendMsg("user",text);_scrollChat();
+  var ins=await CHAT_SB.from("support_messages").insert({session_id:session,username:uname,name:name,role:"user",message:text}).select("id").single();
+  if(ins.data)_chatLastId=ins.data.id;
+  try{
+    await fetch("https://api.telegram.org/bot8898030018:AAGbiyas66mmdE-cFI08F_WDkeZCupOIz1g/sendMessage",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({chat_id:"5559542103",text:"<b>&#x1F4AC; Live Chat</b>\n\n&#x1F464; "+name+(uname?" (@"+uname+")":"(Guest)")+"\nSession: "+session+"\n\n<b>Message:</b>\n"+text+"\n\n<i>Reply to this message to respond!</i>",parse_mode:"HTML"})
+    });
+  }catch(e){}
+}
+async function _pollChat(){
+  if(!_chatOpen)return;
+  var session=_getChatSession();
+  var q=CHAT_SB.from("support_messages").select("*").eq("session_id",session).eq("role","admin").order("created_at",{ascending:true});
+  if(_chatLastId)q=q.gt("id",_chatLastId);
+  var r=await q;
+  if(r.data&&r.data.length){
+    r.data.forEach(function(m){_appendMsg("admin",m.message,m.created_at);_chatLastId=m.id;});
+    _scrollChat();
+  }
+}
+</script>
 </body>
 </html>
