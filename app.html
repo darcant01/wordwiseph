@@ -624,6 +624,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div class="rstr" id="rstr"></div>
       <div class="rmsg" id="rmsg"></div>
       <div id="save-area"></div>
+      <div id="profile-downloads" style="display:none;margin-top:14px"></div>
       <div class="rbtns">
         <button class="btn btn-gold" onclick="retryQuiz()">New Round!</button>
         <button class="btn btn-navy" onclick="navTo('start')">Change Level</button>
@@ -1148,6 +1149,10 @@ async function api(data){
       };
     }
 
+    if(a==='getPurchases'){
+      const {data:rows}=await SB.from('purchases').select('*').eq('username',data.username).order('granted_at',{ascending:false});
+      return {success:true,purchases:rows||[]};
+    }
     if(a==='checkPlan'){
       const {data:cp}=await SB.from('users').select('subscription,sub_expiry').eq('username',data.username).limit(1);
       if(!cp||!cp.length)return {success:false};
@@ -1814,6 +1819,31 @@ async function showResult(){
   TICKER.notifyLocal(entry);
   TICKER.resume();
   const sa=document.getElementById('save-area');
+  // Downloads section
+  var dlPurchases=CU._purchases||[];
+  var dlEl=document.getElementById('profile-downloads');
+  if(dlEl){
+    if(dlPurchases.length>0){
+      var icons={"name-tracer":"\u270f\ufe0f","alphabet-pack":"\ud83d\udd24","numbers-pack":"\ud83d\udd22","sight-words":"\ud83d\udc41\ufe0f","sentence-writing":"\ud83d\udcdd","pattern-tracing":"\ud83d\udcc8","shapes-patterns":"\ud83d\udd37","days-months":"\ud83d\udcc5","math-drills":"\u2795","coloring-vocab":"\ud83c\udfa8","grammar-fix-it":"\ud83d\udee0\ufe0f","ultimate-bundle":"\ud83d\udc51"};
+      dlEl.innerHTML='<div class="sectitle" style="font-size:14px;margin-bottom:10px">\ud83d\udce5 My Printables ('+dlPurchases.length+')</div>'+
+        dlPurchases.map(function(pu,idx){
+          var ic=icons[pu.product_slug]||"\ud83d\udcc4";
+          return '<div class="arow" style="justify-content:space-between"><div><span style="font-size:16px;margin-right:8px">'+ic+'</span><span style="font-size:13px;font-weight:800">'+pu.product_name+'</span>'+(pu.child_name?'<span style="font-size:11px;color:#9CA3AF;margin-left:6px">for '+pu.child_name+'</span>':'')+'</div><button class="btn btn-pink" style="padding:7px 14px;font-size:11px" data-dl-idx="'+idx+'">\u2b07\ufe0f Download</button></div>';
+        }).join('');
+      dlEl.style.display='block';
+      // Wire download buttons
+      dlEl.querySelectorAll('[data-dl-idx]').forEach(function(btn){
+        btn.onclick=function(){
+          var idx=parseInt(this.getAttribute('data-dl-idx'));
+          var pu=dlPurchases[idx];
+          downloadPrintable(pu.product_slug,pu.product_name,pu.child_name||'');
+        };
+      });
+    }else{
+      dlEl.innerHTML='<div style="font-size:13px;color:#9CA3AF;text-align:center;padding:12px">No printables purchased yet.<br><a href="printables.html" style="color:#D4537E;font-weight:800">Browse the shop \u2192</a></div>';
+      dlEl.style.display='block';
+    }
+  }
   if(sa)sa.innerHTML=CU
     ?`<div style="font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:14px">✅ Score saved!</div>`
     :`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:10px">Login to save your score permanently!</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up Free</button></div></div>`;
@@ -1966,6 +1996,8 @@ async function loadProfile(){
   ]);
   const my=[];
   // Use API response first, fall back to CU object
+  const pRes=await api({action:'getPurchases',username:CU.username});
+  CU._purchases=pRes.success?pRes.purchases:[];
   const sub=res.subscription||CU.subscription||'free';
   const subStart=res.subStart||CU.subStart||'';
   const subExpiry=res.subExpiry||CU.subExpiry||'';
@@ -8106,6 +8138,28 @@ async function _pollChat(){
     r.data.forEach(function(m){_appendMsg("admin",m.message,m.created_at);_chatLastId=m.id;});
     _scrollChat();
   }
+}
+</script>
+
+<script>
+async function downloadPrintable(slug,name,childName){
+  showLoader("Preparing your download...");
+  try{
+    var r=await fetch("https://ahtyjglufrvtfnhkooux.supabase.co/functions/v1/get_printable",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer sb_publishable_AylXCLg2W3sQzQSn5sH7Xg_k4ZQblM7"},
+      body:JSON.stringify({action:"get_download_url",username:CU.username,product_slug:slug,child_name:childName||""})
+    });
+    var data=await r.json();
+    hideLoader();
+    if(data.success&&data.url){
+      var a=document.createElement("a");
+      a.href=data.url;a.download=name+".pdf";a.target="_blank";
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+    }else{
+      alert("Download error: "+(data.error||"Please try again or contact support."));
+    }
+  }catch(e){hideLoader();alert("Connection error. Please try again.");}
 }
 </script>
 </body>
