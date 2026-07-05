@@ -1161,6 +1161,7 @@ async function api(data){
       const {error}=await SB.from('payments').insert({username:data.username,plan:data.plan,amount:Number(data.price)||0,gcash_ref:data.reference||'',status:'pending'});
       if(error)return {success:false,error:'Could not submit. Try again.'};
       _logAct(data.username+' \u2013 submitted payment for '+data.plan);
+      _tg({type:'new_payment',username:data.username,plan:data.plan,amount:data.price||data.amount||0,reference:data.reference||''});
       return {success:true,message:'Payment submitted! We will verify and activate your plan shortly.'};
     }
 
@@ -1179,7 +1180,9 @@ async function api(data){
         const start=new Date(); const exp=new Date(Date.now()+days*86400000);
         await SB.from('users').update({subscription:data.plan,sub_start:start.toISOString(),sub_expiry:exp.toISOString()}).eq('username',data.username);
         _logAct(data.username+' \u2013 '+data.plan+' plan activated');
+        _tg({type:'payment_approved',username:data.username,plan:data.plan});
       }
+      if(!approve)_tg({type:'payment_rejected',username:data.username,plan:data.plan});
       return {success:true};
     }
 
