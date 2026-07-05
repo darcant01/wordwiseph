@@ -1149,6 +1149,12 @@ async function api(data){
       };
     }
 
+    if(a==='checkPlan'){
+      const {data:cp}=await SB.from('users').select('subscription,sub_expiry').eq('username',data.username).limit(1);
+      if(!cp||!cp.length)return {success:false};
+      return {success:true,subscription:cp[0].subscription||'free',subExpiry:cp[0].sub_expiry||''};
+    }
+
     if(a==='logActivity'){ await _logAct(data.message||''); return {success:true}; }
 
     if(a==='clearActivity'){
@@ -1538,6 +1544,7 @@ async function doLogin(){
   if(!res.success){showErr('ml-err',res.error||'Wrong username or password!');return;}
   CU=res.user;
   closeLoginModal();
+  startPlanPoll();
   round=1;
   buildHdr();
   updateDiffCards();
@@ -7946,6 +7953,42 @@ async function adminClearAnn(){
   hideLoader();
   if(res.success){document.getElementById('ann-input').value='';alert('\u2705 Announcement removed.');}
   else{alert('\u274c '+(res.error||'Failed'));}
+}
+
+// ── PLAN ACTIVATION NOTIFIER ──
+var _planPollTimer=null;
+function startPlanPoll(){
+  if(_planPollTimer)return;
+  _planPollTimer=setInterval(async function(){
+    if(!CU||!CU.username)return;
+    var prev=CU.subscription||'free';
+    try{
+      var r=await api({action:'checkPlan',username:CU.username});
+      if(!r.success)return;
+      var next=r.subscription||'free';
+      if(next!==prev&&next!=='free'&&next!=='pending'){
+        CU.subscription=next;
+        if(r.subExpiry)CU.subExpiry=r.subExpiry;
+        buildHdr();
+        showPlanBanner(next);
+      }
+    }catch(e){}
+  },20000);
+}
+function stopPlanPoll(){clearInterval(_planPollTimer);_planPollTimer=null;}
+function showPlanBanner(plan){
+  var labels={trial:'Trial',weekly:'Weekly',basic:'Basic',premium:'Premium'};
+  var emojis={trial:'\u26a1',weekly:'\ud83d\udcc5',basic:'\u2b50',premium:'\ud83d\udc51'};
+  var label=labels[plan]||plan;
+  var em=emojis[plan]||'\ud83c\udf89';
+  var old=document.getElementById('plan-banner');if(old)old.remove();
+  var b=document.createElement('div');
+  b.id='plan-banner';
+  b.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:10006;background:linear-gradient(135deg,#10B981,#059669);color:#fff;padding:16px 28px 16px 20px;border-radius:16px;font-family:Nunito,sans-serif;font-size:15px;font-weight:900;text-align:center;box-shadow:0 8px 32px rgba(16,185,129,0.5);animation:modalPop 0.35s ease;min-width:260px;max-width:90vw;cursor:pointer';
+  b.innerHTML=em+' <b>'+label+' Plan Activated!</b><br><span style="font-size:12px;font-weight:700;opacity:0.9">Your subscription is now active. Enjoy! \ud83c\udf89</span>';
+  b.onclick=function(){b.remove();navTo('profile');};
+  document.body.appendChild(b);
+  setTimeout(function(){if(b.parentElement){b.remove();navTo('profile');}},4000);
 }
 </script>
 
