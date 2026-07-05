@@ -933,6 +933,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
   <div class="wrap">
     <div class="atabrow">
       <button class="atab on"  onclick="adminTab('ov',this)">Overview</button>
+      <button class="atab" onclick="adminTab('live',this)">🟢 Live</button>
       <button class="atab"     onclick="adminTab('us',this)">Users</button>
       <button class="atab"     onclick="adminTab('sc',this)">All Scores</button>
       <button class="atab"     onclick="adminTab('ac',this)">Activity</button>
@@ -945,6 +946,19 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div class="sectitle">Recent Activity</div>
       <div class="card" id="arecent"></div>
     </div>
+    <div id="a-live" style="display:none">
+      <div class="sectitle" style="display:flex;align-items:center;justify-content:space-between">
+        <span>🟢 Live Monitor</span>
+        <button onclick="refreshLive()" style="font-family:Nunito,sans-serif;font-size:12px;font-weight:900;padding:6px 14px;border-radius:99px;background:var(--pink);border:none;color:#fff;cursor:pointer">↻ Refresh</button>
+      </div>
+      <div class="sgrid" id="live-stats" style="margin-bottom:16px"></div>
+      <div class="sectitle">Active Sessions (last 30 min)</div>
+      <div class="card" id="live-users"></div>
+      <div class="sectitle" style="margin-top:16px">Plan Breakdown</div>
+      <div class="sgrid" id="live-plans"></div>
+      <div id="live-updated" style="font-size:11px;font-weight:700;color:#9CA3AF;text-align:center;margin-top:10px"></div>
+    </div>
+
     <div id="a-us" style="display:none">
       <div class="sectitle">All Users</div>
       <div style="overflow-x:auto"><table class="atable"><thead><tr><th>#</th><th>Name</th><th>Username</th><th>Type</th><th>Role</th><th>Sub</th><th>Expires</th><th>Rounds</th><th>Best</th><th>Joined</th></tr></thead><tbody id="utbody"></tbody></table></div>
@@ -2009,7 +2023,7 @@ function adminTab(sec,el){
   if(sec==='live')loadLiveMonitor();
   else loadAdmin(sec);
 }
-async // ── LIVE MONITOR ──
+// ── LIVE MONITOR ──
 var liveRefreshTimer=null;
 async function loadLiveMonitor(){
   await refreshLive();
@@ -2077,7 +2091,7 @@ async function refreshLive(){
   if(upd)upd.textContent='Updated: '+new Date().toLocaleTimeString();
 }
 
-function loadAdmin(sec){
+async function loadAdmin(sec){
   if(!CU||CU.role!=='admin'){navTo('start');return;}
   if(sec==='pay'){loadAdminPayments();return;}
   showLoader('Loading...');
