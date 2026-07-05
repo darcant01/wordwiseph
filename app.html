@@ -2066,6 +2066,18 @@ async function refreshLive(){
     <div class="scard" style="border-top:3px solid #D4537E"><div class="snum">${paidCount}</div><div class="slbll">Paid Users</div></div>
     <div class="scard" style="border-top:3px solid #FAC775"><div class="snum" style="color:${joinedToday>0?'#D4537E':'inherit'}">${joinedToday}</div><div class="slbll">Joined Today</div></div>
     <div class="scard" style="border-top:3px solid #F59E0B"><div class="snum" style="color:${expireSoon>0?'#E24B4A':'inherit'}">${expireSoon}</div><div class="slbll">⚠️ Expiring Soon</div></div>`;
+  // API usage card (needs backend v4)
+  const ls2=document.getElementById('live-stats');
+  if(ls2&&typeof res.apiToday!=='undefined'){
+    const lim=res.apiLimit||3000;
+    const pct=Math.min(100,Math.round(res.apiToday/lim*100));
+    const col=pct>=80?'#E24B4A':(pct>=50?'#F59E0B':'#10B981');
+    ls2.innerHTML+=`<div class="scard" style="border-top:3px solid ${col}">
+      <div class="snum" style="color:${col}">${pct}%</div>
+      <div class="slbll">📊 API Usage (${res.apiToday}/${lim})</div>
+      <div style="height:6px;background:#EAEDF5;border-radius:99px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${col};border-radius:99px"></div></div>
+    </div>`;
+  }
   const lu=document.getElementById('live-users');
   if(lu){
     if(recentUsers.size===0){
@@ -7738,7 +7750,7 @@ function shareFromGameModal(){
 
 <script>
 // ── AUTO-UPDATE CHECKER ──
-var APP_VERSION='2026.07.05.1';
+var APP_VERSION='2026.07.05.2';
 function checkForUpdate(){
   fetch('version.json?t='+Date.now(),{cache:'no-store'})
     .then(function(r){return r.json();})
