@@ -883,18 +883,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div style="font-size:12px;color:#888780;font-weight:700;margin-top:6px">Found in your GCash SMS or app notification</div>
     </div>
     <div class="pay-step">
-      <div class="pay-title"><span class="pay-num">3</span>Upload your receipt screenshot</div>
-      <div class="upload-box" id="upload-box" onclick="document.getElementById('receipt-file').click()">
-        <input type="file" id="receipt-file" accept="image/*" style="display:none" onchange="previewReceipt(this)"/>
-        <div class="upload-icon">📸</div>
-        <div class="upload-label">Tap to upload receipt</div>
-        <div class="upload-sub">JPG, PNG, or screenshot from your GCash app</div>
-        <img id="receipt-preview" class="upload-preview" alt="Receipt preview"/>
-      </div>
-      <div style="font-size:12px;color:#888780;font-weight:700;margin-top:8px;text-align:center">Optional but helps us verify faster!</div>
-    </div>
-    <div class="pay-step">
-      <div class="pay-title"><span class="pay-num">4</span>Submit for verification</div>
+      <div class="pay-title"><span class="pay-num">3</span>Submit for verification</div>
       <div style="font-size:13px;color:#5F5E5A;font-weight:700;margin-bottom:12px;line-height:1.6">Our admin verifies within <strong>24 hours</strong> and activates your plan.</div>
       <div class="err" id="pay-err"></div>
       <button class="btn btn-pink btn-block" onclick="submitPayment()">Submit Payment</button>
@@ -2036,22 +2025,7 @@ function choosePlan(plan,price){
   navTo('payment');
 }
 
-function previewReceipt(input){
-  const file=input.files[0];if(!file)return;
-  const prev=document.getElementById('receipt-preview');
-  const box=document.getElementById('upload-box');
-  const reader=new FileReader();
-  reader.onload=function(e){
-    if(prev){prev.src=e.target.result;prev.style.display='block';}
-    if(box){
-      box.classList.add('has-file');
-      const icon=box.querySelector('.upload-icon');if(icon)icon.textContent='✅';
-      const lbl=box.querySelector('.upload-label');if(lbl)lbl.textContent='Receipt uploaded!';
-      const sub=box.querySelector('.upload-sub');if(sub)sub.textContent=file.name;
-    }
-  };
-  reader.readAsDataURL(file);
-}
+
 
 async function submitPayment(){
   hideErr('pay-err');
@@ -2059,38 +2033,15 @@ async function submitPayment(){
   if(!CU){showErr('pay-err','Please login first!');return;}
   if(!ref||ref.length<6){showErr('pay-err','Please enter your GCash reference number (min 6 digits)!');return;}
   if(!selPlan){showErr('pay-err','No plan selected. Please go back and choose a plan!');return;}
-  const fileInput=document.getElementById('receipt-file');
-  let receiptB64='';
-  if(fileInput?.files[0]){
-    showLoader('Reading receipt...');
-    receiptB64=await new Promise(resolve=>{
-      const reader=new FileReader();
-      reader.onload=e=>resolve(e.target.result);
-      reader.onerror=()=>resolve('');
-      reader.readAsDataURL(fileInput.files[0]);
-    });
-  }
   showLoader('Submitting payment...');
-  const payload={action:'submitPayment',username:CU.username,name:CU.name,plan:selPlan,price:selPrice,reference:ref,hasReceipt:receiptB64?'yes':'no',date:new Date().toLocaleDateString()};
-  let res;
-  if(receiptB64){
-    try{
-      let res0=await api(payload);const t=JSON.stringify(res0);
-      try{res=JSON.parse(t);}catch(e){res=await api(payload);}
-    }catch(e){res=await api(payload);}
-  }else{
-    res=await api(payload);
-  }
+  const payload={action:'submitPayment',username:CU.username,name:CU.name,plan:selPlan,price:selPrice,reference:ref,date:new Date().toLocaleDateString()};
+  const res=await api(payload);
   hideLoader();
   if(!res.success){showErr('pay-err',res.error||'Submission failed. Please try again.');return;}
   CU.subscription='pending';buildHdr();
-  if(fileInput)fileInput.value='';
-  const prev=document.getElementById('receipt-preview');if(prev){prev.style.display='none';prev.src='';}
-  const box=document.getElementById('upload-box');
-  if(box){box.classList.remove('has-file');const icon=box.querySelector('.upload-icon');if(icon)icon.textContent='📸';const lbl=box.querySelector('.upload-label');if(lbl)lbl.textContent='Tap to upload receipt';const sub2=box.querySelector('.upload-sub');if(sub2)sub2.textContent='JPG, PNG, or screenshot from GCash';}
   const ref2=document.getElementById('gcash-ref');if(ref2)ref2.value='';
   selPlan=null;selPrice=0;
-  alert('✅ Payment submitted!'+(receiptB64?'\n📸 Receipt uploaded!':'')+'\n\nOur admin will verify within 24 hours.\nThank you for subscribing to WordWise PH!');
+  alert('✅ Payment submitted!\n\nOur admin will verify within 24 hours.\nThank you for subscribing to WordWise PH!');
   navTo('profile');
 }
 
