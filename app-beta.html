@@ -1122,9 +1122,19 @@ async function api(data){
     }
 
     if(a==='getProfile'){
-      const {data:rows}=await SB.from('users').select('subscription,sub_start,sub_expiry').eq('username',data.username).limit(1);
-      if(!rows||!rows.length)return {success:false};
-      return {success:true,subscription:rows[0].subscription||'free',subStart:rows[0].sub_start||'',subExpiry:rows[0].sub_expiry||''};
+      const {data:rows,error}=await SB.from('users')
+        .select('subscription,sub_start,sub_expiry,rounds,best')
+        .eq('username',data.username).limit(1);
+      if(error||!rows||!rows.length)return {success:false};
+      const u=rows[0];
+      return {
+        success:true,
+        subscription: u.subscription||'free',
+        subStart:     u.sub_start||'',
+        subExpiry:    u.sub_expiry||'',
+        rounds:       u.rounds||0,
+        best:         u.best||0
+      };
     }
 
     if(a==='logActivity'){ await _logAct(data.message||''); return {success:true}; }
@@ -1929,8 +1939,11 @@ async function loadProfile(){
   if(!CU){navTo('login');return;}
   const ps=document.getElementById('psub');if(ps)ps.textContent='Welcome back, '+CU.name+'!';
   const pst=document.getElementById('pstats');if(pst)pst.innerHTML='<div class="scard"><div class="snum">...</div><div class="slbll">Loading</div></div>';
-  const res=await api({action:'getProfile',username:CU.username});
-  const my=res.success?res.scores:[];
+  const [res, scRes]=await Promise.all([
+    api({action:'getProfile',username:CU.username}),
+    api({action:'getScores',diff:'easy'})
+  ]);
+  const my=[];
   // Use API response first, fall back to CU object
   const sub=res.subscription||CU.subscription||'free';
   const subStart=res.subStart||CU.subStart||'';
@@ -1943,8 +1956,8 @@ async function loadProfile(){
   // Subscription card
   const sc=document.getElementById('psub-card');
   if(sc){
-    const subMap={free:'🌱 Free Plan',basic:'⚡ Basic Plan',premium:'🔥 Premium Plan',pending:'⏳ Payment Pending',expired:'❌ Plan Expired'};
-    const isActive=sub==='basic'||sub==='premium';
+    const subMap={free:'🌱 Free Plan',trial:'⚡ Trial Plan',weekly:'📅 Weekly Plan',basic:'⭐ Basic Plan',premium:'👑 Premium Plan',pending:'⏳ Payment Pending',expired:'❌ Plan Expired'};
+    const isActive=['trial','weekly','basic','premium'].includes(sub);
     let daysLeft=null,expiryStr='',urgentClass='',renewMsg='';
     if(isActive&&subExpiry){
       const expDate=new Date(subExpiry),today=new Date();today.setHours(0,0,0,0);
@@ -1959,7 +1972,7 @@ async function loadProfile(){
       <div class="sectitle">My Subscription</div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px">
         <div>
-          <span class="sub-status ${sub==='pending'?'pending':isActive?'active':sub==='expired'?'expired':'free'}" style="font-size:14px;padding:6px 14px">${subMap[sub]||'🌱 Free Plan'}</span>
+          <span class="sub-status ${sub==='pending'?'pending':['basic','premium'].includes(sub)?'active':['trial','weekly'].includes(sub)?'active':sub==='expired'?'expired':'free'}" style="font-size:14px;padding:6px 14px">${subMap[sub]||'🌱 Free Plan'}</span>
           ${subStart?`<div style="font-size:12px;color:#888780;font-weight:700;margin-top:6px">Started: ${subStart}</div>`:''}
         </div>
         <button class="btn btn-pink btn-sm" onclick="navTo('pricing')">${isActive?'Renew / Upgrade':'Upgrade Plan'}</button>
