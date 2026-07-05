@@ -933,6 +933,12 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
     </div>
     <div id="a-ov">
       <div class="sgrid" id="astats"></div>
+      <div class="sectitle" style="display:flex;align-items:center;justify-content:space-between;margin-top:16px">
+        <span>☁️ Supabase Free Tier Usage</span>
+        <button onclick="loadSupabaseUsage()" style="font-family:Nunito,sans-serif;font-size:11px;font-weight:900;padding:5px 12px;border-radius:99px;background:var(--pink);border:none;color:#fff;cursor:pointer">↻ Refresh</button>
+      </div>
+      <div id="sb-usage-cards" class="sgrid" style="margin-bottom:8px"></div>
+      <div id="sb-usage-warning" style="display:none;margin-bottom:16px"></div>
       <div class="sectitle">By Difficulty</div>
       <div class="sgrid" id="adiff"></div>
       <div class="sectitle">Recent Activity</div>
@@ -1180,6 +1186,36 @@ async function api(data){
     if(a==='getPurchases'){
       const {data:rows}=await SB.from('purchases').select('*').eq('username',data.username).order('granted_at',{ascending:false});
       return {success:true,purchases:rows||[]};
+    }
+    if(a==='getSupabaseUsage'){
+      // Count rows in each table to estimate DB usage
+      // Supabase free tier: 500MB DB, 1GB storage, 5GB bandwidth
+      const [u,s,p,a2,sm,pu]=await Promise.all([
+        SB.from('users').select('*',{count:'exact',head:true}),
+        SB.from('scores').select('*',{count:'exact',head:true}),
+        SB.from('payments').select('*',{count:'exact',head:true}),
+        SB.from('activity').select('*',{count:'exact',head:true}),
+        SB.from('support_messages').select('*',{count:'exact',head:true}),
+        SB.from('purchases').select('*',{count:'exact',head:true}).catch(()=>({count:0}))
+      ]);
+      return {
+        success:true,
+        counts:{
+          users:u.count||0,
+          scores:s.count||0,
+          payments:p.count||0,
+          activity:a2.count||0,
+          support:sm.count||0,
+          purchases:pu.count||0
+        },
+        limits:{
+          db_mb:500,
+          storage_gb:1,
+          bandwidth_gb:5,
+          edge_invocations:500000,
+          auth_users:50000
+        }
+      };
     }
     if(a==='checkPlan'){
       const {data:cp}=await SB.from('users').select('subscription,sub_expiry').eq('username',data.username).limit(1);
@@ -2298,6 +2334,7 @@ async function loadAdmin(sec){
   if(!res.success){alert('Could not load admin data: '+res.error);return;}
   const{users=[],scores=[],activity=[]}=res;
   if(sec==='ov'){
+    loadSupabaseUsage();
     const tu=users.filter(u=>u.role!=='admin').length;
     const kids=users.filter(u=>u.type==='kid').length;
     const adults=users.filter(u=>u.type==='adult'&&u.role!=='admin').length;
@@ -2365,6 +2402,60 @@ async function loadAdminPayments(){
       </tr>`).join('')
     :'<tr><td colspan="9" style="text-align:center;color:#888780;padding:16px">No payment requests yet.</td></tr>';
 }
+async function loadSupabaseUsage(){
+  var cards=document.getElementById('sb-usage-cards');
+  var warn=document.getElementById('sb-usage-warning');
+  if(cards)cards.innerHTML='<div style="color:#9CA3AF;font-size:12px;padding:8px">Loading usage...</div>';
+  const res=await api({action:'getSupabaseUsage'});
+  if(!res.success){if(cards)cards.innerHTML='<div style="color:#E24B4A;font-size:12px">Could not load usage data</div>';return;}
+  const{counts,limits}=res;
+
+  // Estimate DB size: avg ~500 bytes per row across all tables
+  const totalRows=Object.values(counts).reduce((a,b)=>a+b,0);
+  const estDbMb=Math.max(0.1,(totalRows*500)/1024/1024);
+  const dbPct=Math.min(100,Math.round(estDbMb/limits.db_mb*100));
+
+  // Supabase free tier limits to track
+  const metrics=[
+    {label:'Database',icon:'🗄️',val:estDbMb.toFixed(1)+' MB',limit:limits.db_mb+' MB',pct:dbPct,detail:'~'+totalRows+' total rows'},
+    {label:'Users',icon:'👥',val:counts.users,limit:limits.auth_users,pct:Math.round(counts.users/limits.auth_users*100),detail:'Free tier: 50,000 max'},
+    {label:'Scores',icon:'🎮',val:counts.scores,limit:'∞',pct:0,detail:'No row limit on free tier'},
+    {label:'Activity Logs',icon:'📋',val:counts.activity,limit:'5,000',pct:Math.round(counts.activity/5000*100),detail:'Auto-trimmed at 5,000'},
+    {label:'Edge Functions',icon:'⚡',val:'N/A',limit:'500K/mo',pct:0,detail:'Track in Supabase Dashboard'},
+  ];
+
+  var warnings=[];
+  if(dbPct>=80)warnings.push({lvl:'🚨',msg:'Database is '+dbPct+'% full ('+estDbMb.toFixed(1)+'MB / '+limits.db_mb+'MB). Consider cleaning old scores or upgrading.'});
+  else if(dbPct>=60)warnings.push({lvl:'⚠️',msg:'Database at '+dbPct+'%. Keep an eye on it.'});
+  if(counts.users>=40000)warnings.push({lvl:'🚨',msg:'Users ('+counts.users+') approaching the 50,000 free tier limit!'});
+  if(counts.activity>=4500)warnings.push({lvl:'⚠️',msg:'Activity log has '+counts.activity+' rows — auto-trim will run at 5,000.'});
+
+  if(cards){
+    cards.innerHTML=metrics.map(function(m){
+      var barColor=m.pct>=80?'#E24B4A':m.pct>=60?'#F59E0B':'#10B981';
+      var bg=m.pct>=80?'#FFF0F0':m.pct>=60?'#FFFBEB':'#F0FFF4';
+      return '<div class="scard" style="background:'+bg+';border-top:3px solid '+barColor+'">'+
+        '<div style="font-size:18px;margin-bottom:4px">'+m.icon+'</div>'+
+        '<div class="snum" style="font-size:18px;color:'+barColor+'">'+m.val+'</div>'+
+        '<div class="slbll">'+m.label+'</div>'+
+        '<div style="font-size:10px;color:#9CA3AF;margin-top:4px">Limit: '+m.limit+'</div>'+
+        (m.pct>0?'<div style="height:5px;background:#E8EAF0;border-radius:99px;margin-top:6px;overflow:hidden"><div style="height:100%;width:'+m.pct+'%;background:'+barColor+';border-radius:99px"></div></div>':'')+'</div>';
+    }).join('');
+  }
+
+  if(warn){
+    if(warnings.length>0){
+      warn.style.display='block';
+      warn.innerHTML=warnings.map(function(w){
+        return '<div style="background:'+(w.lvl==='🚨'?'#FFF0F0':'#FFFBEB')+';border-left:4px solid '+(w.lvl==='🚨'?'#E24B4A':'#F59E0B')+';border-radius:0 10px 10px 0;padding:10px 14px;font-size:12px;font-weight:800;color:#1D2B55;margin-bottom:8px">'+w.lvl+' '+w.msg+'<br><span style="font-weight:700;color:#6B7280;font-size:11px">Check Supabase Dashboard → <a href="https://supabase.com/dashboard/project/ahtyjglufrvtfnhkooux" target="_blank" style="color:#D4537E">open dashboard</a></span></div>';
+      }).join('');
+    }else{
+      warn.style.display='block';
+      warn.innerHTML='<div style="background:#F0FFF4;border-left:4px solid #10B981;border-radius:0 10px 10px 0;padding:10px 14px;font-size:12px;font-weight:800;color:#1D2B55">✅ All usage within safe limits. No action needed.</div>';
+    }
+  }
+}
+
 async function adminDeleteUser(u){
   if(!confirm('Delete @'+u+'? This removes all their data and cannot be undone.'))return;
   if(prompt('Type DELETE to confirm:')!=='DELETE'){alert('Cancelled.');return;}
