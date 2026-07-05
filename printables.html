@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Printable Worksheets for Kids — WordWise PH Shop</title>
+<meta name="description" content="Personalized printable PDFs for Filipino kids — name tracers, alphabet, numbers, sight words, sentence writing and more. Pay via GCash, delivered same day!"/>
+<link rel="icon" type="image/png" href="favicon.png"/>
+<meta property="og:title" content="WordWise PH Printables — Learning PDFs for Kids"/>
+<meta property="og:description" content="Personalized tracing sheets, alphabet packs, sight words and more. Pay via GCash!"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--navy:#1D2B55;--pink:#D4537E;--pink2:#c0456e;--gold:#FAC775;--light:#F4F6FF;--muted:#6B7280}
+html{scroll-behavior:smooth}
+body{font-family:"Nunito",sans-serif;background:#fff;color:var(--navy);overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(29,43,85,0.96);backdrop-filter:blur(12px);height:64px;display:flex;align-items:center;padding:0 clamp(16px,5vw,48px);justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.08)}
+.nav-logo{font-size:clamp(18px,4vw,22px);font-weight:900;color:#fff}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-link{font-size:13px;font-weight:800;padding:8px 14px;border-radius:99px;color:rgba(255,255,255,0.8);border:none;background:none;cursor:pointer;font-family:Nunito,sans-serif}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,0.1)}
+.nav-cta{background:var(--pink);color:#fff;padding:9px 20px;border-radius:99px;font-size:13px;font-weight:900;font-family:Nunito,sans-serif;border:none;cursor:pointer}
+.ham{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px}
+.ham span{width:22px;height:2.5px;background:#fff;border-radius:2px}
+.mob-menu{display:none;position:fixed;top:64px;left:0;right:0;background:var(--navy);padding:16px;z-index:199;flex-direction:column;gap:8px}
+.mob-menu.open{display:flex}
+.mob-link{font-size:14px;font-weight:800;padding:12px 16px;border-radius:12px;color:rgba(255,255,255,0.85);cursor:pointer}
+.hero{background:linear-gradient(135deg,#0F1A3E,#1D2B55,#2B1F5E);padding:100px clamp(16px,5vw,48px) 56px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 70% 30%,rgba(212,83,126,0.18),transparent 70%)}
+.hero-tag{display:inline-block;font-size:12px;font-weight:900;padding:5px 16px;border-radius:99px;background:rgba(250,199,117,0.15);border:1.5px solid rgba(250,199,117,0.35);color:var(--gold);margin-bottom:14px;position:relative}
+.hero h1{font-size:clamp(26px,6vw,44px);font-weight:900;color:#fff;position:relative;line-height:1.2;margin-bottom:10px}
+.hero h1 span{color:var(--gold)}
+.hero p{font-size:clamp(13px,3vw,16px);color:rgba(255,255,255,0.65);max-width:560px;margin:0 auto 20px;position:relative}
+.hero-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;position:relative}
+.hbadge{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:12px;font-weight:800;padding:6px 14px;border-radius:99px}
+main{max-width:1000px;margin:0 auto;padding:clamp(28px,5vw,48px) clamp(16px,4vw,24px)}
+.section-title{font-size:clamp(20px,4vw,28px);font-weight:900;margin-bottom:6px}
+.section-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:40px}
+.pcard{background:#fff;border:1.5px solid #EAEDF5;border-radius:20px;padding:20px;display:flex;flex-direction:column;transition:all 0.2s;position:relative;overflow:hidden}
+.pcard:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(29,43,85,0.12);border-color:var(--pink)}
+.pcard-badge{position:absolute;top:12px;right:12px;font-size:10px;font-weight:900;padding:3px 10px;border-radius:99px}
+.badge-best{background:#FFF0F7;color:var(--pink)}
+.badge-new{background:#F0FFF4;color:#10B981}
+.badge-pop{background:#FFF8E7;color:#D97706}
+.pcard-emoji{font-size:40px;margin-bottom:10px}
+.pcard-name{font-size:15px;font-weight:900;margin-bottom:4px;padding-right:50px}
+.pcard-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px;flex:1}
+.pcard-feats{font-size:11.5px;color:#4B5563;line-height:1.9;margin-bottom:12px}
+.pcard-price{font-size:24px;font-weight:900;color:var(--pink);margin-bottom:12px}
+.pcard-price small{font-size:11px;color:#9CA3AF;font-weight:700}
+.pbtn{width:100%;padding:11px;border-radius:99px;background:var(--pink);border:none;color:#fff;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;transition:all 0.2s}
+.pbtn:hover{background:var(--pink2);transform:scale(1.02)}
+.bundle-card{background:linear-gradient(135deg,#1D2B55,#2D3F7A);border-radius:20px;padding:clamp(20px,4vw,32px);margin-bottom:40px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center}
+.bundle-card h2{color:#fff;font-size:clamp(18px,4vw,26px);font-weight:900;margin-bottom:6px}
+.bundle-card p{color:rgba(255,255,255,0.7);font-size:13px;line-height:1.6}
+.bundle-feats{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.bfeat{background:rgba(255,255,255,0.1);color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:99px}
+.bundle-price{text-align:center;flex-shrink:0}
+.bundle-price .old{font-size:13px;color:rgba(255,255,255,0.5);text-decoration:line-through}
+.bundle-price .new{font-size:clamp(28px,6vw,42px);font-weight:900;color:var(--gold)}
+.bundle-price small{font-size:11px;color:rgba(255,255,255,0.6);display:block}
+.bundle-price .pbtn{background:var(--gold);color:var(--navy);margin-top:10px;min-width:140px}
+.bundle-price .pbtn:hover{background:#f0bb60}
+.how{background:var(--light);border-radius:20px;padding:clamp(20px,4vw,32px);margin-bottom:40px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-top:18px}
+.step{background:#fff;border-radius:14px;padding:16px;text-align:center}
+.stepnum{width:32px;height:32px;border-radius:50%;background:var(--pink);color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+.step b{display:block;font-size:13px;margin-bottom:4px}
+.step span{font-size:11.5px;color:var(--muted);line-height:1.6}
+.note{background:#FFF8E7;border-left:4px solid var(--gold);border-radius:0 12px 12px 0;padding:14px 16px;font-size:13px;color:#4B5563;line-height:1.7;margin-bottom:28px}
+footer{background:var(--navy);padding:28px;text-align:center;margin-top:44px}
+footer a{color:rgba(255,255,255,0.55);font-size:13px;font-weight:700;margin:0 8px}
+footer a:hover{color:#fff}
+.copy{font-size:12px;color:rgba(255,255,255,0.3);margin-top:12px}
+@media(max-width:768px){.nav-links{display:none}.ham{display:flex}.bundle-card{grid-template-columns:1fr}.bundle-price{text-align:left}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">WordWise<span>PH</span></a>
+  <div class="nav-links">
+    <button class="nav-link" onclick="location.href='index.html#games'">&#x1F3AE; Games</button>
+    <button class="nav-link" onclick="location.href='blog.html'">&#x1F4DA; Blog</button>
+    <button class="nav-link" onclick="location.href='about.html'">About</button>
+    <button class="nav-cta" onclick="location.href='app.html'">Play Free &#x2192;</button>
+  </div>
+  <div class="ham" onclick="toggleMob()" id="ham"><span></span><span></span><span></span></div>
+</nav>
+<div class="mob-menu" id="mob-menu">
+  <div class="mob-link" onclick="location.href='index.html'">&#x1F3E0; Home</div>
+  <div class="mob-link" onclick="location.href='app.html'">&#x1F3AE; Games</div>
+  <div class="mob-link" onclick="location.href='blog.html'">&#x1F4DA; Blog</div>
+  <div class="mob-link" onclick="location.href='about.html'">&#x2139;&#xFE0F; About</div>
+  <div class="mob-link" style="background:var(--pink);color:#fff;border-radius:12px;text-align:center" onclick="location.href='app.html'">&#x1F680; Play Free</div>
+</div>
+
+<div class="hero">
+  <div class="hero-tag">&#x1F5A8;&#xFE0F; Printable PDFs for Kids</div>
+  <h1>Learning they can <span>hold in their hands</span> &#x270F;&#xFE0F;</h1>
+  <p>Personalized worksheets made for Filipino kids — print at home or any computer shop. Pay via GCash, delivered same day!</p>
+  <div class="hero-badges">
+    <span class="hbadge">&#x2705; Instant digital delivery</span>
+    <span class="hbadge">&#x1F4F1; Pay via GCash</span>
+    <span class="hbadge">&#x1F4C4; Print unlimited times</span>
+    <span class="hbadge">&#x1F1F5;&#x1F1ED; Made for Filipino kids</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- BUNDLE -->
+  <div class="bundle-card">
+    <div>
+      <div style="font-size:11px;font-weight:900;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">&#x1F451; Best Value</div>
+      <h2>Ultimate Learning Bundle</h2>
+      <p>Everything your child needs from pre-writing to early reading — all 8 packs in one. Perfect for Kinder to Grade 2.</p>
+      <div class="bundle-feats">
+        <span class="bfeat">&#x270F;&#xFE0F; Name Tracer</span>
+        <span class="bfeat">&#x1F524; Alphabet A-Z</span>
+        <span class="bfeat">&#x1F522; Numbers 1-20</span>
+        <span class="bfeat">&#x1F440; Sight Words</span>
+        <span class="bfeat">&#x1F4DD; Sentence Writing</span>
+        <span class="bfeat">&#x1F3A8; Coloring Pages</span>
+        <span class="bfeat">&#x1F4C5; Days &amp; Months</span>
+        <span class="bfeat">&#x1F916; Phonics Blends</span>
+      </div>
+    </div>
+    <div class="bundle-price">
+      <div class="old">&#x20B1;592</div>
+      <div class="new">&#x20B1;299</div>
+      <small>one-time · 100+ pages</small>
+      <button class="pbtn" onclick="orderNow('Ultimate Learning Bundle','299')">Get the Bundle</button>
+    </div>
+  </div>
+
+  <!-- WRITING PACK -->
+  <div class="section-title">&#x270F;&#xFE0F; Writing & Tracing</div>
+  <div class="section-sub">Build handwriting habits early — the foundation of all learning</div>
+  <div class="grid">
+    <div class="pcard">
+      <span class="pcard-badge badge-best">&#x2B50; Best Seller</span>
+      <div class="pcard-emoji">&#x270F;&#xFE0F;</div>
+      <div class="pcard-name">My Name Tracer</div>
+      <div class="pcard-desc">Personalized with YOUR child's name — dotted letters, arrows, and practice lines on every page.</div>
+      <div class="pcard-feats">&#x2705; Child's name on every page<br>&#x2705; 10 pages: trace &#x2192; copy &#x2192; write alone<br>&#x2705; Uppercase + lowercase<br>&#x2705; Bonus coloring page</div>
+      <div class="pcard-price">&#x20B1;49 <small>one-time</small></div>
+      <button class="pbtn" onclick="orderNow('My Name Tracer','49')">Order Now</button>
+    </div>
+    <div class="pcard">
+      <span class="pcard-badge badge-new">&#x1F331; New</span>
+      <div class="pcard-emoji">&#x1F524;</div>
+      <div class="pcard-name">Alphabet Mastery Pack (A-Z)</div>
+      <div class="pcard-desc">A-Z tracing worksheets with pictures, beginning sounds, and practice lines.</div>
+      <div class="pcard-feats">&#x2705; 26 letter pages (Aa-Zz)<br>&#x2705; Picture + word for each letter<br>&#x2705; Big + small letter tracing<br>&#x2705; Review every 5 letters</div>
+      <div class="pcard-price">&#x20B1;79 <small>one-time</small></div>
+      <button class="pbtn" onclick="orderNow('Alphabet Mastery Pack','79')">Order Now</button>
+    </div>
+    <div class="pcard">
+      <div class="pcard-emoji">&#x1F4DD;</div>
+      <div class="pcard-name">Sentence Writing Starter</div>
+      <div class="pcard-desc">Simple 3-5 word sentences with illustration boxes — builds writing confidence step by step.</div>
+      <div class="pcard-feats">&#x2705; 20 guided sentence pages<br>&#x2705; Draw-and-write format<br>&#x2705; Present tense focus<br>&#x2705; Word bank on each page</div>
+      <div class="pcard-price">&#x20B1;69 <small>one-time</small></div>
+      <button class="pbtn" onclick="orderNow('Sentence Writing Starter','69')">Order Now</button>
+    </div>
+    <div class="pcard">
+      <span class="pcard-badge badge-pop">&#x1F525; Popular</span>
+      <div class="pcard-emoji">&#x1F4C8;</div>
+      <div class="pcard-name">Pattern Tracing for Beginners</div>
+      <div class="pcard-desc">Lines, curves, zigzags and shapes — pre-writing exercises that build pencil control before letters.</div>
+      <div class="pcard-feats">&#x2705; 15 pages of guided patterns<br>&#x2705; Progressive difficulty<br>&#x2705; Straight &#x2192; curved &#x2192; mixed<br>&#x2705; Fun animal themes</div>
+      <div class="pcard-price">&#x20B1;49 <small>one-time</small></div>
+      <button class="pbtn" onclick="orderNow('Pattern Tracing for Beginners','49')">Order Now</button>
+    </div>
+  </div>
+
+  <!-- NUMBERS & MATH -->
+  <div class="section-title">&#x1F522; Numbers &amp; Early Math</div>
+  <div class="section-sub">Make numbers fun and concrete before formal math begins</div>
+  <div class="grid">
+    <div class="pcard">
+      <div class="pcard-emoji">&#x1F522;</div>
+      <div class="pcard-name">Numbers &amp; Counting Pack (1-20)</div>
+      <div class="pcard-desc">Trace numbers, count objects, and learn number words from one to twenty.</div>
+      <div class="pcard-feats">&#x2705; 20 number pages<br>&#x2705; Count-and-circle activities<br>&#x2705; Number words (one, two...)<br>&#x2705; Dot-to-dot bonus pages</div>
+      <div class="pcard-price">&#x20B1;79 <small>one-time</small></div>
+      <button class="pbtn" onclick="orderNow('Numbers and Counting Pack','79')">Order Now</button>
+    </div>
+    <div class="pcard">
+      <span class="pcard-badge badge-new">&#x1F331; New</span>
+      <div class="pcard-emoji">&#x2795;</div>
+      <div class="pcard-name">Addition &amp; Subtraction Drills</div>
+      <div class="pcard-desc">Simple +/- worksheets with pictures and number lines. Grade 1-2 level, no calculators needed!</div>
+      <div class="pcard-feats">&#x2705; Addition 1-10, then 1-20<br>&#x2705; Subtraction with visuals<br>&#x2705; Number line reference<br>&#x2705; Mixed review pages</div>
+      <div class="pcard-price">&#x20B1;69 <small>one-time</small></div>
+      <button class="pbtn" onclick="orderNow('Addition and Subtraction Drills','69')">Order Now</button>
+    </div>
+    <div class="pcard">
+      <div class="pcard-emoji">&#x1F4CF;</div>
+      <div class="pcard-name">Shapes &amp; Patterns</div>
+      <div class="pcard-desc">Circle, square, triangle, diamond — trace, color, and identify shapes in the world around them.</div>
+      <div class="pcard-feats">&#x2705; 12 basic shapes<br>&#x2705; Real-world examples<br>&#x2705; Sorting activities<br>&#x2705; Pattern completion</div>
+      <div class="pcard-price">&#x20B1;49 <small>one-time</small></div>
+      <button class="pbtn" onclick="orderNow('Shapes and Patterns','49')">Order Now</button>
+    </div>
+  </div>
+
+  <!-- READING & ENGLISH -->
+  <div class="section-title">&#x1F4D6; Reading &amp; English</div>
+  <div class="section-sub">Build vocabulary, phonics, and reading confidence from day one</div>
+  <div class="grid">
+    <div class="pcard">
+      <span class="pcard-badge badge-pop">&#x1F525; Popular</span>
+      <div class="pcard-emoji">&#x1F440;</div>
+      <div class="pcard-name">Sight Words Pack (Dolch Pre-K to Grade 1)</div>
+      <div class="pcard-desc">The 100 most common English words — trace, read, and use in sentences. Accelerates reading fluency fast.</div>
+      <div class="pcard-feats">&#x2705; 100 sight words<br>&#x2705; Trace + write + use<br>&#x2705; Flash card format<br>&#x2705; Progress tracker page</div>
+      <div class="pcard-price">&#x20B1;89 <small>one-time</small></div>
+      <button class="pbtn" onclick="orderNow('Sight Words Pack','89')">Order Now</button>
+    </div>
+    <div class="pcard">
+      <span class="pcard-badge badge-new">&#x1F331; New</span>
+      <div class="pcard-emoji">&#x1F916;</div>
+      <div class="pcard-name">Phonics Blends &amp; Digraphs</div>
+      <div class="pcard-desc">CH, SH, TH, BL, CR and more — common English sound combinations Filipino kids struggle with most.</div>
+      <div class="pcard-feats">&#x2705; 20 blend/digraph pairs<br>&#x2705; Word lists + pictures<br>&#x2705; Fill-in exercises<br>&#x2705; Read-aloud sentences</div>
+      <div class="pcard-price">&#x20B1;79 <small>one-time</small></div>
+      <button class="pbtn" onclick="orderNow('Phonics Blends and Digraphs','79')">Order Now</button>
+    </div>
+    <div class="pcard">
+      <div class="pcard-emoji">&#x1F4AC;</div>
+      <div class="pcard-name">Conversation Starters for Kids</div>
+      <div class="pcard-desc">Simple English question-and-answer prompts to practice speaking at home with parents.</div>
+      <div class="pcard-feats">&#x2705; 30 daily conversation cards<br>&#x2705; Parent + child format<br>&#x2705; Cut-out card version<br>&#x2705; Topics: family, food, school</div>
+      <div class="pcard-price">&#x20B1;59 <small>one-time</small></div>
+      <button class="pbtn" onclick="orderNow('Conversation Starters for Kids','59')">Order Now</button>
+    </div>
+    <div class="pcard">
+      <div class="pcard-emoji">&#x1F6E0;&#xFE0F;</div>
+      <div class="pcard-name">Grammar Fix-It Cards</div>
+      <div class="pcard-desc">Common Filipino grammar mistakes turned into fun fix-it exercises. Perfect for Grades 3-5.</div>
+      <div class="pcard-feats">&#x2705; 10 most common errors<br>&#x2705; He/she, verb tenses, articles<br>&#x2705; Spot-the-error format<br>&#x2705; Answer key included</div>
+      <div class="pcard-price">&#x20B1;69 <small>one-time</small></div>
+      <button class="pbtn" onclick="orderNow('Grammar Fix-It Cards','69')">Order Now</button>
+    </div>
+  </div>
+
+  <!-- CALENDAR & LIFE SKILLS -->
+  <div class="section-title">&#x1F4C5; Life Skills &amp; Awareness</div>
+  <div class="section-sub">Real-world knowledge every child needs — practical and fun</div>
+  <div class="grid">
+    <div class="pcard">
+      <div class="pcard-emoji">&#x1F4C5;</div>
+      <div class="pcard-name">Days, Months &amp; Seasons</div>
+      <div class="pcard-desc">Learn the days of the week, months of the year, and Philippine seasons in English.</div>
+      <div class="pcard-feats">&#x2705; Days of the week tracing<br>&#x2705; Months + abbreviations<br>&#x2705; Calendar fill-in activity<br>&#x2705; Seasons in the Philippines</div>
+      <div class="pcard-price">&#x20B1;59 <small>one-time</small></div>
+      <button class="pbtn" onclick="orderNow('Days Months and Seasons','59')">Order Now</button>
+    </div>
+    <div class="pcard">
+      <span class="pcard-badge badge-new">&#x1F331; New</span>
+      <div class="pcard-emoji">&#x1F308;</div>
+      <div class="pcard-name">Colors, Sizes &amp; Opposites</div>
+      <div class="pcard-desc">Big/small, hot/cold, happy/sad — essential adjectives and opposites with colorful illustrations.</div>
+      <div class="pcard-feats">&#x2705; 12 color pages<br>&#x2705; 20 opposite pairs<br>&#x2705; Size comparison activities<br>&#x2705; Color-by-word pages</div>
+      <div class="pcard-price">&#x20B1;59 <small>one-time</small></div>
+      <button class="pbtn" onclick="orderNow('Colors Sizes and Opposites','59')">Order Now</button>
+    </div>
+    <div class="pcard">
+      <div class="pcard-emoji">&#x1F9D1;&#x200D;&#x1F4BC;</div>
+      <div class="pcard-name">Community Helpers Workbook</div>
+      <div class="pcard-desc">Doctor, teacher, farmer, driver — learn jobs and community roles in English with activities.</div>
+      <div class="pcard-feats">&#x2705; 15 community helpers<br>&#x2705; Trace the job name<br>&#x2705; Match + draw activities<br>&#x2705; "When I grow up..." page</div>
+      <div class="pcard-price">&#x20B1;69 <small>one-time</small></div>
+      <button class="pbtn" onclick="orderNow('Community Helpers Workbook','69')">Order Now</button>
+    </div>
+    <div class="pcard">
+      <div class="pcard-emoji">&#x1F3A8;</div>
+      <div class="pcard-name">Coloring &amp; Vocabulary Pages</div>
+      <div class="pcard-desc">Beautiful coloring pages with English vocabulary labels — learning disguised as play.</div>
+      <div class="pcard-feats">&#x2705; 20 themed coloring pages<br>&#x2705; Animals, food, transport<br>&#x2705; Label-and-color format<br>&#x2705; Bonus word search</div>
+      <div class="pcard-price">&#x20B1;49 <small>one-time</small></div>
+      <button class="pbtn" onclick="orderNow('Coloring and Vocabulary Pages','49')">Order Now</button>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how">
+    <div style="font-size:clamp(18px,4vw,24px);font-weight:900;margin-bottom:6px;text-align:center">How it works</div>
+    <div style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:18px">From order to printed in minutes</div>
+    <div class="steps">
+      <div class="step"><div class="stepnum">1</div><b>Order</b><span>Tap any product and send us your child's name (for name tracer) via Telegram</span></div>
+      <div class="step"><div class="stepnum">2</div><b>Pay via GCash</b><span>Send to 0931-762-5402 · WordWise PH / Darcant</span></div>
+      <div class="step"><div class="stepnum">3</div><b>We prepare it</b><span>Your PDF is ready same day, usually within 1-2 hours</span></div>
+      <div class="step"><div class="stepnum">4</div><b>Download &amp; Print</b><span>Delivered via Messenger or email · Print as many times as you want!</span></div>
+    </div>
+  </div>
+
+  <div class="note">&#x1F4A1; <b>No printer at home?</b> Bring the PDF file to any computer shop or printing center — it costs around &#x20B1;2-5 per page. One full pack printed = less than &#x20B1;100. And you can reprint any page your child wants to practice again!</div>
+
+</main>
+
+<footer>
+  <div>
+    <a href="index.html">Home</a>
+    <a href="app.html">Games</a>
+    <a href="blog.html">Blog</a>
+    <a href="about.html">About</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+  </div>
+  <div class="copy">&#169; 2026 WordWise PH &middot; Made with &#x2764;&#xFE0F; for every child</div>
+</footer>
+
+<script>
+function toggleMob(){document.getElementById("mob-menu").classList.toggle("open")}
+document.addEventListener("click",function(e){var m=document.getElementById("mob-menu"),h=document.getElementById("ham");if(m&&h&&!m.contains(e.target)&&!h.contains(e.target))m.classList.remove("open");});
+function orderNow(product, price){
+  var msg="Hi! I want to order: "+product+" (&#x20B1;"+price+"). My child's name is: ___";
+  var url="https://t.me/wordwiseph_support_bot?start=order_"+encodeURIComponent(product.toLowerCase().replace(/\s+/g,"_"));
+  if(confirm("Order "+product+" for &#x20B1;"+price+"?\n\nYou will be taken to our Telegram to complete the order.\n\n(Your order details will be copied to clipboard)")){
+    try{navigator.clipboard.writeText("Hi! I want to order: "+product+" (&#x20B1;"+price+"). My child's name is: ___");}catch(e){}
+    window.open(url,"_blank");
+  }
+}
+</script>
+</body>
+</html>
