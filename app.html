@@ -1113,6 +1113,7 @@ function stopAllGames(){
 }
 
 function navTo(s){
+  try{if(liveRefreshTimer)clearInterval(liveRefreshTimer);}catch(e){}
   if(s==='login' && document.getElementById('login-modal')){openLoginModal();return;}
   if(s==='register' && document.getElementById('register-modal')){closeLoginModal();openRegisterModal();return;}
   stopAllGames();
@@ -2003,11 +2004,80 @@ async function addChild(){
 function adminTab(sec,el){
   document.querySelectorAll('.atab').forEach(t=>t.classList.remove('on'));
   if(el)el.classList.add('on');
-  ['ov','us','sc','ac','pay'].forEach(x=>{const d=document.getElementById('a-'+x);if(d)d.style.display='none';});
+  ['ov','live','us','sc','ac','pay'].forEach(x=>{const d=document.getElementById('a-'+x);if(d)d.style.display='none';});
   const p=document.getElementById('a-'+sec);if(p)p.style.display='block';
-  loadAdmin(sec);
+  if(sec==='live')loadLiveMonitor();
+  else loadAdmin(sec);
 }
-async function loadAdmin(sec){
+async // ── LIVE MONITOR ──
+var liveRefreshTimer=null;
+async function loadLiveMonitor(){
+  await refreshLive();
+  clearInterval(liveRefreshTimer);
+  liveRefreshTimer=setInterval(refreshLive,30000);
+}
+async function refreshLive(){
+  const upd=document.getElementById('live-updated');
+  if(upd)upd.textContent='Refreshing...';
+  showLoader('Loading...');
+  const res=await api({action:'adminData'});
+  hideLoader();
+  if(!res.success){if(upd)upd.textContent='Error';return;}
+  const{users=[],scores=[],activity=[]}=res;
+  const now=Date.now();
+  const thirtyMin=30*60*1000;
+  const recentUsers=new Set();
+  activity.forEach(a=>{
+    try{
+      const t=new Date(a.t);
+      if(now-t.getTime()<thirtyMin&&a.m&&a.m.includes(' – ')){
+        const u=a.m.split(' – ')[0].trim();
+        if(u&&u!=='Guest')recentUsers.add(u);
+      }
+    }catch(e){}
+  });
+  const na=users.filter(u=>u.role!=='admin');
+  const total=na.length;
+  const liveCount=recentUsers.size;
+  const paidCount=na.filter(u=>['trial','weekly','basic','premium'].includes(u.subscription)).length;
+  const todayStr=new Date().toISOString().slice(0,10);
+  const joinedToday=na.filter(u=>u.joined&&u.joined.slice(0,10)===todayStr).length;
+  const expireSoon=na.filter(u=>{
+    if(!u.subExpiry)return false;
+    const d=Math.ceil((new Date(u.subExpiry)-new Date())/86400000);
+    return d>=0&&d<=3;
+  }).length;
+  const ls=document.getElementById('live-stats');
+  if(ls)ls.innerHTML=`
+    <div class="scard" style="border-top:3px solid #10B981"><div class="snum" style="color:#10B981">${liveCount}</div><div class="slbll">🟢 Live Now</div></div>
+    <div class="scard" style="border-top:3px solid #1D2B55"><div class="snum">${total}</div><div class="slbll">Total Registered</div></div>
+    <div class="scard" style="border-top:3px solid #D4537E"><div class="snum">${paidCount}</div><div class="slbll">Paid Users</div></div>
+    <div class="scard" style="border-top:3px solid #FAC775"><div class="snum" style="color:${joinedToday>0?'#D4537E':'inherit'}">${joinedToday}</div><div class="slbll">Joined Today</div></div>
+    <div class="scard" style="border-top:3px solid #F59E0B"><div class="snum" style="color:${expireSoon>0?'#E24B4A':'inherit'}">${expireSoon}</div><div class="slbll">⚠️ Expiring Soon</div></div>`;
+  const lu=document.getElementById('live-users');
+  if(lu){
+    if(recentUsers.size===0){
+      lu.innerHTML='<div style="padding:16px;text-align:center;color:#9CA3AF;font-weight:700">No active sessions in the last 30 minutes</div>';
+    }else{
+      lu.innerHTML=[...recentUsers].map(u=>{
+        const usr=na.find(x=>x.username===u)||{};
+        const plan=usr.subscription||'free';
+        const pc={trial:'#F59E0B',weekly:'#10B981',basic:'#D4537E',premium:'#7C3AED',free:'#9CA3AF'}[plan]||'#9CA3AF';
+        return '<div class="arow"><div class="adot" style="background:#10B981"></div><div class="atxt"><b>'+u+'</b> <span style="font-size:11px;color:#9CA3AF">'+( usr.type||'')+'</span></div><div class="atime" style="color:'+pc+';font-weight:900;font-size:11px">'+plan.toUpperCase()+'</div></div>';
+      }).join('');
+    }
+  }
+  const plans=['free','trial','weekly','basic','premium'];
+  const pc2={'free':'#9CA3AF','trial':'#F59E0B','weekly':'#10B981','basic':'#D4537E','premium':'#7C3AED'};
+  const lp=document.getElementById('live-plans');
+  if(lp)lp.innerHTML=plans.map(p=>{
+    const cnt=na.filter(u=>(u.subscription||'free')===p).length;
+    return '<div class="scard" style="border-top:3px solid '+pc2[p]+'"><div class="snum" style="color:'+pc2[p]+'">'+cnt+'</div><div class="slbll">'+p.charAt(0).toUpperCase()+p.slice(1)+'</div></div>';
+  }).join('');
+  if(upd)upd.textContent='Updated: '+new Date().toLocaleTimeString();
+}
+
+function loadAdmin(sec){
   if(!CU||CU.role!=='admin'){navTo('start');return;}
   if(sec==='pay'){loadAdminPayments();return;}
   showLoader('Loading...');
