@@ -1539,11 +1539,8 @@ function buildQuiz(){
     const long=q.choices.some(c=>c.length>16);
     const qt=q.blank?q.q.replace('___','<span class="qblnk">___</span>'):q.q;
     const tag=`<span class="dtag ${diff}">${diff}</span>`;
-    const btns=sh.map(c=>{
-      const cs=c.replace(/'/g,"\'").replace(/"/g,'&quot;');
-      const cr=q.correct.replace(/'/g,"\'").replace(/"/g,'&quot;');
-      return `<button class="cbtn" onclick="ansQ(${i},this,'${cs}','${cr}')">${c}</button>`;
-    }).join('');
+    window._qch=window._qch||{};window._qch[i]={sh:sh,correct:q.correct};
+    const btns=sh.map((c,j)=>`<button class="cbtn" onclick="ansQA(${i},this,${j})">${c}</button>`).join('');
     con.innerHTML+=`<div class="qcard" id="qc${i}" style="${i>0?'opacity:0.4;pointer-events:none':''}">
       <div class="qhdr"><div class="qn">${i+1}</div><div class="qtxt">${qt}${tag}</div></div>
       <div class="choices ${long?'c1':''}" id="ch${i}">${btns}</div>
@@ -1590,6 +1587,7 @@ function autoAns(){
   if(answered<(QL[diff]||5)){cQ++;unlockN();startTimer();}
   else{document.getElementById('sbtn').disabled=false;setTimeout(function(){showResult();},1200);}
 }
+function ansQA(q,btn,j){var d=(window._qch||{})[q];if(!d)return;ansQ(q,btn,d.sh[j],d.correct);}
 function ansQ(q,btn,chosen,correct){
   const btns=document.getElementById('ch'+q)?.querySelectorAll('.cbtn');
   if(!btns||btns[0]?.disabled)return;
@@ -2634,11 +2632,8 @@ function buildSpell(){
 
   spellQs.forEach((q,i)=>{
     const sh=shuf(q.choices);
-    const btns=sh.map(c=>{
-      const cs=c.replace(/'/g,"\'");
-      const cr=q.correct.replace(/'/g,"\'");
-      return `<button class="spell-btn" onclick="ansSpell(${i},this,'${cs}','${cr}')">${c}</button>`;
-    }).join('');
+    window._sch=window._sch||{};window._sch[i]={sh:sh,correct:q.correct};
+    const btns=sh.map((c,j)=>`<button class="spell-btn" onclick="ansSpellA(${i},this,${j})">${c}</button>`).join('');
     con.innerHTML+=`<div class="qcard" id="sqc${i}" style="${i>0?'opacity:0.4;pointer-events:none':''}">
       <div style="text-align:center;margin-bottom:6px"><span class="spell-category">${q.category}</span></div>
       <div class="spell-definition">${q.hint}</div>
@@ -2695,6 +2690,7 @@ function autoAnsSpell(){
   else{const sb=document.getElementById('spell-sbtn');if(sb)sb.disabled=false;setTimeout(showSpellResult,1200);}
 }
 
+function ansSpellA(q,btn,j){var d=(window._sch||{})[q];if(!d)return;ansSpell(q,btn,d.sh[j],d.correct);}
 function ansSpell(q,btn,chosen,correct){
   const btns=document.getElementById('sch'+q)?.querySelectorAll('.spell-btn');
   if(!btns||btns[0]?.disabled)return;
