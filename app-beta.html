@@ -1178,8 +1178,8 @@ async function api(data){
     }
 
     if(a==='submitPayment'){
-      const {error}=await SB.from('payments').insert({username:data.username,plan:data.plan,amount:Number(data.price)||0,gcash_ref:data.reference||'',status:'pending'});
-      if(error)return {success:false,error:'Could not submit. Try again.'};
+      const {error}=await SB.from('payments').insert({username:data.username,name:data.name||data.username,plan:data.plan,amount:Number(data.price)||0,gcash_ref:data.reference||'',status:'pending'});
+      if(error){console.error('Payment insert error:',error);return {success:false,error:'Could not submit: '+(error.message||error.code||'Check Supabase RLS policies')};}
       _logAct(data.username+' \u2013 submitted payment for '+data.plan);
       _tg({type:'new_payment',username:data.username,plan:data.plan,amount:data.price||data.amount||0,reference:data.reference||''});
       return {success:true,message:'Payment submitted! We will verify and activate your plan shortly.'};
@@ -1240,7 +1240,7 @@ async function api(data){
     return {success:false,error:'Unknown action: '+a};
   }catch(e){
     console.error('Supabase error:',e);
-    return {success:false,error:'Connection error. Check your internet.'};
+    console.error('Supabase api() error:',e); return {success:false,error:'Connection error: '+(e.message||String(e))};
   }
 }
 
