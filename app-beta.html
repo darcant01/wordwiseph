@@ -1593,7 +1593,7 @@ async function doReg(){
 }
 
 async function doLogout(){
-  if(CU)api({action:'logActivity',message:CU.name+' logged out'});
+  stopPlanPoll();if(CU)api({action:'logActivity',message:CU.name+' logged out'});
   CU=null; round=1; buildHdr(); updateDiffCards(); navTo('start');
 }
 
