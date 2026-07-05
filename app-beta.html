@@ -1998,10 +1998,10 @@ async function loadProfile(){
 
       ${isActive&&!subExpiry?`
         <div style="background:#EEEDFE;border:1.5px solid #7F77DD;border-radius:12px;padding:14px;margin-top:4px">
-          <div style="font-size:14px;font-weight:800;color:#3C3489;margin-bottom:6px">📅 Expiry date not set yet</div>
+          <div style="font-size:14px;font-weight:800;color:#3C3489;margin-bottom:6px">📅 Expiry date loading...</div>
           <div style="font-size:13px;color:#534AB7;font-weight:700;line-height:1.6">
-            Your plan is active! The admin needs to add your expiry date in the Google Sheet.<br>
-            Contact admin at <strong>darcant01@gmail.com</strong> to set your expiry date.
+            Your plan is active! Expiry info will appear here shortly.<br>
+            Questions? Message us on <strong>Telegram: @wordwiseph_support_bot</strong>
           </div>
         </div>
       `:''}
@@ -2314,9 +2314,10 @@ async function handlePayment(username,plan,reference,approve){
       // Calculate 30-day expiry and show it to admin
       const start = new Date();
       const expiry = new Date();
-      expiry.setDate(expiry.getDate()+30);
+      const planDaysMap={trial:1,weekly:7,basic:30,premium:30};
+      expiry.setDate(expiry.getDate()+(planDaysMap[plan]||30));
       const fmt = d => d.toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
-      alert('✅ Plan activated for @'+username+'!\n\n📅 Subscription: '+plan.toUpperCase()+'\n🗓️ Start: '+fmt(start)+'\n⏰ Expires: '+fmt(expiry)+'\n\nThe expiry date has been saved in Google Sheets.');
+      alert('✅ Plan activated for @'+username+'!\n\n📅 Plan: '+plan.charAt(0).toUpperCase()+plan.slice(1)+'\n🗓️ Starts: '+fmt(start)+'\n⏰ Expires: '+fmt(expiry)+'\n\nUser can now access all '+plan+' features. ✨');
     } else {
       alert('❌ Payment rejected for @'+username+'.');
     }
