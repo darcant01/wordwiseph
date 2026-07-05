@@ -1075,6 +1075,18 @@ async function _ann(){
   }catch(e){ return null; }
 }
 async function _logAct(m){ try{ await SB.from('activity').insert({m:m}); }catch(e){} }
+
+// SHA-256 password hashing using Web Crypto API (built into all modern browsers)
+async function hashPassword(pass){
+  try{
+    const enc=new TextEncoder();
+    const buf=await crypto.subtle.digest('SHA-256',enc.encode(pass));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }catch(e){
+    // Fallback for very old browsers — still better than plain text
+    return 'h_'+btoa(pass).replace(/=/g,'');
+  }
+}
 async function _tg(payload){
   try{
     fetch('https://ahtyjglufrvtfnhkooux.supabase.co/functions/v1/telegram_webhook',{
@@ -1094,7 +1106,8 @@ async function api(data){
     const a=data.action;
 
     if(a==='login'){
-      const {data:rows,error}=await SB.from('users').select('*').eq('username',data.username).eq('password',data.password).limit(1);
+      const loginHash=await hashPassword(data.password);
+      const {data:rows,error}=await SB.from('users').select('*').eq('username',data.username).eq('password',loginHash).limit(1);
       if(error)throw error;
       if(!rows||!rows.length)return {success:false,error:'Wrong username or password!'};
       _logAct(rows[0].username+' \u2013 logged in');
@@ -1104,7 +1117,8 @@ async function api(data){
     if(a==='register'){
       const {data:ex}=await SB.from('users').select('id').eq('username',data.username).limit(1);
       if(ex&&ex.length)return {success:false,error:'Username already taken!'};
-      const {error}=await SB.from('users').insert({name:data.name,username:data.username,password:data.password,type:data.type||'kid'});
+      const hashed=await hashPassword(data.password);
+      const {error}=await SB.from('users').insert({name:data.name,username:data.username,password:hashed,type:data.type||'kid'});
       if(error)return {success:false,error:'Registration failed!'};
       _logAct(data.username+' \u2013 joined WordWise');
       return {success:true};
@@ -1228,7 +1242,8 @@ async function api(data){
     }
 
     if(a==='setAnnouncement'){
-      const {data:adm}=await SB.from('users').select('id').eq('username',data.username).eq('password',data.password).eq('role','admin').limit(1);
+      const annHash=await hashPassword(data.password);
+      const {data:adm}=await SB.from('users').select('id').eq('username',data.username).eq('password',annHash).eq('role','admin').limit(1);
       if(!adm||!adm.length)return {success:false,error:'Not authorized'};
       const text=(data.text||'').trim();
       if(text){
