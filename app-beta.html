@@ -1075,6 +1075,26 @@ async function _ann(){
   }catch(e){ return null; }
 }
 async function _logAct(m){ try{ await SB.from('activity').insert({m:m}); }catch(e){} }
+async function _tg(payload){
+  try{
+    var pE={trial:'\u26a1',weekly:'\ud83d\udcc5',basic:'\u2b50',premium:'\ud83d\udc51'};
+    var e=pE[payload.plan]||'\ud83d\udcb3';
+    var plan=payload.plan?(payload.plan.charAt(0).toUpperCase()+payload.plan.slice(1)):'';
+    var text='';
+    if(payload.type==='new_payment'){
+      text='\ud83d\udd14 New Payment Received!\n\nUser: @'+payload.username+'\n'+e+' Plan: '+plan+'\n\u20b1 Amount: \u20b1'+payload.amount+'\nGCash Ref: '+payload.reference+'\n\nApprove at: https://wordwiseph.com/app-beta.html';
+    }else if(payload.type==='payment_approved'){
+      text='\u2705 Payment Approved!\n\nUser: @'+payload.username+'\nPlan: '+plan+'\n\ud83c\udf89 Account activated!';
+    }else if(payload.type==='payment_rejected'){
+      text='\u274c Payment Rejected\n\nUser: @'+payload.username+'\nPlan: '+plan;
+    }
+    if(!text)return;
+    await fetch('https://api.telegram.org/bot8898030018:AAGbiyas66mmdE-cFI08F_WDkeZCupOIz1g/sendMessage',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:'5559542103',text:text})
+    });
+  }catch(e){ console.warn('TG:',e); }
+}
 const _PLAN_DAYS={trial:1,weekly:7,basic:30,premium:30};
 
 async function api(data){
