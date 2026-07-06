@@ -1207,33 +1207,29 @@ async function api(data){
       return {success:true,purchases:rows||[]};
     }
     if(a==='getSupabaseUsage'){
-      // Count rows in each table to estimate DB usage
-      // Supabase free tier: 500MB DB, 1GB storage, 5GB bandwidth
-      const [u,s,p,a2,sm,pu]=await Promise.all([
-        SB.from('users').select('*',{count:'exact',head:true}),
-        SB.from('scores').select('*',{count:'exact',head:true}),
-        SB.from('payments').select('*',{count:'exact',head:true}),
-        SB.from('activity').select('*',{count:'exact',head:true}),
-        SB.from('support_messages').select('*',{count:'exact',head:true}),
-        SB.from('purchases').select('*',{count:'exact',head:true}).catch(()=>({count:0}))
+      // Count each table independently — don't let one failure break everything
+      async function safeCount(table){
+        try{
+          const {count,error}=await SB.from(table).select('*',{count:'exact',head:true});
+          return error?0:(count||0);
+        }catch(e){return 0;}
+      }
+      const [uc,sc,pc,ac,smc,puc,cc]=await Promise.all([
+        safeCount('users'),
+        safeCount('scores'),
+        safeCount('payments'),
+        safeCount('activity'),
+        safeCount('support_messages'),
+        safeCount('purchases'),
+        safeCount('children'),
       ]);
       return {
         success:true,
         counts:{
-          users:u.count||0,
-          scores:s.count||0,
-          payments:p.count||0,
-          activity:a2.count||0,
-          support:sm.count||0,
-          purchases:pu.count||0
+          users:uc,scores:sc,payments:pc,
+          activity:ac,support:smc,purchases:puc,children:cc
         },
-        limits:{
-          db_mb:500,
-          storage_gb:1,
-          bandwidth_gb:5,
-          edge_invocations:500000,
-          auth_users:50000
-        }
+        limits:{db_mb:500,storage_gb:1,bandwidth_gb:5,edge_invocations:500000,auth_users:50000}
       };
     }
     if(a==='editUser'){
