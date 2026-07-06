@@ -941,6 +941,12 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       </div>
       <div id="sb-usage-cards" class="sgrid" style="margin-bottom:8px"></div>
       <div id="sb-usage-warning" style="display:none;margin-bottom:16px"></div>
+      <div class="sectitle" style="display:flex;align-items:center;justify-content:space-between;margin-top:16px">
+        <span>&#9650; Vercel Free Tier Usage</span>
+        <button onclick="loadVercelUsage()" style="font-family:Nunito,sans-serif;font-size:11px;font-weight:900;padding:5px 12px;border-radius:99px;background:#000;border:none;color:#fff;cursor:pointer">&#8635; Refresh</button>
+      </div>
+      <div id="vc-usage-cards" class="sgrid" style="margin-bottom:8px"></div>
+      <div id="vc-usage-info" style="margin-bottom:16px"></div>
       <div class="sectitle">By Difficulty</div>
       <div class="sgrid" id="adiff"></div>
       <div class="sectitle">Recent Activity</div>
@@ -2388,6 +2394,7 @@ async function loadAdmin(sec){
   const{users=[],scores=[],activity=[]}=res;
   if(sec==='ov'){
     loadSupabaseUsage();
+    loadVercelUsage();
     const tu=users.filter(u=>u.role!=='admin').length;
     const kids=users.filter(u=>u.type==='kid').length;
     const adults=users.filter(u=>u.type==='adult'&&u.role!=='admin').length;
@@ -8492,6 +8499,55 @@ async function downloadPrintable(slug,name,childName){
       alert("Download error: "+(data.error||"Please try again or contact support."));
     }
   }catch(e){hideLoader();alert("Connection error. Please try again.");}
+}
+
+function loadVercelUsage(){
+  var cards=document.getElementById('vc-usage-cards');
+  var info=document.getElementById('vc-usage-info');
+  if(cards)cards.innerHTML='<div style="color:#9CA3AF;font-size:12px;padding:8px">Loading...</div>';
+
+  // Count this month commits as proxy for deployments
+  fetch('https://api.github.com/repos/darcant01/wordwiseph/commits?per_page=100')
+    .then(function(r){return r.json();})
+    .then(function(commits){
+      var now=new Date();
+      var deploys=Array.isArray(commits)?commits.filter(function(cm){
+        var d=new Date(cm.commit&&cm.commit.author&&cm.commit.author.date||0);
+        return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+      }).length:0;
+
+      var limits=[
+        {label:'Bandwidth',     icon:'&#128225;',used:'Check dashboard',limit:'100 GB/mo',  pct:0,
+         note:'~200,000 page visits before limit. Resets 1st of month.'},
+        {label:'Deployments',   icon:'&#128640;',used:deploys+' this month',limit:'100/day', pct:Math.min(100,Math.round(deploys/3)),
+         note:Math.max(0,100-deploys)+' remaining today. Each GitHub push = 1 deploy.'},
+        {label:'Edge Requests', icon:'&#9889;',  used:'Check dashboard',limit:'1M/month',   pct:0,
+         note:'Page visits + static file requests. Very unlikely to hit on free tier.'},
+        {label:'Build Minutes', icon:'&#128296;',used:'~'+Math.round(deploys*0.5)+' min',limit:'6,000/mo',pct:Math.min(100,Math.round(deploys*0.5/60)),
+         note:'Static builds ~30s each. '+Math.round(6000-deploys*0.5)+' minutes remaining.'},
+      ];
+
+      if(cards){
+        cards.innerHTML=limits.map(function(m){
+          var bc=m.pct>=80?'#E24B4A':m.pct>=60?'#F59E0B':'#10B981';
+          var bg=m.pct>=80?'#FFF0F0':m.pct>=60?'#FFFBEB':'#F9FAFB';
+          return '<div class="scard" style="background:'+bg+';border-top:3px solid '+(m.pct>0?bc:'#1D2B55')+'">'+
+            '<div style="font-size:18px;margin-bottom:4px">'+m.icon+'</div>'+
+            '<div class="snum" style="font-size:15px;color:#1D2B55">'+m.used+'</div>'+
+            '<div class="slbll">'+m.label+'</div>'+
+            '<div style="font-size:10px;color:#9CA3AF;margin-top:4px">Limit: '+m.limit+'</div>'+
+            (m.pct>0?'<div style="height:5px;background:#E8EAF0;border-radius:99px;margin-top:6px;overflow:hidden"><div style="height:100%;width:'+m.pct+'%;background:'+bc+';border-radius:99px"></div></div>':'')+'</div>';
+        }).join('');
+      }
+      if(info){
+        info.style.display='block';
+        info.innerHTML='<div style="background:#F9FAFB;border-left:4px solid #000;border-radius:0 10px 10px 0;padding:10px 14px;font-size:12px;color:#4B5563;font-weight:700">'+
+          '&#9650; For exact usage: <a href="https://vercel.com/darcant01/wordwiseph" target="_blank" style="color:#D4537E;font-weight:900">Open Vercel Dashboard &#8594;</a><br>'+
+          '<span style="color:#9CA3AF">Bandwidth, requests &amp; deploys reset on the 1st of every month.</span></div>';
+      }
+    }).catch(function(){
+      if(cards)cards.innerHTML='<div style="font-size:12px;color:#9CA3AF;padding:8px">Could not load deployment count. <a href="https://vercel.com/darcant01/wordwiseph" target="_blank" style="color:#D4537E">Open Vercel Dashboard</a></div>';
+    });
 }
 </script>
 </body>
