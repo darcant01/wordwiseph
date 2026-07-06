@@ -2399,11 +2399,11 @@ async function loadAdmin(sec){
       } else if(isActive&&!u.subExpiry){
         expDisplay=`<button class="pay-approve-btn approve" style="font-size:10px;padding:3px 8px" onclick="adminSetExpiry('${u.username}','${u.subscription}')">📅 Set</button>`;
       }
-      const dBtn=u.role==='admin'?'<span style="font-size:10px;color:#9CA3AF">admin</span>':`<button data-del="${u.username}" style="padding:3px 8px;border-radius:6px;background:#FFF0F0;border:1px solid #FFCCCC;color:#E24B4A;font-family:Nunito,sans-serif;font-size:10px;font-weight:900;cursor:pointer">Del</button>`;
+      const safeU=u.username.replace(/'/g,"\\'");
+      const dBtn=u.role==='admin'?'<span style="font-size:10px;color:#9CA3AF">admin</span>':`<button onclick="adminDeleteUser('${safeU}')" style="padding:3px 8px;border-radius:6px;background:#FFF0F0;border:1px solid #FFCCCC;color:#E24B4A;font-family:Nunito,sans-serif;font-size:10px;font-weight:900;cursor:pointer">🗑️ Del</button>`;
       return `<tr><td>${i+1}</td><td>${u.name}</td><td>@${u.username}</td><td>${u.type}</td><td><span class="rbdg ${u.role}">${u.role}</span></td><td><span class="sub-status ${isActive?'active':u.subscription==='pending'?'pending':'free'}">${u.subscription||'free'}</span></td><td style="font-size:12px">${expDisplay}</td><td>${u.rounds}</td><td>${u.best}/5</td><td>${u.joined}</td><td>${dBtn}</td></tr>`;
-    }).join('')||'<tr><td colspan="11" style="text-align:center;color:#888780">No users.</td></tr>';
-    // Wire delete buttons
-    document.getElementById('utbody').addEventListener('click',function(e){var b=e.target.closest('[data-del]');if(b)adminDeleteUser(b.getAttribute('data-del'));});
+    }).join('')||'<tr><td colspan="11" style="text-align:center;color:#888780;padding:16px">No users found.</td></tr>';
+
   }else if(sec==='sc'){
     const sb=document.getElementById('stbody');
     if(sb)sb.innerHTML=scores.slice().reverse().map((s,i)=>`<tr><td>${i+1}</td><td>${s.name}</td><td>${s.score}/5</td><td><span class="dc2 ${s.diff}">${s.diff}</span></td><td>${s.stars}</td><td>${s.date}</td></tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:#888780">No scores.</td></tr>';
