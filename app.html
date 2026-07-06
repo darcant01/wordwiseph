@@ -756,7 +756,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <div class="plan-icon">🌱</div>
         <div class="plan-name" style="color:#5F5E5A">Free</div>
         <div class="plan-price" style="color:#5F5E5A">₱0 <span style="font-size:14px;color:#888780">/forever</span></div>
-        <div class="plan-period" style="color:#888780">No payment needed</div>
+        <div class="plan-period" style="color:#888780">Start learning — no credit card needed!</div>
         <div class="plan-divider"></div>
         <div class="plan-features">
           <div class="plan-feat"><span class="pi">✅</span>Grammar Quiz — Easy only</div>
@@ -776,7 +776,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <div class="plan-icon">🌤️</div>
         <div class="plan-name" style="color:#92400E">Trial</div>
         <div class="plan-price" style="color:#F59E0B">₱10 <span style="font-size:14px;color:#B45309">/day</span></div>
-        <div class="plan-period" style="color:#B45309">Just 1 day — test everything!</div>
+        <div class="plan-period" style="color:#B45309">Try the full app for just 1 day!</div>
         <div class="plan-divider"></div>
         <div class="plan-features">
           <div class="plan-feat"><span class="pi">✅</span>All 7 Brainy Games</div>
@@ -795,7 +795,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <div class="plan-icon">🗓️</div>
         <div class="plan-name" style="color:#065F46">Weekly</div>
         <div class="plan-price" style="color:#10B981">₱35 <span style="font-size:14px;color:#059669">/week</span></div>
-        <div class="plan-period" style="color:#059669">7 days full access</div>
+        <div class="plan-period" style="color:#059669">Full access for 7 days — great for school breaks!</div>
         <div class="plan-divider"></div>
         <div class="plan-features">
           <div class="plan-feat"><span class="pi">✅</span>All 7 Brainy Games</div>
@@ -815,7 +815,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <div class="plan-icon">⚡</div>
         <div class="plan-name">Basic</div>
         <div class="plan-price">₱99 <span>/mo</span></div>
-        <div class="plan-period">Best value for 1 child</div>
+        <div class="plan-period">Perfect for 1 child — most popular!</div>
         <div class="plan-divider"></div>
         <div class="plan-features">
           <div class="plan-feat"><span class="pi">✅</span>All 7 Brainy Games unlocked</div>
@@ -837,11 +837,11 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <div class="plan-icon">👑</div>
         <div class="plan-name" style="color:#FAC775">Premium</div>
         <div class="plan-price" style="color:#fff">₱199 <span style="font-size:14px;color:#B5D4F4">/mo</span></div>
-        <div class="plan-period" style="color:#B5D4F4">For families — up to 5 children</div>
+        <div class="plan-period" style="color:#B5D4F4">For families — link up to 3 children!</div>
         <div class="plan-divider" style="border-color:rgba(255,255,255,0.15)"></div>
         <div class="plan-features">
           <div class="plan-feat" style="color:#fff"><span class="pi">✅</span>Everything in Basic</div>
-          <div class="plan-feat" style="color:#fff"><span class="pi">✅</span>Up to 5 child accounts</div>
+          <div class="plan-feat" style="color:#fff"><span class="pi">✅</span>Link up to 3 child accounts</div>
           <div class="plan-feat" style="color:#fff"><span class="pi">✅</span>🔡 Lowercase Letter Tracer</div>
           <div class="plan-feat" style="color:#fff"><span class="pi">✅</span>✍️ Trace My Name (PRO)</div>
           <div class="plan-feat" style="color:#fff"><span class="pi">✅</span>Advanced parent dashboard</div>
@@ -1298,10 +1298,21 @@ async function api(data){
     }
 
     if(a==='addChild'){
+      const {data:parent}=await SB.from('users').select('subscription,sub_expiry').eq('username',data.parentUsername).limit(1);
+      if(!parent||!parent.length)return {success:false,error:'Parent account not found.'};
+      const parentPlan=parent[0].subscription||'free';
+      const maxKids={basic:1,premium:3}[parentPlan]||0;
+      if(!maxKids)return {success:false,error:'Child linking requires a Basic or Premium plan.'};
+      if(parent[0].sub_expiry&&new Date(parent[0].sub_expiry)<new Date())return {success:false,error:'Your subscription has expired. Renew to manage child accounts.'};
+      const {data:existing}=await SB.from('children').select('id').eq('parent_username',data.parentUsername);
+      if((existing||[]).length>=maxKids)return {success:false,error:'You have reached the '+maxKids+' child limit for your '+parentPlan+' plan.'};
       const {data:kid}=await SB.from('users').select('name,username').eq('username',data.childUsername).limit(1);
-      if(!kid||!kid.length)return {success:false,error:'Could not link. Check the username and try again.'};
+      if(!kid||!kid.length)return {success:false,error:'Username not found. Ask your child to register first.'};
+      if(data.childUsername===data.parentUsername)return {success:false,error:'You cannot link your own account.'};
+      const {data:alreadyLinked}=await SB.from('children').select('id').eq('child_username',data.childUsername).limit(1);
+      if(alreadyLinked&&alreadyLinked.length)return {success:false,error:'This account is already linked to a parent.'};
       const {error}=await SB.from('children').insert({parent_username:data.parentUsername,child_username:kid[0].username,child_name:kid[0].name});
-      if(error)return {success:false,error:'Already linked or limit reached.'};
+      if(error)return {success:false,error:'Could not link account. Try again.'};
       return {success:true};
     }
 
