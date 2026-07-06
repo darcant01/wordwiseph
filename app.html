@@ -968,7 +968,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 
     <div id="a-us" style="display:none">
       <div class="sectitle">All Users</div>
-      <div style="overflow-x:auto"><table class="atable"><thead><tr><th>#</th><th>Name</th><th>Username</th><th>Type</th><th>Role</th><th>Sub</th><th>Expires</th><th>Rounds</th><th>Best</th><th>Joined</th></tr></thead><tbody id="utbody"></tbody></table></div>
+      <div style="overflow-x:auto"><table class="atable"><thead><tr><th>#</th><th>Name</th><th>Username</th><th>Type</th><th>Role</th><th>Sub</th><th>Expires</th><th>Rounds</th><th>Best</th><th>Joined</th><th>Action</th></tr></thead><tbody id="utbody"></tbody></table></div>
     </div>
     <div id="a-sc" style="display:none">
       <div class="sectitle">All Scores</div>
@@ -2490,12 +2490,39 @@ async function loadSupabaseUsage(){
 }
 
 async function adminDeleteUser(u){
-  if(!confirm('Delete @'+u+'? This removes all their data and cannot be undone.'))return;
-  if(prompt('Type DELETE to confirm:')!=='DELETE'){alert('Cancelled.');return;}
-  showLoader('Deleting...');
-  const r=await api({action:'deleteUser',adminUsername:CU.username,username:u});
-  hideLoader();
-  if(r.success){alert('Done! @'+u+' has been deleted.');loadAdmin('us');}else{alert('Error: '+(r.error||'Failed'));}
+  // Use a custom modal instead of confirm/prompt which can be blocked
+  var modal=document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px';
+  modal.innerHTML='<div style="background:#fff;border-radius:20px;padding:24px;max-width:360px;width:100%;font-family:Nunito,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,0.3)">'
+    +'<div style="font-size:32px;text-align:center;margin-bottom:8px">🗑️</div>'
+    +'<div style="font-size:16px;font-weight:900;color:#1D2B55;text-align:center;margin-bottom:6px">Delete @'+u+'?</div>'
+    +'<div style="font-size:12px;color:#6B7280;text-align:center;margin-bottom:16px">This permanently removes their account, scores, payments, and purchases.</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button id="del-cancel" style="flex:1;padding:12px;border-radius:99px;border:2px solid #E8EAF0;background:#fff;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;color:#1D2B55">Cancel</button>'
+    +'<button id="del-confirm" style="flex:1;padding:12px;border-radius:99px;border:none;background:#E24B4A;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;color:#fff">Yes, Delete</button>'
+    +'</div></div>';
+  document.body.appendChild(modal);
+  modal.querySelector('#del-cancel').onclick=function(){document.body.removeChild(modal);};
+  modal.querySelector('#del-confirm').onclick=async function(){
+    document.body.removeChild(modal);
+    showLoader('Deleting @'+u+'...');
+    const r=await api({action:'deleteUser',adminUsername:CU.username,username:u});
+    hideLoader();
+    if(r.success){
+      var ok=document.createElement('div');
+      ok.style.cssText='position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#10B981;color:#fff;padding:12px 24px;border-radius:99px;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;z-index:9999;box-shadow:0 4px 20px rgba(16,185,129,0.4)';
+      ok.textContent='✅ @'+u+' deleted successfully';
+      document.body.appendChild(ok);
+      setTimeout(function(){if(ok.parentElement)ok.remove();},3000);
+      loadAdmin('us');
+    }else{
+      var err=document.createElement('div');
+      err.style.cssText='position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#E24B4A;color:#fff;padding:12px 24px;border-radius:99px;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;z-index:9999';
+      err.textContent='❌ Error: '+(r.error||'Could not delete');
+      document.body.appendChild(err);
+      setTimeout(function(){if(err.parentElement)err.remove();},4000);
+    }
+  };
 }
 async function adminSetExpiry(username, plan){
   const days = prompt('Set subscription for @'+username+'\nHow many days from today?\n(e.g. 30 for one month)', '30');
