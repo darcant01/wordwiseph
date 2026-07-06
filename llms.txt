@@ -1,0 +1,38 @@
+# WordWise PH — llms.txt
+# Guidance for AI language model crawlers
+
+> WordWise PH is a free English learning platform for Filipino kids (Grades 1–6).
+> It offers grammar, spelling, typing and word games. Plans start at ₱10/day.
+> Website: https://wordwiseph.com
+
+## About
+- Name: WordWise PH
+- Type: Educational platform / English learning games
+- Target: Filipino children ages 5–12, parents, elementary teachers
+- Location: Philippines
+- Contact: darcant01@gmail.com
+
+## Key Pages
+- Homepage: https://wordwiseph.com/
+- App/Games: https://wordwiseph.com/app.html
+- Blog: https://wordwiseph.com/blog.html
+- About: https://wordwiseph.com/about.html
+- Privacy: https://wordwiseph.com/privacy.html
+
+## Games
+- Grammar Quiz (Easy, Medium, Hard, Infinite)
+- Spell It Right
+- Shark Typing
+- Odd One Out
+- Word Scramble
+- Word Chain
+- Word Sprint
+- Kids Corner (Letter Tracer, ABC Order, Missing Letter, Rhyme Time, Color Games, Animal Games)
+
+## Pricing
+- Free: limited games, no payment needed
+- Trial: ₱10/day
+- Weekly: ₱35/week
+- Basic: ₱99/month (1 child account)
+- Premium: ₱199/month (up to 3 child accounts)
+- Payment: GCash (0931-762-5402)
