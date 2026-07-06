@@ -1723,7 +1723,7 @@ function shuf(a){return[...a].sort(()=>Math.random()-0.5);}
 function checkAccess(d){
   // Medium and Hard require active subscription
   if(d==='medium'||d==='hard'||d==='infinite'){
-    const sub=CU?.subscription||'free';
+    const sub=CU?.role==='admin'?'admin':(CU?.subscription||'free');
     const hasAccess=(CU&&CU.role==='admin')||sub==='basic'||sub==='premium'; // expired = no access
     if(!hasAccess){
       if(!CU){
@@ -1749,7 +1749,7 @@ function startQuiz(d){
 }
 
 function updateDiffCards(){
-  const sub=CU?.subscription||'free';
+  const sub=CU?.role==='admin'?'admin':(CU?.subscription||'free');
   const hasAccess=(CU&&CU.role==='admin')||CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly'); // expired counts as free
   ['medium','hard','infinite'].forEach(d=>{
     const card=document.getElementById('dc-'+d);
@@ -2203,7 +2203,7 @@ async function submitPayment(){
   CU.subscription='pending';buildHdr();
   const ref2=document.getElementById('gcash-ref');if(ref2)ref2.value='';
   selPlan=null;selPrice=0;
-  alert('✅ Payment submitted!\n\nOur admin will verify within 24 hours.\nThank you for subscribing to WordWise PH!');
+  alert('\u2705 Payment submitted!\n\nOur admin will verify within 24 hours.\nThank you for subscribing to WordWise PH!');
   navTo('profile');
 }
 
@@ -2907,7 +2907,7 @@ function startSpell(){
 }
 
 function updateSpellLocks(){
-  const sub=CU?.subscription||'free';
+  const sub=CU?.role==='admin'?'admin':(CU?.subscription||'free');
   const hasAccess=(CU&&CU.role==='admin')||CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('spell-lock-'+d);
@@ -2918,7 +2918,7 @@ function updateSpellLocks(){
 }
 
 function checkSpellAccess(d){
-  const sub=CU?.subscription||'free';
+  const sub=CU?.role==='admin'?'admin':(CU?.subscription||'free');
   const hasAccess=(CU&&CU.role==='admin')||CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   if(!hasAccess){
     if(!CU){
@@ -3273,7 +3273,7 @@ function startShark(){
 }
 
 function updateSharkLocks(){
-  const sub=CU?.subscription||'free';
+  const sub=CU?.role==='admin'?'admin':(CU?.subscription||'free');
   const hasAccess=(CU&&CU.role==='admin')||CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('shark-lock-'+d);
@@ -3284,7 +3284,7 @@ function updateSharkLocks(){
 }
 
 function checkSharkAccess(d){
-  const sub=CU?.subscription||'free';
+  const sub=CU?.role==='admin'?'admin':(CU?.subscription||'free');
   const hasAccess=(CU&&CU.role==='admin')||CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   if(!hasAccess){
     if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
@@ -3597,7 +3597,7 @@ function startOdd(){
 }
 
 function updateOddLocks(){
-  const sub=CU?.subscription||'free';
+  const sub=CU?.role==='admin'?'admin':(CU?.subscription||'free');
   const hasAccess=(CU&&CU.role==='admin')||CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('odd-lock-'+d);
@@ -3608,7 +3608,7 @@ function updateOddLocks(){
 }
 
 function checkOddAccess(d){
-  const sub=CU?.subscription||'free';
+  const sub=CU?.role==='admin'?'admin':(CU?.subscription||'free');
   const hasAccess=(CU&&CU.role==='admin')||CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   if(!hasAccess){
     if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
@@ -3930,7 +3930,7 @@ function startScramble(){
 }
 
 function updateScrambleLocks(){
-  const sub=CU?.subscription||'free';
+  const sub=CU?.role==='admin'?'admin':(CU?.subscription||'free');
   const hasAccess=(CU&&CU.role==='admin')||CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('scramble-lock-'+d);
@@ -3941,7 +3941,7 @@ function updateScrambleLocks(){
 }
 
 function checkScrambleAccess(d){
-  const sub=CU?.subscription||'free';
+  const sub=CU?.role==='admin'?'admin':(CU?.subscription||'free');
   const hasAccess=(CU&&CU.role==='admin')||CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   if(!hasAccess){
     if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
@@ -4478,7 +4478,7 @@ function startChain(){
 }
 
 function updateChainLocks(){
-  const sub=CU?.subscription||'free';
+  const sub=CU?.role==='admin'?'admin':(CU?.subscription||'free');
   const hasAccess=(CU&&CU.role==='admin')||CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('chain-lock-'+d);
@@ -4489,7 +4489,7 @@ function updateChainLocks(){
 }
 
 function checkChainAccess(d){
-  const sub=CU?.subscription||'free';
+  const sub=CU?.role==='admin'?'admin':(CU?.subscription||'free');
   const hasAccess=(CU&&CU.role==='admin')||CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   if(!hasAccess){
     if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
@@ -4772,7 +4772,7 @@ function startSprint(){
 }
 
 function updateSprintLocks(){
-  const sub=CU?.subscription||'free';
+  const sub=CU?.role==='admin'?'admin':(CU?.subscription||'free');
   const hasAccess=(CU&&CU.role==='admin')||CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   ['medium','hard','infinite'].forEach(d=>{
     const lock=document.getElementById('sprint-lock-'+d);
@@ -4783,7 +4783,7 @@ function updateSprintLocks(){
 }
 
 function checkSprintAccess(d){
-  const sub=CU?.subscription||'free';
+  const sub=CU?.role==='admin'?'admin':(CU?.subscription||'free');
   const hasAccess=(CU&&CU.role==='admin')||CU&&(sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
   if(!hasAccess){
     if(!CU){if(confirm('Medium and Hard require a subscription.\nGo to Login?'))navTo('login');}
@@ -8151,9 +8151,10 @@ async function adminClearAnn(){
 // ── PLAN ACTIVATION NOTIFIER ──
 var _planPollTimer=null;
 function startPlanPoll(){
+  if(!CU||CU.role==='admin')return; // admins skip plan polling
   if(_planPollTimer)return;
   _planPollTimer=setInterval(async function(){
-    if(!CU||!CU.username)return;
+    if(!CU||!CU.username||CU.role==='admin')return;
     var prev=CU.subscription||'free';
     try{
       var r=await api({action:'checkPlan',username:CU.username});
@@ -8170,6 +8171,7 @@ function startPlanPoll(){
 }
 function stopPlanPoll(){clearInterval(_planPollTimer);_planPollTimer=null;}
 function showPlanBanner(plan){
+  if(CU&&CU.role==='admin')return;
   var labels={trial:'Trial',weekly:'Weekly',basic:'Basic',premium:'Premium'};
   var emojis={trial:'\u26a1',weekly:'\ud83d\udcc5',basic:'\u2b50',premium:'\ud83d\udc51'};
   var label=labels[plan]||plan;
