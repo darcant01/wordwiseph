@@ -60,12 +60,16 @@
       "source": "/app-beta.html",
       "destination": "/app.html",
       "permanent": true
-    }
-  ],
-  "rewrites": [
+    },
     {
-      "source": "/",
-      "destination": "/index.html"
+      "source": "/app-beta",
+      "destination": "/app.html",
+      "permanent": true
+    },
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
     }
   ]
 }
