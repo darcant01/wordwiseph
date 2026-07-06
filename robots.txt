@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /app-beta.html
+Disallow: /printables.html
+
 Sitemap: https://wordwiseph.com/sitemap.xml
-# WordWise PH sitemap
