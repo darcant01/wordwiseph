@@ -1236,6 +1236,20 @@ async function api(data){
         }
       };
     }
+    if(a==='editUser'){
+      // Only admin can edit user type/role
+      const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
+      if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
+      if(data.targetUsername===data.adminUsername&&data.role&&data.role!=='admin')return {success:false,error:'Cannot demote your own admin account!'};
+      const updates={};
+      if(data.type)updates.type=data.type;
+      if(data.role)updates.role=data.role;
+      if(!Object.keys(updates).length)return {success:false,error:'Nothing to update'};
+      const {error}=await SB.from('users').update(updates).eq('username',data.targetUsername);
+      if(error)return {success:false,error:error.message};
+      await SB.from('activity').insert({m:'Admin updated @'+data.targetUsername+': '+JSON.stringify(updates)});
+      return {success:true};
+    }
     if(a==='checkPlan'){
       const {data:cp}=await SB.from('users').select('subscription,sub_expiry').eq('username',data.username).limit(1);
       if(!cp||!cp.length)return {success:false};
@@ -2410,7 +2424,10 @@ async function loadAdmin(sec){
         expDisplay=`<button class="pay-approve-btn approve" style="font-size:10px;padding:3px 8px" onclick="adminSetExpiry('${u.username}','${u.subscription}')">📅 Set</button>`;
       }
       const safeU=u.username.replace(/'/g,"\\'");
-      const dBtn=u.role==='admin'?'<span style="font-size:10px;color:#9CA3AF">admin</span>':`<button onclick="adminDeleteUser('${safeU}')" style="padding:3px 8px;border-radius:6px;background:#FFF0F0;border:1px solid #FFCCCC;color:#E24B4A;font-family:Nunito,sans-serif;font-size:10px;font-weight:900;cursor:pointer">🗑️ Del</button>`;
+      const editBtn=`<button onclick="adminEditUser('${safeU}','${u.type}','${u.role}')" style="padding:3px 8px;border-radius:6px;background:#EFF6FF;border:1px solid #BFDBFE;color:#1D4ED8;font-family:Nunito,sans-serif;font-size:10px;font-weight:900;cursor:pointer;margin-right:4px">✏️ Edit</button>`;
+      const dBtn=u.role==='admin'
+        ?'<span style="font-size:10px;color:#9CA3AF">admin</span>'
+        :`${editBtn}<button onclick="adminDeleteUser('${safeU}')" style="padding:3px 8px;border-radius:6px;background:#FFF0F0;border:1px solid #FFCCCC;color:#E24B4A;font-family:Nunito,sans-serif;font-size:10px;font-weight:900;cursor:pointer">🗑️ Del</button>`;
       return `<tr><td>${i+1}</td><td>${u.name}</td><td>@${u.username}</td><td>${u.type}</td><td><span class="rbdg ${u.role}">${u.role}</span></td><td><span class="sub-status ${isActive?'active':u.subscription==='pending'?'pending':'free'}">${u.subscription||'free'}</span></td><td style="font-size:12px">${expDisplay}</td><td>${u.rounds}</td><td>${u.best}/5</td><td>${u.joined}</td><td>${dBtn}</td></tr>`;
     }).join('')||'<tr><td colspan="11" style="text-align:center;color:#888780;padding:16px">No users found.</td></tr>';
 
@@ -2495,6 +2512,104 @@ async function loadSupabaseUsage(){
       warn.innerHTML='<div style="background:#F0FFF4;border-left:4px solid #10B981;border-radius:0 10px 10px 0;padding:10px 14px;font-size:12px;font-weight:800;color:#1D2B55">✅ All usage within safe limits. No action needed.</div>';
     }
   }
+}
+
+async function adminEditUser(username, currentType, currentRole){
+  var modal=document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px';
+  modal.innerHTML=`
+    <div style="background:#fff;border-radius:20px;padding:24px;max-width:380px;width:100%;font-family:Nunito,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+      <div style="font-size:22px;font-weight:900;color:#1D2B55;margin-bottom:4px">✏️ Edit @${username}</div>
+      <div style="font-size:12px;color:#9CA3AF;margin-bottom:20px">Change account type or role</div>
+
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;font-weight:900;color:#1D2B55;display:block;margin-bottom:6px">Account Type</label>
+        <div style="display:flex;gap:8px">
+          <button id="type-adult" onclick="adminSetTypeBtnState('adult')"
+            style="flex:1;padding:10px;border-radius:10px;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;border:2px solid ${currentType==='adult'?'#1D2B55':'#E8EAF0'};background:${currentType==='adult'?'#1D2B55':'#fff'};color:${currentType==='adult'?'#fff':'#1D2B55'}">
+            👨 Adult
+          </button>
+          <button id="type-kid" onclick="adminSetTypeBtnState('kid')"
+            style="flex:1;padding:10px;border-radius:10px;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;border:2px solid ${currentType==='kid'?'#1D2B55':'#E8EAF0'};background:${currentType==='kid'?'#1D2B55':'#fff'};color:${currentType==='kid'?'#fff':'#1D2B55'}">
+            👦 Kid
+          </button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <label style="font-size:12px;font-weight:900;color:#1D2B55;display:block;margin-bottom:6px">Role</label>
+        <div style="display:flex;gap:8px">
+          <button id="role-user" onclick="adminSetRoleBtnState('user')"
+            style="flex:1;padding:10px;border-radius:10px;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;border:2px solid ${currentRole==='user'?'#10B981':'#E8EAF0'};background:${currentRole==='user'?'#10B981':'#fff'};color:${currentRole==='user'?'#fff':'#1D2B55'}">
+            👤 User
+          </button>
+          <button id="role-admin" onclick="adminSetRoleBtnState('admin')"
+            style="flex:1;padding:10px;border-radius:10px;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;border:2px solid ${currentRole==='admin'?'#D4537E':'#E8EAF0'};background:${currentRole==='admin'?'#D4537E':'#fff'};color:${currentRole==='admin'?'#fff':'#1D2B55'}">
+            👑 Admin
+          </button>
+        </div>
+        <div style="font-size:11px;color:#F59E0B;margin-top:6px;font-weight:700">⚠️ Making someone Admin gives full access to all features and admin panel.</div>
+      </div>
+
+      <div style="display:flex;gap:8px">
+        <button onclick="this.closest('div[style*=inset]').remove()"
+          style="flex:1;padding:12px;border-radius:99px;border:2px solid #E8EAF0;background:#fff;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;color:#1D2B55">
+          Cancel
+        </button>
+        <button id="edit-save-btn"
+          style="flex:1;padding:12px;border-radius:99px;border:none;background:#1D2B55;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;color:#fff">
+          Save Changes
+        </button>
+      </div>
+      <div id="edit-result" style="margin-top:10px;font-size:12px;text-align:center"></div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  // Track selected values
+  var selType=currentType, selRole=currentRole;
+
+  window.adminSetTypeBtnState=function(t){
+    selType=t;
+    var ab=modal.querySelector('#type-adult');
+    var kb=modal.querySelector('#type-kid');
+    ab.style.background=t==='adult'?'#1D2B55':'#fff';
+    ab.style.color=t==='adult'?'#fff':'#1D2B55';
+    ab.style.border='2px solid '+(t==='adult'?'#1D2B55':'#E8EAF0');
+    kb.style.background=t==='kid'?'#1D2B55':'#fff';
+    kb.style.color=t==='kid'?'#fff':'#1D2B55';
+    kb.style.border='2px solid '+(t==='kid'?'#1D2B55':'#E8EAF0');
+  };
+
+  window.adminSetRoleBtnState=function(r){
+    selRole=r;
+    var ub=modal.querySelector('#role-user');
+    var ab=modal.querySelector('#role-admin');
+    ub.style.background=r==='user'?'#10B981':'#fff';
+    ub.style.color=r==='user'?'#fff':'#1D2B55';
+    ub.style.border='2px solid '+(r==='user'?'#10B981':'#E8EAF0');
+    ab.style.background=r==='admin'?'#D4537E':'#fff';
+    ab.style.color=r==='admin'?'#fff':'#1D2B55';
+    ab.style.border='2px solid '+(r==='admin'?'#D4537E':'#E8EAF0');
+  };
+
+  modal.querySelector('#edit-save-btn').onclick=async function(){
+    var btn=this;
+    btn.textContent='Saving...';btn.disabled=true;
+    var res=await api({action:'editUser',adminUsername:CU.username,targetUsername:username,type:selType,role:selRole});
+    if(res.success){
+      modal.remove();
+      var toast=document.createElement('div');
+      toast.style.cssText='position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#10B981;color:#fff;padding:12px 24px;border-radius:99px;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;z-index:9999;box-shadow:0 4px 20px rgba(16,185,129,0.4)';
+      toast.textContent='✅ @'+username+' updated to '+selType+' / '+selRole;
+      document.body.appendChild(toast);
+      setTimeout(function(){if(toast.parentElement)toast.remove();},3000);
+      loadAdmin('us');
+    }else{
+      btn.textContent='Save Changes';btn.disabled=false;
+      var r=modal.querySelector('#edit-result');
+      if(r)r.innerHTML='<span style="color:#E24B4A">❌ '+(res.error||'Failed')+'</span>';
+    }
+  };
 }
 
 async function adminDeleteUser(u){
