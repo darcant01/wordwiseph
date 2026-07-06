@@ -1,6 +1,17 @@
 User-agent: *
 Allow: /
 Disallow: /app-beta.html
+Disallow: /app-beta
 Disallow: /printables.html
+
+# AI crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Googlebot
+Allow: /
 
 Sitemap: https://wordwiseph.com/sitemap.xml
