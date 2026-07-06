@@ -1070,7 +1070,7 @@ let aCtx=null, BANK=null;
 // ═══ SUPABASE ADAPTER — replaces GAS api(), same call signature & response shapes ═══
 const SB = supabase.createClient("https://ahtyjglufrvtfnhkooux.supabase.co", "sb_publishable_AylXCLg2W3sQzQSn5sH7Xg_k4ZQblM7");
 function _d(ts){ try{ return new Date(ts).toLocaleDateString(); }catch(e){ return ''; } }
-function _userOut(u){ return {id:u.id,name:u.name,username:u.username,type:u.type,role:u.role,joined:u.joined,rounds:u.rounds||0,best:u.best||0,subscription:u.subscription||'free',subStart:u.sub_start||'',subExpiry:u.sub_expiry||''}; }
+function _userOut(u){ return {id:u.id,name:u.name,username:u.username,type:u.type,role:u.role,joined:u.joined,rounds:u.rounds||0,best:u.best||0,subscription:u.subscription||'free',subStart:u.sub_start||'',subExpiry:u.sub_expiry||'',isChild:u._isChild||false,parentUsername:u._parentUsername||''}; }
 async function _ann(){
   try{
     const {data}=await SB.from('settings').select('key,value').in('key',['ann_text','ann_id']);
@@ -1116,8 +1116,19 @@ async function api(data){
       const {data:rows,error}=await SB.from('users').select('*').eq('username',data.username).eq('password',loginHash).limit(1);
       if(error)throw error;
       if(!rows||!rows.length)return {success:false,error:'Wrong username or password!'};
-      _logAct(rows[0].username+' \u2013 logged in');
-      return {success:true,user:_userOut(rows[0])};
+      const user=rows[0];
+      // Check if child account — inherit parent subscription
+      const {data:linked}=await SB.from('children').select('parent_username').eq('child_username',user.username).limit(1);
+      if(linked&&linked.length){
+        const {data:parentRow}=await SB.from('users').select('subscription,sub_start,sub_expiry').eq('username',linked[0].parent_username).limit(1);
+        if(parentRow&&parentRow.length){
+          const par=parentRow[0];
+          const isActive=['basic','premium'].includes(par.subscription)&&(!par.sub_expiry||new Date(par.sub_expiry)>new Date());
+          if(isActive){user.subscription=par.subscription;user.sub_start=par.sub_start;user.sub_expiry=par.sub_expiry;user._isChild=true;user._parentUsername=linked[0].parent_username;}
+        }
+      }
+      _logAct(user.username+' \u2013 logged in');
+      return {success:true,user:_userOut(user)};
     }
 
     if(a==='register'){
@@ -1220,7 +1231,16 @@ async function api(data){
     if(a==='checkPlan'){
       const {data:cp}=await SB.from('users').select('subscription,sub_expiry').eq('username',data.username).limit(1);
       if(!cp||!cp.length)return {success:false};
-      return {success:true,subscription:cp[0].subscription||'free',subExpiry:cp[0].sub_expiry||''};
+      let cpSub=cp[0].subscription||'free';let cpExp=cp[0].sub_expiry||'';
+      const {data:lnk}=await SB.from('children').select('parent_username').eq('child_username',data.username).limit(1);
+      if(lnk&&lnk.length){
+        const {data:par}=await SB.from('users').select('subscription,sub_expiry').eq('username',lnk[0].parent_username).limit(1);
+        if(par&&par.length&&['basic','premium'].includes(par[0].subscription)){
+          const active=!par[0].sub_expiry||new Date(par[0].sub_expiry)>new Date();
+          if(active){cpSub=par[0].subscription;cpExp=par[0].sub_expiry||'';}
+        }
+      }
+      return {success:true,subscription:cpSub,subExpiry:cpExp};
     }
 
     if(a==='logActivity'){ await _logAct(data.message||''); return {success:true}; }
