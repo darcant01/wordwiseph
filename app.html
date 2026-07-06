@@ -1184,21 +1184,23 @@ async function api(data){
       const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
       if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
       if(data.username===data.adminUsername)return {success:false,error:'Cannot delete your own account!'};
-      // Delete all user data across every table
-      await SB.from('scores').delete().eq('username',data.username);
-      await SB.from('payments').delete().eq('username',data.username);
+      const errs=[];
+      // Delete related data (wrap each in try/catch to see which ones fail)
+      const tbls=[
+        SB.from('scores').delete().eq('username',data.username),
+        SB.from('payments').delete().eq('username',data.username),
+        SB.from('support_messages').delete().eq('session_id',data.username),
+        SB.from('children').delete().eq('parent_username',data.username),
+        SB.from('children').delete().eq('child_username',data.username),
+        SB.from('activity').delete().like('m','%'+data.username+'%'),
+      ];
+      for(const q of tbls){const {error:e}=await q;if(e)errs.push(e.message);}
       try{await SB.from('purchases').delete().eq('username',data.username);}catch(e){}
-      await SB.from('support_messages').delete().eq('session_id',data.username);
-      await SB.from('children').delete().eq('parent_username',data.username);
-      await SB.from('children').delete().eq('child_username',data.username);
-      // Delete activity logs that mention this user (stored as text)
-      await SB.from('activity').delete().like('m','%'+data.username+'%');
-      // Finally delete the user account
+      // Delete the user account itself
       const {error:delErr}=await SB.from('users').delete().eq('username',data.username);
-      if(delErr)return {success:false,error:delErr.message};
-      // Log the deletion (by admin)
+      if(delErr)return {success:false,error:'User delete failed: '+delErr.message+(errs.length?' | Also: '+errs.join(', '):'')};
       await SB.from('activity').insert({m:'Admin deleted account: @'+data.username});
-      return {success:true};
+      return {success:true,warnings:errs};
     }
     if(a==='getPurchases'){
       const {data:rows}=await SB.from('purchases').select('*').eq('username',data.username).order('granted_at',{ascending:false});
