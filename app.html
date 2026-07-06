@@ -2237,7 +2237,7 @@ async function loadParent(){
   const ps=document.getElementById('parent-sub');if(ps)ps.textContent='Welcome, '+CU.name+'!';
   const sub=CU.subscription||'free';
   const canAdd=sub==='basic'||sub==='premium';
-  const maxKids=sub==='premium'?5:sub==='basic'?1:0;
+  const maxKids=sub==='premium'?3:sub==='basic'?1:0;
   const statusMap={free:'🌱 Free Plan',basic:'⚡ Basic Plan',premium:'🔥 Premium Plan',pending:'⏳ Pending',expired:'❌ Expired'};
   const sc=document.getElementById('parent-sub-card');
   if(sc)sc.innerHTML=`
