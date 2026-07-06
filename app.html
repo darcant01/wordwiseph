@@ -1643,6 +1643,7 @@ async function doLogin(){
   hideLoader();
   if(!res.success){showErr('ml-err',res.error||'Wrong username or password!');return;}
   CU=res.user;
+  try{localStorage.setItem('ww_cu',JSON.stringify(CU));}catch(e){}
   closeLoginModal();
   startPlanPoll();
   round=1;
@@ -1701,7 +1702,8 @@ async function doReg(){
 
 async function doLogout(){
   stopPlanPoll();if(CU)api({action:'logActivity',message:CU.name+' logged out'});
-  CU=null; round=1; buildHdr(); updateDiffCards(); navTo('start');
+  CU=null; try{localStorage.removeItem('ww_cu');}catch(e){}
+  round=1; buildHdr(); updateDiffCards(); navTo('start');
 }
 
 function guestPlay(){CU=null; round=1; buildHdr(); updateDiffCards(); navTo('start');}
@@ -2745,7 +2747,24 @@ function sKidWhoops(){
 }
 
 // ── INIT ─────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded',function(){
+document.addEventListener('DOMContentLoaded',async function(){
+  // Restore session from localStorage on page reload
+  try{
+    var saved=localStorage.getItem('ww_cu');
+    if(saved){
+      var parsed=JSON.parse(saved);
+      if(parsed&&parsed.username){
+        // Re-verify with Supabase to ensure account still exists + get fresh sub status
+        var fresh=await api({action:'checkPlan',username:parsed.username});
+        if(fresh&&fresh.success){
+          parsed.subscription=fresh.subscription||parsed.subscription||'free';
+          parsed.subExpiry=fresh.subExpiry||parsed.subExpiry||'';
+        }
+        CU=parsed;
+        startPlanPoll();
+      }
+    }
+  }catch(e){ try{localStorage.removeItem('ww_cu');}catch(e2){} }
   buildHdr();
   updateDiffCards();
   loadLBGame('grammar','easy');
@@ -8163,6 +8182,7 @@ function startPlanPoll(){
       if(next!==prev&&next!=='free'&&next!=='pending'){
         CU.subscription=next;
         if(r.subExpiry)CU.subExpiry=r.subExpiry;
+        try{localStorage.setItem('ww_cu',JSON.stringify(CU));}catch(e){}
         buildHdr();
         showPlanBanner(next);
       }
