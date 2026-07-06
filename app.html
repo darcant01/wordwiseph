@@ -1184,13 +1184,19 @@ async function api(data){
       const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
       if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
       if(data.username===data.adminUsername)return {success:false,error:'Cannot delete your own account!'};
+      // Delete all user data across every table
       await SB.from('scores').delete().eq('username',data.username);
       await SB.from('payments').delete().eq('username',data.username);
       try{await SB.from('purchases').delete().eq('username',data.username);}catch(e){}
       await SB.from('support_messages').delete().eq('session_id',data.username);
       await SB.from('children').delete().eq('parent_username',data.username);
+      await SB.from('children').delete().eq('child_username',data.username);
+      // Delete activity logs that mention this user (stored as text)
+      await SB.from('activity').delete().like('m','%'+data.username+'%');
+      // Finally delete the user account
       const {error:delErr}=await SB.from('users').delete().eq('username',data.username);
       if(delErr)return {success:false,error:delErr.message};
+      // Log the deletion (by admin)
       await SB.from('activity').insert({m:'Admin deleted account: @'+data.username});
       return {success:true};
     }
