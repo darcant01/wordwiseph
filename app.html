@@ -1290,8 +1290,11 @@ async function api(data){
       return {success:true,limit:data&&data.length?parseInt(data[0].value)||4:4};
     }
     if(a==='setFreeLimit'){
-      const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
-      if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
+      // Allow 'system' for auto-reset when promo ends
+      if(data.adminUsername!=='system'){
+        const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
+        if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
+      }
       const lim=Math.max(0,Math.min(999,parseInt(data.limit)||4));
       await SB.from('settings').upsert([{key:'free_rounds_limit',value:String(lim)}]);
       return {success:true,limit:lim};
@@ -3045,6 +3048,17 @@ function sKidWhoops(){
 // ── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',async function(){
   try{var flR=await api({action:'getFreeLimit'});window._freeLimit=flR.success?flR.limit:4;var frd=document.getElementById('free-rounds-display');if(frd)frd.textContent=window._freeLimit;}catch(e){window._freeLimit=4;}
+  // Check if promo already ended — reset free limit if so
+  try{
+    var promoEnd=localStorage.getItem('ww_promo_end');
+    if(promoEnd&&new Date(promoEnd)<=new Date()){
+      localStorage.removeItem('ww_promo_end');
+      if(window._freeLimit>4){
+        window._freeLimit=4;
+        api({action:'setFreeLimit',adminUsername:'system',limit:4}).catch(function(){});
+      }
+    }
+  }catch(e){}
   // Restore session from localStorage on page reload
   try{
     var saved=localStorage.getItem('ww_cu');
@@ -8453,7 +8467,7 @@ function showAnnouncementBanner(ann){
   if(window._cdTimer)clearInterval(window._cdTimer);
   window._cdTimer=setInterval(function(){
     var tag=document.getElementById('ann-countdown');
-    var newCd=getPromoCountdown();
+    var newCd=getPromoCountdown(); // this auto-resets limit if expired
     if(tag){if(newCd)tag.textContent=newCd;else tag.remove();}
     else if(newCd){
       var s2=document.querySelector('#ann-banner span');
@@ -8467,7 +8481,15 @@ function getPromoCountdown(){
     var end=localStorage.getItem('ww_promo_end');
     if(!end)return '';
     var diff=new Date(end)-new Date();
-    if(diff<=0){localStorage.removeItem('ww_promo_end');return '';}
+    if(diff<=0){
+      localStorage.removeItem('ww_promo_end');
+      // Auto-reset free rounds back to 4 when promo ends
+      if(window._freeLimit&&window._freeLimit>4){
+        window._freeLimit=4;
+        api({action:'setFreeLimit',adminUsername:'system',limit:4}).catch(function(){});
+      }
+      return '';
+    }
     var days=Math.floor(diff/86400000);
     var hrs=Math.floor((diff%86400000)/3600000);
     var mins=Math.floor((diff%3600000)/60000);
