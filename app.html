@@ -1999,11 +1999,16 @@ async function showResult(){
   document.getElementById('rstr').textContent=stars;
   document.getElementById('rmsg').textContent=msg;
   const total=QL[diff]||5;const entry={name:CU?CU.name:'Guest',username:CU?CU.username:'guest',type:CU?CU.type:'guest',score:lastSco,total,diff,stars,date:new Date().toLocaleDateString()};
-  showLoader('Saving score...');
-  await api({action:'saveScore',...entry});
-  hideLoader();
-  TICKER.notifyLocal(entry);
-  TICKER.resume();
+  try{
+    showLoader('Saving score...');
+    await api({action:'saveScore',...entry});
+    hideLoader();
+    TICKER.notifyLocal(entry);
+    TICKER.resume();
+  }catch(e){
+    hideLoader();
+    console.warn('Score save failed:',e);
+  }
   const sa=document.getElementById('save-area');
   // Downloads section
   var dlPurchases=CU._purchases||[];
@@ -2035,11 +2040,13 @@ async function showResult(){
     :`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:10px">Login to save your score permanently!</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up Free</button></div></div>`;
   document.getElementById('result').classList.add('show');
   document.getElementById('sbtn').disabled=true;
-  // Fill and auto-open the result popup
-  var rmS=document.getElementById('rm-sco');if(rmS)rmS.textContent=document.getElementById('rsco').textContent;
-  var rmT=document.getElementById('rm-str');if(rmT)rmT.textContent=document.getElementById('rstr').textContent;
-  var rmM=document.getElementById('rm-msg');if(rmM)rmM.textContent=document.getElementById('rmsg').textContent;
-  var rmV=document.getElementById('rm-save');if(rmV&&sa)rmV.innerHTML=sa.innerHTML;
+  // Fill and open the result popup
+  try{
+    var rmS=document.getElementById('rm-sco');if(rmS)rmS.textContent=document.getElementById('rsco').textContent;
+    var rmT=document.getElementById('rm-str');if(rmT)rmT.textContent=document.getElementById('rstr').textContent;
+    var rmM=document.getElementById('rm-msg');if(rmM)rmM.textContent=document.getElementById('rmsg').textContent;
+    var rmV=document.getElementById('rm-save');if(rmV&&sa)rmV.innerHTML=sa.innerHTML;
+  }catch(e){console.warn('Result fill error:',e);}
   openResultModal();
 }
 function retryQuiz(){
