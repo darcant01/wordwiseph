@@ -989,6 +989,16 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div class="card" id="live-users"></div>
       <div class="sectitle" style="margin-top:16px">Plan Breakdown</div>
       <div class="sgrid" id="live-plans"></div>
+      <div class="sectitle" style="margin-top:16px">⏳ Promo Countdown</div>
+      <div class="card" style="padding:14px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:900;color:#1D2B55;margin-bottom:8px">Set promo end date — adds a live countdown to the announcement banner</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <input type="date" id="promo-date" style="padding:8px 12px;border-radius:10px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;color:#1D2B55"/>
+          <button onclick="setPromoDate()" style="padding:8px 16px;border-radius:99px;background:#D4537E;border:none;color:#fff;font-family:Nunito,sans-serif;font-size:12px;font-weight:900;cursor:pointer">⏳ Set</button>
+          <button onclick="clearPromoDate()" style="padding:8px 14px;border-radius:99px;background:#9CA3AF;border:none;color:#fff;font-family:Nunito,sans-serif;font-size:12px;font-weight:900;cursor:pointer">✕ Clear</button>
+        </div>
+        <div id="promo-preview" style="margin-top:8px;font-size:12px;font-weight:700"></div>
+      </div>
       <div class="sectitle" style="margin-top:16px">📢 Announcement to All Users</div>
       <div class="card" style="padding:14px">
         <textarea id="ann-input" rows="2" maxlength="200" placeholder="e.g. 🛠️ Upgrade tonight 2–4 AM — games stay playable, accounts are safe!" style="width:100%;border:1.5px solid #E8EAF0;border-radius:12px;padding:10px 12px;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;color:#1D2B55;resize:vertical;box-sizing:border-box"></textarea>
@@ -8438,6 +8448,50 @@ function showAnnouncementBanner(ann){
   document.body.appendChild(b);
 }
 // ── ADMIN: publish/clear announcement ──
+function getPromoCountdown(){
+  try{
+    var end=localStorage.getItem('ww_promo_end');
+    if(!end)return '';
+    var diff=new Date(end)-new Date();
+    if(diff<=0){localStorage.removeItem('ww_promo_end');return '';}
+    var days=Math.floor(diff/86400000);
+    var hrs=Math.floor((diff%86400000)/3600000);
+    var mins=Math.floor((diff%3600000)/60000);
+    if(days>0)return '\u23f3 '+days+'d '+hrs+'h left!';
+    if(hrs>0)return '\u23f3 '+hrs+'h '+mins+'m left!';
+    return '\u23f3 '+mins+'m left!';
+  }catch(e){return '';}
+}
+function setPromoDate(){
+  var d=document.getElementById('promo-date');
+  if(!d||!d.value){alert('Please select a date');return;}
+  var end=new Date(d.value);
+  end.setHours(23,59,59,999);
+  if(end<=new Date()){alert('Please select a future date');return;}
+  localStorage.setItem('ww_promo_end',end.toISOString());
+  var p2=document.getElementById('promo-preview');
+  var cd=getPromoCountdown();
+  if(p2)p2.innerHTML='<span style="color:#10B981;font-weight:900">\u2705 Countdown set! </span>Banner will show: <b>'+cd+'</b>';
+}
+function clearPromoDate(){
+  localStorage.removeItem('ww_promo_end');
+  var p2=document.getElementById('promo-preview');
+  var inp=document.getElementById('promo-date');
+  if(p2)p2.innerHTML='<span style="color:#9CA3AF">Countdown cleared.</span>';
+  if(inp)inp.value='';
+}
+function loadPromoDate(){
+  try{
+    var end=localStorage.getItem('ww_promo_end');
+    if(!end)return;
+    var d=new Date(end);
+    var inp=document.getElementById('promo-date');
+    if(inp)inp.value=d.toISOString().split('T')[0];
+    var p2=document.getElementById('promo-preview');
+    var cd=getPromoCountdown();
+    if(p2&&cd)p2.innerHTML='<span style="color:#10B981;font-weight:900">\u2705 Active: </span><b>'+cd+'</b>';
+  }catch(e){}
+}
 async function adminPublishAnn(){
   var t=document.getElementById('ann-input').value.trim();
   if(!t){alert('Write an announcement first!');return;}
