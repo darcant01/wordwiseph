@@ -8471,7 +8471,7 @@ function getPromoCountdown(){
     var days=Math.floor(diff/86400000);
     var hrs=Math.floor((diff%86400000)/3600000);
     var mins=Math.floor((diff%3600000)/60000);
-    if(days>0)return '\u23f3 '+days+'d '+hrs+'h left!';
+    if(days>0)return '\u23f3 '+days+'d '+hrs+'h '+mins+'m left!';
     if(hrs>0)return '\u23f3 '+hrs+'h '+mins+'m left!';
     return '\u23f3 '+mins+'m left!';
   }catch(e){return '';}
