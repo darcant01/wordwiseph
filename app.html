@@ -960,6 +960,26 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div class="card" id="arecent"></div>
     </div>
     <div id="a-live" style="display:none">
+      <!-- FREE ROUNDS SETTING -->
+      <div class="card" style="padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div style="font-size:18px">🎮</div>
+        <div style="flex:1;min-width:180px">
+          <div style="font-size:13px;font-weight:900;color:#1D2B55;margin-bottom:2px">Free Rounds Limit</div>
+          <div style="font-size:11px;color:#9CA3AF;font-weight:700">Rounds unsubscribed users can play</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <input type="number" id="fl-inp" value="4" min="0" max="999"
+            style="width:70px;padding:8px;border-radius:10px;border:2px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:20px;font-weight:900;color:#1D2B55;text-align:center"/>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button onclick="flSet(0)"  class="fl-btn" style="padding:5px 10px;border-radius:99px;border:1.5px solid #E8EAF0;background:#fff;color:#1D2B55;font-family:Nunito,sans-serif;font-size:12px;font-weight:900;cursor:pointer">0</button>
+            <button onclick="flSet(4)"  class="fl-btn" style="padding:5px 10px;border-radius:99px;border:1.5px solid #1D2B55;background:#1D2B55;color:#fff;font-family:Nunito,sans-serif;font-size:12px;font-weight:900;cursor:pointer">4</button>
+            <button onclick="flSet(10)" class="fl-btn" style="padding:5px 10px;border-radius:99px;border:1.5px solid #E8EAF0;background:#fff;color:#1D2B55;font-family:Nunito,sans-serif;font-size:12px;font-weight:900;cursor:pointer">10</button>
+            <button onclick="flSet(999)"class="fl-btn" style="padding:5px 10px;border-radius:99px;border:1.5px solid #E8EAF0;background:#fff;color:#1D2B55;font-family:Nunito,sans-serif;font-size:12px;font-weight:900;cursor:pointer">∞</button>
+          </div>
+          <button onclick="saveFreeLimit()" style="padding:8px 18px;border-radius:99px;background:#10B981;border:none;color:#fff;font-family:Nunito,sans-serif;font-size:12px;font-weight:900;cursor:pointer">💾 Save</button>
+        </div>
+        <div id="fl-result" style="width:100%;font-size:11px"></div>
+      </div>
       <div class="sectitle" style="display:flex;align-items:center;justify-content:space-between">
         <span>🟢 Live Monitor</span>
         <button onclick="refreshLive()" style="font-family:Nunito,sans-serif;font-size:12px;font-weight:900;padding:6px 14px;border-radius:99px;background:var(--pink);border:none;color:#fff;cursor:pointer">↻ Refresh</button>
@@ -2319,7 +2339,23 @@ function adminTab(sec,el){
   if(el)el.classList.add('on');
   ['ov','live','us','sc','ac','pay'].forEach(x=>{const d=document.getElementById('a-'+x);if(d)d.style.display='none';});
   const p=document.getElementById('a-'+sec);if(p)p.style.display='block';
-  if(sec==='live')loadLiveMonitor();
+  if(sec==='live'){
+    loadLiveMonitor();
+    // Load current free limit into input
+    api({action:'getFreeLimit'}).then(function(r){
+      var v=r&&r.success?r.limit:4;
+      window._freeLimit=v;
+      var inp=document.getElementById('fl-inp');
+      if(inp)inp.value=v;
+      // Highlight matching quick button
+      document.querySelectorAll('.fl-btn').forEach(function(b){
+        var bv=b.textContent==='∞'?999:parseInt(b.textContent);
+        b.style.background=bv===v?'#1D2B55':'#fff';
+        b.style.color=bv===v?'#fff':'#1D2B55';
+        b.style.border='1.5px solid '+(bv===v?'#1D2B55':'#E8EAF0');
+      });
+    }).catch(function(){});
+  }
   else loadAdmin(sec);
 }
 // ── LIVE MONITOR ──
@@ -2538,6 +2574,16 @@ function renderFreeLimitPanel(cur){
   var frd=document.getElementById('free-rounds-display');if(frd)frd.textContent=cur;
 }
 
+function flSet(n){
+  var inp=document.getElementById('fl-inp');
+  if(inp)inp.value=n;
+  document.querySelectorAll('.fl-btn').forEach(function(b){
+    b.style.background='#fff';b.style.color='#1D2B55';b.style.border='1.5px solid #E8EAF0';
+  });
+  event.target.style.background='#1D2B55';
+  event.target.style.color='#fff';
+  event.target.style.border='1.5px solid #1D2B55';
+}
 async function saveFreeLimit(){
   var inp=document.getElementById('fl-inp');
   var limit=parseInt(inp?inp.value:'4');
