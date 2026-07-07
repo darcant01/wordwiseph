@@ -1030,7 +1030,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 <div id="guest-modal" style="display:none;position:fixed;inset:0;background:rgba(29,43,85,0.93);z-index:9000;align-items:center;justify-content:center;padding:16px">
   <div style="background:#fff;border-radius:24px;padding:32px;max-width:420px;width:100%;text-align:center">
     <div style="font-size:56px;margin-bottom:10px">🔒</div>
-    <div style="font-size:22px;font-weight:900;color:#1D2B55;margin-bottom:10px">5 Free Rounds Used!</div>
+    <div style="font-size:22px;font-weight:900;color:#1D2B55;margin-bottom:10px" id="guest-modal-title">Free Rounds Used!</div>
     <div style="font-size:14px;color:#5F5E5A;font-weight:700;line-height:1.7;margin-bottom:20px">
       Guest players get <strong id="free-rounds-display">4</strong> free rounds.<br>
       Subscribe for <strong>unlimited rounds</strong> + all features!
@@ -1490,6 +1490,16 @@ function navTo(s){
 
 // ── HEADER ───────────────────────────────────────────────────
 function buildHdr(){
+  // Update round counter display if visible
+  const rc=document.getElementById('round-counter');
+  if(rc&&!CU){
+    const lim=window._freeLimit||4;
+    const used=Math.max(0,round-1);
+    rc.textContent='Round '+used+'/'+lim;
+    rc.style.color=used>=lim?'#E24B4A':used>=(lim*0.75)?'#F59E0B':'#10B981';
+  }else if(rc){
+    rc.textContent='';
+  }
   const r=document.getElementById('hdr-right');
   if(!r)return;
   const sb=`<button class="hbtn" id="sndbtn" onclick="toggleSound()" style="min-width:110px">🔊 Sound ON</button>`;
@@ -1782,7 +1792,14 @@ function guestPlay(){CU=null; round=1; buildHdr(); updateDiffCards(); navTo('sta
 // ── GUEST LIMIT ───────────────────────────────────────────────
 function showGuestModal(){
   const m=document.getElementById('guest-modal');
-  if(m)m.style.display='flex';
+  if(!m)return;
+  // Update title and display with current limit
+  const lim=window._freeLimit||4;
+  const t=document.getElementById('guest-modal-title');
+  if(t)t.textContent=lim+' Free Round'+(lim===1?'':'s')+' Used!';
+  const d=document.getElementById('free-rounds-display');
+  if(d)d.textContent=lim;
+  m.style.display='flex';
 }
 function guestModalGo(dest){
   const m=document.getElementById('guest-modal');
@@ -2029,6 +2046,7 @@ function retryQuiz(){
   if(diff==='infinite'){window._infScore=0;window._infPool=null;buildQuiz();window.scrollTo({top:0,behavior:'smooth'});return;}
   round++;
   if(!CU&&round>(window._freeLimit||4)){showGuestModal();return;}
+  buildHdr();
   buildQuiz();window.scrollTo({top:0,behavior:'smooth'});
 }
 
