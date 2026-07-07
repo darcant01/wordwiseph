@@ -2487,8 +2487,12 @@ async function loadAdminPayments(){
 async function loadFreeLimit(){
   var panel=document.getElementById('free-limit-panel');
   if(!panel)return;
-  var res=await api({action:'getFreeLimit'});
-  var cur=res.success?res.limit:4;
+  var cur=window._freeLimit||4;
+  try{
+    var res=await api({action:'getFreeLimit'});
+    if(res&&res.success)cur=res.limit;
+    window._freeLimit=cur;
+  }catch(e){}
   window._freeLimit=cur;
   var frd=document.getElementById('free-rounds-display');if(frd)frd.textContent=cur;
   var btns=[0,1,2,4,5,10,20].map(function(n){
