@@ -942,6 +942,13 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div id="sb-usage-cards" class="sgrid" style="margin-bottom:8px"></div>
       <div id="sb-usage-warning" style="display:none;margin-bottom:16px"></div>
       <div class="sectitle" style="display:flex;align-items:center;justify-content:space-between;margin-top:16px">
+        <span>&#127918; Free Rounds Limit</span>
+        <button onclick="loadFreeLimit()" style="font-family:Nunito,sans-serif;font-size:11px;font-weight:900;padding:5px 12px;border-radius:99px;background:#10B981;border:none;color:#fff;cursor:pointer">&#8635; Refresh</button>
+      </div>
+      <div id="free-limit-panel" class="card" style="padding:16px;margin-bottom:16px">
+        <div style="font-size:13px;color:#9CA3AF;text-align:center">Loading...</div>
+      </div>
+      <div class="sectitle" style="display:flex;align-items:center;justify-content:space-between;margin-top:16px">
         <span>&#9650; Vercel Free Tier Usage</span>
         <button onclick="loadVercelUsage()" style="font-family:Nunito,sans-serif;font-size:11px;font-weight:900;padding:5px 12px;border-radius:99px;background:#000;border:none;color:#fff;cursor:pointer">&#8635; Refresh</button>
       </div>
@@ -1001,7 +1008,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
     <div style="font-size:56px;margin-bottom:10px">🔒</div>
     <div style="font-size:22px;font-weight:900;color:#1D2B55;margin-bottom:10px">5 Free Rounds Used!</div>
     <div style="font-size:14px;color:#5F5E5A;font-weight:700;line-height:1.7;margin-bottom:20px">
-      Guest players get <strong>4 free rounds</strong>.<br>
+      Guest players get <strong id="free-rounds-display">4</strong> free rounds.<br>
       Subscribe for <strong>unlimited rounds</strong> + all features!
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
@@ -1253,6 +1260,17 @@ async function api(data){
       if(error)return {success:false,error:error.message};
       await SB.from('activity').insert({m:'Admin updated @'+data.targetUsername+': '+JSON.stringify(updates)});
       return {success:true};
+    }
+    if(a==='getFreeLimit'){
+      const {data}=await SB.from('settings').select('value').eq('key','free_rounds_limit').limit(1);
+      return {success:true,limit:data&&data.length?parseInt(data[0].value)||4:4};
+    }
+    if(a==='setFreeLimit'){
+      const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
+      if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
+      const lim=Math.max(0,Math.min(999,parseInt(data.limit)||4));
+      await SB.from('settings').upsert([{key:'free_rounds_limit',value:String(lim)}]);
+      return {success:true,limit:lim};
     }
     if(a==='checkPlan'){
       const {data:cp}=await SB.from('users').select('subscription,sub_expiry').eq('username',data.username).limit(1);
@@ -1770,7 +1788,7 @@ function checkAccess(d){
 }
 
 function startQuiz(d){
-  if(!CU&&round>4){showGuestModal();return;}
+  if(!CU&&round>(window._freeLimit||4)){showGuestModal();return;}
   diff=d;
   if(d==='infinite'){window._infScore=0;window._infPool=null;}
   navTo('quiz'); buildQuiz();
@@ -1983,7 +2001,7 @@ async function showResult(){
 function retryQuiz(){
   if(diff==='infinite'){window._infScore=0;window._infPool=null;buildQuiz();window.scrollTo({top:0,behavior:'smooth'});return;}
   round++;
-  if(!CU&&round>4){showGuestModal();return;}
+  if(!CU&&round>(window._freeLimit||4)){showGuestModal();return;}
   buildQuiz();window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -2394,6 +2412,7 @@ async function loadAdmin(sec){
   const{users=[],scores=[],activity=[]}=res;
   if(sec==='ov'){
     loadSupabaseUsage();
+    loadFreeLimit();
     loadVercelUsage();
     const tu=users.filter(u=>u.role!=='admin').length;
     const kids=users.filter(u=>u.type==='kid').length;
@@ -2465,6 +2484,48 @@ async function loadAdminPayments(){
       </tr>`).join('')
     :'<tr><td colspan="9" style="text-align:center;color:#888780;padding:16px">No payment requests yet.</td></tr>';
 }
+async function loadFreeLimit(){
+  var panel=document.getElementById('free-limit-panel');
+  if(!panel)return;
+  var res=await api({action:'getFreeLimit'});
+  var cur=res.success?res.limit:4;
+  window._freeLimit=cur;
+  var frd=document.getElementById('free-rounds-display');if(frd)frd.textContent=cur;
+  var btns=[0,1,2,4,5,10,20].map(function(n){
+    return '<button onclick="document.getElementById(\'fl-inp\').value='+n+'" style="padding:5px 11px;border-radius:99px;border:1.5px solid '+(n===cur?'#1D2B55':'#E8EAF0')+';background:'+(n===cur?'#1D2B55':'#fff')+';color:'+(n===cur?'#fff':'#1D2B55')+';font-family:Nunito,sans-serif;font-size:12px;font-weight:900;cursor:pointer">'+n+'</button>';
+  }).join('');
+  panel.innerHTML=''
+    +'<label style="font-size:13px;font-weight:900;color:#1D2B55;display:block;margin-bottom:10px">How many rounds can <b>unsubscribed users</b> play for free?</label>'
+    +'<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px">'
+    +'<input type="number" id="fl-inp" value="'+cur+'" min="0" max="999" style="width:90px;padding:10px;border-radius:10px;border:2px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:24px;font-weight:900;color:#1D2B55;text-align:center"/>'
+    +'<div><div style="font-size:13px;color:#6B7280;font-weight:700">rounds per session</div>'
+    +'<div style="font-size:12px;color:#10B981;font-weight:900;margin-top:2px">Currently: '+cur+' free rounds</div></div>'
+    +'</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">'+btns+'</div>'
+    +'<button onclick="saveFreeLimit()" style="padding:10px 24px;border-radius:99px;background:#10B981;border:none;color:#fff;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer">&#128190; Save Changes</button>'
+    +'<div id="fl-result" style="margin-top:10px"></div>'
+    +'<div style="margin-top:12px;padding:10px 14px;background:#FFF8E7;border-radius:10px;font-size:12px;color:#92600A;font-weight:700">'
+    +'&#128161; <b>0</b> = must subscribe before any game &nbsp;|&nbsp; <b>4</b> = default &nbsp;|&nbsp; <b>999</b> = unlimited free play</div>';
+}
+
+async function saveFreeLimit(){
+  var inp=document.getElementById('fl-inp');
+  var limit=parseInt(inp?inp.value:'4');
+  if(isNaN(limit)||limit<0||limit>999){alert('Enter a number between 0 and 999');return;}
+  showLoader('Saving...');
+  var res=await api({action:'setFreeLimit',adminUsername:CU.username,limit:limit});
+  hideLoader();
+  var r=document.getElementById('fl-result');
+  if(res.success){
+    window._freeLimit=limit;
+    var frd=document.getElementById('free-rounds-display');if(frd)frd.textContent=limit;
+    if(r)r.innerHTML='<div style="background:#F0FFF4;border-left:4px solid #10B981;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12px;font-weight:800;color:#065F46">&#x2705; Updated to <b>'+limit+' free rounds</b>! Takes effect immediately.</div>';
+    setTimeout(loadFreeLimit,800);
+  }else{
+    if(r)r.innerHTML='<div style="background:#FFF0F0;border-left:4px solid #E24B4A;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12px;font-weight:800;color:#E24B4A">&#x274c; '+(res.error||'Failed')+'</div>';
+  }
+}
+
 async function loadSupabaseUsage(){
   var cards=document.getElementById('sb-usage-cards');
   var warn=document.getElementById('sb-usage-warning');
@@ -2903,6 +2964,7 @@ function sKidWhoops(){
 
 // ── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',async function(){
+  try{var flR=await api({action:'getFreeLimit'});window._freeLimit=flR.success?flR.limit:4;var frd=document.getElementById('free-rounds-display');if(frd)frd.textContent=window._freeLimit;}catch(e){window._freeLimit=4;}
   // Restore session from localStorage on page reload
   try{
     var saved=localStorage.getItem('ww_cu');
