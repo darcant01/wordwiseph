@@ -8433,6 +8433,15 @@ function showAnnouncementBanner(ann){
   var icon=document.createTextNode('\ud83d\udce2 ');
   var span=document.createElement('span');
   span.textContent=ann.text;
+  // Inject countdown if promo is active
+  var cd=getPromoCountdown();
+  if(cd){
+    var cdTag=document.createElement('span');
+    cdTag.id='ann-countdown';
+    cdTag.style.cssText='background:rgba(250,199,117,0.25);border:1px solid rgba(250,199,117,0.5);border-radius:99px;padding:2px 10px;margin-left:8px;font-weight:900;color:#FAC775;white-space:nowrap';
+    cdTag.textContent=cd;
+    span.appendChild(cdTag);
+  }
   var x=document.createElement('button');
   x.textContent='\u2715';
   x.setAttribute('aria-label','Dismiss');
@@ -8440,6 +8449,17 @@ function showAnnouncementBanner(ann){
   x.onclick=function(){try{localStorage.setItem('ann_dismissed',String(ann.id));}catch(e){}b.remove();};
   b.appendChild(icon);b.appendChild(span);b.appendChild(x);
   document.body.appendChild(b);
+  // Live countdown update every 60 seconds
+  if(window._cdTimer)clearInterval(window._cdTimer);
+  window._cdTimer=setInterval(function(){
+    var tag=document.getElementById('ann-countdown');
+    var newCd=getPromoCountdown();
+    if(tag){if(newCd)tag.textContent=newCd;else tag.remove();}
+    else if(newCd){
+      var s2=document.querySelector('#ann-banner span');
+      if(s2){var t=document.createElement('span');t.id='ann-countdown';t.style.cssText='background:rgba(250,199,117,0.25);border:1px solid rgba(250,199,117,0.5);border-radius:99px;padding:2px 10px;margin-left:8px;font-weight:900;color:#FAC775;white-space:nowrap';t.textContent=newCd;s2.appendChild(t);}
+    }
+  },60000);
 }
 // ── ADMIN: publish/clear announcement ──
 function getPromoCountdown(){
@@ -8463,9 +8483,16 @@ function setPromoDate(){
   end.setHours(23,59,59,999);
   if(end<=new Date()){alert('Please select a future date');return;}
   localStorage.setItem('ww_promo_end',end.toISOString());
-  var p2=document.getElementById('promo-preview');
   var cd=getPromoCountdown();
-  if(p2)p2.innerHTML='<span style="color:#10B981;font-weight:900">\u2705 Countdown set! </span>Banner will show: <b>'+cd+'</b>';
+  var p2=document.getElementById('promo-preview');
+  if(p2)p2.innerHTML='<span style="color:#10B981;font-weight:900">\u2705 Set! </span>Countdown: <b style="color:#FAC775">'+cd+'</b>';
+  // Immediately update banner if it's showing
+  var tag=document.getElementById('ann-countdown');
+  if(tag){tag.textContent=cd;}
+  else{
+    var s2=document.querySelector('#ann-banner span');
+    if(s2&&cd){var t=document.createElement('span');t.id='ann-countdown';t.style.cssText='background:rgba(250,199,117,0.25);border:1px solid rgba(250,199,117,0.5);border-radius:99px;padding:2px 10px;margin-left:8px;font-weight:900;color:#FAC775;white-space:nowrap';t.textContent=cd;s2.appendChild(t);}
+  }
 }
 function clearPromoDate(){
   localStorage.removeItem('ww_promo_end');
