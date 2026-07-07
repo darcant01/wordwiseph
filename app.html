@@ -2484,15 +2484,21 @@ async function loadAdminPayments(){
       </tr>`).join('')
     :'<tr><td colspan="9" style="text-align:center;color:#888780;padding:16px">No payment requests yet.</td></tr>';
 }
-async function loadFreeLimit(){
+function loadFreeLimit(){
   var panel=document.getElementById('free-limit-panel');
   if(!panel)return;
   var cur=window._freeLimit||4;
-  try{
-    var res=await api({action:'getFreeLimit'});
-    if(res&&res.success)cur=res.limit;
-    window._freeLimit=cur;
-  }catch(e){}
+  // Render immediately with current value
+  renderFreeLimitPanel(cur);
+  // Then update async from DB
+  api({action:'getFreeLimit'}).then(function(res){
+    if(res&&res.success&&res.limit!==cur){
+      window._freeLimit=res.limit;
+      renderFreeLimitPanel(res.limit);
+    }
+  }).catch(function(){});
+}
+function renderFreeLimitPanel(cur){
   window._freeLimit=cur;
   var frd=document.getElementById('free-rounds-display');if(frd)frd.textContent=cur;
   var btns=[0,1,2,4,5,10,20].map(function(n){
@@ -2510,6 +2516,7 @@ async function loadFreeLimit(){
     +'<div id="fl-result" style="margin-top:10px"></div>'
     +'<div style="margin-top:12px;padding:10px 14px;background:#FFF8E7;border-radius:10px;font-size:12px;color:#92600A;font-weight:700">'
     +'&#128161; <b>0</b> = must subscribe before any game &nbsp;|&nbsp; <b>4</b> = default &nbsp;|&nbsp; <b>999</b> = unlimited free play</div>';
+  var frd=document.getElementById('free-rounds-display');if(frd)frd.textContent=cur;
 }
 
 async function saveFreeLimit(){
