@@ -2412,7 +2412,6 @@ async function loadAdmin(sec){
   const{users=[],scores=[],activity=[]}=res;
   if(sec==='ov'){
     loadSupabaseUsage();
-    loadFreeLimit();
     loadVercelUsage();
     const tu=users.filter(u=>u.role!=='admin').length;
     const kids=users.filter(u=>u.type==='kid').length;
@@ -2435,6 +2434,24 @@ async function loadAdmin(sec){
     if(ad)ad.innerHTML=`<div class="scard"><div class="snum">${easy}</div><div class="slbll">Easy</div></div><div class="scard"><div class="snum">${med}</div><div class="slbll">Medium</div></div><div class="scard"><div class="snum">${hard}</div><div class="slbll">Hard</div></div>`;
     const ar=document.getElementById('arecent');
     if(ar)ar.innerHTML=activity.slice(0,8).map(a=>`<div class="arow"><div class="adot" style="background:var(--pink)"></div><div class="atxt">${a.m}</div><div class="atime">${a.t}</div></div>`).join('')||'<div style="padding:14px;text-align:center;color:#888780">No activity yet.</div>';
+    // ── FREE ROUNDS PANEL — inline render ──
+    (function(){
+      var fl=document.getElementById('free-limit-panel');
+      if(!fl)return;
+      var cur=window._freeLimit||4;
+      var btns=[0,1,2,4,5,10,20].map(function(n){
+        return '<button onclick="window._freeLimit='+n+';document.getElementById(\'fl-inp\').value='+n+';this.parentNode.querySelectorAll(\'button\').forEach(function(b){b.style.background=\'#fff\';b.style.color=\'#1D2B55\';b.style.border=\'1.5px solid #E8EAF0\';});this.style.background=\'#1D2B55\';this.style.color=\'#fff\';this.style.border=\'1.5px solid #1D2B55\';" style="padding:5px 14px;border-radius:99px;border:1.5px solid '+(n===cur?'#1D2B55':'#E8EAF0')+';background:'+(n===cur?'#1D2B55':'#fff')+';color:'+(n===cur?'#fff':'#1D2B55')+';font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer">'+n+'</button>';
+      }).join('');
+      fl.innerHTML='<div style="margin-bottom:12px;font-size:13px;font-weight:900;color:#1D2B55">How many rounds can unsubscribed users play for free?</div>'
+        +'<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px">'
+        +'<input type="number" id="fl-inp" value="'+cur+'" min="0" max="999" style="width:80px;padding:10px;border-radius:10px;border:2px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:22px;font-weight:900;color:#1D2B55;text-align:center"/>'
+        +'<div style="font-size:13px;color:#6B7280;font-weight:700">rounds &nbsp;<span style="color:#10B981;font-weight:900">Currently: '+cur+' free</span></div>'
+        +'</div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">'+btns+'</div>'
+        +'<button onclick="saveFreeLimit()" style="padding:10px 24px;border-radius:99px;background:#10B981;border:none;color:#fff;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer">&#128190; Save</button>'
+        +'<div id="fl-result" style="margin-top:10px"></div>'
+        +'<div style="margin-top:10px;padding:10px;background:#FFF8E7;border-radius:8px;font-size:11px;color:#92600A;font-weight:700">0 = must subscribe first &nbsp;|&nbsp; 4 = default &nbsp;|&nbsp; 999 = unlimited free</div>';
+    })();
   }else if(sec==='us'){
     const ub=document.getElementById('utbody');
     if(ub)ub.innerHTML=users.map((u,i)=>{
