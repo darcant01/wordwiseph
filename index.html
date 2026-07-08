@@ -992,5 +992,57 @@ window.addEventListener('scroll',()=>{
   nav.style.boxShadow=window.scrollY>20?'0 4px 24px rgba(0,0,0,0.25)':'none';
 });
 </script>
+
+<!-- ══ ANNOUNCEMENT + PROMO COUNTDOWN BANNER ══ -->
+<script>
+(function(){
+  var SB_URL='https://ahtyjglufrvtfnhkooux.supabase.co';
+  var SB_KEY='sb_publishable_AylXCLg2W3sQzQSn5sH7Xg_k4ZQblM7';
+  var promoEnd='';
+  function cdText(){
+    if(!promoEnd)return '';
+    var diff=new Date(promoEnd)-new Date();
+    if(diff<=0)return '';
+    var d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),m=Math.floor((diff%3600000)/60000);
+    if(d>0)return '\u23f3 '+d+'d '+h+'h '+m+'m left!';
+    if(h>0)return '\u23f3 '+h+'h '+m+'m left!';
+    return '\u23f3 '+m+'m left!';
+  }
+  fetch(SB_URL+'/rest/v1/settings?select=key,value&key=in.(ann_text,ann_id,promo_end)',{
+    headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();}).then(function(rows){
+    if(!Array.isArray(rows))return;
+    var get=function(k){var x=rows.find(function(r){return r.key===k;});return x?x.value:'';};
+    var text=get('ann_text'),id=get('ann_id')||'0';
+    promoEnd=get('promo_end')||'';
+    if(!text)return;
+    try{if(localStorage.getItem('ann_dismissed')===String(id))return;}catch(e){}
+    var b=document.createElement('div');
+    b.id='ann-banner';
+    b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:10004;background:linear-gradient(90deg,#1D2B55,#2D3F7A);color:#fff;padding:12px 48px 12px 16px;font-family:Nunito,sans-serif;font-size:13px;font-weight:800;text-align:center;box-shadow:0 -4px 20px rgba(0,0,0,0.3)';
+    var span=document.createElement('span');
+    span.textContent='\ud83d\udce2 '+text;
+    var cd=cdText();
+    if(cd){
+      var tag=document.createElement('span');
+      tag.id='lp-countdown';
+      tag.style.cssText='background:rgba(250,199,117,0.25);border:1px solid rgba(250,199,117,0.5);border-radius:99px;padding:2px 10px;margin-left:8px;font-weight:900;color:#FAC775;white-space:nowrap';
+      tag.textContent=cd;
+      span.appendChild(tag);
+    }
+    var x=document.createElement('button');
+    x.textContent='\u2715';
+    x.style.cssText='position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-weight:900;cursor:pointer;font-family:Nunito,sans-serif';
+    x.onclick=function(){try{localStorage.setItem('ann_dismissed',String(id));}catch(e){}b.remove();};
+    b.appendChild(span);b.appendChild(x);
+    document.body.appendChild(b);
+    setInterval(function(){
+      var t=document.getElementById('lp-countdown');
+      var c2=cdText();
+      if(t){if(c2)t.textContent=c2;else t.remove();}
+    },60000);
+  }).catch(function(){});
+})();
+</script>
 </body>
 </html>
