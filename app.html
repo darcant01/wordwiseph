@@ -1491,12 +1491,25 @@ var KINSTR={
   'how-many-legs':'\ud83e\uddb5 Count the legs! How many does this animal have?',
   'big-or-small':'\ud83d\udc0b Is this animal BIG or small? Tap the right answer!'
 };
+function guestRoundsUsed(){
+  try{return parseInt(sessionStorage.getItem('ww_rounds_used')||'0')||0;}catch(e){return window._roundsUsed||0;}
+}
+function guestRoundGate(){
+  if(CU)return true; // logged-in users: not limited by free rounds
+  var lim=window._freeLimit||4;
+  var used=guestRoundsUsed();
+  if(used>=lim){showGuestModal();return false;}
+  try{sessionStorage.setItem('ww_rounds_used',String(used+1));}catch(e){window._roundsUsed=used+1;}
+  try{updateFreeRoundsBadge();}catch(e){}
+  try{buildHdr();}catch(e){}
+  return true;
+}
 function updateFreeRoundsBadge(){
   var b=document.getElementById('free-rounds-badge');
   if(!b)return;
   if(CU){b.style.display='none';return;}
   var lim=window._freeLimit||4;
-  var used=Math.max(0,(typeof round!=='undefined'?round:1)-1);
+  var used=guestRoundsUsed();
   var left=Math.max(0,lim-used);
   if(lim>=999){b.textContent='\ud83c\udf89 UNLIMITED free rounds \u2014 promo active!';}
   else{b.textContent='\ud83c\udfae Free player: '+left+' of '+lim+' rounds left \u2014 Sign up to save scores!';}
@@ -1546,7 +1559,7 @@ function buildHdr(){
   const rc=document.getElementById('round-counter');
   if(rc&&!CU){
     const lim=window._freeLimit||4;
-    const used=Math.max(0,round-1);
+    const used=guestRoundsUsed();
     rc.textContent='Round '+used+'/'+lim;
     rc.style.color=used>=lim?'#E24B4A':used>=(lim*0.75)?'#F59E0B':'#10B981';
   }else if(rc){
@@ -1884,7 +1897,7 @@ function checkAccess(d){
 }
 
 function startQuiz(d){
-  if(!CU&&round>(window._freeLimit||4)){showGuestModal();return;}
+  if(!guestRoundGate())return;
   diff=d;
   if(d==='infinite'){window._infScore=0;window._infPool=null;}
   navTo('quiz'); buildQuiz();
@@ -2106,7 +2119,7 @@ async function showResult(){
 function retryQuiz(){
   if(diff==='infinite'){window._infScore=0;window._infPool=null;buildQuiz();window.scrollTo({top:0,behavior:'smooth'});return;}
   round++;
-  if(!CU&&round>(window._freeLimit||4)){showGuestModal();return;}
+  if(!guestRoundGate())return;
   buildHdr();
   buildQuiz();window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -3346,6 +3359,7 @@ function checkSpellAccess(d){
 }
 
 function launchSpell(d){
+  if(!guestRoundGate())return;
   spellDiff=d;
   navTo('spell');
   buildSpell();
@@ -3709,6 +3723,7 @@ function checkSharkAccess(d){
 }
 
 function launchShark(d){
+  if(!guestRoundGate())return;
   sharkDiff=d;
   sharkWordTime=SHARK_TL[d];
   document.getElementById('shark-start').style.display='none';
@@ -4033,6 +4048,7 @@ function checkOddAccess(d){
 }
 
 function launchOdd(d){
+  if(!guestRoundGate())return;
   oddDiff=d;
   navTo('odd');
   buildOdd();
@@ -4366,6 +4382,7 @@ function checkScrambleAccess(d){
 }
 
 function launchScramble(d){
+  if(!guestRoundGate())return;
   scrambleDiff=d;
   navTo('scramble');
   buildScramble();
@@ -4914,6 +4931,7 @@ function checkChainAccess(d){
 }
 
 function launchChain(d){
+  if(!guestRoundGate())return;
   chainDiff=d;
   chainScore=0; chainBest=0; chainUsedWords=[];
   chainTTotal=CHAIN_TL[d]; chainTLeft=chainTTotal;
@@ -5208,6 +5226,7 @@ function checkSprintAccess(d){
 }
 
 function launchSprint(d){
+  if(!guestRoundGate())return;
   sprintDiff=d;
   sprintScore=0; sprintUsed=[]; sprintAccepted=[];
   sprintTLeft=60; sprintRunning=true;
