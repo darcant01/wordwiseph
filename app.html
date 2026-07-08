@@ -1033,13 +1033,13 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
     <div style="font-size:56px;margin-bottom:10px">🔒</div>
     <div style="font-size:22px;font-weight:900;color:#1D2B55;margin-bottom:10px" id="guest-modal-title">Free Rounds Used!</div>
     <div style="font-size:14px;color:#5F5E5A;font-weight:700;line-height:1.7;margin-bottom:20px">
-      Guest players get <strong id="free-rounds-display">4</strong> free rounds.<br>
+      <span id="gm-who">Guest players</span> get <strong id="free-rounds-display">4</strong> free rounds.<br>
       Subscribe for <strong>unlimited rounds</strong> + all features!
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <button class="btn btn-pink btn-block" onclick="guestModalGo('pricing')">View Plans</button>
-      <button class="btn btn-navy btn-block" onclick="guestModalGo('register')">Create Free Account</button>
-      <button class="lnk" onclick="guestModalGo('login')" style="margin-top:4px">Already have an account? Login</button>
+      <button class="btn btn-navy btn-block" id="gm-register" onclick="guestModalGo('register')">Create Free Account</button>
+      <button class="lnk" id="gm-login" onclick="guestModalGo('login')" style="margin-top:4px">Already have an account? Login</button>
     </div>
   </div>
 </div>
@@ -1494,8 +1494,14 @@ var KINSTR={
 function guestRoundsUsed(){
   try{return parseInt(sessionStorage.getItem('ww_rounds_used')||'0')||0;}catch(e){return window._roundsUsed||0;}
 }
+function hasActiveSub(){
+  if(!CU)return false;
+  if(CU.role==='admin')return true;
+  var s=CU.subscription||'free';
+  return s==='basic'||s==='premium'||s==='trial'||s==='weekly';
+}
 function guestRoundGate(){
-  if(CU)return true; // logged-in users: not limited by free rounds
+  if(hasActiveSub())return true; // subscribers & admin: unlimited
   var lim=window._freeLimit||4;
   var used=guestRoundsUsed();
   if(used>=lim){showGuestModal();return false;}
@@ -1507,11 +1513,12 @@ function guestRoundGate(){
 function updateFreeRoundsBadge(){
   var b=document.getElementById('free-rounds-badge');
   if(!b)return;
-  if(CU){b.style.display='none';return;}
+  if(hasActiveSub()){b.style.display='none';return;}
   var lim=window._freeLimit||4;
   var used=guestRoundsUsed();
   var left=Math.max(0,lim-used);
   if(lim>=999){b.textContent='\ud83c\udf89 UNLIMITED free rounds \u2014 promo active!';}
+  else if(CU){b.textContent='\ud83c\udfae Free plan: '+left+' of '+lim+' rounds left \u2014 Upgrade for unlimited!';}
   else{b.textContent='\ud83c\udfae Free player: '+left+' of '+lim+' rounds left \u2014 Sign up to save scores!';}
   b.style.display='block';
 }
@@ -1557,7 +1564,7 @@ function navTo(s){
 function buildHdr(){
   // Update round counter display if visible
   const rc=document.getElementById('round-counter');
-  if(rc&&!CU){
+  if(rc&&!hasActiveSub()){
     const lim=window._freeLimit||4;
     const used=guestRoundsUsed();
     rc.textContent='Round '+used+'/'+lim;
@@ -1858,12 +1865,24 @@ function guestPlay(){CU=null; round=1; buildHdr(); updateDiffCards(); navTo('sta
 function showGuestModal(){
   const m=document.getElementById('guest-modal');
   if(!m)return;
-  // Update title and display with current limit
   const lim=window._freeLimit||4;
   const t=document.getElementById('guest-modal-title');
   if(t)t.textContent=lim+' Free Round'+(lim===1?'':'s')+' Used!';
   const d=document.getElementById('free-rounds-display');
   if(d)d.textContent=lim;
+  // Adapt for logged-in free users vs guests
+  const who=document.getElementById('gm-who');
+  const reg=document.getElementById('gm-register');
+  const log=document.getElementById('gm-login');
+  if(CU){
+    if(who)who.textContent='Free accounts';
+    if(reg)reg.style.display='none';
+    if(log)log.style.display='none';
+  }else{
+    if(who)who.textContent='Guest players';
+    if(reg)reg.style.display='';
+    if(log)log.style.display='';
+  }
   m.style.display='flex';
 }
 function guestModalGo(dest){
