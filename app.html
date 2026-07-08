@@ -440,7 +440,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 
 <!-- ══ START ══ -->
 <div id="sc-start" class="screen active">
-  <div class="hero"><div class="htitle">WordWise <span>Grammar!</span></div><div class="hsub">Race the clock · Earn stars · Top the leaderboard!</div></div>
+  <div class="hero"><div class="htitle">WordWise <span>Grammar!</span></div><div class="hsub">Race the clock · Earn stars · Top the leaderboard!</div><div id="free-rounds-badge" style="display:none;margin:10px auto 0;max-width:340px;background:rgba(250,199,117,0.15);border:1.5px solid rgba(250,199,117,0.5);border-radius:99px;padding:6px 16px;font-size:12px;font-weight:900;color:#FAC775;text-align:center"></div></div>
   <div class="wrap">
     <div class="card">
       <div class="ctitle">Pick your level</div>
@@ -1481,6 +1481,17 @@ var KINSTR={
   'how-many-legs':'\ud83e\uddb5 Count the legs! How many does this animal have?',
   'big-or-small':'\ud83d\udc0b Is this animal BIG or small? Tap the right answer!'
 };
+function updateFreeRoundsBadge(){
+  var b=document.getElementById('free-rounds-badge');
+  if(!b)return;
+  if(CU){b.style.display='none';return;}
+  var lim=window._freeLimit||4;
+  var used=Math.max(0,(typeof round!=='undefined'?round:1)-1);
+  var left=Math.max(0,lim-used);
+  if(lim>=999){b.textContent='\ud83c\udf89 UNLIMITED free rounds \u2014 promo active!';}
+  else{b.textContent='\ud83c\udfae Free player: '+left+' of '+lim+' rounds left \u2014 Sign up to save scores!';}
+  b.style.display='block';
+}
 function showGameInstr(s,el){
   if(!KINSTR[s]||!el)return;
   if(document.getElementById('ginstr-'+s))return;
@@ -1498,6 +1509,7 @@ function navTo(s){
   const el=document.getElementById('sc-'+s);
   if(el)el.classList.add('active');
   try{showGameInstr(s,el);}catch(e){}
+  if(s==='start')try{updateFreeRoundsBadge();}catch(e){}
   if(s==='lb')   { loadLBGame('grammar','easy'); }
   if(s==='profile') loadProfile();
   if(s==='admin'){
@@ -3104,7 +3116,7 @@ function sKidWhoops(){
 
 // ── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',async function(){
-  try{var flR=await api({action:'getFreeLimit'});window._freeLimit=flR.success?flR.limit:4;var frd=document.getElementById('free-rounds-display');if(frd)frd.textContent=window._freeLimit;}catch(e){window._freeLimit=4;}
+  try{var flR=await api({action:'getFreeLimit'});window._freeLimit=flR.success?flR.limit:4;var frd=document.getElementById('free-rounds-display');if(frd)frd.textContent=window._freeLimit;try{updateFreeRoundsBadge();}catch(e){}}catch(e){window._freeLimit=4;}
   // Check if promo already ended — reset free limit if so
   try{
     var promoEnd=localStorage.getItem('ww_promo_end');
