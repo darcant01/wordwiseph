@@ -1286,6 +1286,16 @@ async function api(data){
       await SB.from('activity').insert({m:'Admin updated @'+data.targetUsername+': '+JSON.stringify(updates)});
       return {success:true};
     }
+    if(a==='getPromoEnd'){
+      const {data}=await SB.from('settings').select('value').eq('key','promo_end').limit(1);
+      return {success:true,end:data&&data.length?data[0].value:''};
+    }
+    if(a==='setPromoEnd'){
+      const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
+      if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
+      await SB.from('settings').upsert([{key:'promo_end',value:data.end||''}]);
+      return {success:true};
+    }
     if(a==='getFreeLimit'){
       const {data}=await SB.from('settings').select('value').eq('key','free_rounds_limit').limit(1);
       return {success:true,limit:data&&data.length?parseInt(data[0].value)||4:4};
@@ -3116,6 +3126,11 @@ function sKidWhoops(){
 
 // ── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',async function(){
+  try{
+    var peR=await api({action:'getPromoEnd'});
+    if(peR&&peR.success&&peR.end&&new Date(peR.end)>new Date()){localStorage.setItem('ww_promo_end',peR.end);}
+    else if(peR&&peR.success&&!peR.end){localStorage.removeItem('ww_promo_end');}
+  }catch(e){}
   try{var flR=await api({action:'getFreeLimit'});window._freeLimit=flR.success?flR.limit:4;var frd=document.getElementById('free-rounds-display');if(frd)frd.textContent=window._freeLimit;try{updateFreeRoundsBadge();}catch(e){}}catch(e){window._freeLimit=4;}
   // Check if promo already ended — reset free limit if so
   try{
@@ -8576,6 +8591,7 @@ function setPromoDate(){
   end.setHours(23,59,59,999);
   if(end<=new Date()){alert('Please select a future date');return;}
   localStorage.setItem('ww_promo_end',end.toISOString());
+  api({action:'setPromoEnd',adminUsername:CU.username,end:end.toISOString()}).catch(function(){});
   var cd=getPromoCountdown();
   var p2=document.getElementById('promo-preview');
   if(p2)p2.innerHTML='<span style="color:#10B981;font-weight:900">\u2705 Set! </span>Countdown: <b style="color:#FAC775">'+cd+'</b>';
@@ -8589,6 +8605,7 @@ function setPromoDate(){
 }
 function clearPromoDate(){
   localStorage.removeItem('ww_promo_end');
+  if(CU)api({action:'setPromoEnd',adminUsername:CU.username,end:''}).catch(function(){});
   var p2=document.getElementById('promo-preview');
   var inp=document.getElementById('promo-date');
   if(p2)p2.innerHTML='<span style="color:#9CA3AF">Countdown cleared.</span>';
