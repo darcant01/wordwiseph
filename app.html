@@ -440,14 +440,11 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 
 <!-- ══ START ══ -->
 <div id="sc-start" class="screen active">
-  <div class="hero"><div class="htitle">WordWise <span>Grammar!</span></div><div class="hsub">Race the clock · Earn stars · Top the leaderboard!</div><div id="free-rounds-badge" style="display:none;margin:10px auto 0;max-width:320px;background:rgba(250,199,117,0.15);border:1.5px solid rgba(250,199,117,0.5);border-radius:99px;padding:6px 16px;font-size:12px;font-weight:900;color:#FAC775;text-align:center"></div></div>
+  <div class="hero"><div class="htitle">WordWise <span>Grammar!</span></div><div class="hsub">Race the clock · Earn stars · Top the leaderboard!</div></div>
   <div class="wrap">
     <div class="card">
       <div class="ctitle">Pick your level</div>
-      <div class="csub">Easy: 5 questions · Medium: 15 questions · Hard: 30 questions</div><div style="max-width:520px;margin:8px auto 0">
-      <button onclick="var d=document.getElementById('howto-quiz-start');d.style.display=d.style.display==='none'?'block':'none'" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);border-radius:99px;padding:5px 14px;font-family:Nunito,sans-serif;font-size:11px;font-weight:900;color:#fff;cursor:pointer">❓ How to Play</button>
-      <div id="howto-quiz-start" style="display:none;margin-top:8px;background:rgba(255,255,255,0.1);border-radius:14px;padding:12px 16px;font-size:12px;font-weight:700;color:#fff;text-align:left;line-height:1.6"><div style="display:flex;gap:8px;margin-bottom:6px"><span>1.</span><span>Pick a difficulty level below.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>2.</span><span>Read each question and tap the correct answer before the timer runs out.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>3.</span><span>Answer all questions, then tap "See My Score!" for your stars.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>4.</span><span>Score 100% to become a Grammar Superstar! 🏆</span></div></div>
-    </div>
+      <div class="csub">Easy: 5 questions · Medium: 15 questions · Hard: 30 questions</div><div style="margin-top:10px;background:#FFF8E7;border:1.5px solid #FFD93D;border-radius:12px;padding:10px 14px;font-size:12.5px;font-weight:700;color:#5F5E5A;line-height:1.6;text-align:center">💡 Read each question and tap the correct answer <b>before the timer runs out</b>. Finish all questions, then tap <b>"See My Score!"</b> to earn your stars! ⭐</div>
       <div class="diff-grid">
         <div class="dc easy" onclick="startQuiz('easy')">
           <div class="di">🌱</div>
@@ -551,10 +548,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
     <div class="rpill" id="spell-round-pill">Round 1</div>
     <div class="strow" id="spell-stars"></div>
     <div class="htitle" style="font-size:clamp(18px,4vw,26px)">Spell It <span>Right!</span></div>
-    <div class="hsub" id="spell-diff-lbl">Easy — 10 words</div><div style="max-width:520px;margin:8px auto 0">
-      <button onclick="var d=document.getElementById('howto-spell');d.style.display=d.style.display==='none'?'block':'none'" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);border-radius:99px;padding:5px 14px;font-family:Nunito,sans-serif;font-size:11px;font-weight:900;color:#fff;cursor:pointer">❓ How to Play</button>
-      <div id="howto-spell" style="display:none;margin-top:8px;background:rgba(255,255,255,0.1);border-radius:14px;padding:12px 16px;font-size:12px;font-weight:700;color:#fff;text-align:left;line-height:1.6"><div style="display:flex;gap:8px;margin-bottom:6px"><span>1.</span><span>Look at the picture and hint for each word.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>2.</span><span>Type the correct spelling in the box.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>3.</span><span>Tap Check (or press Enter) to submit.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>4.</span><span>Spell all words correctly to earn 5 stars! ⭐</span></div></div>
-    </div>
+    <div class="hsub" id="spell-diff-lbl">Easy — 10 words</div>
     <div class="pbar-w"><div class="pbar" id="spell-pbar"></div></div>
     <div class="plbl" id="spell-plbl">0 of 10 answered</div>
     <div class="tw">
@@ -585,6 +579,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 <div id="sc-spell-pick" class="screen">
   <div class="hero"><div class="htitle">Spell It <span>Right!</span></div><div class="hsub">Choose your difficulty level</div></div>
   <div class="wrap">
+    <div style="text-align:center;padding:4px 0 8px"><div style="font-size:clamp(34px,8vw,54px);margin-bottom:8px">📝</div><div style="font-size:clamp(15px,4vw,20px);font-weight:900;color:var(--navy);margin-bottom:6px">Pick the correct spelling!</div><div style="font-size:clamp(12px,3vw,14px);color:#5F5E5A;font-weight:700;line-height:1.7;margin-bottom:14px">Read carefully and choose the correct spelling of each word.<br>Answer before the timer runs out to earn stars! ⭐</div></div>
     <div class="diff-grid">
       <div class="dc easy" onclick="launchSpell('easy')">
         <div class="di">🌱</div>
@@ -1466,6 +1461,34 @@ function stopAllGames(){
   try{sprintRunning=false}catch(e){}
 }
 
+
+// ── Kids game instructions (auto-banner on each game screen) ──
+var KINSTR={
+  'letter-tracer':'\u270f\ufe0f Follow the dots to trace each letter. Tap Next for a new letter!',
+  'abc-order':'\ud83d\udd24 Tap the letters in ABC order \u2014 A first, Z last!',
+  'missing-letter':'\ud83d\udd0d A letter is missing! Tap the right letter to finish the word.',
+  'rhyme':'\ud83c\udfb5 Pick the word that rhymes \u2014 it sounds the same at the end!',
+  'color-match':'\ud83c\udfa8 Match each color to its name!',
+  'find-color':'\ud83d\udc40 Find and tap the object with the right color!',
+  'color-word':'\ud83c\udf08 Read the color word and tap the matching color!',
+  'color-mixer':'\ud83e\uddea Mix two colors \u2014 what new color do they make?',
+  'rainbow-order':'\ud83c\udf08 Put the rainbow colors in the correct order!',
+  'animal-match':'\ud83d\udc3e Match each animal to its name!',
+  'animal-sound':'\ud83d\udd0a Which animal makes this sound? Tap it!',
+  'animal-group':'\ud83e\udd81 Pick the animal that belongs to the group!',
+  'animal-alphabet':'\ud83d\udc18 Which animal starts with this letter?',
+  'where-live':'\ud83c\udfe0 Where does this animal live? Tap its home!',
+  'how-many-legs':'\ud83e\uddb5 Count the legs! How many does this animal have?',
+  'big-or-small':'\ud83d\udc0b Is this animal BIG or small? Tap the right answer!'
+};
+function showGameInstr(s,el){
+  if(!KINSTR[s]||!el)return;
+  if(document.getElementById('ginstr-'+s))return;
+  var host=el.querySelector('.wrap')||el;
+  host.insertAdjacentHTML('afterbegin',
+    '<div id="ginstr-'+s+'" style="background:#FFF8E7;border:2px solid #FFD93D;border-radius:14px;padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:800;color:#1D2B55;text-align:center;line-height:1.6">'+KINSTR[s]+'</div>');
+}
+
 function navTo(s){
   try{if(liveRefreshTimer)clearInterval(liveRefreshTimer);}catch(e){}
   if(s==='login' && document.getElementById('login-modal')){openLoginModal();return;}
@@ -1474,7 +1497,7 @@ function navTo(s){
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   const el=document.getElementById('sc-'+s);
   if(el)el.classList.add('active');
-  if(s==='start')try{updateFreeRoundsBadge();}catch(e){}
+  try{showGameInstr(s,el);}catch(e){}
   if(s==='lb')   { loadLBGame('grammar','easy'); }
   if(s==='profile') loadProfile();
   if(s==='admin'){
@@ -1496,17 +1519,6 @@ function navTo(s){
 }
 
 // ── HEADER ───────────────────────────────────────────────────
-function updateFreeRoundsBadge(){
-  var b=document.getElementById('free-rounds-badge');
-  if(!b)return;
-  if(CU){b.style.display='none';return;}
-  var lim=window._freeLimit||4;
-  var used=Math.max(0,(typeof round!=='undefined'?round:1)-1);
-  var left=Math.max(0,lim-used);
-  if(lim>=999){b.textContent='\ud83c\udf89 UNLIMITED free rounds \u2014 promo active!';}
-  else{b.textContent='\ud83c\udfae Free player: '+left+' of '+lim+' rounds left \u2014 Sign up to save scores!';}
-  b.style.display='block';
-}
 function buildHdr(){
   // Update round counter display if visible
   const rc=document.getElementById('round-counter');
@@ -3092,7 +3104,7 @@ function sKidWhoops(){
 
 // ── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',async function(){
-  try{var flR=await api({action:'getFreeLimit'});window._freeLimit=flR.success?flR.limit:4;var frd=document.getElementById('free-rounds-display');if(frd)frd.textContent=window._freeLimit;try{updateFreeRoundsBadge();}catch(e){}}catch(e){window._freeLimit=4;}
+  try{var flR=await api({action:'getFreeLimit'});window._freeLimit=flR.success?flR.limit:4;var frd=document.getElementById('free-rounds-display');if(frd)frd.textContent=window._freeLimit;}catch(e){window._freeLimit=4;}
   // Check if promo already ended — reset free limit if so
   try{
     var promoEnd=localStorage.getItem('ww_promo_end');
@@ -6028,10 +6040,7 @@ function showRhymeResult(){
   <div class="hero">
     <div class="rpill" id="shark-pill">Get Ready!</div>
     <div class="htitle" style="font-size:clamp(20px,5vw,32px)">Shark <span>Typing!</span> 🦈</div>
-    <div class="hsub" id="shark-diff-lbl">Type the word before the shark attacks!</div><div style="max-width:520px;margin:8px auto 0">
-      <button onclick="var d=document.getElementById('howto-shark');d.style.display=d.style.display==='none'?'block':'none'" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);border-radius:99px;padding:5px 14px;font-family:Nunito,sans-serif;font-size:11px;font-weight:900;color:#fff;cursor:pointer">❓ How to Play</button>
-      <div id="howto-shark" style="display:none;margin-top:8px;background:rgba(255,255,255,0.1);border-radius:14px;padding:12px 16px;font-size:12px;font-weight:700;color:#fff;text-align:left;line-height:1.6"><div style="display:flex;gap:8px;margin-bottom:6px"><span>1.</span><span>A word appears on screen — type it fast!</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>2.</span><span>Every correct word pushes the shark back. 🦈</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>3.</span><span>Typos let the shark swim closer.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>4.</span><span>Survive as long as you can to set a high score!</span></div></div>
-    </div>
+    <div class="hsub" id="shark-diff-lbl">Type the word before the shark attacks!</div>
   </div>
   <div class="qmain" style="padding-top:0">
     <div id="shark-game" style="display:none">
@@ -6090,10 +6099,7 @@ function showRhymeResult(){
     <div class="rpill" id="odd-pill">Round 1</div>
     <div class="strow" id="odd-stars"></div>
     <div class="htitle" style="font-size:clamp(20px,5vw,32px)">Odd One <span>Out!</span> 🎯</div>
-    <div class="hsub" id="odd-diff-lbl">Find the word that doesn't belong!</div><div style="max-width:520px;margin:8px auto 0">
-      <button onclick="var d=document.getElementById('howto-odd');d.style.display=d.style.display==='none'?'block':'none'" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);border-radius:99px;padding:5px 14px;font-family:Nunito,sans-serif;font-size:11px;font-weight:900;color:#fff;cursor:pointer">❓ How to Play</button>
-      <div id="howto-odd" style="display:none;margin-top:8px;background:rgba(255,255,255,0.1);border-radius:14px;padding:12px 16px;font-size:12px;font-weight:700;color:#fff;text-align:left;line-height:1.6"><div style="display:flex;gap:8px;margin-bottom:6px"><span>1.</span><span>Read the four words carefully.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>2.</span><span>Three belong to the same group — one does not.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>3.</span><span>Tap the odd one out before the timer ends.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>4.</span><span>Get streaks for bonus points! 🎯</span></div></div>
-    </div>
+    <div class="hsub" id="odd-diff-lbl">Find the word that doesn't belong!</div>
     <div class="pbar-w"><div class="pbar" id="odd-pbar"></div></div>
     <div class="plbl" id="odd-plbl">0 of 10 answered</div>
     <div class="tw">
@@ -6124,6 +6130,7 @@ function showRhymeResult(){
 <div id="sc-odd-pick" class="screen">
   <div class="hero"><div class="htitle">Odd One <span>Out!</span></div><div class="hsub">Choose your difficulty level</div></div>
   <div class="wrap">
+    <div style="text-align:center;padding:4px 0 8px"><div style="font-size:clamp(34px,8vw,54px);margin-bottom:8px">🎯</div><div style="font-size:clamp(15px,4vw,20px);font-weight:900;color:var(--navy);margin-bottom:6px">Find the odd one out!</div><div style="font-size:clamp(12px,3vw,14px);color:#5F5E5A;font-weight:700;line-height:1.7;margin-bottom:14px">Three words belong together — one does not.<br>Tap the word that doesn't fit the group!</div></div>
     <div class="diff-grid">
       <div class="dc easy" onclick="launchOdd('easy')"><div class="di">🎯</div><div class="dt">Easy</div><div class="ds">10 rounds · 15 sec</div></div>
       <div class="dc medium" onclick="checkOddAccess('medium')"><div class="di">⚡</div><div class="dt">Medium</div><div class="ds">15 rounds · 12 sec</div><div id="odd-lock-medium" style="display:none;margin-top:6px;font-size:11px;background:#FAEEDA;color:#412402;padding:3px 8px;border-radius:99px;font-weight:800">🔒 Subscribe</div></div>
@@ -6143,10 +6150,7 @@ function showRhymeResult(){
     <div class="rpill" id="scramble-pill">Round 1</div>
     <div class="strow" id="scramble-stars"></div>
     <div class="htitle" style="font-size:clamp(20px,5vw,32px)">Word <span>Scramble!</span> 🔀</div>
-    <div class="hsub" id="scramble-diff-lbl">Unscramble the letters!</div><div style="max-width:520px;margin:8px auto 0">
-      <button onclick="var d=document.getElementById('howto-scramble');d.style.display=d.style.display==='none'?'block':'none'" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);border-radius:99px;padding:5px 14px;font-family:Nunito,sans-serif;font-size:11px;font-weight:900;color:#fff;cursor:pointer">❓ How to Play</button>
-      <div id="howto-scramble" style="display:none;margin-top:8px;background:rgba(255,255,255,0.1);border-radius:14px;padding:12px 16px;font-size:12px;font-weight:700;color:#fff;text-align:left;line-height:1.6"><div style="display:flex;gap:8px;margin-bottom:6px"><span>1.</span><span>The letters of a word are mixed up.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>2.</span><span>Tap or type the letters in the right order.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>3.</span><span>Use the hint if you're stuck.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>4.</span><span>Unscramble all words to finish the round! 🔀</span></div></div>
-    </div>
+    <div class="hsub" id="scramble-diff-lbl">Unscramble the letters!</div>
     <div class="pbar-w"><div class="pbar" id="scramble-pbar"></div></div>
     <div class="plbl" id="scramble-plbl">0 of 10 answered</div>
     <div class="tw">
@@ -6176,6 +6180,7 @@ function showRhymeResult(){
 <div id="sc-scramble-pick" class="screen">
   <div class="hero"><div class="htitle">Word <span>Scramble!</span></div><div class="hsub">Choose your difficulty</div></div>
   <div class="wrap">
+    <div style="text-align:center;padding:4px 0 8px"><div style="font-size:clamp(34px,8vw,54px);margin-bottom:8px">🔀</div><div style="font-size:clamp(15px,4vw,20px);font-weight:900;color:var(--navy);margin-bottom:6px">Unscramble the letters!</div><div style="font-size:clamp(12px,3vw,14px);color:#5F5E5A;font-weight:700;line-height:1.7;margin-bottom:14px">The letters are mixed up — put them back in order to spell the word.<br>Use the hint if you get stuck!</div></div>
     <div class="diff-grid">
       <div class="dc easy" onclick="launchScramble('easy')">
         <div class="di">🔀</div><div class="dt">Easy</div>
@@ -6202,10 +6207,7 @@ function showRhymeResult(){
   <div class="hero">
     <div class="rpill" id="chain-pill">Round 1</div>
     <div class="htitle" style="font-size:clamp(20px,5vw,32px)">Word <span>Chain!</span> 🔗</div>
-    <div class="hsub" id="chain-diff-lbl">Type a word starting with the last letter!</div><div style="max-width:520px;margin:8px auto 0">
-      <button onclick="var d=document.getElementById('howto-chain');d.style.display=d.style.display==='none'?'block':'none'" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);border-radius:99px;padding:5px 14px;font-family:Nunito,sans-serif;font-size:11px;font-weight:900;color:#fff;cursor:pointer">❓ How to Play</button>
-      <div id="howto-chain" style="display:none;margin-top:8px;background:rgba(255,255,255,0.1);border-radius:14px;padding:12px 16px;font-size:12px;font-weight:700;color:#fff;text-align:left;line-height:1.6"><div style="display:flex;gap:8px;margin-bottom:6px"><span>1.</span><span>Look at the last letter of the given word.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>2.</span><span>Type any English word that starts with that letter.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>3.</span><span>No repeating words in the same round!</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>4.</span><span>Build the longest chain you can! 🔗</span></div></div>
-    </div>
+    <div class="hsub" id="chain-diff-lbl">Type a word starting with the last letter!</div>
   </div>
   <div class="qmain" style="padding-top:0">
 
@@ -6304,10 +6306,7 @@ function showRhymeResult(){
   <div class="hero">
     <div class="rpill" id="sprint-pill">Get Ready!</div>
     <div class="htitle" style="font-size:clamp(20px,5vw,32px)">Word <span>Sprint!</span> 🏃</div>
-    <div class="hsub" id="sprint-diff-lbl">Type as many words as you can!</div><div style="max-width:520px;margin:8px auto 0">
-      <button onclick="var d=document.getElementById('howto-sprint');d.style.display=d.style.display==='none'?'block':'none'" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);border-radius:99px;padding:5px 14px;font-family:Nunito,sans-serif;font-size:11px;font-weight:900;color:#fff;cursor:pointer">❓ How to Play</button>
-      <div id="howto-sprint" style="display:none;margin-top:8px;background:rgba(255,255,255,0.1);border-radius:14px;padding:12px 16px;font-size:12px;font-weight:700;color:#fff;text-align:left;line-height:1.6"><div style="display:flex;gap:8px;margin-bottom:6px"><span>1.</span><span>Words appear one after another.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>2.</span><span>Type each word as fast as you can.</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>3.</span><span>The clock is ticking — speed matters! ⏱️</span></div><div style="display:flex;gap:8px;margin-bottom:6px"><span>4.</span><span>Beat your personal best every sprint! 🏃</span></div></div>
-    </div>
+    <div class="hsub" id="sprint-diff-lbl">Type as many words as you can!</div>
   </div>
   <div class="qmain" style="padding-top:0">
     <div id="sprint-start" style="text-align:center;padding:8px 0">
