@@ -1084,11 +1084,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
   </div>
 </div>
 
-<!-- FLOATING TIMER -->
-<div id="floating-timer" style="display:none;position:fixed;top:70px;right:14px;z-index:500;flex-direction:column;align-items:center;justify-content:center;background:var(--navy);border-radius:50%;width:62px;height:62px;box-shadow:0 4px 20px rgba(29,43,85,0.4);border:3px solid var(--n2)">
-  <div id="ft-num" style="font-size:20px;font-weight:900;color:var(--gold);line-height:1">30</div>
-  <div style="font-size:9px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:0.5px;margin-top:1px">sec</div>
-</div>
+
 
 
 <script>
@@ -1568,7 +1564,7 @@ function navTo(s){
   if(s==='start')  updateDiffCards();
   // Show/hide floating timer
   const ft=document.getElementById('floating-timer');
-  const gameScreens=['quiz','spell','odd','shark','scramble','chain','sprint','abc-order','missing-letter','rhyme'];
+  const gameScreens=['quiz','spell','odd','shark','scramble','chain','sprint','abc-order','missing-letter','rhyme','color-word'];
   if(ft) ft.style.display=gameScreens.includes(s)?'flex':'none';
   // Show ticker on ALL pages always
   TICKER.setVisible(true);
@@ -5988,7 +5984,7 @@ function buildRhymeQ(idx){
   if(!con)return;
 
   con.innerHTML=`
-    <div class="qcard" id="rhqc${idx}" style="${idx>0?'opacity:0.4;pointer-events:none':''}">
+    <div class="qcard" id="rhqc${idx}">
       <div style="text-align:center;margin-bottom:10px">
         <div style="font-size:clamp(13px,3vw,15px);font-weight:700;color:#888780">${idx+1} of 8</div>
       </div>
@@ -6070,12 +6066,23 @@ function startRhymeTimer(){
   clearInterval(rhTInt);
   rhTLeft=rhTTotal;
   const el=document.getElementById('rh-time');if(el)el.textContent=rhTLeft;
+  syncFloatTimer(rhTLeft,rhTTotal);
   rhTInt=setInterval(()=>{
     rhTLeft--;
     const t=document.getElementById('rh-time');if(t)t.textContent=rhTLeft;
+    syncFloatTimer(rhTLeft,rhTTotal);
     if(rhTLeft<=5&&rhTLeft>0)sUrg();
     if(rhTLeft<=0){clearInterval(rhTInt);sTU();submitRhyme(rhCQ);}
   },1000);
+}
+function syncFloatTimer(left,total){
+  const ft=document.getElementById('floating-timer');
+  const fn=document.getElementById('ft-num');
+  if(ft&&fn){
+    fn.textContent=Math.max(0,left);
+    if(left<=Math.ceil(total*0.25))ft.classList.add('urgent');
+    else ft.classList.remove('urgent');
+  }
 }
 
 function showRhymeResult(){
@@ -7226,9 +7233,11 @@ function buildCWQuestion(idx){
     '</div>'+
     '<div class="fb" id="cw-fb-'+idx+'" style="margin-top:12px"></div>'+
     '</div>';
+  syncFloatTimer(cwTLeft,5);
   cwTInt=setInterval(function(){
     cwTLeft--;
     var t=document.getElementById('cw-time');if(t)t.textContent=cwTLeft;
+    syncFloatTimer(cwTLeft,5);
     if(cwTLeft<=0){clearInterval(cwTInt);ansCW(cwCQ,!cwQs[cwCQ].match);}
   },1000);
 }
