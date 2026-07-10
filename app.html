@@ -1293,7 +1293,8 @@ async function api(data){
     if(a==='setPromoEnd'){
       const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
       if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
-      await SB.from('settings').upsert([{key:'promo_end',value:data.end||''}]);
+      const {error:peErr}=await SB.from('settings').upsert([{key:'promo_end',value:data.end||''}]);
+      if(peErr)return {success:false,error:'Save failed: '+peErr.message};
       return {success:true};
     }
     if(a==='getFreeLimit'){
@@ -1307,7 +1308,12 @@ async function api(data){
         if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
       }
       const lim=Math.max(0,Math.min(999,parseInt(data.limit)||4));
-      await SB.from('settings').upsert([{key:'free_rounds_limit',value:String(lim)}]);
+      const {error:upErr}=await SB.from('settings').upsert([{key:'free_rounds_limit',value:String(lim)}]);
+      if(upErr)return {success:false,error:'Save failed: '+upErr.message+' (check settings table RLS policies)'};
+      // Read back to verify persistence
+      const {data:chk}=await SB.from('settings').select('value').eq('key','free_rounds_limit').limit(1);
+      const saved=chk&&chk.length?parseInt(chk[0].value):null;
+      if(saved!==lim)return {success:false,error:'Save did not persist (got '+saved+'). Run the settings RLS policies in Supabase SQL Editor.'};
       return {success:true,limit:lim};
     }
     if(a==='checkPlan'){
@@ -2146,7 +2152,7 @@ async function showResult(){
   openResultModal();
 }
 function retryQuiz(){
-  if(diff==='infinite'){window._infScore=0;window._infPool=null;buildQuiz();window.scrollTo({top:0,behavior:'smooth'});return;}
+  if(diff==='infinite'){if(!guestRoundGate())return;window._infScore=0;window._infPool=null;buildQuiz();window.scrollTo({top:0,behavior:'smooth'});return;}
   round++;
   if(!guestRoundGate())return;
   buildHdr();
@@ -5478,7 +5484,12 @@ let tracerIdx = 0;
 
 function checkKidsAccess(){
   var sub = CU ? (CU.subscription||'free') : 'free';
-  var hasAccess = promoUnlocked() || (CU&&CU.role==='admin') || CU && (sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
+  var isSubscriber = (CU&&CU.role==='admin') || CU && (sub==='basic'||sub==='premium'||sub==='trial'||sub==='weekly');
+  // Promo access: each kids game consumes one free round
+  if(!isSubscriber && promoUnlocked()){
+    return guestRoundGate();
+  }
+  var hasAccess = isSubscriber;
   if(!hasAccess){
     if(!CU){
       if(confirm('🌟 Kids Corner requires a subscription.\n\nCreate a free account and subscribe to unlock!\n\nGo to Login?')) navTo('login');
