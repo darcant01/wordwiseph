@@ -8650,7 +8650,17 @@ function setPromoDate(){
   end.setHours(23,59,59,999);
   if(end<=new Date()){alert('Please select a future date');return;}
   localStorage.setItem('ww_promo_end',end.toISOString());
-  api({action:'setPromoEnd',adminUsername:CU.username,end:end.toISOString()}).catch(function(){});
+  api({action:'setPromoEnd',adminUsername:CU.username,end:end.toISOString()}).then(function(r){
+    var p3=document.getElementById('promo-preview');
+    if(r&&r.success){
+      if(p3)p3.innerHTML+='<br><span style="color:#10B981;font-size:11px">\u2601\ufe0f Saved to server \u2014 all visitors will see this countdown.</span>';
+    }else{
+      if(p3)p3.innerHTML+='<br><span style="color:#E24B4A;font-size:11px">\u26a0\ufe0f Server save failed: '+((r&&r.error)||'unknown')+' \u2014 only this browser will see the countdown!</span>';
+    }
+  }).catch(function(){
+    var p3=document.getElementById('promo-preview');
+    if(p3)p3.innerHTML+='<br><span style="color:#E24B4A;font-size:11px">\u26a0\ufe0f Server save failed \u2014 only this browser will see the countdown!</span>';
+  });
   var cd=getPromoCountdown();
   var p2=document.getElementById('promo-preview');
   if(p2)p2.innerHTML='<span style="color:#10B981;font-weight:900">\u2705 Set! </span>Countdown: <b style="color:#FAC775">'+cd+'</b>';
