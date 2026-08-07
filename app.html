@@ -989,6 +989,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <button class="atab"     onclick="adminTab('sc',this)">All Scores</button>
       <button class="atab"     onclick="adminTab('ac',this)">Activity</button>
       <button class="atab"     onclick="adminTab('pay',this)">💳 Payments</button>
+      <button class="atab"     onclick="adminTab('rw',this)">💰 Rewards</button>
     </div>
     <div id="a-ov">
       <div class="sgrid" id="astats"></div>
@@ -1085,6 +1086,28 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div class="sectitle">Payment Requests</div>
       <div style="font-size:13px;color:#5F5E5A;font-weight:700;margin-bottom:12px">Approve or reject GCash payment submissions. Approved payments auto-activate the user's plan.</div>
       <div style="overflow-x:auto"><table class="atable"><thead><tr><th>#</th><th>Name</th><th>Username</th><th>Plan</th><th>Amount</th><th>GCash Ref</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody id="pay-tbody"></tbody></table></div>
+    </div>
+    <div id="a-rw" style="display:none">
+      <div class="sectitle">💰 Weekly Prize Settings</div>
+      <div class="card" style="padding:16px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:900;color:#1D2B55;margin-bottom:12px">Prize amounts (₱) for this week's Top 5</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">
+          <div><label style="font-size:11px;font-weight:800;color:#9CA3AF">🥇 1st</label><input id="rw-p1" type="number" min="0" style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:900;text-align:center;box-sizing:border-box"/></div>
+          <div><label style="font-size:11px;font-weight:800;color:#9CA3AF">🥈 2nd</label><input id="rw-p2" type="number" min="0" style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:900;text-align:center;box-sizing:border-box"/></div>
+          <div><label style="font-size:11px;font-weight:800;color:#9CA3AF">🥉 3rd</label><input id="rw-p3" type="number" min="0" style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:900;text-align:center;box-sizing:border-box"/></div>
+          <div><label style="font-size:11px;font-weight:800;color:#9CA3AF">🏅 4th</label><input id="rw-p4" type="number" min="0" style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:900;text-align:center;box-sizing:border-box"/></div>
+          <div><label style="font-size:11px;font-weight:800;color:#9CA3AF">🏅 5th</label><input id="rw-p5" type="number" min="0" style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:900;text-align:center;box-sizing:border-box"/></div>
+        </div>
+        <button onclick="saveWeeklyPrizes()" style="padding:10px 22px;border-radius:99px;background:#10B981;border:none;color:#fff;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer">💾 Save Prizes</button>
+        <div id="rw-prize-result" style="margin-top:8px"></div>
+      </div>
+      <div class="sectitle" style="display:flex;align-items:center;justify-content:space-between">
+        <span>📋 Reward Claims</span>
+        <button onclick="loadWeeklyClaimsAdmin()" style="font-family:Nunito,sans-serif;font-size:11px;font-weight:900;padding:5px 12px;border-radius:99px;background:var(--pink);border:none;color:#fff;cursor:pointer">↻ Refresh</button>
+      </div>
+      <div id="rw-claims-list" class="card" style="padding:14px">
+        <div style="text-align:center;color:#9CA3AF;font-size:13px;padding:16px">Loading claims...</div>
+      </div>
     </div>
   </div>
 </div>
@@ -3025,7 +3048,7 @@ async function addChild(){
 function adminTab(sec,el){
   document.querySelectorAll('.atab').forEach(t=>t.classList.remove('on'));
   if(el)el.classList.add('on');
-  ['ov','live','us','sc','ac','pay'].forEach(x=>{const d=document.getElementById('a-'+x);if(d)d.style.display='none';});
+  ['ov','live','us','sc','ac','pay','rw'].forEach(x=>{const d=document.getElementById('a-'+x);if(d)d.style.display='none';});
   const p=document.getElementById('a-'+sec);if(p)p.style.display='block';
   if(sec==='live'){
     loadLiveMonitor();
@@ -3155,9 +3178,75 @@ async function loadMoreScores(reset){
   renderScoresTable();
 }
 
+async function loadWeeklyPrizesAdmin(){
+  const res=await api({action:'getPrizeSettings'});
+  const prizes=(res&&res.success&&res.prizes)?res.prizes:[200,150,100,75,50];
+  ['rw-p1','rw-p2','rw-p3','rw-p4','rw-p5'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el)el.value=prizes[i]||0;
+  });
+}
+
+async function saveWeeklyPrizes(){
+  const prizes=['rw-p1','rw-p2','rw-p3','rw-p4','rw-p5'].map(id=>{
+    const el=document.getElementById(id);
+    return Math.max(0,parseInt(el?el.value:'0')||0);
+  });
+  showLoader('Saving...');
+  const res=await api({action:'setPrizeSettings',adminUsername:CU.username,prizes});
+  hideLoader();
+  const r=document.getElementById('rw-prize-result');
+  if(r)r.innerHTML=res&&res.success
+    ?'<div style="background:#F0FFF4;border-left:4px solid #10B981;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12px;font-weight:800;color:#065F46">✅ Prize amounts saved! Takes effect for this week\'s ranking immediately.</div>'
+    :'<div style="background:#FFF0F0;border-left:4px solid #E24B4A;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12px;font-weight:800;color:#E24B4A">❌ '+((res&&res.error)||'Failed')+'</div>';
+}
+
+async function loadWeeklyClaimsAdmin(){
+  const el=document.getElementById('rw-claims-list');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;color:#9CA3AF;font-size:13px;padding:16px">Loading claims...</div>';
+  const res=await api({action:'getWeeklyClaimsAdmin',adminUsername:CU.username});
+  if(!res||!res.success){
+    el.innerHTML='<div style="text-align:center;color:#E24B4A;font-size:13px;padding:16px">'+((res&&res.error)||'Could not load claims')+'</div>';
+    return;
+  }
+  if(!res.claims||!res.claims.length){
+    el.innerHTML='<div style="text-align:center;color:#9CA3AF;font-size:13px;padding:16px">No claims submitted yet.</div>';
+    return;
+  }
+  el.innerHTML=res.claims.map(cl=>{
+    const paid=cl.status==='paid';
+    const medals={1:'🥇',2:'🥈',3:'🥉',4:'🏅',5:'🏅'};
+    return '<div style="border-bottom:1px solid #F0F0F0;padding:12px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
+      +'<div style="font-size:22px">'+(medals[cl.rank]||'#'+cl.rank)+'</div>'
+      +'<div style="flex:1;min-width:180px">'
+        +'<div style="font-size:13px;font-weight:900;color:#1D2B55">'+cl.name+' <span style="color:#9CA3AF;font-weight:700">@'+cl.username+'</span></div>'
+        +'<div style="font-size:11px;color:#6B7280;font-weight:700;margin-top:2px">Week of '+cl.week_start+' · Rank #'+cl.rank+' · '+cl.points+' pts</div>'
+        +'<div style="font-size:12px;font-weight:800;color:#1D2B55;margin-top:4px">📱 '+cl.gcash_number+' <span style="color:#6B7280;font-weight:700">('+cl.gcash_name+')</span></div>'
+      +'</div>'
+      +'<div style="text-align:right">'
+        +'<div style="font-size:16px;font-weight:900;color:#10B981">₱'+cl.prize_amount+'</div>'
+        +(paid
+          ?'<div style="font-size:11px;font-weight:800;color:#10B981;margin-top:4px">✅ Paid</div>'
+          :'<button onclick="markClaimPaidAdmin(\''+cl.username+'\',\''+cl.week_start+'\','+cl.prize_amount+')" style="margin-top:4px;padding:6px 14px;border-radius:99px;background:#10B981;border:none;color:#fff;font-family:Nunito,sans-serif;font-size:11px;font-weight:900;cursor:pointer">Mark Paid</button>')
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+async function markClaimPaidAdmin(username, weekStart, prize){
+  if(!confirm('Confirm you have sent ₱'+prize+' via GCash to @'+username+'?'))return;
+  showLoader('Updating...');
+  const res=await api({action:'markWeeklyClaimPaid',adminUsername:CU.username,username,weekStart,prize});
+  hideLoader();
+  if(res&&res.success)loadWeeklyClaimsAdmin();
+  else alert('Error: '+((res&&res.error)||'Failed'));
+}
+
 async function loadAdmin(sec){
   if(!CU||CU.role!=='admin'){navTo('start');return;}
   if(sec==='pay'){loadAdminPayments();return;}
+  if(sec==='rw'){loadWeeklyPrizesAdmin();loadWeeklyClaimsAdmin();return;}
   showLoader('Loading...');
   const res=await api({action:'adminData'});
   hideLoader();
