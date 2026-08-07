@@ -1563,17 +1563,32 @@ async function api(data){
 }
 
 // ── LOADER ───────────────────────────────────────────────────
+const WW_MASCOTS=['🦈','🦉','🐝','🦋','🐸','🦊'];
 function showLoader(msg){
   let el=document.getElementById('ww-loader');
   if(!el){
     el=document.createElement('div');
     el.id='ww-loader';
-    el.innerHTML='<div style="text-align:center"><div class="ww-spin"></div><div id="ww-lmsg" style="color:#F4C0D1;font-family:Nunito,sans-serif;font-size:17px;font-weight:800;margin-top:16px;padding:0 20px"></div></div>';
+    const mascot=WW_MASCOTS[Math.floor(Math.random()*WW_MASCOTS.length)];
+    el.innerHTML='<div style="text-align:center">'
+      +'<div id="ww-mascot" style="font-size:56px;display:inline-block;animation:wwBounce 0.9s ease-in-out infinite;filter:drop-shadow(0 6px 10px rgba(0,0,0,0.35))">'+mascot+'</div>'
+      +'<div style="display:flex;gap:6px;justify-content:center;margin-top:10px">'
+        +'<span class="ww-dot" style="animation-delay:0s"></span>'
+        +'<span class="ww-dot" style="animation-delay:0.15s"></span>'
+        +'<span class="ww-dot" style="animation-delay:0.3s"></span>'
+      +'</div>'
+      +'<div id="ww-lmsg" style="color:#F4C0D1;font-family:Nunito,sans-serif;font-size:17px;font-weight:800;margin-top:14px;padding:0 20px"></div>'
+      +'</div>';
     el.style.cssText='display:none;position:fixed;inset:0;background:rgba(29,43,85,0.93);z-index:9999;align-items:center;justify-content:center';
     document.body.appendChild(el);
     const st=document.createElement('style');
-    st.textContent='.ww-spin{width:50px;height:50px;border:5px solid #B5D4F4;border-top-color:#FAC775;border-radius:50%;animation:wws 0.8s linear infinite;margin:0 auto}@keyframes wws{to{transform:rotate(360deg)}}';
+    st.textContent='@keyframes wwBounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-18px) scale(1.08)}}'
+      +'.ww-dot{width:8px;height:8px;border-radius:50%;background:#FAC775;display:inline-block;animation:wwDot 1s ease-in-out infinite}'
+      +'@keyframes wwDot{0%,80%,100%{opacity:0.3;transform:scale(0.7)}40%{opacity:1;transform:scale(1)}}';
     document.head.appendChild(st);
+  }else{
+    const mEl=document.getElementById('ww-mascot');
+    if(mEl)mEl.textContent=WW_MASCOTS[Math.floor(Math.random()*WW_MASCOTS.length)];
   }
   document.getElementById('ww-lmsg').textContent=msg||'Loading...';
   el.style.display='flex';
