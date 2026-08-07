@@ -2815,7 +2815,7 @@ async function loadKidsWeeklyChampions(){
   const res=await api({action:'getWeeklyKidsChampions'});
   const medals=['🥇','🥈','🥉','🏅','🏅'];
   if(!res||!res.success||!res.champions?.length){
-    el.innerHTML='<div class="lb-empty"><div style="font-size:40px;margin-bottom:12px">🌟</div><div style="font-size:16px;font-weight:900;color:var(--navy);margin-bottom:8px">No Players Yet This Week!</div><div style="font-size:13px;font-weight:700;color:#888780">Play any Kids Corner game to enter the Top 5!</div></div>';
+    el.innerHTML='<div class="lb-empty"><div style="font-size:40px;margin-bottom:12px">🌟</div><div style="font-size:16px;font-weight:900;color:var(--navy);margin-bottom:8px">No Kids Champions Yet This Week!</div><div style="font-size:13px;font-weight:700;color:#888780;line-height:1.7">To appear here, play <strong style="color:var(--navy)">ALL 15 Kids Corner games</strong> this week!</div></div>';
     return;
   }
   el.innerHTML=res.champions.map(r=>`
