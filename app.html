@@ -1244,6 +1244,11 @@ async function api(data){
       return {success:true,scores:scores,ann:ann};
     }
 
+    if(a==='getUserKidsProgress'){
+      const {data:rows}=await SB.from('scores').select('diff').eq('username',data.username).like('diff','kids-%');
+      const diffs=[...new Set((rows||[]).map(r=>r.diff))];
+      return {success:true, diffs};
+    }
     if(a==='getKidsAllTimeScores'){
       const {data:rows}=await SB.from('scores').select('*').like('diff','kids-%').order('created_at',{ascending:false}).limit(2000);
       const byUser={};
@@ -1593,6 +1598,38 @@ function guestRoundGate(){
   try{buildHdr();}catch(e){}
   return true;
 }
+const KIDS_ONCLICK_MAP={
+  'kids-abc-order':'startABCOrder()', 'kids-missing-letter':'startMissingLetter()',
+  'kids-rhyme':'startRhymeTime()', 'kids-color-match':'startColorMatch()',
+  'kids-color-word':'startColorWord()', 'kids-rainbow-order':'startRainbowOrder()',
+  'kids-color-mixer':'startColorMixer()', 'kids-find-color':'startFindColor()',
+  'kids-animal-sound':'startAnimalSound()', 'kids-animal-match':'startAnimalMatch()',
+  'kids-where-live':'startWhereDoILive()', 'kids-animal-alphabet':'startAnimalAlphabet()',
+  'kids-how-many-legs':'startHowManyLegs()', 'kids-big-small':'startBigOrSmall()',
+  'kids-animal-group':'startAnimalGroup()'
+};
+async function applyKidsBadges(){
+  // Clear any existing badges first
+  document.querySelectorAll('.kids-done-badge').forEach(b=>b.remove());
+  if(!CU) return; // badges only for logged-in users (matches score saving behavior)
+  try{
+    const res=await api({action:'getUserKidsProgress', username:CU.username});
+    if(!res||!res.success) return;
+    const done=new Set(res.diffs||[]);
+    Object.keys(KIDS_ONCLICK_MAP).forEach(diffKey=>{
+      if(!done.has(diffKey)) return;
+      const onclickVal=KIDS_ONCLICK_MAP[diffKey];
+      const card=document.querySelector('[onclick="'+onclickVal+'"]');
+      if(!card) return;
+      const badge=document.createElement('div');
+      badge.className='kids-done-badge';
+      badge.textContent='⭐';
+      badge.style.cssText='position:absolute;top:-8px;right:-8px;background:#10B981;color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 8px rgba(16,185,129,0.5);border:2px solid #fff;z-index:2';
+      card.appendChild(badge);
+    });
+  }catch(e){ console.warn('Kids badges error:',e); }
+}
+
 function updateFreeRoundsBadge(){
   var b=document.getElementById('free-rounds-badge');
   if(!b)return;
@@ -1623,6 +1660,7 @@ function navTo(s){
   if(el)el.classList.add('active');
   try{showGameInstr(s,el);}catch(e){}
   if(s==='start')try{updateFreeRoundsBadge();}catch(e){}
+  if(s==='kids')try{applyKidsBadges();}catch(e){}
   if(s==='lb')   { loadLBGame('grammar','easy'); }
   if(s==='profile') loadProfile();
   if(s==='admin'){
