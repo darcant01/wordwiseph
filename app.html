@@ -763,19 +763,8 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div class="lbtabs">
         <button class="lbt on" onclick="switchKidsLBMode('champion',this)">🏆 All-Time Champion</button>
         <button class="lbt" onclick="switchKidsLBMode('bygame',this)">🎮 By Game</button>
-        <button class="lbt" onclick="switchKidsLBMode('rewards',this)">💰 Weekly Rewards</button>
       </div>
       <div id="lb-kids-champion" style="display:block"></div>
-      <div id="lb-kids-rewards" style="display:none">
-        <div style="background:linear-gradient(135deg,#FF6B9D,#FFB347);border-radius:16px;padding:16px;margin-bottom:16px;text-align:center;color:#fff">
-          <div style="font-size:28px;margin-bottom:6px">💰</div>
-          <div style="font-size:16px;font-weight:900;margin-bottom:4px">This Week's Kids Corner Top 5 Win Cash!</div>
-          <div style="font-size:12px;font-weight:700;opacity:0.9">Ranked by best score across all 15 Kids Corner games.</div>
-          <div id="lb-kids-weekly-countdown" style="margin-top:10px;display:inline-block;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:99px;padding:5px 16px;font-size:12px;font-weight:900"></div>
-        </div>
-        <div id="lb-kids-weekly-list"></div>
-        <div id="lb-kids-weekly-claim" style="margin-top:16px"></div>
-      </div>
       <div id="lb-kids-bygame" style="display:none">
       <div style="margin-bottom:14px">
         <select id="lb-kids-select" onchange="loadLBGame('kids', this.value)"
@@ -803,14 +792,30 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 
     <!-- Weekly Cash Prize -->
     <div id="lb-weekly" class="lb-game-panel" style="display:none">
-      <div style="background:linear-gradient(135deg,#10B981,#059669);border-radius:16px;padding:16px;margin-bottom:16px;text-align:center;color:#fff">
-        <div style="font-size:28px;margin-bottom:6px">💰</div>
-        <div style="font-size:16px;font-weight:900;margin-bottom:4px">This Week's Top 5 Win Real Cash!</div>
-        <div style="font-size:12px;font-weight:700;opacity:0.9">Ranked by best score across Grammar, Spell, Shark, Odd One Out, Scramble, Chain &amp; Sprint.</div>
-        <div id="lb-weekly-countdown" style="margin-top:10px;display:inline-block;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:99px;padding:5px 16px;font-size:12px;font-weight:900"></div>
+      <div class="lbtabs">
+        <button class="lbt on" onclick="switchWeeklyCategory('main',this)">🎮 Main Games</button>
+        <button class="lbt" onclick="switchWeeklyCategory('kids',this)">🌟 Kids Corner</button>
       </div>
-      <div id="lb-weekly-list"></div>
-      <div id="lb-weekly-claim" style="margin-top:16px"></div>
+      <div id="lb-weekly-main-wrap" style="display:block">
+        <div style="background:linear-gradient(135deg,#10B981,#059669);border-radius:16px;padding:16px;margin-bottom:16px;text-align:center;color:#fff">
+          <div style="font-size:28px;margin-bottom:6px">💰</div>
+          <div style="font-size:16px;font-weight:900;margin-bottom:4px">This Week's Top 5 Win Real Cash!</div>
+          <div style="font-size:12px;font-weight:700;opacity:0.9">Ranked by best score across Grammar, Spell, Shark, Odd One Out, Scramble, Chain &amp; Sprint.</div>
+          <div id="lb-weekly-countdown" style="margin-top:10px;display:inline-block;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:99px;padding:5px 16px;font-size:12px;font-weight:900"></div>
+        </div>
+        <div id="lb-weekly-list"></div>
+        <div id="lb-weekly-claim" style="margin-top:16px"></div>
+      </div>
+      <div id="lb-weekly-kids-wrap" style="display:none">
+        <div style="background:linear-gradient(135deg,#FF6B9D,#FFB347);border-radius:16px;padding:16px;margin-bottom:16px;text-align:center;color:#fff">
+          <div style="font-size:28px;margin-bottom:6px">💰</div>
+          <div style="font-size:16px;font-weight:900;margin-bottom:4px">This Week's Kids Corner Top 5 Win Cash!</div>
+          <div style="font-size:12px;font-weight:700;opacity:0.9">Ranked by best score across all 15 Kids Corner games.</div>
+          <div id="lb-kids-weekly-countdown" style="margin-top:10px;display:inline-block;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:99px;padding:5px 16px;font-size:12px;font-weight:900"></div>
+        </div>
+        <div id="lb-kids-weekly-list"></div>
+        <div id="lb-kids-weekly-claim" style="margin-top:16px"></div>
+      </div>
     </div>
 
   </div>
@@ -2745,10 +2750,7 @@ function switchLBCategory(cat, el){
   }else if(cat==='weekly'){
     const p=document.getElementById('lb-weekly');
     if(p)p.style.display='block';
-    loadWeeklyChampions();
-    updateWeeklyCountdown();
-    if(window._weeklyCdTimer)clearInterval(window._weeklyCdTimer);
-    window._weeklyCdTimer=setInterval(updateWeeklyCountdown,60000);
+    switchWeeklyCategory('main', document.querySelector('#lb-weekly .lbt'));
   }
 }
 
@@ -2784,16 +2786,29 @@ function switchKidsLBMode(mode, el){
   if(el)el.classList.add('on');
   const champ=document.getElementById('lb-kids-champion');
   const bygame=document.getElementById('lb-kids-bygame');
-  const rewards=document.getElementById('lb-kids-rewards');
   if(champ)champ.style.display=(mode==='champion')?'block':'none';
   if(bygame)bygame.style.display=(mode==='bygame')?'block':'none';
-  if(rewards)rewards.style.display=(mode==='rewards')?'block':'none';
   if(mode==='champion'){
     loadKidsChampions();
   }else if(mode==='bygame'){
     const sel=document.getElementById('lb-kids-select');
     loadLBGame('kids', sel?sel.value:'kids-abc-order');
-  }else if(mode==='rewards'){
+  }
+}
+
+function switchWeeklyCategory(cat, el){
+  document.querySelectorAll('#lb-weekly .lbt').forEach(t=>t.classList.remove('on'));
+  if(el)el.classList.add('on');
+  const mainWrap=document.getElementById('lb-weekly-main-wrap');
+  const kidsWrap=document.getElementById('lb-weekly-kids-wrap');
+  if(mainWrap)mainWrap.style.display=(cat==='main')?'block':'none';
+  if(kidsWrap)kidsWrap.style.display=(cat==='kids')?'block':'none';
+  if(cat==='main'){
+    loadWeeklyChampions();
+    updateWeeklyCountdown();
+    if(window._weeklyCdTimer)clearInterval(window._weeklyCdTimer);
+    window._weeklyCdTimer=setInterval(updateWeeklyCountdown,60000);
+  }else if(cat==='kids'){
     loadKidsWeeklyChampions();
     updateKidsWeeklyCountdown();
     if(window._kidsWeeklyCdTimer)clearInterval(window._kidsWeeklyCdTimer);
