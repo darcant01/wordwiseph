@@ -654,8 +654,14 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
   <div class="hero"><div class="htitle">🏆 <span>Leaderboards</span></div><div class="hsub">Top players across all games!</div></div>
   <div class="wrap">
 
-    <!-- Game Selector Dropdown -->
-    <div style="margin-bottom:16px">
+    <!-- Category Pills -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <button id="lb-cat-games" class="lb-gtab on" onclick="switchLBCategory('games',this)">🎮 Games</button>
+      <button id="lb-cat-kids" class="lb-gtab" onclick="switchLBCategory('kids',this)">🌟 Kids Corner</button>
+      <button id="lb-cat-weekly" class="lb-gtab" onclick="switchLBCategory('weekly',this)" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border-color:#10B981">💰 Weekly Cash Prize</button>
+    </div>
+    <!-- Games-only dropdown (only visible when Games category is active) -->
+    <div id="lb-games-dropdown-wrap" style="margin-bottom:16px">
       <select id="lb-game-select" onchange="switchLBGame(this.value,null)"
         style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:800;color:#1D2B55;background:#fff">
         <option value="grammar">📝 Grammar</option>
@@ -665,8 +671,6 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <option value="scramble">🔀 Scramble</option>
         <option value="chain">🔗 Chain</option>
         <option value="sprint">🏃 Sprint</option>
-        <option value="kids">🌟 Kids Corner</option>
-        <option value="weekly">💰 Weekly Cash Prize</option>
       </select>
     </div>
 
@@ -2717,31 +2721,46 @@ function retryQuiz(){
 let lbCurrentGame = 'grammar';
 let lbCurrentDiff = {grammar:'easy', spell:'easy', shark:'easy', odd:'easy'};
 
+function switchLBCategory(cat, el){
+  document.querySelectorAll('#lb-cat-games,#lb-cat-kids,#lb-cat-weekly').forEach(b=>b.classList.remove('on'));
+  const btn=document.getElementById('lb-cat-'+cat);
+  if(btn)btn.classList.add('on');
+  const gwrap=document.getElementById('lb-games-dropdown-wrap');
+  if(gwrap)gwrap.style.display=(cat==='games')?'block':'none';
+  ['grammar','spell','shark','odd','scramble','chain','sprint','kids','weekly'].forEach(g=>{
+    const p=document.getElementById('lb-'+g);
+    if(p)p.style.display='none';
+  });
+  if(cat==='games'){
+    const sel=document.getElementById('lb-game-select');
+    switchLBGame(sel?sel.value:'grammar', null);
+  }else if(cat==='kids'){
+    const p=document.getElementById('lb-kids');
+    if(p)p.style.display='block';
+    loadKidsChampions();
+  }else if(cat==='weekly'){
+    const p=document.getElementById('lb-weekly');
+    if(p)p.style.display='block';
+    loadWeeklyChampions();
+    updateWeeklyCountdown();
+    if(window._weeklyCdTimer)clearInterval(window._weeklyCdTimer);
+    window._weeklyCdTimer=setInterval(updateWeeklyCountdown,60000);
+  }
+}
+
 function switchLBGame(game, el){
   lbCurrentGame = game;
   const sel=document.getElementById('lb-game-select');
   if(sel && sel.value!==game)sel.value=game;
-  ['grammar','spell','shark','odd','scramble','chain','sprint','kids','weekly'].forEach(g=>{
+  ['grammar','spell','shark','odd','scramble','chain','sprint'].forEach(g=>{
     const p=document.getElementById('lb-'+g);
     if(p)p.style.display=(g===game?'block':'none');
   });
-  // Reset diff tabs — set All Time as active
   const panel=document.getElementById('lb-'+game);
   if(panel){
     panel.querySelectorAll('.lbt').forEach(t=>t.classList.remove('on'));
     const first=panel.querySelector('.lbt');
     if(first)first.classList.add('on');
-  }
-  if(game==='kids'){
-    loadKidsChampions();
-    return;
-  }
-  if(game==='weekly'){
-    loadWeeklyChampions();
-    updateWeeklyCountdown();
-    if(window._weeklyCdTimer)clearInterval(window._weeklyCdTimer);
-    window._weeklyCdTimer=setInterval(updateWeeklyCountdown,60000);
-    return;
   }
   lbCurrentDiff[game]='all';
   loadLBGame(game, 'all');
