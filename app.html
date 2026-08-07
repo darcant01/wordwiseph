@@ -427,6 +427,8 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(1.2)}}
 @keyframes modalPop{from{opacity:0;transform:scale(0.92) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
 @keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0.7}}
+@keyframes fireworkPop{0%{transform:translate(-50%,-50%) scale(0.3);opacity:1}70%{opacity:1}100%{transform:translate(calc(-50% + var(--fx)),calc(-50% + var(--fy))) scale(1);opacity:0}}
+@keyframes fireworkFlash{0%{transform:translate(-50%,-50%) scale(0);opacity:0.9}100%{transform:translate(-50%,-50%) scale(3.5);opacity:0}}
 </style>
 <meta property="og:image" content="https://wordwiseph.com/og-image.png"/>
 <meta name="description" content="Grammar Quiz, Kids Corner, Letter Tracer, Shark Typing &amp; Brainy Games for Filipino kids. All difficulty levels. Free to play, no download needed!"/>
@@ -1848,6 +1850,55 @@ function sTU(){
 }
 
 // 🏆 Win / Perfect score — fanfare
+function sFirework(delay){
+  if(!snd)return;
+  delay=delay||0;
+  // Launch whoosh (rising pitch)
+  try{
+    const ac=gA();
+    const o=ac.createOscillator();
+    const g=ac.createGain();
+    o.connect(g);g.connect(ac.destination);
+    o.type='sine';
+    o.frequency.setValueAtTime(300,ac.currentTime+delay);
+    o.frequency.exponentialRampToValueAtTime(900,ac.currentTime+delay+0.25);
+    g.gain.setValueAtTime(0.0001,ac.currentTime+delay);
+    g.gain.exponentialRampToValueAtTime(0.15,ac.currentTime+delay+0.15);
+    g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+delay+0.28);
+    o.start(ac.currentTime+delay);o.stop(ac.currentTime+delay+0.3);
+  }catch(e){}
+  // Pop + crackle
+  noise(0.18,2200,0.35,delay+0.28);
+  noise(0.35,1200,0.18,delay+0.32);
+  tone(1200,0.08,'square',0.12,delay+0.3);
+}
+
+function fireworkBurst(xPct,yPct,delay,color){
+  setTimeout(function(){
+    var wrap=document.createElement('div');
+    wrap.style.cssText='position:fixed;left:'+xPct+'vw;top:'+yPct+'vh;pointer-events:none;z-index:10002';
+    document.body.appendChild(wrap);
+    // Flash ring
+    var flash=document.createElement('div');
+    flash.style.cssText='position:absolute;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,'+color+'aa,transparent 70%);animation:fireworkFlash 0.5s ease-out forwards';
+    wrap.appendChild(flash);
+    // Radiating particles
+    var n=18;
+    for(var i=0;i<n;i++){
+      var angle=(i/n)*Math.PI*2;
+      var dist=50+Math.random()*40;
+      var fx=(Math.cos(angle)*dist)+'px';
+      var fy=(Math.sin(angle)*dist)+'px';
+      var p=document.createElement('div');
+      var sz=4+Math.random()*4;
+      p.style.cssText='position:absolute;width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:'+color+';--fx:'+fx+';--fy:'+fy+';animation:fireworkPop '+(0.7+Math.random()*0.4)+'s ease-out forwards';
+      wrap.appendChild(p);
+    }
+    setTimeout(function(){wrap.remove();},1300);
+  },delay*1000);
+  sFirework(delay);
+}
+
 function sWin(){
   if(!snd)return;
   // Triumphant fanfare
@@ -8822,6 +8873,15 @@ function confettiBurst(){
     c.appendChild(p);
   }
   setTimeout(function(){c.remove();},4200);
+  // 🎆 Fireworks bursts — pop at staggered times and positions
+  var fwColors=['#FF6B9D','#FAC775','#4ECDC4','#8B5CF6','#FF8E53','#1D9E75'];
+  var bursts=[
+    {x:22,y:28},{x:72,y:22},{x:50,y:38},{x:35,y:55},{x:65,y:48}
+  ];
+  bursts.forEach(function(b,i){
+    var color=fwColors[Math.floor(Math.random()*fwColors.length)];
+    fireworkBurst(b.x,b.y,i*0.35,color);
+  });
 }
 // ── Share score ──
 function shareScore(scoElId,gameName){
