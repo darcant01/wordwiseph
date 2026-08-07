@@ -1375,57 +1375,23 @@ async function api(data){
       if(error)return {success:false,error:error.message};
       return {success:true};
     }
-    if(a==='getWeeklyLeaderboard'){
-      const weekStart=data.weekStart;
-      const {data:rows}=await SB.from('scores').select('*').gte('created_at',weekStart).neq('username','guest').order('created_at',{ascending:false}).limit(3000);
-      const byUser={};
-      (rows||[]).forEach(r=>{
-        const u=r.username; if(!u) return;
-        if(!byUser[u]) byUser[u]={name:r.name||u, username:u, total:0, games:0};
-        byUser[u].total+=Number(r.score)||0;
-        byUser[u].games+=1;
-      });
-      const {data:prizeRow}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
-      const prizes=prizeRow&&prizeRow.length?JSON.parse(prizeRow[0].value):[100,75,50,25,10];
-      const ranked=Object.values(byUser).sort((a,b)=>b.total-a.total).slice(0,5)
-        .map((u,i)=>({...u, rank:i+1, prize:prizes[i]||0}));
-      return {success:true, leaders:ranked, prizes, weekStart};
-    }
-    if(a==='submitGcashClaim'){
-      const {data:adm}=await SB.from('users').select('id').eq('username',data.username).limit(1);
-      if(!adm||!adm.length)return {success:false,error:'Account not found'};
-      const {error}=await SB.from('reward_claims').insert({
-        week_start:data.weekStart, username:data.username, name:data.name,
-        rank:data.rank, score:data.score, prize_amount:data.prize,
-        gcash_number:data.gcashNumber, gcash_name:data.gcashName||data.name, status:'pending'
-      });
-      if(error){
-        if(error.code==='23505')return {success:false,error:'You already submitted a claim for this week'};
-        return {success:false,error:error.message};
-      }
-      await SB.from('activity').insert({m:'🎉 @'+data.username+' claimed weekly reward rank #'+data.rank+' (₱'+data.prize+')'});
-      return {success:true};
-    }
-    if(a==='getMyClaim'){
-      const {data:rows}=await SB.from('reward_claims').select('*').eq('week_start',data.weekStart).eq('username',data.username).limit(1);
-      return {success:true, claim:rows&&rows.length?rows[0]:null};
-    }
-    if(a==='getRewardClaims'){
+    if(a==='getWeeklyClaimsAdmin'){
       const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
       if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
-      const {data:rows}=await SB.from('reward_claims').select('*').order('submitted_at',{ascending:false}).limit(200);
+      const {data:rows}=await SB.from('weekly_rewards').select('*').order('submitted_at',{ascending:false}).limit(200);
       return {success:true, claims:rows||[]};
     }
-    if(a==='markClaimPaid'){
+    if(a==='markWeeklyClaimPaid'){
       const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
       if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
-      const {error}=await SB.from('reward_claims').update({status:'paid',paid_at:new Date().toISOString()}).eq('id',data.claimId);
+      const {error}=await SB.from('weekly_rewards').update({status:'paid',paid_at:new Date().toISOString()}).eq('username',data.username).eq('week_start',data.weekStart);
       if(error)return {success:false,error:error.message};
+      await SB.from('activity').insert({m:'💰 Admin marked weekly reward as PAID for @'+data.username+' (₱'+data.prize+')'});
       return {success:true};
     }
     if(a==='getPrizeSettings'){
       const {data:rows}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
-      const prizes=rows&&rows.length?JSON.parse(rows[0].value):[100,75,50,25,10];
+      const prizes=rows&&rows.length?JSON.parse(rows[0].value):[200,150,100,75,50];
       return {success:true, prizes};
     }
     if(a==='setPrizeSettings'){
