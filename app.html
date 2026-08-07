@@ -2769,16 +2769,37 @@ async function loadWeeklyChampions(){
   if(CU && claimEl){
     const mine=res.champions.find(c2=>c2.username===CU.username);
     if(mine){
-      claimEl.innerHTML=`
-        <div style="background:#FFF8E7;border:2px solid #FAC775;border-radius:16px;padding:16px;text-align:center">
-          <div style="font-size:32px;margin-bottom:6px">🎉</div>
-          <div style="font-size:15px;font-weight:900;color:#1D2B55;margin-bottom:6px">You're #${mine.rank} this week!</div>
-          <div style="font-size:13px;font-weight:700;color:#5F5E5A;margin-bottom:14px">Claim your ₱${mine.prize} GCash prize below.</div>
-          <input id="claim-gcash-name" type="text" placeholder="Full name on GCash" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;margin-bottom:8px;box-sizing:border-box"/>
-          <input id="claim-gcash-number" type="tel" placeholder="GCash Number (09XXXXXXXXX)" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;margin-bottom:12px;box-sizing:border-box"/>
-          <button onclick="submitWeeklyClaim(${mine.rank},${mine.prize})" style="width:100%;padding:13px;border-radius:99px;background:#10B981;border:none;color:#fff;font-family:Nunito,sans-serif;font-size:14px;font-weight:900;cursor:pointer">💰 Claim My Prize</button>
-          <div id="claim-result" style="margin-top:10px;font-size:12px"></div>
-        </div>`;
+      claimEl.innerHTML='<div class="lb-empty">Checking your claim status...</div>';
+      const weekStart=res.weekStart;
+      const cRes=await api({action:'getMyWeeklyClaim',username:CU.username,weekStart});
+      const existing=cRes&&cRes.success?cRes.claim:null;
+      if(existing&&existing.status==='paid'){
+        claimEl.innerHTML=`
+          <div style="background:#F0FFF4;border:2px solid #10B981;border-radius:16px;padding:16px;text-align:center">
+            <div style="font-size:32px;margin-bottom:6px">✅</div>
+            <div style="font-size:15px;font-weight:900;color:#065F46;margin-bottom:6px">₱${existing.prize_amount} Paid!</div>
+            <div style="font-size:12px;font-weight:700;color:#5F5E5A;margin-bottom:12px">Sent to ${existing.gcash_number}</div>
+            ${existing.receipt_url?`<a href="${existing.receipt_url}" target="_blank"><img src="${existing.receipt_url}" style="max-width:100%;max-height:200px;border-radius:12px;border:1.5px solid #10B981"/></a><div style="font-size:11px;color:#10B981;font-weight:800;margin-top:8px">Tap to view full receipt</div>`:''}
+          </div>`;
+      }else if(existing&&existing.status==='submitted'){
+        claimEl.innerHTML=`
+          <div style="background:#FFF8E7;border:2px solid #FAC775;border-radius:16px;padding:16px;text-align:center">
+            <div style="font-size:32px;margin-bottom:6px">⏳</div>
+            <div style="font-size:15px;font-weight:900;color:#1D2B55;margin-bottom:6px">Claim Submitted!</div>
+            <div style="font-size:12px;font-weight:700;color:#5F5E5A">₱${existing.prize_amount} pending admin approval. Usually paid within 24-48 hours.</div>
+          </div>`;
+      }else{
+        claimEl.innerHTML=`
+          <div style="background:#FFF8E7;border:2px solid #FAC775;border-radius:16px;padding:16px;text-align:center">
+            <div style="font-size:32px;margin-bottom:6px">🎉</div>
+            <div style="font-size:15px;font-weight:900;color:#1D2B55;margin-bottom:6px">You're #${mine.rank} this week!</div>
+            <div style="font-size:13px;font-weight:700;color:#5F5E5A;margin-bottom:14px">Claim your ₱${mine.prize} GCash prize below.</div>
+            <input id="claim-gcash-name" type="text" placeholder="Full name on GCash" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;margin-bottom:8px;box-sizing:border-box"/>
+            <input id="claim-gcash-number" type="tel" placeholder="GCash Number (09XXXXXXXXX)" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;margin-bottom:12px;box-sizing:border-box"/>
+            <button onclick="submitWeeklyClaim(${mine.rank},${mine.prize})" style="width:100%;padding:13px;border-radius:99px;background:#10B981;border:none;color:#fff;font-family:Nunito,sans-serif;font-size:14px;font-weight:900;cursor:pointer">💰 Claim My Prize</button>
+            <div id="claim-result" style="margin-top:10px;font-size:12px"></div>
+          </div>`;
+      }
     }
   }
 }
@@ -3273,7 +3294,7 @@ async function loadWeeklyClaimsAdmin(){
       +'<div style="text-align:right">'
         +'<div style="font-size:16px;font-weight:900;color:#10B981">₱'+cl.prize_amount+'</div>'
         +(paid
-          ?'<div style="font-size:11px;font-weight:800;color:#10B981;margin-top:4px">✅ Paid</div>'
+          ?'<div style="font-size:11px;font-weight:800;color:#10B981;margin-top:4px">✅ Paid</div>'+(cl.receipt_url?'<a href="'+cl.receipt_url+'" target="_blank" style="font-size:10px;font-weight:800;color:#1D4ED8;text-decoration:underline">View Receipt</a>':'')
           :'<button onclick="markClaimPaidAdmin(\''+cl.username+'\',\''+cl.week_start+'\','+cl.prize_amount+')" style="margin-top:4px;padding:6px 14px;border-radius:99px;background:#10B981;border:none;color:#fff;font-family:Nunito,sans-serif;font-size:11px;font-weight:900;cursor:pointer">Mark Paid</button>')
       +'</div>'
     +'</div>';
