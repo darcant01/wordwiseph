@@ -1112,6 +1112,16 @@ let aCtx=null, BANK=null;
 // ── API ──────────────────────────────────────────────────────
 // ═══ SUPABASE ADAPTER — replaces GAS api(), same call signature & response shapes ═══
 const SB = supabase.createClient("https://ahtyjglufrvtfnhkooux.supabase.co", "sb_publishable_AylXCLg2W3sQzQSn5sH7Xg_k4ZQblM7");
+
+// ── Universal Kids Corner score saver (non-blocking, logged-in only) ──
+async function saveKidsScore(diffKey, score, total, stars){
+  if(!CU) return; // guests: not saved, same behavior as other games
+  try{
+    await api({action:'saveScore', name:CU.name, username:CU.username, type:CU.type,
+      score:score, total:total, diff:diffKey, stars:stars, date:new Date().toLocaleDateString()});
+    try{TICKER.notifyLocal({name:CU.name, username:CU.username, score:score, total:total, diff:diffKey, stars:stars});TICKER.resume();}catch(e){}
+  }catch(e){ console.warn('Kids score save failed:', diffKey, e); }
+}
 function _d(ts){ try{ return new Date(ts).toLocaleDateString(); }catch(e){ return ''; } }
 function _userOut(u){ return {id:u.id,name:u.name,username:u.username,type:u.type,role:u.role,joined:u.joined,rounds:u.rounds||0,best:u.best||0,subscription:u.subscription||'free',subStart:u.sub_start||'',subExpiry:u.sub_expiry||'',isChild:u._isChild||false,parentUsername:u._parentUsername||''}; }
 async function _ann(){
@@ -5795,6 +5805,7 @@ function endABCOrder(){
   document.getElementById('abc-game').style.display='none';
   document.getElementById('abc-over').style.display='block';
   document.getElementById('abc-final').textContent=abcScore+'/26';
+  saveKidsScore('kids-abc-order',abcScore,26,stars);
   const pct=Math.round(abcScore/26*100);
   let stars='',msg='';
   if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You know all your ABCs! 🏆';sWin();}
@@ -5933,6 +5944,7 @@ function showMLResult(){
   const score=mlAns.filter(a=>a).length;
   const pct=Math.round(score/10*100);
   document.getElementById('ml-rsco').textContent=score+'/10';
+  saveKidsScore('kids-missing-letter',score,10,stars);
   let stars='',msg='';
   if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You found every missing letter! 🏆';sWin();}
   else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost perfect!';sWin();}
@@ -6103,6 +6115,7 @@ function showRhymeResult(){
   const score=rhAns.filter(a=>a).length;
   const pct=Math.round(score/8*100);
   document.getElementById('rh-rsco').textContent=score+'/8';
+  saveKidsScore('kids-rhyme',score,8,stars);
   let stars='',msg='';
   if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect Rhymer! Amazing! 🏆';sWin();}
   else if(pct>=75){stars='⭐⭐⭐⭐💫';msg='Great rhyming skills!';sWin();}
@@ -7202,6 +7215,7 @@ function showCMResult(){
   clearInterval(cmTInt);
   var pct=Math.round(cmScore/cmTotal*100);
   document.getElementById('cm-rsco').textContent=cmScore+'/'+cmTotal;
+  saveKidsScore('kids-color-match',cmScore,cmTotal,stars);
   var stars='',msg='';
   if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You know all your colors! 🌈';sKidFinish();}
   else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Amazing! Almost perfect!';sKidStar();}
@@ -7275,6 +7289,7 @@ function showCWResult(){
   if(document.getElementById('cw-result').classList.contains('show'))return;
   var pct=Math.round(cwScore/cwTotal*100);
   document.getElementById('cw-rsco').textContent=cwScore+'/'+cwTotal;
+  saveKidsScore('kids-color-word',cwScore,cwTotal,stars);
   var stars='',msg='';
   if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect focus! 🏆';sKidFinish();}
   else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great eyes! Almost perfect!';}
@@ -7346,6 +7361,7 @@ function showROResult(){
   clearInterval(roTInt);
   var pct=Math.round(roScore/RAINBOW_ORDER.length*100);
   document.getElementById('ro-rsco').textContent=roScore+'/'+RAINBOW_ORDER.length;
+  saveKidsScore('kids-rainbow-order',roScore,RAINBOW_ORDER.length,stars);
   var stars='',msg='';
   if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect Rainbow! You know ROYGBIV! 🌈';sKidFinish();}
   else if(pct>=71){stars='⭐⭐⭐⭐💫';msg='Almost! Keep learning the rainbow!';}
@@ -7415,6 +7431,7 @@ function showMXResult(){
   if(document.getElementById('mx-result').classList.contains('show'))return;
   var pct=Math.round(mxScore/mxTotal*100);
   document.getElementById('mx-rsco').textContent=mxScore+'/'+mxTotal;
+  saveKidsScore('kids-color-mixer',mxScore,mxTotal,stars);
   var stars='',msg='';
   if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect Color Scientist! 🎨';sKidFinish();}
   else if(pct>=75){stars='⭐⭐⭐⭐💫';msg='Great color mixing skills!';}
@@ -7512,6 +7529,7 @@ function showFCResult(){
   if(document.getElementById('fc-result').classList.contains('show'))return;
   var pct=Math.round(fcScore/fcTotal*100);
   document.getElementById('fc-rsco').textContent=fcScore+'/'+fcTotal;
+  saveKidsScore('kids-find-color',fcScore,fcTotal,stars);
   var stars='',msg='';
   if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Amazing! You found every color! 🌈';sKidFinish();}
   else if(pct>=75){stars='⭐⭐⭐⭐💫';msg='Great color finding skills!';}
@@ -7850,6 +7868,7 @@ function showASResult(){
   clearInterval(asTInt);
   var pct=Math.round(asScore/asTotal*100);
   document.getElementById('as-rsco').textContent=asScore+'/'+asTotal;
+  saveKidsScore('kids-animal-sound',asScore,asTotal,stars);
   var stars='',msg='';
   if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Amazing! You know all animal sounds! 🐾';sKidFinish();}
   else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great job! Almost perfect!';sKidStar();}
@@ -7903,6 +7922,7 @@ function showAMResult(){
   if(document.getElementById('am-result').classList.contains('show'))return;
   var pct=Math.round(amScore/amTotal*100);
   document.getElementById('am-rsco').textContent=amScore+'/'+amTotal;
+  saveKidsScore('kids-animal-match',amScore,amTotal,stars);
   var stars='',msg='';
   if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect! You matched them all! 🐾';sKidFinish();}
   else if(pct>=75){stars='⭐⭐⭐⭐💫';msg='Great matching skills!';}
@@ -7953,6 +7973,7 @@ function showWHResult(){
   if(document.getElementById('wh-result').classList.contains('show'))return;
   var pct=Math.round(whScore/whTotal*100);
   document.getElementById('wh-rsco').textContent=whScore+'/'+whTotal;
+  saveKidsScore('kids-where-live',whScore,whTotal,stars);
   var stars='',msg='';
   if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Amazing! You know where they all live! 🏠';sKidFinish();}
   else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great habitat knowledge!';}
@@ -8002,6 +8023,7 @@ function showAAResult(){
   if(document.getElementById('aa-result').classList.contains('show'))return;
   var pct=Math.round(aaScore/aaTotal*100);
   document.getElementById('aa-rsco').textContent=aaScore+'/'+aaTotal;
+  saveKidsScore('kids-animal-alphabet',aaScore,aaTotal,stars);
   var stars='',msg='';
   if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Amazing! Animals and letters master! 🐾';sKidFinish();}
   else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great job!';}
@@ -8054,6 +8076,7 @@ function showHLResult(){
   if(document.getElementById('hl-result').classList.contains('show'))return;
   var pct=Math.round(hlScore/hlTotal*100);
   document.getElementById('hl-rsco').textContent=hlScore+'/'+hlTotal;
+  saveKidsScore('kids-how-many-legs',hlScore,hlTotal,stars);
   var stars='',msg='';
   if(pct===100){stars='⭐⭐⭐⭐⭐';msg='You counted every leg! 🦵';sKidFinish();}
   else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great counting skills!';}
@@ -8114,6 +8137,7 @@ function showBSResult(){
   if(document.getElementById('bs-result').classList.contains('show'))return;
   var pct=Math.round(bsScore/bsTotal*100);
   document.getElementById('bs-rsco').textContent=bsScore+'/'+bsTotal;
+  saveKidsScore('kids-big-small',bsScore,bsTotal,stars);
   var stars='',msg='';
   if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Perfect size master! 🐘';sKidFinish();}
   else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great size comparison!';}
@@ -8164,6 +8188,7 @@ function showAGResult(){
   if(document.getElementById('ag-result').classList.contains('show'))return;
   var pct=Math.round(agScore/agTotal*100);
   document.getElementById('ag-rsco').textContent=agScore+'/'+agTotal;
+  saveKidsScore('kids-animal-group',agScore,agTotal,stars);
   var stars='',msg='';
   if(pct===100){stars='⭐⭐⭐⭐⭐';msg='Animal Expert! You know them all! 🐾';sKidFinish();}
   else if(pct>=80){stars='⭐⭐⭐⭐💫';msg='Great animal knowledge!';}
