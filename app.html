@@ -781,7 +781,8 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div style="background:linear-gradient(135deg,#10B981,#059669);border-radius:16px;padding:16px;margin-bottom:16px;text-align:center;color:#fff">
         <div style="font-size:28px;margin-bottom:6px">💰</div>
         <div style="font-size:16px;font-weight:900;margin-bottom:4px">This Week's Top 5 Win Real Cash!</div>
-        <div style="font-size:12px;font-weight:700;opacity:0.9">Ranked by best score across Grammar, Spell, Shark, Odd One Out, Scramble, Chain &amp; Sprint. Resets every Monday!</div>
+        <div style="font-size:12px;font-weight:700;opacity:0.9">Ranked by best score across Grammar, Spell, Shark, Odd One Out, Scramble, Chain &amp; Sprint.</div>
+        <div id="lb-weekly-countdown" style="margin-top:10px;display:inline-block;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:99px;padding:5px 16px;font-size:12px;font-weight:900"></div>
       </div>
       <div id="lb-weekly-list"></div>
       <div id="lb-weekly-claim" style="margin-top:16px"></div>
@@ -2625,6 +2626,9 @@ function switchLBGame(game, el){
   }
   if(game==='weekly'){
     loadWeeklyChampions();
+    updateWeeklyCountdown();
+    if(window._weeklyCdTimer)clearInterval(window._weeklyCdTimer);
+    window._weeklyCdTimer=setInterval(updateWeeklyCountdown,60000);
     return;
   }
   lbCurrentDiff[game]='all';
@@ -2693,6 +2697,25 @@ async function loadKidsChampions(){
           <div class="lbdate">total pts</div>
         </div>
       </div>`).join('');
+}
+
+function getWeekResetCountdown(){
+  var now=new Date();
+  var day=now.getDay(); // 0=Sun,1=Mon...6=Sat
+  var daysUntilMon=(8-day)%7; if(daysUntilMon===0)daysUntilMon=7;
+  var nextMon=new Date(now);
+  nextMon.setDate(now.getDate()+daysUntilMon);
+  nextMon.setHours(0,0,0,0);
+  var diff=nextMon-now;
+  if(diff<=0)return '⏳ Resetting...';
+  var d=Math.floor(diff/86400000), h=Math.floor((diff%86400000)/3600000), m=Math.floor((diff%3600000)/60000);
+  if(d>0)return '⏳ '+d+'d '+h+'h '+m+'m until reset';
+  if(h>0)return '⏳ '+h+'h '+m+'m until reset';
+  return '⏳ '+m+'m until reset';
+}
+function updateWeeklyCountdown(){
+  var el=document.getElementById('lb-weekly-countdown');
+  if(el)el.textContent=getWeekResetCountdown();
 }
 
 async function loadWeeklyChampions(){
