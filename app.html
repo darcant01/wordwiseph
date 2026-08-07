@@ -1100,6 +1100,10 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div style="overflow-x:auto"><table class="atable"><thead><tr><th>#</th><th>Name</th><th>Username</th><th>Plan</th><th>Amount</th><th>GCash Ref</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody id="pay-tbody"></tbody></table></div>
     </div>
     <div id="a-rw" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button id="rw-cat-main" onclick="switchRwCategory('main')" style="flex:1;padding:10px;border-radius:99px;border:2px solid #1D2B55;background:#1D2B55;color:#fff;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer">🎮 Main Games</button>
+        <button id="rw-cat-kids" onclick="switchRwCategory('kids')" style="flex:1;padding:10px;border-radius:99px;border:2px solid #E8EAF0;background:#fff;color:#1D2B55;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer">🌟 Kids Corner</button>
+      </div>
       <div class="sectitle">💰 Weekly Prize Settings</div>
       <div class="card" style="padding:16px;margin-bottom:16px">
         <div style="font-size:13px;font-weight:900;color:#1D2B55;margin-bottom:12px">Prize amounts (₱) for this week's Top 5</div>
@@ -3417,8 +3421,18 @@ async function loadMoreScores(reset){
   renderScoresTable();
 }
 
+function switchRwCategory(cat){
+  window._rwCategory=cat;
+  const mainBtn=document.getElementById('rw-cat-main');
+  const kidsBtn=document.getElementById('rw-cat-kids');
+  if(mainBtn){mainBtn.style.background=cat==='main'?'#1D2B55':'#fff';mainBtn.style.color=cat==='main'?'#fff':'#1D2B55';mainBtn.style.border='2px solid '+(cat==='main'?'#1D2B55':'#E8EAF0');}
+  if(kidsBtn){kidsBtn.style.background=cat==='kids'?'#1D2B55':'#fff';kidsBtn.style.color=cat==='kids'?'#fff':'#1D2B55';kidsBtn.style.border='2px solid '+(cat==='kids'?'#1D2B55':'#E8EAF0');}
+  loadWeeklyPrizesAdmin();
+  loadWeeklyClaimsAdmin();
+}
+
 async function loadWeeklyPrizesAdmin(){
-  const res=await api({action:'getPrizeSettings'});
+  const res=await api({action:'getPrizeSettings',category:window._rwCategory||'main'});
   const prizes=(res&&res.success&&res.prizes)?res.prizes:[200,150,100,75,50];
   ['rw-p1','rw-p2','rw-p3','rw-p4','rw-p5'].forEach((id,i)=>{
     const el=document.getElementById(id);
@@ -3432,7 +3446,7 @@ async function saveWeeklyPrizes(){
     return Math.max(0,parseInt(el?el.value:'0')||0);
   });
   showLoader('Saving...');
-  const res=await api({action:'setPrizeSettings',adminUsername:CU.username,prizes});
+  const res=await api({action:'setPrizeSettings',adminUsername:CU.username,prizes,category:window._rwCategory||'main'});
   hideLoader();
   const r=document.getElementById('rw-prize-result');
   if(r)r.innerHTML=res&&res.success
@@ -3444,7 +3458,7 @@ async function loadWeeklyClaimsAdmin(){
   const el=document.getElementById('rw-claims-list');
   if(!el)return;
   el.innerHTML='<div style="text-align:center;color:#9CA3AF;font-size:13px;padding:16px">Loading claims...</div>';
-  const res=await api({action:'getWeeklyClaimsAdmin',adminUsername:CU.username});
+  const res=await api({action:'getWeeklyClaimsAdmin',adminUsername:CU.username,category:window._rwCategory||'main'});
   if(!res||!res.success){
     el.innerHTML='<div style="text-align:center;color:#E24B4A;font-size:13px;padding:16px">'+((res&&res.error)||'Could not load claims')+'</div>';
     return;
@@ -3477,7 +3491,7 @@ let _receiptTarget=null;
 let _receiptFile=null;
 
 function markClaimPaidAdmin(username, weekStart, prize){
-  _receiptTarget={username,weekStart,prize};
+  _receiptTarget={username,weekStart,prize,category:window._rwCategory||'main'};
   _receiptFile=null;
   const sub=document.getElementById('receipt-modal-sub');
   if(sub)sub.textContent='Upload proof you sent ₱'+prize+' via GCash to @'+username;
@@ -3528,7 +3542,7 @@ async function confirmMarkPaid(){
     const {data:pub}=SB.storage.from('receipts').getPublicUrl(path);
     const receiptUrl=pub.publicUrl;
     const res=await api({action:'markWeeklyClaimPaid',adminUsername:CU.username,
-      username:_receiptTarget.username,weekStart:_receiptTarget.weekStart,prize:_receiptTarget.prize,receiptUrl});
+      username:_receiptTarget.username,weekStart:_receiptTarget.weekStart,prize:_receiptTarget.prize,receiptUrl,category:_receiptTarget.category||'main'});
     if(res&&res.success){
       closeReceiptModal();
       loadWeeklyClaimsAdmin();
@@ -3544,7 +3558,7 @@ async function confirmMarkPaid(){
 async function loadAdmin(sec){
   if(!CU||CU.role!=='admin'){navTo('start');return;}
   if(sec==='pay'){loadAdminPayments();return;}
-  if(sec==='rw'){loadWeeklyPrizesAdmin();loadWeeklyClaimsAdmin();return;}
+  if(sec==='rw'){window._rwCategory=window._rwCategory||'main';loadWeeklyPrizesAdmin();loadWeeklyClaimsAdmin();return;}
   showLoader('Loading...');
   const res=await api({action:'adminData'});
   hideLoader();
