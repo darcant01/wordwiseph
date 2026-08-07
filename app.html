@@ -1113,6 +1113,24 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
   </div>
 </div>
 
+<!-- Receipt Upload Modal -->
+<div id="receipt-modal" onclick="if(event.target===this)closeReceiptModal()" style="display:none;position:fixed;inset:0;z-index:9996;background:rgba(15,26,62,0.78);backdrop-filter:blur(6px);align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto">
+  <div style="background:#fff;border-radius:24px;padding:24px;width:100%;max-width:380px;box-shadow:0 24px 80px rgba(15,26,62,0.5);margin:40px auto">
+    <div style="text-align:center;font-size:36px;margin-bottom:8px">🧾</div>
+    <div style="text-align:center;font-size:17px;font-weight:900;color:#1D2B55;margin-bottom:4px">Upload Payment Receipt</div>
+    <div id="receipt-modal-sub" style="text-align:center;font-size:13px;color:#6B7280;font-weight:700;margin-bottom:16px"></div>
+    <div id="receipt-preview" style="display:none;margin-bottom:12px;text-align:center">
+      <img id="receipt-preview-img" style="max-width:100%;max-height:220px;border-radius:12px;border:1.5px solid #E8EAF0"/>
+    </div>
+    <input id="receipt-file-input" type="file" accept="image/*" onchange="previewReceipt(this)" style="width:100%;padding:10px;border-radius:12px;border:2px dashed #E8EAF0;font-family:Nunito,sans-serif;font-size:12px;margin-bottom:14px;box-sizing:border-box"/>
+    <div style="display:flex;gap:8px">
+      <button onclick="closeReceiptModal()" style="flex:1;padding:12px;border-radius:99px;border:2px solid #E8EAF0;background:#fff;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;color:#1D2B55">Cancel</button>
+      <button id="receipt-confirm-btn" onclick="confirmMarkPaid()" style="flex:1;padding:12px;border-radius:99px;border:none;background:#10B981;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;color:#fff">Confirm Paid</button>
+    </div>
+    <div id="receipt-result" style="margin-top:10px"></div>
+  </div>
+</div>
+
 <!-- GUEST MODAL -->
 <div id="guest-modal" style="display:none;position:fixed;inset:0;background:rgba(29,43,85,0.93);z-index:9000;align-items:center;justify-content:center;padding:16px">
   <div style="background:#fff;border-radius:24px;padding:32px;max-width:420px;width:100%;text-align:center">
@@ -1408,10 +1426,15 @@ async function api(data){
     if(a==='markWeeklyClaimPaid'){
       const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
       if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
-      const {error}=await SB.from('weekly_rewards').update({status:'paid',paid_at:new Date().toISOString()}).eq('username',data.username).eq('week_start',data.weekStart);
+      if(!data.receiptUrl)return {success:false,error:'Receipt image is required'};
+      const {error}=await SB.from('weekly_rewards').update({status:'paid',paid_at:new Date().toISOString(),receipt_url:data.receiptUrl}).eq('username',data.username).eq('week_start',data.weekStart);
       if(error)return {success:false,error:error.message};
-      await SB.from('activity').insert({m:'💰 Admin marked weekly reward as PAID for @'+data.username+' (₱'+data.prize+')'});
+      await SB.from('activity').insert({m:'💰 Admin marked weekly reward as PAID for @'+data.username+' (₱'+data.prize+') with receipt'});
       return {success:true};
+    }
+    if(a==='getMyWeeklyClaim'){
+      const {data:rows}=await SB.from('weekly_rewards').select('*').eq('username',data.username).eq('week_start',data.weekStart).limit(1);
+      return {success:true, claim: rows&&rows.length?rows[0]:null};
     }
     if(a==='getPrizeSettings'){
       const {data:rows}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
@@ -3257,13 +3280,72 @@ async function loadWeeklyClaimsAdmin(){
   }).join('');
 }
 
-async function markClaimPaidAdmin(username, weekStart, prize){
-  if(!confirm('Confirm you have sent ₱'+prize+' via GCash to @'+username+'?'))return;
-  showLoader('Updating...');
-  const res=await api({action:'markWeeklyClaimPaid',adminUsername:CU.username,username,weekStart,prize});
-  hideLoader();
-  if(res&&res.success)loadWeeklyClaimsAdmin();
-  else alert('Error: '+((res&&res.error)||'Failed'));
+let _receiptTarget=null;
+let _receiptFile=null;
+
+function markClaimPaidAdmin(username, weekStart, prize){
+  _receiptTarget={username,weekStart,prize};
+  _receiptFile=null;
+  const sub=document.getElementById('receipt-modal-sub');
+  if(sub)sub.textContent='Upload proof you sent ₱'+prize+' via GCash to @'+username;
+  const prev=document.getElementById('receipt-preview');
+  if(prev)prev.style.display='none';
+  const inp=document.getElementById('receipt-file-input');
+  if(inp)inp.value='';
+  const res=document.getElementById('receipt-result');
+  if(res)res.innerHTML='';
+  const m=document.getElementById('receipt-modal');
+  if(m)m.style.display='flex';
+}
+
+function closeReceiptModal(){
+  const m=document.getElementById('receipt-modal');
+  if(m)m.style.display='none';
+  _receiptTarget=null;
+  _receiptFile=null;
+}
+
+function previewReceipt(inputEl){
+  const file=inputEl.files&&inputEl.files[0];
+  if(!file)return;
+  _receiptFile=file;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=document.getElementById('receipt-preview-img');
+    const prev=document.getElementById('receipt-preview');
+    if(img)img.src=e.target.result;
+    if(prev)prev.style.display='block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function confirmMarkPaid(){
+  const resultEl=document.getElementById('receipt-result');
+  if(!_receiptFile){
+    if(resultEl)resultEl.innerHTML='<span style="color:#E24B4A;font-weight:800">Please select a receipt image.</span>';
+    return;
+  }
+  const btn=document.getElementById('receipt-confirm-btn');
+  if(btn){btn.disabled=true;btn.textContent='Uploading...';}
+  try{
+    const ext=(_receiptFile.name.split('.').pop()||'jpg').toLowerCase();
+    const path=_receiptTarget.weekStart+'/'+_receiptTarget.username+'-'+Date.now()+'.'+ext;
+    const {error:upErr}=await SB.storage.from('receipts').upload(path,_receiptFile,{upsert:true});
+    if(upErr)throw new Error(upErr.message);
+    const {data:pub}=SB.storage.from('receipts').getPublicUrl(path);
+    const receiptUrl=pub.publicUrl;
+    const res=await api({action:'markWeeklyClaimPaid',adminUsername:CU.username,
+      username:_receiptTarget.username,weekStart:_receiptTarget.weekStart,prize:_receiptTarget.prize,receiptUrl});
+    if(res&&res.success){
+      closeReceiptModal();
+      loadWeeklyClaimsAdmin();
+    }else{
+      if(resultEl)resultEl.innerHTML='<span style="color:#E24B4A;font-weight:800">❌ '+((res&&res.error)||'Failed')+'</span>';
+    }
+  }catch(e){
+    if(resultEl)resultEl.innerHTML='<span style="color:#E24B4A;font-weight:800">❌ Upload failed: '+e.message+'</span>';
+  }
+  if(btn){btn.disabled=false;btn.textContent='Confirm Paid';}
 }
 
 async function loadAdmin(sec){
