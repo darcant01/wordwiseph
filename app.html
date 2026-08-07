@@ -1051,8 +1051,14 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div style="overflow-x:auto"><table class="atable"><thead><tr><th>#</th><th>Name</th><th>Username</th><th>Type</th><th>Role</th><th>Sub</th><th>Expires</th><th>Rounds</th><th>Best</th><th>Joined</th><th>Action</th></tr></thead><tbody id="utbody"></tbody></table></div>
     </div>
     <div id="a-sc" style="display:none">
-      <div class="sectitle">All Scores</div>
+      <div class="sectitle" style="display:flex;align-items:center;justify-content:space-between">
+        <span>All Scores</span>
+        <span id="sc-count" style="font-size:11px;font-weight:800;color:#9CA3AF"></span>
+      </div>
       <div style="overflow-x:auto"><table class="atable"><thead><tr><th>#</th><th>Player</th><th>Score</th><th>Difficulty</th><th>Stars</th><th>Date</th></tr></thead><tbody id="stbody"></tbody></table></div>
+      <div style="text-align:center;margin-top:14px">
+        <button id="sc-loadmore-btn" onclick="loadMoreScores()" style="padding:10px 24px;border-radius:99px;background:#1D2B55;border:none;color:#fff;font-family:Nunito,sans-serif;font-size:13px;font-weight:900;cursor:pointer;display:none">Load More Scores</button>
+      </div>
     </div>
     <div id="a-ac" style="display:none">
       <div class="sectitle">Activity Log</div>
@@ -1410,6 +1416,14 @@ async function api(data){
       return {success:true};
     }
 
+    if(a==='getScoresPage'){
+      const offset=Math.max(0,parseInt(data.offset)||0);
+      const limit=Math.min(200,Math.max(1,parseInt(data.limit)||100));
+      const {data:rows,count,error}=await SB.from('scores').select('*',{count:'exact'}).order('created_at',{ascending:false}).range(offset,offset+limit-1);
+      if(error)return {success:false,error:error.message};
+      const scores=(rows||[]).map(x=>({name:x.name||x.username,username:x.username,score:x.score,total:x.total,stars:x.stars,diff:x.diff,date:_d(x.created_at)}));
+      return {success:true, scores, total:count||0, offset, limit};
+    }
     if(a==='adminData'){
       const [u,s,ac]=await Promise.all([
         SB.from('users').select('*').order('joined',{ascending:false}),
@@ -2754,6 +2768,35 @@ async function refreshLive(){
   if(upd)upd.textContent='Updated: '+new Date().toLocaleTimeString();
 }
 
+window._adminScores=[];
+window._adminScoresOffset=0;
+window._adminScoresTotal=0;
+const ADMIN_SCORES_PAGE=100;
+
+function renderScoresTable(){
+  const sb=document.getElementById('stbody');
+  if(!sb)return;
+  const list=window._adminScores;
+  sb.innerHTML=list.map((s,i)=>`<tr><td>${i+1}</td><td>${s.name}</td><td>${s.score}${s.total?'/'+s.total:''}</td><td><span class="dc2 ${s.diff}">${s.diff}</span></td><td>${s.stars}</td><td>${s.date}</td></tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:#888780">No scores.</td></tr>';
+  const cnt=document.getElementById('sc-count');
+  if(cnt)cnt.textContent=list.length+' of '+window._adminScoresTotal+' shown';
+  const btn=document.getElementById('sc-loadmore-btn');
+  if(btn)btn.style.display=(list.length<window._adminScoresTotal)?'inline-block':'none';
+}
+
+async function loadMoreScores(reset){
+  if(reset){window._adminScores=[];window._adminScoresOffset=0;window._adminScoresTotal=0;}
+  const btn=document.getElementById('sc-loadmore-btn');
+  if(btn){btn.disabled=true;btn.textContent='Loading...';}
+  const res=await api({action:'getScoresPage',offset:window._adminScoresOffset,limit:ADMIN_SCORES_PAGE});
+  if(btn){btn.disabled=false;btn.textContent='Load More Scores';}
+  if(!res||!res.success)return;
+  window._adminScores=window._adminScores.concat(res.scores);
+  window._adminScoresOffset+=res.scores.length;
+  window._adminScoresTotal=res.total;
+  renderScoresTable();
+}
+
 async function loadAdmin(sec){
   if(!CU||CU.role!=='admin'){navTo('start');return;}
   if(sec==='pay'){loadAdminPayments();return;}
@@ -2825,8 +2868,7 @@ async function loadAdmin(sec){
     }).join('')||'<tr><td colspan="11" style="text-align:center;color:#888780;padding:16px">No users found.</td></tr>';
 
   }else if(sec==='sc'){
-    const sb=document.getElementById('stbody');
-    if(sb)sb.innerHTML=scores.slice().reverse().map((s,i)=>`<tr><td>${i+1}</td><td>${s.name}</td><td>${s.score}/5</td><td><span class="dc2 ${s.diff}">${s.diff}</span></td><td>${s.stars}</td><td>${s.date}</td></tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:#888780">No scores.</td></tr>';
+    loadMoreScores(true);
   }else if(sec==='ac'){
     const al=document.getElementById('alog');
     if(al)al.innerHTML=activity.map(a=>`<div class="arow"><div class="adot" style="background:var(--pink)"></div><div class="atxt">${a.m}</div><div class="atime">${a.d} · ${a.t}</div></div>`).join('')||'<div style="padding:14px;text-align:center;color:#888780">No activity.</div>';
