@@ -498,6 +498,18 @@ footer{
   },
   "potentialAction": {"@type": "SearchAction", "target": "https://wordwiseph.com/app.html"}
 }</script>
+<link rel="manifest" href="/manifest.json"/>
+<meta name="theme-color" content="#1D2B55"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="WordWise PH"/>
+<link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png"/>
+<link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144.png"/>
+<link rel="apple-touch-icon" sizes="128x128" href="/icons/icon-128.png"/>
+<link rel="apple-touch-icon" sizes="96x96"   href="/icons/icon-96.png"/>
+<link rel="apple-touch-icon" sizes="72x72"   href="/icons/icon-72.png"/>
 </head>
 <body>
 
@@ -1043,6 +1055,16 @@ window.addEventListener('scroll',()=>{
     },60000);
   }).catch(function(){});
 })();
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(r=>console.log('✅ WordWise SW registered'))
+      .catch(e=>console.warn('SW error:',e));
+  });
+}
 </script>
 </body>
 </html>
