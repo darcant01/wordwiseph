@@ -3115,7 +3115,7 @@ async function loadLBGame(game, diff){
 
 // Keep old loadLB for compatibility (called from navTo)
 async function loadLB(d){
-  switchLBGame('grammar', document.querySelector('.lb-gtab'));
+  switchLBCategory('games', document.getElementById('lb-cat-games'));
 }
 
 function switchLB(d,el){
