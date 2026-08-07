@@ -664,6 +664,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <button class="lb-gtab" onclick="switchLBGame('chain',this)">🔗 Chain</button>
       <button class="lb-gtab" onclick="switchLBGame('sprint',this)">🏃 Sprint</button>
       <button class="lb-gtab" onclick="switchLBGame('kids',this)">🌟 Kids Corner</button>
+      <button class="lb-gtab" onclick="switchLBGame('weekly',this)" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border-color:#10B981">💰 Weekly Cash Prize</button>
     </div>
 
     <!-- Grammar Quiz LB -->
@@ -773,6 +774,17 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       </div>
       <div id="lb-kids-list" class="lb-list"></div>
       </div>
+    </div>
+
+    <!-- Weekly Cash Prize -->
+    <div id="lb-weekly" class="lb-game-panel" style="display:none">
+      <div style="background:linear-gradient(135deg,#10B981,#059669);border-radius:16px;padding:16px;margin-bottom:16px;text-align:center;color:#fff">
+        <div style="font-size:28px;margin-bottom:6px">💰</div>
+        <div style="font-size:16px;font-weight:900;margin-bottom:4px">This Week's Top 5 Win Real Cash!</div>
+        <div style="font-size:12px;font-weight:700;opacity:0.9">Ranked by best score across Grammar, Spell, Shark, Odd One Out, Scramble, Chain &amp; Sprint. Resets every Monday!</div>
+      </div>
+      <div id="lb-weekly-list"></div>
+      <div id="lb-weekly-claim" style="margin-top:16px"></div>
     </div>
 
   </div>
@@ -1258,6 +1270,170 @@ async function api(data){
       const {data:rows}=await SB.from('scores').select('diff').eq('username',data.username).like('diff','kids-%');
       const diffs=[...new Set((rows||[]).map(r=>r.diff))];
       return {success:true, diffs};
+    }
+    if(a==='getWeeklyChampions'){
+      // Monday 00:00 (local) of the current week
+      const now=new Date();
+      const day=now.getDay(); // 0=Sun,1=Mon...
+      const diffToMon=(day===0?-6:1-day);
+      const monday=new Date(now);monday.setDate(now.getDate()+diffToMon);monday.setHours(0,0,0,0);
+      const {data:rows}=await SB.from('scores').select('*').gte('created_at',monday.toISOString()).order('created_at',{ascending:false}).limit(3000);
+      const gameOf=(diff)=>{
+        if(['easy','medium','hard','infinite'].includes(diff))return 'grammar';
+        if(diff&&diff.startsWith('spell-'))return 'spell';
+        if(diff&&diff.startsWith('shark-'))return 'shark';
+        if(diff&&diff.startsWith('odd-'))return 'odd';
+        if(diff&&diff.startsWith('scramble-'))return 'scramble';
+        if(diff&&diff.startsWith('chain-'))return 'chain';
+        if(diff&&diff.startsWith('sprint-'))return 'sprint';
+        return null;
+      };
+      const byUser={};
+      (rows||[]).forEach(r=>{
+        const game=gameOf(r.diff); if(!game) return;
+        const u=r.username; if(!u||u==='guest') return;
+        if(!byUser[u]) byUser[u]={name:r.name||u, type:r.type||'free', games:{}};
+        const prev=byUser[u].games[game];
+        if(!prev || (r.score||0)>prev) byUser[u].games[game]=r.score||0;
+      });
+      const ranked=Object.keys(byUser).map(u=>{
+        const rec=byUser[u];
+        const gk=Object.keys(rec.games);
+        const total=gk.reduce((s,g)=>s+rec.games[g],0);
+        return {username:u, name:rec.name, type:rec.type, gamesPlayed:gk.length, total};
+      }).sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
+      // Get prize amounts
+      const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
+      const prizes=pz&&pz.length?JSON.parse(pz[0].value):[200,150,100,75,50];
+      ranked.forEach(r=>r.prize=prizes[r.rank-1]||0);
+      return {success:true, champions:ranked, weekStart:monday.toISOString().split('T')[0]};
+    }
+    if(a==='claimWeeklyReward'){
+      if(!data.username)return {success:false,error:'Not logged in'};
+      // Recompute ranking server-side to verify eligibility (no trusting client input)
+      const now=new Date();
+      const day=now.getDay();
+      const diffToMon=(day===0?-6:1-day);
+      const monday=new Date(now);monday.setDate(now.getDate()+diffToMon);monday.setHours(0,0,0,0);
+      const {data:rows}=await SB.from('scores').select('*').gte('created_at',monday.toISOString()).limit(3000);
+      const gameOf=(diff)=>{
+        if(['easy','medium','hard','infinite'].includes(diff))return 'grammar';
+        if(diff&&diff.startsWith('spell-'))return 'spell';
+        if(diff&&diff.startsWith('shark-'))return 'shark';
+        if(diff&&diff.startsWith('odd-'))return 'odd';
+        if(diff&&diff.startsWith('scramble-'))return 'scramble';
+        if(diff&&diff.startsWith('chain-'))return 'chain';
+        if(diff&&diff.startsWith('sprint-'))return 'sprint';
+        return null;
+      };
+      const byUser={};
+      (rows||[]).forEach(r=>{
+        const game=gameOf(r.diff); if(!game) return;
+        const u=r.username; if(!u||u==='guest') return;
+        if(!byUser[u]) byUser[u]={name:r.name||u, type:r.type||'free', games:{}};
+        const prev=byUser[u].games[game];
+        if(!prev || (r.score||0)>prev) byUser[u].games[game]=r.score||0;
+      });
+      const ranked=Object.keys(byUser).map(u=>{
+        const rec=byUser[u];
+        const gk=Object.keys(rec.games);
+        const total=gk.reduce((s,g)=>s+rec.games[g],0);
+        return {username:u, total};
+      }).sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
+      const mine=ranked.find(r=>r.username===data.username);
+      if(!mine)return {success:false,error:'You are not in this week\'s Top 5. Keep playing!'};
+      const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
+      const prizes=pz&&pz.length?JSON.parse(pz[0].value):[200,150,100,75,50];
+      const prize=prizes[mine.rank-1]||0;
+      const weekStart=monday.toISOString().split('T')[0];
+      const {error}=await SB.from('weekly_rewards').upsert([{
+        username:data.username, name:data.name||data.username, week_start:weekStart,
+        rank:mine.rank, points:mine.total, prize_amount:prize,
+        gcash_number:data.gcashNumber, gcash_name:data.gcashName,
+        status:'submitted', submitted_at:new Date().toISOString()
+      }], {onConflict:'username,week_start'});
+      if(error)return {success:false,error:error.message};
+      return {success:true, rank:mine.rank, prize};
+    }
+    if(a==='getWeeklyClaims'){
+      const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
+      if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
+      const {data:rows}=await SB.from('weekly_rewards').select('*').order('week_start',{ascending:false}).order('rank',{ascending:true}).limit(200);
+      return {success:true, claims:rows||[]};
+    }
+    if(a==='markRewardPaid'){
+      const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
+      if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
+      const {error}=await SB.from('weekly_rewards').update({status:'paid',paid_at:new Date().toISOString()}).eq('id',data.claimId);
+      if(error)return {success:false,error:error.message};
+      return {success:true};
+    }
+    if(a==='setWeeklyPrizes'){
+      const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
+      if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
+      const {error}=await SB.from('settings').upsert([{key:'weekly_prizes',value:JSON.stringify(data.prizes)}]);
+      if(error)return {success:false,error:error.message};
+      return {success:true};
+    }
+    if(a==='getWeeklyLeaderboard'){
+      const weekStart=data.weekStart;
+      const {data:rows}=await SB.from('scores').select('*').gte('created_at',weekStart).neq('username','guest').order('created_at',{ascending:false}).limit(3000);
+      const byUser={};
+      (rows||[]).forEach(r=>{
+        const u=r.username; if(!u) return;
+        if(!byUser[u]) byUser[u]={name:r.name||u, username:u, total:0, games:0};
+        byUser[u].total+=Number(r.score)||0;
+        byUser[u].games+=1;
+      });
+      const {data:prizeRow}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
+      const prizes=prizeRow&&prizeRow.length?JSON.parse(prizeRow[0].value):[100,75,50,25,10];
+      const ranked=Object.values(byUser).sort((a,b)=>b.total-a.total).slice(0,5)
+        .map((u,i)=>({...u, rank:i+1, prize:prizes[i]||0}));
+      return {success:true, leaders:ranked, prizes, weekStart};
+    }
+    if(a==='submitGcashClaim'){
+      const {data:adm}=await SB.from('users').select('id').eq('username',data.username).limit(1);
+      if(!adm||!adm.length)return {success:false,error:'Account not found'};
+      const {error}=await SB.from('reward_claims').insert({
+        week_start:data.weekStart, username:data.username, name:data.name,
+        rank:data.rank, score:data.score, prize_amount:data.prize,
+        gcash_number:data.gcashNumber, gcash_name:data.gcashName||data.name, status:'pending'
+      });
+      if(error){
+        if(error.code==='23505')return {success:false,error:'You already submitted a claim for this week'};
+        return {success:false,error:error.message};
+      }
+      await SB.from('activity').insert({m:'🎉 @'+data.username+' claimed weekly reward rank #'+data.rank+' (₱'+data.prize+')'});
+      return {success:true};
+    }
+    if(a==='getMyClaim'){
+      const {data:rows}=await SB.from('reward_claims').select('*').eq('week_start',data.weekStart).eq('username',data.username).limit(1);
+      return {success:true, claim:rows&&rows.length?rows[0]:null};
+    }
+    if(a==='getRewardClaims'){
+      const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
+      if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
+      const {data:rows}=await SB.from('reward_claims').select('*').order('submitted_at',{ascending:false}).limit(200);
+      return {success:true, claims:rows||[]};
+    }
+    if(a==='markClaimPaid'){
+      const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
+      if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
+      const {error}=await SB.from('reward_claims').update({status:'paid',paid_at:new Date().toISOString()}).eq('id',data.claimId);
+      if(error)return {success:false,error:error.message};
+      return {success:true};
+    }
+    if(a==='getPrizeSettings'){
+      const {data:rows}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
+      const prizes=rows&&rows.length?JSON.parse(rows[0].value):[100,75,50,25,10];
+      return {success:true, prizes};
+    }
+    if(a==='setPrizeSettings'){
+      const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
+      if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
+      const {error}=await SB.from('settings').upsert([{key:'weekly_prizes',value:JSON.stringify(data.prizes)}]);
+      if(error)return {success:false,error:error.message};
+      return {success:true};
     }
     if(a==='getKidsAllTimeScores'){
       const {data:rows}=await SB.from('scores').select('*').like('diff','kids-%').order('created_at',{ascending:false}).limit(2000);
@@ -2443,7 +2619,7 @@ function switchLBGame(game, el){
   lbCurrentGame = game;
   document.querySelectorAll('.lb-gtab').forEach(t=>t.classList.remove('on'));
   if(el)el.classList.add('on');
-  ['grammar','spell','shark','odd','scramble','chain','sprint','kids'].forEach(g=>{
+  ['grammar','spell','shark','odd','scramble','chain','sprint','kids','weekly'].forEach(g=>{
     const p=document.getElementById('lb-'+g);
     if(p)p.style.display=(g===game?'block':'none');
   });
@@ -2456,6 +2632,10 @@ function switchLBGame(game, el){
   }
   if(game==='kids'){
     loadKidsChampions();
+    return;
+  }
+  if(game==='weekly'){
+    loadWeeklyChampions();
     return;
   }
   lbCurrentDiff[game]='all';
@@ -2524,6 +2704,72 @@ async function loadKidsChampions(){
           <div class="lbdate">total pts</div>
         </div>
       </div>`).join('');
+}
+
+async function loadWeeklyChampions(){
+  const el=document.getElementById('lb-weekly-list');
+  const claimEl=document.getElementById('lb-weekly-claim');
+  if(!el)return;
+  el.innerHTML='<div class="lb-empty">Loading this week\'s champions...</div>';
+  if(claimEl)claimEl.innerHTML='';
+  const res=await api({action:'getWeeklyChampions'});
+  const medals=['🥇','🥈','🥉','🏅','🏅'];
+  if(!res||!res.success||!res.champions?.length){
+    el.innerHTML='<div class="lb-empty"><div style="font-size:40px;margin-bottom:12px">💰</div><div style="font-size:16px;font-weight:900;color:var(--navy);margin-bottom:8px">No Players Yet This Week!</div><div style="font-size:13px;font-weight:700;color:#888780">Play any of the 7 Brainy Games to enter the Top 5!</div></div>';
+    return;
+  }
+  el.innerHTML=res.champions.map(r=>`
+    <div class="lbrow ${r.rank===1?'gold':r.rank===2?'silver':r.rank===3?'bronze':''}">
+      <div class="lbmedal">${medals[r.rank-1]}</div>
+      <div class="lbinfo">
+        <div class="lbname">${r.name}<span class="lbbdg ${r.type}">${r.type==='kid'?'Kid':r.type==='adult'?'Adult':'Guest'}</span></div>
+        <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">${r.gamesPlayed} games played this week</div>
+      </div>
+      <div class="lbright">
+        <span class="lb-score-display" style="font-size:clamp(16px,3.5vw,22px);color:#10B981">₱${r.prize}</span>
+        <div class="lbdate">${r.total} pts</div>
+      </div>
+    </div>`).join('');
+  // Show claim form if the logged-in user is in the top 5 and hasn't claimed yet
+  if(CU && claimEl){
+    const mine=res.champions.find(c2=>c2.username===CU.username);
+    if(mine){
+      claimEl.innerHTML=`
+        <div style="background:#FFF8E7;border:2px solid #FAC775;border-radius:16px;padding:16px;text-align:center">
+          <div style="font-size:32px;margin-bottom:6px">🎉</div>
+          <div style="font-size:15px;font-weight:900;color:#1D2B55;margin-bottom:6px">You're #${mine.rank} this week!</div>
+          <div style="font-size:13px;font-weight:700;color:#5F5E5A;margin-bottom:14px">Claim your ₱${mine.prize} GCash prize below.</div>
+          <input id="claim-gcash-name" type="text" placeholder="Full name on GCash" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;margin-bottom:8px;box-sizing:border-box"/>
+          <input id="claim-gcash-number" type="tel" placeholder="GCash Number (09XXXXXXXXX)" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;margin-bottom:12px;box-sizing:border-box"/>
+          <button onclick="submitWeeklyClaim(${mine.rank},${mine.prize})" style="width:100%;padding:13px;border-radius:99px;background:#10B981;border:none;color:#fff;font-family:Nunito,sans-serif;font-size:14px;font-weight:900;cursor:pointer">💰 Claim My Prize</button>
+          <div id="claim-result" style="margin-top:10px;font-size:12px"></div>
+        </div>`;
+    }
+  }
+}
+
+async function submitWeeklyClaim(rank, prize){
+  const nameEl=document.getElementById('claim-gcash-name');
+  const numEl=document.getElementById('claim-gcash-number');
+  const name=(nameEl?.value||'').trim();
+  const num=(numEl?.value||'').trim();
+  const resultEl=document.getElementById('claim-result');
+  if(!name||!num){
+    if(resultEl)resultEl.innerHTML='<span style="color:#E24B4A;font-weight:800">Please fill in both fields.</span>';
+    return;
+  }
+  if(!/^09\d{9}$/.test(num)){
+    if(resultEl)resultEl.innerHTML='<span style="color:#E24B4A;font-weight:800">Enter a valid GCash number (09XXXXXXXXX).</span>';
+    return;
+  }
+  showLoader('Submitting claim...');
+  const res=await api({action:'claimWeeklyReward',username:CU.username,name:CU.name,gcashName:name,gcashNumber:num});
+  hideLoader();
+  if(res&&res.success){
+    if(resultEl)resultEl.innerHTML='<span style="color:#10B981;font-weight:900">✅ Claim submitted! Admin will verify and send your ₱'+res.prize+' within 24-48 hours.</span>';
+  }else{
+    if(resultEl)resultEl.innerHTML='<span style="color:#E24B4A;font-weight:800">❌ '+((res&&res.error)||'Failed to submit')+'</span>';
+  }
 }
 
 async function loadLBGame(game, diff){
