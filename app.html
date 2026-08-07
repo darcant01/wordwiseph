@@ -1148,11 +1148,11 @@ const SB = supabase.createClient("https://ahtyjglufrvtfnhkooux.supabase.co", "sb
 
 // ── Universal Kids Corner score saver (non-blocking, logged-in only) ──
 async function saveKidsScore(diffKey, score, total, stars){
-  if(!CU) return; // guests: not saved, same behavior as other games
+  const name=CU?CU.name:'Guest', username=CU?CU.username:'guest', type=CU?CU.type:'guest';
   try{
-    await api({action:'saveScore', name:CU.name, username:CU.username, type:CU.type,
+    await api({action:'saveScore', name:name, username:username, type:type,
       score:score, total:total, diff:diffKey, stars:stars, date:new Date().toLocaleDateString()});
-    try{TICKER.notifyLocal({name:CU.name, username:CU.username, score:score, total:total, diff:diffKey, stars:stars});TICKER.resume();}catch(e){}
+    try{TICKER.notifyLocal({name:name, username:username, score:score, total:total, diff:diffKey, stars:stars});TICKER.resume();}catch(e){}
   }catch(e){ console.warn('Kids score save failed:', diffKey, e); }
 }
 function _d(ts){ try{ return new Date(ts).toLocaleDateString(); }catch(e){ return ''; } }
@@ -2216,17 +2216,15 @@ async function showResult(){
   document.getElementById('rstr').textContent=stars;
   document.getElementById('rmsg').textContent=msg;
   const total=QL[diff]||5;const entry={name:CU?CU.name:'Guest',username:CU?CU.username:'guest',type:CU?CU.type:'guest',score:lastSco,total,diff,stars,date:new Date().toLocaleDateString()};
-  if(CU){
-    try{
-      showLoader('Saving score...');
-      await api({action:'saveScore',...entry});
-      hideLoader();
-      TICKER.notifyLocal(entry);
-      TICKER.resume();
-    }catch(e){
-      hideLoader();
-      console.warn('Score save failed:',e);
-    }
+  try{
+    showLoader('Saving score...');
+    await api({action:'saveScore',...entry});
+    hideLoader();
+    TICKER.notifyLocal(entry);
+    TICKER.resume();
+  }catch(e){
+    hideLoader();
+    console.warn('Score save failed:',e);
   }
   const sa=document.getElementById('save-area');
   // Downloads section
@@ -2256,7 +2254,7 @@ async function showResult(){
   }
   if(sa)sa.innerHTML=CU
     ?`<div style="font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:14px">✅ Score saved!</div>`
-    :`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:10px">Login to save your score permanently!</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up Free</button></div></div>`;
+    :`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:6px">✅ Score saved as Guest!</p><p style="color:#9CA3AF;font-size:12px;font-weight:700;margin-bottom:10px">Sign up to track your progress over time!</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up Free</button></div></div>`;
   document.getElementById('result').classList.add('show');
   document.getElementById('sbtn').disabled=true;
   // Fill and open the result popup
@@ -4107,17 +4105,15 @@ async function endShark(){
   // Save score
   const entry={name:CU?CU.name:'Guest',username:CU?CU.username:'guest',type:CU?CU.type:'guest',score:sharkScore,total:60,diff:'shark-'+sharkDiff,stars,date:new Date().toLocaleDateString()};
   const sa=document.getElementById('shark-save-area');
-  if(CU){
-    try{
-      showLoader('Saving score...');
-      await api({action:'saveScore',...entry});
-      hideLoader();
-      TICKER.notifyLocal(entry);TICKER.resume();
-      if(sa)sa.innerHTML=`<div style="font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:14px">✅ Score saved! ${sharkScore} words typed!</div>`;
-    }catch(e){hideLoader();if(sa)sa.innerHTML='';}
-  }else{
-    if(sa)sa.innerHTML=`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:10px">Login to save your score!</p><div style="display:flex;gap:8px;justify-content:center"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up</button></div></div>`;
-  }
+  try{
+    showLoader('Saving score...');
+    await api({action:'saveScore',...entry});
+    hideLoader();
+    TICKER.notifyLocal(entry);TICKER.resume();
+    if(sa)sa.innerHTML=CU
+      ?`<div style="font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:14px">✅ Score saved! ${sharkScore} words typed!</div>`
+      :`<div style="background:var(--n2);border-radius:14px;padding:14px;margin-bottom:14px"><p style="color:var(--blue);font-size:13px;font-weight:700;margin-bottom:6px">✅ Score saved as Guest!</p><p style="color:#9CA3AF;font-size:12px;font-weight:700;margin-bottom:10px">Sign up to track your progress!</p><div style="display:flex;gap:8px;justify-content:center"><button class="btn btn-pink btn-sm" onclick="navTo('login')">Login</button><button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--lp);color:var(--lp)" onclick="navTo('register')">Sign Up</button></div></div>`;
+  }catch(e){hideLoader();if(sa)sa.innerHTML='';}
   openGameResultModal('shark-over');
   setTimeout(()=>over.scrollIntoView({behavior:'smooth'}),100);
 }
