@@ -749,8 +749,19 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div class="lbtabs">
         <button class="lbt on" onclick="switchKidsLBMode('champion',this)">🏆 All-Time Champion</button>
         <button class="lbt" onclick="switchKidsLBMode('bygame',this)">🎮 By Game</button>
+        <button class="lbt" onclick="switchKidsLBMode('rewards',this)">💰 Weekly Rewards</button>
       </div>
       <div id="lb-kids-champion" style="display:block"></div>
+      <div id="lb-kids-rewards" style="display:none">
+        <div style="background:linear-gradient(135deg,#FF6B9D,#FFB347);border-radius:16px;padding:16px;margin-bottom:16px;text-align:center;color:#fff">
+          <div style="font-size:28px;margin-bottom:6px">💰</div>
+          <div style="font-size:16px;font-weight:900;margin-bottom:4px">This Week's Kids Corner Top 5 Win Cash!</div>
+          <div style="font-size:12px;font-weight:700;opacity:0.9">Ranked by best score across all 15 Kids Corner games.</div>
+          <div id="lb-kids-weekly-countdown" style="margin-top:10px;display:inline-block;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:99px;padding:5px 16px;font-size:12px;font-weight:900"></div>
+        </div>
+        <div id="lb-kids-weekly-list"></div>
+        <div id="lb-kids-weekly-claim" style="margin-top:16px"></div>
+      </div>
       <div id="lb-kids-bygame" style="display:none">
       <div style="margin-bottom:14px">
         <select id="lb-kids-select" onchange="loadLBGame('kids', this.value)"
@@ -2736,15 +2747,112 @@ function switchKidsLBMode(mode, el){
   if(el)el.classList.add('on');
   const champ=document.getElementById('lb-kids-champion');
   const bygame=document.getElementById('lb-kids-bygame');
+  const rewards=document.getElementById('lb-kids-rewards');
+  if(champ)champ.style.display=(mode==='champion')?'block':'none';
+  if(bygame)bygame.style.display=(mode==='bygame')?'block':'none';
+  if(rewards)rewards.style.display=(mode==='rewards')?'block':'none';
   if(mode==='champion'){
-    if(champ)champ.style.display='block';
-    if(bygame)bygame.style.display='none';
     loadKidsChampions();
-  }else{
-    if(champ)champ.style.display='none';
-    if(bygame)bygame.style.display='block';
+  }else if(mode==='bygame'){
     const sel=document.getElementById('lb-kids-select');
     loadLBGame('kids', sel?sel.value:'kids-abc-order');
+  }else if(mode==='rewards'){
+    loadKidsWeeklyChampions();
+    updateKidsWeeklyCountdown();
+    if(window._kidsWeeklyCdTimer)clearInterval(window._kidsWeeklyCdTimer);
+    window._kidsWeeklyCdTimer=setInterval(updateKidsWeeklyCountdown,60000);
+  }
+}
+
+function updateKidsWeeklyCountdown(){
+  var el=document.getElementById('lb-kids-weekly-countdown');
+  if(el)el.textContent=getWeekResetCountdown();
+}
+
+async function loadKidsWeeklyChampions(){
+  const el=document.getElementById('lb-kids-weekly-list');
+  const claimEl=document.getElementById('lb-kids-weekly-claim');
+  if(!el)return;
+  el.innerHTML='<div class="lb-empty">Loading this week\'s champions...</div>';
+  if(claimEl)claimEl.innerHTML='';
+  const res=await api({action:'getWeeklyKidsChampions'});
+  const medals=['🥇','🥈','🥉','🏅','🏅'];
+  if(!res||!res.success||!res.champions?.length){
+    el.innerHTML='<div class="lb-empty"><div style="font-size:40px;margin-bottom:12px">🌟</div><div style="font-size:16px;font-weight:900;color:var(--navy);margin-bottom:8px">No Players Yet This Week!</div><div style="font-size:13px;font-weight:700;color:#888780">Play any Kids Corner game to enter the Top 5!</div></div>';
+    return;
+  }
+  el.innerHTML=res.champions.map(r=>`
+    <div class="lbrow ${r.rank===1?'gold':r.rank===2?'silver':r.rank===3?'bronze':''}">
+      <div class="lbmedal">${medals[r.rank-1]}</div>
+      <div class="lbinfo">
+        <div class="lbname">${r.name}<span class="lbbdg ${r.type}">${r.type==='kid'?'Kid':r.type==='adult'?'Adult':'Guest'}</span></div>
+        <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">${r.gamesPlayed} games played this week</div>
+      </div>
+      <div class="lbright">
+        <span class="lb-score-display" style="font-size:clamp(16px,3.5vw,22px);color:#10B981">₱${r.prize}</span>
+        <div class="lbdate">${r.total} pts</div>
+      </div>
+    </div>`).join('');
+  if(CU && claimEl){
+    const mine=res.champions.find(c2=>c2.username===CU.username);
+    if(mine){
+      claimEl.innerHTML='<div class="lb-empty">Checking your claim status...</div>';
+      const weekStart=res.weekStart;
+      const cRes=await api({action:'getMyWeeklyClaim',username:CU.username,weekStart,category:'kids'});
+      const existing=cRes&&cRes.success?cRes.claim:null;
+      if(existing&&existing.status==='paid'){
+        claimEl.innerHTML=`
+          <div style="background:#F0FFF4;border:2px solid #10B981;border-radius:16px;padding:16px;text-align:center">
+            <div style="font-size:32px;margin-bottom:6px">✅</div>
+            <div style="font-size:15px;font-weight:900;color:#065F46;margin-bottom:6px">₱${existing.prize_amount} Paid!</div>
+            <div style="font-size:12px;font-weight:700;color:#5F5E5A;margin-bottom:12px">Sent to ${existing.gcash_number}</div>
+            ${existing.receipt_url?`<a href="${existing.receipt_url}" target="_blank"><img src="${existing.receipt_url}" style="max-width:100%;max-height:200px;border-radius:12px;border:1.5px solid #10B981"/></a><div style="font-size:11px;color:#10B981;font-weight:800;margin-top:8px">Tap to view full receipt</div>`:''}
+          </div>`;
+      }else if(existing&&existing.status==='submitted'){
+        claimEl.innerHTML=`
+          <div style="background:#FFF8E7;border:2px solid #FAC775;border-radius:16px;padding:16px;text-align:center">
+            <div style="font-size:32px;margin-bottom:6px">⏳</div>
+            <div style="font-size:15px;font-weight:900;color:#1D2B55;margin-bottom:6px">Claim Submitted!</div>
+            <div style="font-size:12px;font-weight:700;color:#5F5E5A">₱${existing.prize_amount} pending admin approval. Usually paid within 24-48 hours.</div>
+          </div>`;
+      }else{
+        claimEl.innerHTML=`
+          <div style="background:#FFF8E7;border:2px solid #FAC775;border-radius:16px;padding:16px;text-align:center">
+            <div style="font-size:32px;margin-bottom:6px">🎉</div>
+            <div style="font-size:15px;font-weight:900;color:#1D2B55;margin-bottom:6px">You're #${mine.rank} this week!</div>
+            <div style="font-size:13px;font-weight:700;color:#5F5E5A;margin-bottom:14px">Claim your ₱${mine.prize} GCash prize below.</div>
+            <input id="kids-claim-gcash-name" type="text" placeholder="Full name on GCash" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;margin-bottom:8px;box-sizing:border-box"/>
+            <input id="kids-claim-gcash-number" type="tel" placeholder="GCash Number (09XXXXXXXXX)" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;margin-bottom:12px;box-sizing:border-box"/>
+            <button onclick="submitKidsWeeklyClaim(${mine.rank},${mine.prize})" style="width:100%;padding:13px;border-radius:99px;background:#10B981;border:none;color:#fff;font-family:Nunito,sans-serif;font-size:14px;font-weight:900;cursor:pointer">💰 Claim My Prize</button>
+            <div id="kids-claim-result" style="margin-top:10px;font-size:12px"></div>
+          </div>`;
+      }
+    }
+  }
+}
+
+async function submitKidsWeeklyClaim(rank, prize){
+  const nameEl=document.getElementById('kids-claim-gcash-name');
+  const numEl=document.getElementById('kids-claim-gcash-number');
+  const name=(nameEl?.value||'').trim();
+  const num=(numEl?.value||'').trim();
+  const resultEl=document.getElementById('kids-claim-result');
+  if(!name||!num){
+    if(resultEl)resultEl.innerHTML='<span style="color:#E24B4A;font-weight:800">Please fill in both fields.</span>';
+    return;
+  }
+  if(!/^09\d{9}$/.test(num)){
+    if(resultEl)resultEl.innerHTML='<span style="color:#E24B4A;font-weight:800">Enter a valid GCash number (09XXXXXXXXX).</span>';
+    return;
+  }
+  showLoader('Submitting claim...');
+  const res=await api({action:'claimKidsWeeklyReward',username:CU.username,name:CU.name,gcashName:name,gcashNumber:num});
+  hideLoader();
+  if(res&&res.success){
+    if(resultEl)resultEl.innerHTML='<span style="color:#10B981;font-weight:900">✅ Claim submitted! Admin will verify and send your ₱'+res.prize+' within 24-48 hours.</span>';
+    setTimeout(loadKidsWeeklyChampions,1500);
+  }else{
+    if(resultEl)resultEl.innerHTML='<span style="color:#E24B4A;font-weight:800">❌ '+((res&&res.error)||'Failed to submit')+'</span>';
   }
 }
 
