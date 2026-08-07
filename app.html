@@ -429,6 +429,8 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 @keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0.7}}
 @keyframes fireworkPop{0%{transform:translate(-50%,-50%) scale(0.3);opacity:1}70%{opacity:1}100%{transform:translate(calc(-50% + var(--fx)),calc(-50% + var(--fy))) scale(1);opacity:0}}
 @keyframes fireworkFlash{0%{transform:translate(-50%,-50%) scale(0);opacity:0.9}100%{transform:translate(-50%,-50%) scale(3.5);opacity:0}}
+@keyframes charBounce{0%{transform:translateY(0) rotate(0deg) scale(1)}20%{transform:translateY(-14px) rotate(-8deg) scale(1.15)}45%{transform:translateY(0) rotate(6deg) scale(1.05)}70%{transform:translateY(-6px) rotate(-3deg) scale(1.08)}100%{transform:translateY(0) rotate(0deg) scale(1)}}
+.char-happy{animation:charBounce 0.5s ease-out}
 </style>
 <meta property="og:image" content="https://wordwiseph.com/og-image.png"/>
 <meta name="description" content="Grammar Quiz, Kids Corner, Letter Tracer, Shark Typing &amp; Brainy Games for Filipino kids. All difficulty levels. Free to play, no download needed!"/>
@@ -1871,6 +1873,14 @@ function sFirework(delay){
   noise(0.18,2200,0.35,delay+0.28);
   noise(0.35,1200,0.18,delay+0.32);
   tone(1200,0.08,'square',0.12,delay+0.3);
+}
+
+function charReact(elId){
+  var el=document.getElementById(elId);
+  if(!el)return;
+  el.classList.remove('char-happy');
+  void el.offsetWidth; // force reflow so animation restarts even mid-play
+  el.classList.add('char-happy');
 }
 
 function streakPuff(anchorElId){
@@ -4197,6 +4207,7 @@ function sharkCorrectWord(){
   clearInterval(sharkWordTimer);
   const fish=document.getElementById('shark-fish');
   if(fish){fish.textContent='🎉';setTimeout(()=>{fish.textContent='🐟';},400);}
+  charReact('shark-character');
   const bar=document.getElementById('shark-danger-bar');
   if(bar){bar.style.transition='none';bar.style.width='0%';}
   sharkScore++;sharkStreak++;
