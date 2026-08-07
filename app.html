@@ -1313,6 +1313,65 @@ async function api(data){
       const diffs=[...new Set((rows||[]).map(r=>r.diff))];
       return {success:true, diffs};
     }
+    if(a==='getWeeklyKidsChampions'){
+      const now=new Date();
+      const day=now.getDay();
+      const diffToMon=(day===0?-6:1-day);
+      const monday=new Date(now);monday.setDate(now.getDate()+diffToMon);monday.setHours(0,0,0,0);
+      const {data:rows}=await SB.from('scores').select('*').gte('created_at',monday.toISOString()).like('diff','kids-%').order('created_at',{ascending:false}).limit(3000);
+      const byUser={};
+      (rows||[]).forEach(r=>{
+        const u=r.username; if(!u||u==='guest') return;
+        if(!byUser[u]) byUser[u]={name:r.name||u, type:r.type||'free', games:{}};
+        const prev=byUser[u].games[r.diff];
+        if(!prev || (r.score||0)>prev) byUser[u].games[r.diff]=r.score||0;
+      });
+      const ranked=Object.keys(byUser).map(u=>{
+        const rec=byUser[u];
+        const gk=Object.keys(rec.games);
+        const total=gk.reduce((s,g)=>s+rec.games[g],0);
+        return {username:u, name:rec.name, type:rec.type, gamesPlayed:gk.length, total};
+      }).sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
+      const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes_kids').limit(1);
+      const prizes=pz&&pz.length?JSON.parse(pz[0].value):[100,75,50,25,10];
+      ranked.forEach(r=>r.prize=prizes[r.rank-1]||0);
+      return {success:true, champions:ranked, weekStart:monday.toISOString().split('T')[0]};
+    }
+    if(a==='claimKidsWeeklyReward'){
+      if(!data.username)return {success:false,error:'Not logged in'};
+      const now=new Date();
+      const day=now.getDay();
+      const diffToMon=(day===0?-6:1-day);
+      const monday=new Date(now);monday.setDate(now.getDate()+diffToMon);monday.setHours(0,0,0,0);
+      const {data:rows}=await SB.from('scores').select('*').gte('created_at',monday.toISOString()).like('diff','kids-%').limit(3000);
+      const byUser={};
+      (rows||[]).forEach(r=>{
+        const u=r.username; if(!u||u==='guest') return;
+        if(!byUser[u]) byUser[u]={games:{}};
+        const prev=byUser[u].games[r.diff];
+        if(!prev || (r.score||0)>prev) byUser[u].games[r.diff]=r.score||0;
+      });
+      const ranked=Object.keys(byUser).map(u=>{
+        const rec=byUser[u];
+        const gk=Object.keys(rec.games);
+        const total=gk.reduce((s,g)=>s+rec.games[g],0);
+        return {username:u, total};
+      }).sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
+      const mine=ranked.find(r=>r.username===data.username);
+      if(!mine)return {success:false,error:'You are not in this week\'s Kids Corner Top 5. Keep playing!'};
+      const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes_kids').limit(1);
+      const prizes=pz&&pz.length?JSON.parse(pz[0].value):[100,75,50,25,10];
+      const prize=prizes[mine.rank-1]||0;
+      const weekStart=monday.toISOString().split('T')[0];
+      const {error}=await SB.from('weekly_rewards').upsert([{
+        username:data.username, name:data.name||data.username, week_start:weekStart, category:'kids',
+        rank:mine.rank, points:mine.total, prize_amount:prize,
+        gcash_number:data.gcashNumber, gcash_name:data.gcashName,
+        status:'submitted', submitted_at:new Date().toISOString()
+      }], {onConflict:'username,week_start,category'});
+      if(error)return {success:false,error:error.message};
+      return {success:true, rank:mine.rank, prize};
+    }
     if(a==='getWeeklyChampions'){
       // Monday 00:00 (local) of the current week
       const now=new Date();
@@ -1420,31 +1479,36 @@ async function api(data){
     if(a==='getWeeklyClaimsAdmin'){
       const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
       if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
-      const {data:rows}=await SB.from('weekly_rewards').select('*').order('submitted_at',{ascending:false}).limit(200);
+      const category=data.category||'main';
+      const {data:rows}=await SB.from('weekly_rewards').select('*').eq('category',category).order('submitted_at',{ascending:false}).limit(200);
       return {success:true, claims:rows||[]};
     }
     if(a==='markWeeklyClaimPaid'){
       const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
       if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
       if(!data.receiptUrl)return {success:false,error:'Receipt image is required'};
-      const {error}=await SB.from('weekly_rewards').update({status:'paid',paid_at:new Date().toISOString(),receipt_url:data.receiptUrl}).eq('username',data.username).eq('week_start',data.weekStart);
+      const category=data.category||'main';
+      const {error}=await SB.from('weekly_rewards').update({status:'paid',paid_at:new Date().toISOString(),receipt_url:data.receiptUrl}).eq('username',data.username).eq('week_start',data.weekStart).eq('category',category);
       if(error)return {success:false,error:error.message};
-      await SB.from('activity').insert({m:'💰 Admin marked weekly reward as PAID for @'+data.username+' (₱'+data.prize+') with receipt'});
+      await SB.from('activity').insert({m:'💰 Admin marked '+category+' weekly reward as PAID for @'+data.username+' (₱'+data.prize+') with receipt'});
       return {success:true};
     }
     if(a==='getMyWeeklyClaim'){
-      const {data:rows}=await SB.from('weekly_rewards').select('*').eq('username',data.username).eq('week_start',data.weekStart).limit(1);
+      const category=data.category||'main';
+      const {data:rows}=await SB.from('weekly_rewards').select('*').eq('username',data.username).eq('week_start',data.weekStart).eq('category',category).limit(1);
       return {success:true, claim: rows&&rows.length?rows[0]:null};
     }
     if(a==='getPrizeSettings'){
-      const {data:rows}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
+      const key=(data.category==='kids')?'weekly_prizes_kids':'weekly_prizes';
+      const {data:rows}=await SB.from('settings').select('value').eq('key',key).limit(1);
       const prizes=rows&&rows.length?JSON.parse(rows[0].value):[200,150,100,75,50];
       return {success:true, prizes};
     }
     if(a==='setPrizeSettings'){
       const {data:adm}=await SB.from('users').select('role').eq('username',data.adminUsername).limit(1);
       if(!adm||!adm.length||adm[0].role!=='admin')return {success:false,error:'Not authorized'};
-      const {error}=await SB.from('settings').upsert([{key:'weekly_prizes',value:JSON.stringify(data.prizes)}]);
+      const key=(data.category==='kids')?'weekly_prizes_kids':'weekly_prizes';
+      const {error}=await SB.from('settings').upsert([{key:key,value:JSON.stringify(data.prizes)}]);
       if(error)return {success:false,error:error.message};
       return {success:true};
     }
