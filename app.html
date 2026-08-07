@@ -6127,8 +6127,13 @@ function showRhymeResult(){
     }
   }catch(e){}
   // Always fetch fresh in background (updates cache)
-  fetch('questions.json')
-    .then(r => r.json())
+  fetch('/questions.json', {cache:'no-cache'})
+    .then(r => {
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const ct = r.headers.get('content-type') || '';
+      if(!ct.includes('json')) throw new Error('Expected JSON, got: '+ct);
+      return r.json();
+    })
     .then(data => {
       BANK = data;
       try{localStorage.setItem(CACHE_KEY, JSON.stringify(data));}catch(e){}
@@ -8806,7 +8811,7 @@ function showPlanBanner(plan){
     <button id="chat-send" onclick="sendChat()">&#x27A4;</button>
   </div>
 </div><script>
-var CHAT_SB=supabase.createClient("https://ahtyjglufrvtfnhkooux.supabase.co","sb_publishable_AylXCLg2W3sQzQSn5sH7Xg_k4ZQblM7");
+var CHAT_SB=SB; // reuse main client — avoids duplicate GoTrueClient warning
 var _chatSession=null,_chatOpen=false,_chatTimer=null,_chatLastId=0;
 function _getChatSession(){
   if(_chatSession)return _chatSession;
