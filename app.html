@@ -1355,16 +1355,18 @@ async function api(data){
         const prev=byUser[u].games[r.diff];
         if(!prev || (r.score||0)>prev) byUser[u].games[r.diff]=r.score||0;
       });
+      const KIDS_TOTAL=15;
       const ranked=Object.keys(byUser).map(u=>{
         const rec=byUser[u];
         const gk=Object.keys(rec.games);
         const total=gk.reduce((s,g)=>s+rec.games[g],0);
         return {username:u, name:rec.name, type:rec.type, gamesPlayed:gk.length, total};
-      }).sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
+      }).filter(r=>r.gamesPlayed>=KIDS_TOTAL)
+        .sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes_kids').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[100,75,50,25,10];
       ranked.forEach(r=>r.prize=prizes[r.rank-1]||0);
-      return {success:true, champions:ranked, weekStart:monday.toISOString().split('T')[0]};
+      return {success:true, champions:ranked, weekStart:monday.toISOString().split('T')[0], requiredGames:KIDS_TOTAL};
     }
     if(a==='claimKidsWeeklyReward'){
       if(!data.username)return {success:false,error:'Not logged in'};
@@ -1380,14 +1382,16 @@ async function api(data){
         const prev=byUser[u].games[r.diff];
         if(!prev || (r.score||0)>prev) byUser[u].games[r.diff]=r.score||0;
       });
+      const KIDS_TOTAL=15;
       const ranked=Object.keys(byUser).map(u=>{
         const rec=byUser[u];
         const gk=Object.keys(rec.games);
         const total=gk.reduce((s,g)=>s+rec.games[g],0);
-        return {username:u, total};
-      }).sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
+        return {username:u, gamesPlayed:gk.length, total};
+      }).filter(r=>r.gamesPlayed>=KIDS_TOTAL)
+        .sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
       const mine=ranked.find(r=>r.username===data.username);
-      if(!mine)return {success:false,error:'You are not in this week\'s Kids Corner Top 5. Keep playing!'};
+      if(!mine)return {success:false,error:'You must play all 15 Kids Corner games this week to be in the Top 5. Keep playing!'};
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes_kids').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[100,75,50,25,10];
       const prize=prizes[mine.rank-1]||0;
