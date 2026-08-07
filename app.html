@@ -741,6 +741,12 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
 
     <!-- Kids Corner LB -->
     <div id="lb-kids" class="lb-game-panel" style="display:none">
+      <div class="lbtabs">
+        <button class="lbt on" onclick="switchKidsLBMode('champion',this)">🏆 All-Time Champion</button>
+        <button class="lbt" onclick="switchKidsLBMode('bygame',this)">🎮 By Game</button>
+      </div>
+      <div id="lb-kids-champion" style="display:block"></div>
+      <div id="lb-kids-bygame" style="display:none">
       <div style="margin-bottom:14px">
         <select id="lb-kids-select" onchange="loadLBGame('kids', this.value)"
           style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:800;color:#1D2B55;background:#fff">
@@ -762,6 +768,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         </select>
       </div>
       <div id="lb-kids-list" class="lb-list"></div>
+      </div>
     </div>
 
   </div>
@@ -1237,6 +1244,27 @@ async function api(data){
       return {success:true,scores:scores,ann:ann};
     }
 
+    if(a==='getKidsAllTimeScores'){
+      const {data:rows}=await SB.from('scores').select('*').like('diff','kids-%').order('created_at',{ascending:false}).limit(2000);
+      const byUser={};
+      (rows||[]).forEach(r=>{
+        const u=r.username; if(!u) return;
+        if(!byUser[u]) byUser[u]={name:r.name||u, type:r.type||'free', diffs:{}};
+        const prev=byUser[u].diffs[r.diff];
+        if(!prev || (r.score||0)>prev) byUser[u].diffs[r.diff]=r.score||0;
+      });
+      const champions=Object.keys(byUser).map(u=>{
+        const rec=byUser[u];
+        const diffKeys=Object.keys(rec.diffs);
+        const rounds=diffKeys.length;
+        const total=diffKeys.reduce((s,k)=>s+rec.diffs[k],0);
+        const best=diffKeys.length?Math.max(...diffKeys.map(k=>rec.diffs[k])):0;
+        return {name:rec.name, type:rec.type, rounds, best, total};
+      }).filter(c2=>c2.rounds>=15)
+        .sort((a,b)=>b.total-a.total)
+        .slice(0,10);
+      return {success:true, scores:champions, requiredGames:15};
+    }
     if(a==='getAllTimeScores'){
       const {data:rows}=await SB.from('scores').select('*').order('score',{ascending:false}).order('created_at',{ascending:false}).limit(10);
       const scores=(rows||[]).map(s=>({name:s.name||s.username,username:s.username,score:s.score,total:s.total,stars:s.stars,date:_d(s.created_at),diff:s.diff}));
@@ -2219,8 +2247,7 @@ function switchLBGame(game, el){
     if(first)first.classList.add('on');
   }
   if(game==='kids'){
-    const sel=document.getElementById('lb-kids-select');
-    loadLBGame('kids', sel?sel.value:'kids-abc-order');
+    loadKidsChampions();
     return;
   }
   lbCurrentDiff[game]='all';
@@ -2234,6 +2261,61 @@ function switchLBDiff(game, diff, el){
   if(panel) panel.querySelectorAll('.lbt').forEach(t=>t.classList.remove('on'));
   if(el)el.classList.add('on');
   loadLBGame(game, diff);
+}
+
+function switchKidsLBMode(mode, el){
+  document.querySelectorAll('#lb-kids .lbt').forEach(t=>t.classList.remove('on'));
+  if(el)el.classList.add('on');
+  const champ=document.getElementById('lb-kids-champion');
+  const bygame=document.getElementById('lb-kids-bygame');
+  if(mode==='champion'){
+    if(champ)champ.style.display='block';
+    if(bygame)bygame.style.display='none';
+    loadKidsChampions();
+  }else{
+    if(champ)champ.style.display='none';
+    if(bygame)bygame.style.display='block';
+    const sel=document.getElementById('lb-kids-select');
+    loadLBGame('kids', sel?sel.value:'kids-abc-order');
+  }
+}
+
+async function loadKidsChampions(){
+  const el=document.getElementById('lb-kids-champion');
+  if(!el)return;
+  el.innerHTML='<div class="lb-empty">Loading champions...</div>';
+  const res=await api({action:'getKidsAllTimeScores'});
+  const medals=['🥇','🥈','🥉'], cls=['gold','silver','bronze'];
+  const need=res.requiredGames||15;
+  if(!res.success||!res.scores?.length){
+    el.innerHTML=`
+      <div class="lb-empty">
+        <div style="font-size:40px;margin-bottom:12px">🌟</div>
+        <div style="font-size:16px;font-weight:900;color:var(--navy);margin-bottom:8px">No Kids Champions Yet!</div>
+        <div style="font-size:13px;font-weight:700;color:#888780;line-height:1.7">
+          To appear here, play <strong style="color:var(--navy)">ALL ${need} Kids Corner games</strong> at least once!
+        </div>
+      </div>`;
+    return;
+  }
+  el.innerHTML =
+    `<div style="text-align:center;font-size:11px;font-weight:800;color:#888780;text-transform:uppercase;letter-spacing:1px;padding:8px 0 12px">
+      Must play all ${need} games to qualify · Ranked by total points
+    </div>` +
+    res.scores.map((e,i)=>`
+      <div class="lbrow ${cls[i]||''}">
+        <div class="lbmedal">${medals[i]||'#'+(i+1)}</div>
+        <div class="lbinfo">
+          <div class="lbname">${e.name}<span class="lbbdg ${e.type}">${e.type==='kid'?'Kid':e.type==='adult'?'Adult':'Guest'}</span></div>
+          <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">
+            🌟 ${e.rounds}/${need} games · Best: ${e.best}pts
+          </div>
+        </div>
+        <div class="lbright">
+          <span class="lb-score-display" style="font-size:clamp(18px,4vw,26px)">${e.total}</span>
+          <div class="lbdate">total pts</div>
+        </div>
+      </div>`).join('');
 }
 
 async function loadLBGame(game, diff){
