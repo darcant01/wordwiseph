@@ -1478,7 +1478,19 @@ async function api(data){
 
     if(a==='getChildren'){
       const {data:rows}=await SB.from('children').select('*').eq('parent_username',data.parentUsername);
-      const children=(rows||[]).map(k=>({username:k.child_username,name:k.child_name,childUsername:k.child_username,childName:k.child_name}));
+      const usernames=(rows||[]).map(k=>k.child_username);
+      let scoresByUser={};
+      if(usernames.length){
+        const {data:allScores}=await SB.from('scores').select('*').in('username',usernames).order('created_at',{ascending:false});
+        (allScores||[]).forEach(s=>{
+          if(!scoresByUser[s.username])scoresByUser[s.username]=[];
+          scoresByUser[s.username].push({score:s.score,total:s.total,diff:s.diff,stars:s.stars,date:_d(s.created_at)});
+        });
+      }
+      const children=(rows||[]).map(k=>({
+        username:k.child_username,name:k.child_name,childUsername:k.child_username,childName:k.child_name,
+        scores:scoresByUser[k.child_username]||[]
+      }));
       return {success:true,children:children};
     }
 
@@ -2602,18 +2614,26 @@ async function loadParent(){
   if(!cl)return;
   if(!kids.length){cl.innerHTML='<div style="text-align:center;padding:16px;color:#888780;font-weight:700">No children linked yet. Add your child below!</div>';return;}
   cl.innerHTML=kids.map(c=>{
-    const best=c.scores?.length?Math.max(...c.scores.map(s=>s.score)):0;
-    const total=c.scores?.length||0;
-    const perfect=c.scores?.filter(s=>s.score===5).length||0;
-    const avg=total?(c.scores.reduce((s,x)=>s+x.score,0)/total).toFixed(1):'0.0';
+    const allScores=c.scores||[];
+    const mainScores=allScores.filter(s=>!(s.diff||'').startsWith('kids-'));
+    const kidsScores=allScores.filter(s=>(s.diff||'').startsWith('kids-'));
+    const best=mainScores.length?Math.max(...mainScores.map(s=>s.score)):0;
+    const total=mainScores.length;
+    const perfect=mainScores.filter(s=>s.total&&s.score===s.total).length;
+    const avg=total?(mainScores.reduce((s,x)=>s+x.score,0)/total).toFixed(1):'0.0';
+    const kidsDistinct=new Set(kidsScores.map(s=>s.diff)).size;
+    const kidsTotal=15;
     const ini=c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    const recent=(c.scores||[]).slice(0,5);
+    const recent=allScores.slice(0,5);
     return `<div class="child-card">
       <div class="child-hdr"><div class="child-av">${ini}</div><div class="child-info"><div class="child-name">${c.name}</div><div class="child-meta">@${c.username}</div></div><span class="sub-status active">Active</span></div>
-      <div class="child-stats"><div class="cs-box"><div class="cs-num">${total}</div><div class="cs-lbl">Games</div></div><div class="cs-box"><div class="cs-num">${best}/5</div><div class="cs-lbl">Best</div></div><div class="cs-box"><div class="cs-num">${perfect}</div><div class="cs-lbl">Perfect</div></div></div>
-      <div style="font-size:12px;font-weight:700;color:#888780;margin-bottom:4px">Avg: ${avg}/5</div>
-      <div class="prog-mini"><div class="prog-mini-bar" style="width:${Math.round(Number(avg)/5*100)}%"></div></div>
-      ${recent.length?`<div style="margin-top:10px">${recent.map(s=>`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #F4C0D1;font-size:12px;font-weight:700"><span style="flex:1">${s.stars}</span><span style="color:#888780">${s.diff}</span><span style="color:var(--pink);font-weight:900">${s.score}/5</span></div>`).join('')}</div>`:''}
+      <div class="child-stats"><div class="cs-box"><div class="cs-num">${total}</div><div class="cs-lbl">Games</div></div><div class="cs-box"><div class="cs-num">${best}</div><div class="cs-lbl">Best</div></div><div class="cs-box"><div class="cs-num">${perfect}</div><div class="cs-lbl">Perfect</div></div></div>
+      <div style="font-size:12px;font-weight:700;color:#888780;margin-bottom:4px">Avg score: ${avg}</div>
+      <div style="background:linear-gradient(135deg,#FFF0F7,#FFF8E8);border-radius:12px;border:1.5px solid #FFB347;padding:10px 12px;margin-top:10px;display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">🌟</span><span style="font-size:12px;font-weight:800;color:#1D2B55">Kids Corner</span></div>
+        <div style="font-size:13px;font-weight:900;color:${kidsDistinct>=kidsTotal?'#10B981':'#BA7517'}">${kidsDistinct}/${kidsTotal} games${kidsDistinct>=kidsTotal?' 🏆':''}</div>
+      </div>
+      ${recent.length?`<div style="margin-top:10px">${recent.map(s=>`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #F4C0D1;font-size:12px;font-weight:700"><span style="flex:1">${s.stars}</span><span style="color:#888780">${s.diff}</span><span style="color:var(--pink);font-weight:900">${s.score}${s.total?'/'+s.total:''}</span></div>`).join('')}</div>`:''}
     </div>`;
   }).join('');
 }
