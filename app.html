@@ -1277,9 +1277,39 @@ async function api(data){
       return {success:true, scores:champions, requiredGames:15};
     }
     if(a==='getAllTimeScores'){
-      const {data:rows}=await SB.from('scores').select('*').order('score',{ascending:false}).order('created_at',{ascending:false}).limit(10);
-      const scores=(rows||[]).map(s=>({name:s.name||s.username,username:s.username,score:s.score,total:s.total,stars:s.stars,date:_d(s.created_at),diff:s.diff}));
-      return {success:true,scores:scores};
+      // Aggregate: user must have played all 7 main games at least once
+      const {data:rows}=await SB.from('scores').select('*').order('created_at',{ascending:false}).limit(3000);
+      const gameOf=(diff)=>{
+        if(['easy','medium','hard','infinite'].includes(diff))return 'grammar';
+        if(diff&&diff.startsWith('spell-'))return 'spell';
+        if(diff&&diff.startsWith('shark-'))return 'shark';
+        if(diff&&diff.startsWith('odd-'))return 'odd';
+        if(diff&&diff.startsWith('scramble-'))return 'scramble';
+        if(diff&&diff.startsWith('chain-'))return 'chain';
+        if(diff&&diff.startsWith('sprint-'))return 'sprint';
+        return null; // kids-* and anything else excluded from this board
+      };
+      const REQUIRED=['grammar','spell','shark','odd','scramble','chain','sprint'];
+      const byUser={};
+      (rows||[]).forEach(r=>{
+        const game=gameOf(r.diff);
+        if(!game) return;
+        const u=r.username; if(!u) return;
+        if(!byUser[u]) byUser[u]={name:r.name||u, type:r.type||'free', games:{}};
+        const prev=byUser[u].games[game];
+        if(!prev || (r.score||0)>prev) byUser[u].games[game]=r.score||0;
+      });
+      const champions=Object.keys(byUser).map(u=>{
+        const rec=byUser[u];
+        const gamesPlayed=Object.keys(rec.games);
+        const rounds=gamesPlayed.length;
+        const total=gamesPlayed.reduce((s,g)=>s+rec.games[g],0);
+        const best=gamesPlayed.length?Math.max(...gamesPlayed.map(g=>rec.games[g])):0;
+        return {name:rec.name, type:rec.type, rounds, best, total};
+      }).filter(c2=>c2.rounds>=REQUIRED.length)
+        .sort((a,b)=>b.total-a.total)
+        .slice(0,10);
+      return {success:true,scores:champions};
     }
 
     if(a==='getProfile'){
