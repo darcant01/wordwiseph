@@ -1,0 +1,77 @@
+{
+  "packageId": "com.wordwiseph.app",
+  "host": "wordwiseph.com",
+  "name": "WordWise PH",
+  "launcherName": "WordWise",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#1D2B55",
+  "navigationColor": "#1D2B55",
+  "navigationColorDark": "#1D2B55",
+  "navigationDividerColor": "#1D2B55",
+  "backgroundColor": "#1D2B55",
+  "enableNotifications": false,
+  "startUrl": "/app.html",
+  "iconUrl": "https://wordwiseph.com/icons/icon-512.png",
+  "maskableIconUrl": "https://wordwiseph.com/icons/icon-512.png",
+  "appVersion": "1",
+  "appVersionName": "1.0.0",
+  "shortcuts": [
+    {
+      "name": "Grammar Quiz",
+      "short_name": "Grammar",
+      "url": "/app.html",
+      "icons": [
+        {
+          "src": "https://wordwiseph.com/icons/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Kids Corner",
+      "short_name": "Kids",
+      "url": "/app.html",
+      "icons": [
+        {
+          "src": "https://wordwiseph.com/icons/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Shark Typing",
+      "short_name": "Shark",
+      "url": "/app.html",
+      "icons": [
+        {
+          "src": "https://wordwiseph.com/icons/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://wordwiseph.com/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": false
+    },
+    "playBilling": {
+      "enabled": false
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://wordwiseph.com/",
+  "minSdkVersion": 19,
+  "signing": {
+    "keystore": "wordwiseph.keystore",
+    "keyAlias": "wordwiseph"
+  }
+}
