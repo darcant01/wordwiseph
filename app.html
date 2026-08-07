@@ -654,17 +654,20 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
   <div class="hero"><div class="htitle">🏆 <span>Leaderboards</span></div><div class="hsub">Top players across all games!</div></div>
   <div class="wrap">
 
-    <!-- Game Selector Tabs -->
-    <div class="lb-game-tabs">
-      <button class="lb-gtab on" onclick="switchLBGame('grammar',this)">📝 Grammar</button>
-      <button class="lb-gtab" onclick="switchLBGame('spell',this)">🔤 Spelling</button>
-      <button class="lb-gtab" onclick="switchLBGame('shark',this)">🦈 Shark</button>
-      <button class="lb-gtab" onclick="switchLBGame('odd',this)">🎯 Odd One</button>
-      <button class="lb-gtab" onclick="switchLBGame('scramble',this)">🔀 Scramble</button>
-      <button class="lb-gtab" onclick="switchLBGame('chain',this)">🔗 Chain</button>
-      <button class="lb-gtab" onclick="switchLBGame('sprint',this)">🏃 Sprint</button>
-      <button class="lb-gtab" onclick="switchLBGame('kids',this)">🌟 Kids Corner</button>
-      <button class="lb-gtab" onclick="switchLBGame('weekly',this)" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border-color:#10B981">💰 Weekly Cash Prize</button>
+    <!-- Game Selector Dropdown -->
+    <div style="margin-bottom:16px">
+      <select id="lb-game-select" onchange="switchLBGame(this.value,null)"
+        style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:800;color:#1D2B55;background:#fff">
+        <option value="grammar">📝 Grammar</option>
+        <option value="spell">🔤 Spelling</option>
+        <option value="shark">🦈 Shark</option>
+        <option value="odd">🎯 Odd One Out</option>
+        <option value="scramble">🔀 Scramble</option>
+        <option value="chain">🔗 Chain</option>
+        <option value="sprint">🏃 Sprint</option>
+        <option value="kids">🌟 Kids Corner</option>
+        <option value="weekly">💰 Weekly Cash Prize</option>
+      </select>
     </div>
 
     <!-- Grammar Quiz LB -->
@@ -2716,8 +2719,8 @@ let lbCurrentDiff = {grammar:'easy', spell:'easy', shark:'easy', odd:'easy'};
 
 function switchLBGame(game, el){
   lbCurrentGame = game;
-  document.querySelectorAll('.lb-gtab').forEach(t=>t.classList.remove('on'));
-  if(el)el.classList.add('on');
+  const sel=document.getElementById('lb-game-select');
+  if(sel && sel.value!==game)sel.value=game;
   ['grammar','spell','shark','odd','scramble','chain','sprint','kids','weekly'].forEach(g=>{
     const p=document.getElementById('lb-'+g);
     if(p)p.style.display=(g===game?'block':'none');
