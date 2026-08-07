@@ -659,6 +659,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <button class="lb-gtab" onclick="switchLBGame('scramble',this)">🔀 Scramble</button>
       <button class="lb-gtab" onclick="switchLBGame('chain',this)">🔗 Chain</button>
       <button class="lb-gtab" onclick="switchLBGame('sprint',this)">🏃 Sprint</button>
+      <button class="lb-gtab" onclick="switchLBGame('kids',this)">🌟 Kids Corner</button>
     </div>
 
     <!-- Grammar Quiz LB -->
@@ -736,6 +737,31 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <button class="lbt hard" onclick="switchLBDiff('sprint','hard',this)">🔥 Hard</button>
       </div>
       <div id="lb-sprint-list" class="lb-list"></div>
+    </div>
+
+    <!-- Kids Corner LB -->
+    <div id="lb-kids" class="lb-game-panel" style="display:none">
+      <div style="margin-bottom:14px">
+        <select id="lb-kids-select" onchange="loadLBGame('kids', this.value)"
+          style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid #E8EAF0;font-family:Nunito,sans-serif;font-size:14px;font-weight:800;color:#1D2B55;background:#fff">
+          <option value="kids-abc-order">🔤 ABC Order</option>
+          <option value="kids-missing-letter">🔍 Missing Letter</option>
+          <option value="kids-rhyme">🎵 Rhyme Time</option>
+          <option value="kids-color-match">🎯 Color Match</option>
+          <option value="kids-color-word">👁️ Color the Word</option>
+          <option value="kids-rainbow-order">🌈 Rainbow Order</option>
+          <option value="kids-color-mixer">🎨 Color Mixer</option>
+          <option value="kids-find-color">🔍 Find the Color</option>
+          <option value="kids-animal-sound">🔊 Animal Sound</option>
+          <option value="kids-animal-match">👶 Animal Match</option>
+          <option value="kids-where-live">🏠 Where Do I Live</option>
+          <option value="kids-animal-alphabet">🔤 Animal Alphabet</option>
+          <option value="kids-how-many-legs">🦵 How Many Legs</option>
+          <option value="kids-big-small">🐘 Big or Small</option>
+          <option value="kids-animal-group">🐾 Animal Group</option>
+        </select>
+      </div>
+      <div id="lb-kids-list" class="lb-list"></div>
     </div>
 
   </div>
@@ -2181,7 +2207,7 @@ function switchLBGame(game, el){
   lbCurrentGame = game;
   document.querySelectorAll('.lb-gtab').forEach(t=>t.classList.remove('on'));
   if(el)el.classList.add('on');
-  ['grammar','spell','shark','odd','scramble','chain','sprint'].forEach(g=>{
+  ['grammar','spell','shark','odd','scramble','chain','sprint','kids'].forEach(g=>{
     const p=document.getElementById('lb-'+g);
     if(p)p.style.display=(g===game?'block':'none');
   });
@@ -2191,6 +2217,11 @@ function switchLBGame(game, el){
     panel.querySelectorAll('.lbt').forEach(t=>t.classList.remove('on'));
     const first=panel.querySelector('.lbt');
     if(first)first.classList.add('on');
+  }
+  if(game==='kids'){
+    const sel=document.getElementById('lb-kids-select');
+    loadLBGame('kids', sel?sel.value:'kids-abc-order');
+    return;
   }
   lbCurrentDiff[game]='all';
   loadLBGame(game, 'all');
@@ -2253,7 +2284,7 @@ async function loadLBGame(game, diff){
   }
 
   // ── PER DIFFICULTY: top score per round ──
-  const diffKey = game==='grammar' ? diff : game+'-'+diff;
+  const diffKey = game==='grammar' ? diff : game==='kids' ? diff : game+'-'+diff;
   const res = await api({action:'getScores', diff:diffKey});
   if(!res.success||!res.scores?.length){
     listEl.innerHTML='<div class="lb-empty">No scores yet for this level!<br>Be the first to play! 🚀</div>';
@@ -2262,7 +2293,7 @@ async function loadLBGame(game, diff){
   listEl.innerHTML = res.scores.map((e,i)=>{
     // Score display depends on game type
   let scoreDisplay;
-  if(game==='shark'||game==='chain'||game==='sprint'){
+  if((game==='shark'||game==='chain'||game==='sprint')&&game!=='kids'){
     // These games have open-ended scores — just show the number
     const label = game==='shark'?'words':game==='chain'?'words':'words';
     scoreDisplay = `<span class="lb-score-display">${e.score}</span><div class="lbdate">${label}</div>`;
