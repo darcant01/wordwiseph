@@ -799,9 +799,13 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div id="lb-weekly-main-wrap" style="display:block">
         <div style="background:linear-gradient(135deg,#10B981,#059669);border-radius:16px;padding:16px;margin-bottom:16px;text-align:center;color:#fff">
           <div style="font-size:28px;margin-bottom:6px">💰</div>
-          <div style="font-size:16px;font-weight:900;margin-bottom:4px">This Week's Top 5 Win Real Cash!</div>
+          <div style="font-size:16px;font-weight:900;margin-bottom:4px">Top 5 Win Real Cash!</div>
           <div style="font-size:12px;font-weight:700;opacity:0.9">Ranked by best score across Grammar, Spell, Shark, Odd One Out, Scramble, Chain &amp; Sprint.</div>
           <div id="lb-weekly-countdown" style="margin-top:10px;display:inline-block;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:99px;padding:5px 16px;font-size:12px;font-weight:900"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button id="lb-weekly-period-current" onclick="switchWeeklyPeriod('main','current',this)" style="flex:1;padding:9px;border-radius:99px;border:2px solid #1D2B55;background:#1D2B55;color:#fff;font-family:Nunito,sans-serif;font-size:12px;font-weight:900;cursor:pointer">📊 Live Standings</button>
+          <button id="lb-weekly-period-last" onclick="switchWeeklyPeriod('main','last',this)" style="flex:1;padding:9px;border-radius:99px;border:2px solid #E8EAF0;background:#fff;color:#1D2B55;font-family:Nunito,sans-serif;font-size:12px;font-weight:900;cursor:pointer">🏆 Claim Last Week's Prize</button>
         </div>
         <div id="lb-weekly-list"></div>
         <div id="lb-weekly-claim" style="margin-top:16px"></div>
@@ -809,9 +813,13 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
       <div id="lb-weekly-kids-wrap" style="display:none">
         <div style="background:linear-gradient(135deg,#FF6B9D,#FFB347);border-radius:16px;padding:16px;margin-bottom:16px;text-align:center;color:#fff">
           <div style="font-size:28px;margin-bottom:6px">💰</div>
-          <div style="font-size:16px;font-weight:900;margin-bottom:4px">This Week's Kids Corner Top 5 Win Cash!</div>
+          <div style="font-size:16px;font-weight:900;margin-bottom:4px">Kids Corner Top 5 Win Cash!</div>
           <div style="font-size:12px;font-weight:700;opacity:0.9">Ranked by best score across all 15 Kids Corner games.</div>
           <div id="lb-kids-weekly-countdown" style="margin-top:10px;display:inline-block;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:99px;padding:5px 16px;font-size:12px;font-weight:900"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button id="lb-kids-weekly-period-current" onclick="switchWeeklyPeriod('kids','current',this)" style="flex:1;padding:9px;border-radius:99px;border:2px solid #1D2B55;background:#1D2B55;color:#fff;font-family:Nunito,sans-serif;font-size:12px;font-weight:900;cursor:pointer">📊 Live Standings</button>
+          <button id="lb-kids-weekly-period-last" onclick="switchWeeklyPeriod('kids','last',this)" style="flex:1;padding:9px;border-radius:99px;border:2px solid #E8EAF0;background:#fff;color:#1D2B55;font-family:Nunito,sans-serif;font-size:12px;font-weight:900;cursor:pointer">🏆 Claim Last Week's Prize</button>
         </div>
         <div id="lb-kids-weekly-list"></div>
         <div id="lb-kids-weekly-claim" style="margin-top:16px"></div>
@@ -2821,16 +2829,38 @@ function switchWeeklyCategory(cat, el){
   if(mainWrap)mainWrap.style.display=(cat==='main')?'block':'none';
   if(kidsWrap)kidsWrap.style.display=(cat==='kids')?'block':'none';
   if(cat==='main'){
-    loadWeeklyChampions();
+    resetWeeklyPeriodButtons('main');
+    loadWeeklyChampions('current');
     updateWeeklyCountdown();
     if(window._weeklyCdTimer)clearInterval(window._weeklyCdTimer);
     window._weeklyCdTimer=setInterval(updateWeeklyCountdown,60000);
   }else if(cat==='kids'){
-    loadKidsWeeklyChampions();
+    resetWeeklyPeriodButtons('kids');
+    loadKidsWeeklyChampions('current');
     updateKidsWeeklyCountdown();
     if(window._kidsWeeklyCdTimer)clearInterval(window._kidsWeeklyCdTimer);
     window._kidsWeeklyCdTimer=setInterval(updateKidsWeeklyCountdown,60000);
   }
+}
+
+function resetWeeklyPeriodButtons(scope){
+  const curId=scope==='kids'?'lb-kids-weekly-period-current':'lb-weekly-period-current';
+  const lastId=scope==='kids'?'lb-kids-weekly-period-last':'lb-weekly-period-last';
+  const curBtn=document.getElementById(curId), lastBtn=document.getElementById(lastId);
+  if(curBtn){curBtn.style.background='#1D2B55';curBtn.style.color='#fff';curBtn.style.border='2px solid #1D2B55';}
+  if(lastBtn){lastBtn.style.background='#fff';lastBtn.style.color='#1D2B55';lastBtn.style.border='2px solid #E8EAF0';}
+}
+
+function switchWeeklyPeriod(scope, period, el){
+  const curId=scope==='kids'?'lb-kids-weekly-period-current':'lb-weekly-period-current';
+  const lastId=scope==='kids'?'lb-kids-weekly-period-last':'lb-weekly-period-last';
+  const curBtn=document.getElementById(curId), lastBtn=document.getElementById(lastId);
+  const active=period==='current'?curBtn:lastBtn;
+  const inactive=period==='current'?lastBtn:curBtn;
+  if(active){active.style.background='#1D2B55';active.style.color='#fff';active.style.border='2px solid #1D2B55';}
+  if(inactive){inactive.style.background='#fff';inactive.style.color='#1D2B55';inactive.style.border='2px solid #E8EAF0';}
+  if(scope==='main')loadWeeklyChampions(period);
+  else loadKidsWeeklyChampions(period);
 }
 
 function updateKidsWeeklyCountdown(){
@@ -2838,16 +2868,17 @@ function updateKidsWeeklyCountdown(){
   if(el)el.textContent=getWeekResetCountdown();
 }
 
-async function loadKidsWeeklyChampions(){
+async function loadKidsWeeklyChampions(period){
+  period=period||'current';
   const el=document.getElementById('lb-kids-weekly-list');
   const claimEl=document.getElementById('lb-kids-weekly-claim');
   if(!el)return;
-  el.innerHTML='<div class="lb-empty">Loading this week\'s champions...</div>';
+  el.innerHTML='<div class="lb-empty">Loading champions...</div>';
   if(claimEl)claimEl.innerHTML='';
-  const res=await api({action:'getWeeklyKidsChampions'});
+  const res=await api({action:'getWeeklyKidsChampions',period});
   const medals=['🥇','🥈','🥉','🏅','🏅'];
   if(!res||!res.success||!res.champions?.length){
-    el.innerHTML='<div class="lb-empty"><div style="font-size:40px;margin-bottom:12px">🌟</div><div style="font-size:16px;font-weight:900;color:var(--navy);margin-bottom:8px">No Kids Champions Yet This Week!</div><div style="font-size:13px;font-weight:700;color:#888780;line-height:1.7">To appear here, play <strong style="color:var(--navy)">ALL 15 Kids Corner games</strong> this week!</div></div>';
+    el.innerHTML='<div class="lb-empty"><div style="font-size:40px;margin-bottom:12px">🌟</div><div style="font-size:16px;font-weight:900;color:var(--navy);margin-bottom:8px">'+(period==='last'?'No Kids Winners Last Week':'No Kids Champions Yet This Week!')+'</div><div style="font-size:13px;font-weight:700;color:#888780;line-height:1.7">'+(period==='last'?'Nobody played all 15 games last week.':'To appear here, play <strong style="color:var(--navy)">ALL 15 Kids Corner games</strong> this week!')+'</div></div>';
     return;
   }
   el.innerHTML=res.champions.map(r=>`
@@ -2855,13 +2886,17 @@ async function loadKidsWeeklyChampions(){
       <div class="lbmedal">${medals[r.rank-1]}</div>
       <div class="lbinfo">
         <div class="lbname">${r.name}<span class="lbbdg ${r.type}">${r.type==='kid'?'Kid':r.type==='adult'?'Adult':'Guest'}</span></div>
-        <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">${r.gamesPlayed} games played this week</div>
+        <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">${r.gamesPlayed} games played</div>
       </div>
       <div class="lbright">
         <span class="lb-score-display" style="font-size:clamp(16px,3.5vw,22px);color:#10B981">₱${r.prize}</span>
         <div class="lbdate">${r.total} pts</div>
       </div>
     </div>`).join('');
+  if(period==='current'){
+    if(claimEl)claimEl.innerHTML='<div style="background:#FFF0F7;border-radius:14px;padding:14px;text-align:center;font-size:12px;font-weight:700;color:#6B7280">🔒 Rankings are still live and can change. Claiming opens once this week ends (every Monday) — check "🏆 Claim Last Week\'s Prize" then!</div>';
+    return;
+  }
   if(CU && claimEl){
     const mine=res.champions.find(c2=>c2.username===CU.username);
     if(mine){
@@ -2982,16 +3017,17 @@ function updateWeeklyCountdown(){
   if(el)el.textContent=getWeekResetCountdown();
 }
 
-async function loadWeeklyChampions(){
+async function loadWeeklyChampions(period){
+  period=period||'current';
   const el=document.getElementById('lb-weekly-list');
   const claimEl=document.getElementById('lb-weekly-claim');
   if(!el)return;
-  el.innerHTML='<div class="lb-empty">Loading this week\'s champions...</div>';
+  el.innerHTML='<div class="lb-empty">Loading champions...</div>';
   if(claimEl)claimEl.innerHTML='';
-  const res=await api({action:'getWeeklyChampions'});
+  const res=await api({action:'getWeeklyChampions',period});
   const medals=['🥇','🥈','🥉','🏅','🏅'];
   if(!res||!res.success||!res.champions?.length){
-    el.innerHTML='<div class="lb-empty"><div style="font-size:40px;margin-bottom:12px">💰</div><div style="font-size:16px;font-weight:900;color:var(--navy);margin-bottom:8px">No Players Yet This Week!</div><div style="font-size:13px;font-weight:700;color:#888780">Play any of the 7 Brainy Games to enter the Top 5!</div></div>';
+    el.innerHTML='<div class="lb-empty"><div style="font-size:40px;margin-bottom:12px">💰</div><div style="font-size:16px;font-weight:900;color:var(--navy);margin-bottom:8px">'+(period==='last'?'No Winners Last Week':'No Players Yet This Week!')+'</div><div style="font-size:13px;font-weight:700;color:#888780">'+(period==='last'?'Nobody qualified for the Top 5 last week.':'Play any of the 7 Brainy Games to enter the Top 5!')+'</div></div>';
     return;
   }
   el.innerHTML=res.champions.map(r=>`
@@ -2999,14 +3035,19 @@ async function loadWeeklyChampions(){
       <div class="lbmedal">${medals[r.rank-1]}</div>
       <div class="lbinfo">
         <div class="lbname">${r.name}<span class="lbbdg ${r.type}">${r.type==='kid'?'Kid':r.type==='adult'?'Adult':'Guest'}</span></div>
-        <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">${r.gamesPlayed} games played this week</div>
+        <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">${r.gamesPlayed} games played</div>
       </div>
       <div class="lbright">
         <span class="lb-score-display" style="font-size:clamp(16px,3.5vw,22px);color:#10B981">₱${r.prize}</span>
         <div class="lbdate">${r.total} pts</div>
       </div>
     </div>`).join('');
-  // Show claim form if the logged-in user is in the top 5 and hasn't claimed yet
+  // Live standings: no claiming allowed yet — show a lock note instead
+  if(period==='current'){
+    if(claimEl)claimEl.innerHTML='<div style="background:#F4F6FF;border-radius:14px;padding:14px;text-align:center;font-size:12px;font-weight:700;color:#6B7280">🔒 Rankings are still live and can change. Claiming opens once this week ends (every Monday) — check "🏆 Claim Last Week\'s Prize" then!</div>';
+    return;
+  }
+  // Show claim form if the logged-in user is in last week's top 5 and hasn't claimed yet
   if(CU && claimEl){
     const mine=res.champions.find(c2=>c2.username===CU.username);
     if(mine){
