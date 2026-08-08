@@ -1462,17 +1462,22 @@ async function api(data){
         const prev=byUser[u].games[game];
         if(!prev || (r.score||0)>prev) byUser[u].games[game]=r.score||0;
       });
-      const ranked=Object.keys(byUser).map(u=>{
+      const MAIN_TOTAL=7;
+      let mapped=Object.keys(byUser).map(u=>{
         const rec=byUser[u];
         const gk=Object.keys(rec.games);
         const total=gk.reduce((s,g)=>s+rec.games[g],0);
         return {username:u, name:rec.name, type:rec.type, gamesPlayed:gk.length, total};
-      }).sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
+      });
+      // Only the FINAL (last week / claimable) results require all 7 games played.
+      // Live standings show everyone's current progress so players can see where they stand.
+      if(data.period==='last')mapped=mapped.filter(r=>r.gamesPlayed>=MAIN_TOTAL);
+      const ranked=mapped.sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
       // Get prize amounts
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[200,150,100,75,50];
       ranked.forEach(r=>r.prize=prizes[r.rank-1]||0);
-      return {success:true, champions:ranked, weekStart:rangeStart.toISOString().split('T')[0], period:data.period||'current'};
+      return {success:true, champions:ranked, weekStart:rangeStart.toISOString().split('T')[0], requiredGames:MAIN_TOTAL, period:data.period||'current'};
     }
     if(a==='claimWeeklyReward'){
       if(!data.username)return {success:false,error:'Not logged in'};
@@ -1501,14 +1506,16 @@ async function api(data){
         const prev=byUser[u].games[game];
         if(!prev || (r.score||0)>prev) byUser[u].games[game]=r.score||0;
       });
+      const MAIN_TOTAL=7;
       const ranked=Object.keys(byUser).map(u=>{
         const rec=byUser[u];
         const gk=Object.keys(rec.games);
         const total=gk.reduce((s,g)=>s+rec.games[g],0);
-        return {username:u, total};
-      }).sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
+        return {username:u, gamesPlayed:gk.length, total};
+      }).filter(r=>r.gamesPlayed>=MAIN_TOTAL)
+        .sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
       const mine=ranked.find(r=>r.username===data.username);
-      if(!mine)return {success:false,error:'You were not in last week\'s Top 5. Better luck this week!'};
+      if(!mine)return {success:false,error:'You were not in last week\'s Top 5 (must have played all 7 games). Better luck this week!'};
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[200,150,100,75,50];
       const prize=prizes[mine.rank-1]||0;
@@ -3030,7 +3037,7 @@ async function loadWeeklyChampions(period){
   const res=await api({action:'getWeeklyChampions',period});
   const medals=['🥇','🥈','🥉','🏅','🏅'];
   if(!res||!res.success||!res.champions?.length){
-    el.innerHTML='<div class="lb-empty"><div style="font-size:40px;margin-bottom:12px">💰</div><div style="font-size:16px;font-weight:900;color:var(--navy);margin-bottom:8px">'+(period==='last'?'No Winners Last Week':'No Players Yet This Week!')+'</div><div style="font-size:13px;font-weight:700;color:#888780">'+(period==='last'?'Nobody qualified for the Top 5 last week.':'Play any of the 7 Brainy Games to enter the Top 5!')+'</div></div>';
+    el.innerHTML='<div class="lb-empty"><div style="font-size:40px;margin-bottom:12px">💰</div><div style="font-size:16px;font-weight:900;color:var(--navy);margin-bottom:8px">'+(period==='last'?'No Winners Last Week':'No Players Yet This Week!')+'</div><div style="font-size:13px;font-weight:700;color:#888780;line-height:1.7">'+(period==='last'?'Nobody played <strong style="color:var(--navy)">all 7 games</strong> last week to qualify.':'Play any of the 7 Brainy Games to enter the Top 5!')+'</div></div>';
     return;
   }
   el.innerHTML=res.champions.map(r=>`
