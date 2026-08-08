@@ -2921,12 +2921,17 @@ async function loadKidsWeeklyChampions(period){
       ?(qualified?'<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">✅ Qualified</span>'
                  :'<span style="background:#FEF3C7;color:#92600A;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">🔒 '+r.gamesPlayed+'/'+need+' games, '+r.daysPlayed+'/'+needDays+' days</span>')
       :'';
+    const claimBadge=period==='last'
+      ?(r.claimStatus==='paid'?'<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">✅ Claimed</span>'
+        :r.claimStatus==='submitted'?'<span style="background:#FEF3C7;color:#92600A;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">⏳ Claim Pending</span>'
+        :'<span style="background:#F4F6FF;color:#6B7280;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">Not Claimed Yet</span>')
+      :'';
     return `
     <div class="lbrow ${r.rank===1?'gold':r.rank===2?'silver':r.rank===3?'bronze':''}">
       <div class="lbmedal">${medals[r.rank-1]}</div>
       <div class="lbinfo">
         <div class="lbname">${r.name}<span class="lbbdg ${r.type}">${r.type==='kid'?'Kid':r.type==='adult'?'Adult':'Guest'}</span></div>
-        <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">${r.gamesPlayed} games played${qBadge}</div>
+        <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">${r.gamesPlayed} games played${qBadge}${claimBadge}</div>
       </div>
       <div class="lbright">
         <span class="lb-score-display" style="font-size:clamp(16px,3.5vw,22px);color:#10B981">₱${r.prize}</span>
@@ -3079,12 +3084,17 @@ async function loadWeeklyChampions(period){
       ?(qualified?'<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">✅ Qualified</span>'
                  :'<span style="background:#FEF3C7;color:#92600A;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">🔒 '+r.gamesPlayed+'/'+need+' games, '+r.daysPlayed+'/'+needDays+' days</span>')
       :'';
+    const claimBadge=period==='last'
+      ?(r.claimStatus==='paid'?'<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">✅ Claimed</span>'
+        :r.claimStatus==='submitted'?'<span style="background:#FEF3C7;color:#92600A;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">⏳ Claim Pending</span>'
+        :'<span style="background:#F4F6FF;color:#6B7280;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">Not Claimed Yet</span>')
+      :'';
     return `
     <div class="lbrow ${r.rank===1?'gold':r.rank===2?'silver':r.rank===3?'bronze':''}">
       <div class="lbmedal">${medals[r.rank-1]}</div>
       <div class="lbinfo">
         <div class="lbname">${r.name}<span class="lbbdg ${r.type}">${r.type==='kid'?'Kid':r.type==='adult'?'Adult':'Guest'}</span></div>
-        <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">${r.gamesPlayed} games played${qBadge}</div>
+        <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">${r.gamesPlayed} games played${qBadge}${claimBadge}</div>
       </div>
       <div class="lbright">
         <span class="lb-score-display" style="font-size:clamp(16px,3.5vw,22px);color:#10B981">₱${r.prize}</span>
