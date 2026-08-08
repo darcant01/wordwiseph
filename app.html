@@ -1352,7 +1352,14 @@ async function api(data){
       const day=now.getDay();
       const diffToMon=(day===0?-6:1-day);
       const monday=new Date(now);monday.setDate(now.getDate()+diffToMon);monday.setHours(0,0,0,0);
-      const {data:rows}=await SB.from('scores').select('*').gte('created_at',monday.toISOString()).like('diff','kids-%').order('created_at',{ascending:false}).limit(3000);
+      let rangeStart=monday, rangeEnd=null;
+      if(data.period==='last'){
+        rangeEnd=monday;
+        rangeStart=new Date(monday); rangeStart.setDate(monday.getDate()-7);
+      }
+      let kq=SB.from('scores').select('*').gte('created_at',rangeStart.toISOString()).like('diff','kids-%').order('created_at',{ascending:false}).limit(3000);
+      if(rangeEnd)kq=kq.lt('created_at',rangeEnd.toISOString());
+      const {data:rows}=await kq;
       const byUser={};
       (rows||[]).forEach(r=>{
         const u=r.username; if(!u||u==='guest') return;
@@ -1371,15 +1378,17 @@ async function api(data){
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes_kids').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[100,75,50,25,10];
       ranked.forEach(r=>r.prize=prizes[r.rank-1]||0);
-      return {success:true, champions:ranked, weekStart:monday.toISOString().split('T')[0], requiredGames:KIDS_TOTAL};
+      return {success:true, champions:ranked, weekStart:rangeStart.toISOString().split('T')[0], requiredGames:KIDS_TOTAL, period:data.period||'current'};
     }
     if(a==='claimKidsWeeklyReward'){
       if(!data.username)return {success:false,error:'Not logged in'};
+      // Claims only apply to the PREVIOUS completed week — the current week is still live
       const now=new Date();
       const day=now.getDay();
       const diffToMon=(day===0?-6:1-day);
       const monday=new Date(now);monday.setDate(now.getDate()+diffToMon);monday.setHours(0,0,0,0);
-      const {data:rows}=await SB.from('scores').select('*').gte('created_at',monday.toISOString()).like('diff','kids-%').limit(3000);
+      const prevMonday=new Date(monday); prevMonday.setDate(monday.getDate()-7);
+      const {data:rows}=await SB.from('scores').select('*').gte('created_at',prevMonday.toISOString()).lt('created_at',monday.toISOString()).like('diff','kids-%').limit(3000);
       const byUser={};
       (rows||[]).forEach(r=>{
         const u=r.username; if(!u||u==='guest') return;
@@ -1396,11 +1405,11 @@ async function api(data){
       }).filter(r=>r.gamesPlayed>=KIDS_TOTAL)
         .sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
       const mine=ranked.find(r=>r.username===data.username);
-      if(!mine)return {success:false,error:'You must play all 15 Kids Corner games this week to be in the Top 5. Keep playing!'};
+      if(!mine)return {success:false,error:'You were not in last week\'s Kids Corner Top 5 (must have played all 15 games). Keep playing!'};
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes_kids').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[100,75,50,25,10];
       const prize=prizes[mine.rank-1]||0;
-      const weekStart=monday.toISOString().split('T')[0];
+      const weekStart=prevMonday.toISOString().split('T')[0];
       const {error}=await SB.from('weekly_rewards').upsert([{
         username:data.username, name:data.name||data.username, week_start:weekStart, category:'kids',
         rank:mine.rank, points:mine.total, prize_amount:prize,
