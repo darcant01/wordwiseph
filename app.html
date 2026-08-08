@@ -1371,25 +1371,27 @@ async function api(data){
       const byUser={};
       (rows||[]).forEach(r=>{
         const u=r.username; if(!u||u==='guest') return;
-        if(!byUser[u]) byUser[u]={name:r.name||u, type:r.type||'free', games:{}};
+        if(!byUser[u]) byUser[u]={name:r.name||u, type:r.type||'free', games:{}, days:new Set()};
         const prev=byUser[u].games[r.diff];
         if(!prev || (r.score||0)>prev) byUser[u].games[r.diff]=r.score||0;
+        if(r.created_at)byUser[u].days.add(String(r.created_at).split('T')[0]);
       });
       const KIDS_TOTAL=15;
+      const DAYS_REQUIRED=3;
       let mapped=Object.keys(byUser).map(u=>{
         const rec=byUser[u];
         const gk=Object.keys(rec.games);
         const total=gk.reduce((s,g)=>s+rec.games[g],0);
-        return {username:u, name:rec.name, type:rec.type, gamesPlayed:gk.length, total};
+        return {username:u, name:rec.name, type:rec.type, gamesPlayed:gk.length, daysPlayed:rec.days.size, total};
       });
-      // Only the FINAL (last week / claimable) results require all 15 games played.
+      // Only the FINAL (last week / claimable) results require all 15 games AND 3+ different days played.
       // Live standings show everyone's current progress so players can see where they stand.
-      if(data.period==='last')mapped=mapped.filter(r=>r.gamesPlayed>=KIDS_TOTAL);
+      if(data.period==='last')mapped=mapped.filter(r=>r.gamesPlayed>=KIDS_TOTAL && r.daysPlayed>=DAYS_REQUIRED);
       const ranked=mapped.sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes_kids').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[100,75,50,25,10];
       ranked.forEach(r=>r.prize=prizes[r.rank-1]||0);
-      return {success:true, champions:ranked, weekStart:rangeStart.toISOString().split('T')[0], requiredGames:KIDS_TOTAL, period:data.period||'current'};
+      return {success:true, champions:ranked, weekStart:rangeStart.toISOString().split('T')[0], requiredGames:KIDS_TOTAL, requiredDays:DAYS_REQUIRED, period:data.period||'current'};
     }
     if(a==='claimKidsWeeklyReward'){
       if(!data.username)return {success:false,error:'Not logged in'};
@@ -1403,20 +1405,22 @@ async function api(data){
       const byUser={};
       (rows||[]).forEach(r=>{
         const u=r.username; if(!u||u==='guest') return;
-        if(!byUser[u]) byUser[u]={games:{}};
+        if(!byUser[u]) byUser[u]={games:{}, days:new Set()};
         const prev=byUser[u].games[r.diff];
         if(!prev || (r.score||0)>prev) byUser[u].games[r.diff]=r.score||0;
+        if(r.created_at)byUser[u].days.add(String(r.created_at).split('T')[0]);
       });
       const KIDS_TOTAL=15;
+      const DAYS_REQUIRED=3;
       const ranked=Object.keys(byUser).map(u=>{
         const rec=byUser[u];
         const gk=Object.keys(rec.games);
         const total=gk.reduce((s,g)=>s+rec.games[g],0);
-        return {username:u, gamesPlayed:gk.length, total};
-      }).filter(r=>r.gamesPlayed>=KIDS_TOTAL)
+        return {username:u, gamesPlayed:gk.length, daysPlayed:rec.days.size, total};
+      }).filter(r=>r.gamesPlayed>=KIDS_TOTAL && r.daysPlayed>=DAYS_REQUIRED)
         .sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
       const mine=ranked.find(r=>r.username===data.username);
-      if(!mine)return {success:false,error:'You were not in last week\'s Kids Corner Top 5 (must have played all 15 games). Keep playing!'};
+      if(!mine)return {success:false,error:'You were not in last week\'s Kids Corner Top 5 (must play all 15 games on at least 3 different days). Keep playing!'};
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes_kids').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[100,75,50,25,10];
       const prize=prizes[mine.rank-1]||0;
@@ -1458,26 +1462,28 @@ async function api(data){
       (rows||[]).forEach(r=>{
         const game=gameOf(r.diff); if(!game) return;
         const u=r.username; if(!u||u==='guest') return;
-        if(!byUser[u]) byUser[u]={name:r.name||u, type:r.type||'free', games:{}};
+        if(!byUser[u]) byUser[u]={name:r.name||u, type:r.type||'free', games:{}, days:new Set()};
         const prev=byUser[u].games[game];
         if(!prev || (r.score||0)>prev) byUser[u].games[game]=r.score||0;
+        if(r.created_at)byUser[u].days.add(String(r.created_at).split('T')[0]);
       });
       const MAIN_TOTAL=7;
+      const DAYS_REQUIRED=3;
       let mapped=Object.keys(byUser).map(u=>{
         const rec=byUser[u];
         const gk=Object.keys(rec.games);
         const total=gk.reduce((s,g)=>s+rec.games[g],0);
-        return {username:u, name:rec.name, type:rec.type, gamesPlayed:gk.length, total};
+        return {username:u, name:rec.name, type:rec.type, gamesPlayed:gk.length, daysPlayed:rec.days.size, total};
       });
-      // Only the FINAL (last week / claimable) results require all 7 games played.
+      // Only the FINAL (last week / claimable) results require all 7 games AND 3+ different days played.
       // Live standings show everyone's current progress so players can see where they stand.
-      if(data.period==='last')mapped=mapped.filter(r=>r.gamesPlayed>=MAIN_TOTAL);
+      if(data.period==='last')mapped=mapped.filter(r=>r.gamesPlayed>=MAIN_TOTAL && r.daysPlayed>=DAYS_REQUIRED);
       const ranked=mapped.sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
       // Get prize amounts
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[200,150,100,75,50];
       ranked.forEach(r=>r.prize=prizes[r.rank-1]||0);
-      return {success:true, champions:ranked, weekStart:rangeStart.toISOString().split('T')[0], requiredGames:MAIN_TOTAL, period:data.period||'current'};
+      return {success:true, champions:ranked, weekStart:rangeStart.toISOString().split('T')[0], requiredGames:MAIN_TOTAL, requiredDays:DAYS_REQUIRED, period:data.period||'current'};
     }
     if(a==='claimWeeklyReward'){
       if(!data.username)return {success:false,error:'Not logged in'};
@@ -1502,20 +1508,22 @@ async function api(data){
       (rows||[]).forEach(r=>{
         const game=gameOf(r.diff); if(!game) return;
         const u=r.username; if(!u||u==='guest') return;
-        if(!byUser[u]) byUser[u]={name:r.name||u, type:r.type||'free', games:{}};
+        if(!byUser[u]) byUser[u]={name:r.name||u, type:r.type||'free', games:{}, days:new Set()};
         const prev=byUser[u].games[game];
         if(!prev || (r.score||0)>prev) byUser[u].games[game]=r.score||0;
+        if(r.created_at)byUser[u].days.add(String(r.created_at).split('T')[0]);
       });
       const MAIN_TOTAL=7;
+      const DAYS_REQUIRED=3;
       const ranked=Object.keys(byUser).map(u=>{
         const rec=byUser[u];
         const gk=Object.keys(rec.games);
         const total=gk.reduce((s,g)=>s+rec.games[g],0);
-        return {username:u, gamesPlayed:gk.length, total};
-      }).filter(r=>r.gamesPlayed>=MAIN_TOTAL)
+        return {username:u, gamesPlayed:gk.length, daysPlayed:rec.days.size, total};
+      }).filter(r=>r.gamesPlayed>=MAIN_TOTAL && r.daysPlayed>=DAYS_REQUIRED)
         .sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
       const mine=ranked.find(r=>r.username===data.username);
-      if(!mine)return {success:false,error:'You were not in last week\'s Top 5 (must have played all 7 games). Better luck this week!'};
+      if(!mine)return {success:false,error:'You were not in last week\'s Top 5 (must play all 7 games on at least 3 different days). Better luck this week!'};
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[200,150,100,75,50];
       const prize=prizes[mine.rank-1]||0;
