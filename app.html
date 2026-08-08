@@ -1416,7 +1416,14 @@ async function api(data){
       const day=now.getDay(); // 0=Sun,1=Mon...
       const diffToMon=(day===0?-6:1-day);
       const monday=new Date(now);monday.setDate(now.getDate()+diffToMon);monday.setHours(0,0,0,0);
-      const {data:rows}=await SB.from('scores').select('*').gte('created_at',monday.toISOString()).order('created_at',{ascending:false}).limit(3000);
+      let rangeStart=monday, rangeEnd=null;
+      if(data.period==='last'){
+        rangeEnd=monday;
+        rangeStart=new Date(monday); rangeStart.setDate(monday.getDate()-7);
+      }
+      let q=SB.from('scores').select('*').gte('created_at',rangeStart.toISOString()).order('created_at',{ascending:false}).limit(3000);
+      if(rangeEnd)q=q.lt('created_at',rangeEnd.toISOString());
+      const {data:rows}=await q;
       const gameOf=(diff)=>{
         if(['easy','medium','hard','infinite'].includes(diff))return 'grammar';
         if(diff&&diff.startsWith('spell-'))return 'spell';
@@ -1445,16 +1452,17 @@ async function api(data){
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[200,150,100,75,50];
       ranked.forEach(r=>r.prize=prizes[r.rank-1]||0);
-      return {success:true, champions:ranked, weekStart:monday.toISOString().split('T')[0]};
+      return {success:true, champions:ranked, weekStart:rangeStart.toISOString().split('T')[0], period:data.period||'current'};
     }
     if(a==='claimWeeklyReward'){
       if(!data.username)return {success:false,error:'Not logged in'};
-      // Recompute ranking server-side to verify eligibility (no trusting client input)
+      // Claims only apply to the PREVIOUS completed week — the current week is still live and can change
       const now=new Date();
       const day=now.getDay();
       const diffToMon=(day===0?-6:1-day);
       const monday=new Date(now);monday.setDate(now.getDate()+diffToMon);monday.setHours(0,0,0,0);
-      const {data:rows}=await SB.from('scores').select('*').gte('created_at',monday.toISOString()).limit(3000);
+      const prevMonday=new Date(monday); prevMonday.setDate(monday.getDate()-7);
+      const {data:rows}=await SB.from('scores').select('*').gte('created_at',prevMonday.toISOString()).lt('created_at',monday.toISOString()).limit(3000);
       const gameOf=(diff)=>{
         if(['easy','medium','hard','infinite'].includes(diff))return 'grammar';
         if(diff&&diff.startsWith('spell-'))return 'spell';
@@ -1480,11 +1488,11 @@ async function api(data){
         return {username:u, total};
       }).sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
       const mine=ranked.find(r=>r.username===data.username);
-      if(!mine)return {success:false,error:'You are not in this week\'s Top 5. Keep playing!'};
+      if(!mine)return {success:false,error:'You were not in last week\'s Top 5. Better luck this week!'};
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[200,150,100,75,50];
       const prize=prizes[mine.rank-1]||0;
-      const weekStart=monday.toISOString().split('T')[0];
+      const weekStart=prevMonday.toISOString().split('T')[0];
       const {error}=await SB.from('weekly_rewards').upsert([{
         username:data.username, name:data.name||data.username, week_start:weekStart,
         rank:mine.rank, points:mine.total, prize_amount:prize,
