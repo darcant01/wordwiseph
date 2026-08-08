@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="icon" type="image/png" href="favicon.png"/>
+<meta property="og:title" content="Parent Dashboard — Track Your Child's Progress | WordWise PH"/>
+<meta property="og:description" content="See exactly how your child is improving with the WordWise PH Parent Dashboard — scores, streaks, and progress across every game."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://wordwiseph.com/feature-parent-dashboard.html"/>
+<meta property="og:site_name" content="WordWise PH"/>
+<meta property="og:image" content="https://wordwiseph.com/og-image.png"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Parent Dashboard — Track Your Child's Progress | WordWise PH"/>
+<meta name="twitter:description" content="See exactly how your child is improving with the WordWise PH Parent Dashboard — scores, streaks, and progress across every game."/>
+<link rel="canonical" href="https://wordwiseph.com/feature-parent-dashboard.html"/>
+<title>Parent Dashboard — Track Your Child's Progress | WordWise PH</title>
+<meta name="description" content="See exactly how your child is improving with the WordWise PH Parent Dashboard — scores, streaks, and progress across every game."/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--navy:#1D2B55;--navy2:#243366;--pink:#D4537E;--pink2:#c0456e;--gold:#FAC775;--light:#F4F6FF;--muted:#6B7280;--r:16px;--green:#10B981}
+html{scroll-behavior:smooth}
+body{font-family:"Nunito",sans-serif;background:#fff;color:var(--navy);overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(29,43,85,0.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.08);height:64px;display:flex;align-items:center;padding:0 clamp(16px,5vw,48px);justify-content:space-between}
+.nav-logo{font-size:clamp(18px,4vw,22px);font-weight:900;color:#fff}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-link{font-size:13px;font-weight:800;padding:8px 14px;border-radius:99px;color:rgba(255,255,255,0.8);border:none;background:none;cursor:pointer;transition:all 0.15s;font-family:"Nunito",sans-serif}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,0.1)}
+.nav-link.active{color:#fff;background:rgba(255,255,255,0.12)}
+.nav-cta{background:var(--pink);color:#fff;padding:9px 20px;border-radius:99px;font-size:13px;font-weight:900;font-family:"Nunito",sans-serif;border:none;cursor:pointer;transition:all 0.15s}
+.nav-cta:hover{background:var(--pink2);transform:scale(1.04)}
+.ham{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px}
+.ham span{width:22px;height:2.5px;background:#fff;border-radius:2px}
+.mob-menu{display:none;position:fixed;top:64px;left:0;right:0;background:var(--navy);padding:16px;z-index:199;border-bottom:1px solid rgba(255,255,255,0.1);flex-direction:column;gap:8px}
+.mob-menu.open{display:flex}
+.mob-link{font-size:14px;font-weight:800;padding:12px 16px;border-radius:12px;color:rgba(255,255,255,0.85);cursor:pointer;transition:background 0.15s}
+.mob-link:hover{background:rgba(255,255,255,0.08);color:#fff}
+.hero{min-height:44vh;background:linear-gradient(145deg,#0F1A3E 0%,var(--navy) 45%,#2B1F5E 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px clamp(16px,5vw,48px) 60px;position:relative;overflow:hidden;text-align:center}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 55% 60% at 80% 20%,rgba(212,83,126,0.2) 0%,transparent 70%),radial-gradient(ellipse 45% 50% at 15% 80%,rgba(250,199,117,0.12) 0%,transparent 60%)}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,0.05) 1px,transparent 1px);background-size:32px 32px}
+.hero-icon{font-size:52px;margin-bottom:12px;position:relative;z-index:1;animation:fadeUp 0.5s ease both}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:7px;background:rgba(250,199,117,0.15);border:1.5px solid rgba(250,199,117,0.35);color:var(--gold);font-size:12px;font-weight:800;padding:6px 16px;border-radius:99px;margin-bottom:20px;position:relative;z-index:1;animation:fadeUp 0.5s ease both}
+.hero h1{font-size:clamp(28px,6vw,52px);font-weight:900;color:#fff;line-height:1.15;position:relative;z-index:1;animation:fadeUp 0.6s 0.1s ease both}
+.hero h1 span{color:var(--pink)}
+.hero-sub{font-size:clamp(14px,2.5vw,18px);color:rgba(255,255,255,0.68);max-width:520px;margin:16px auto 0;line-height:1.65;position:relative;z-index:1;animation:fadeUp 0.6s 0.2s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+main{max-width:900px;margin:0 auto;padding:clamp(32px,6vw,60px) clamp(16px,4vw,24px)}
+.card{background:#fff;border-radius:20px;border:1.5px solid #EAEDF5;padding:clamp(22px,4vw,34px);margin-bottom:18px;box-shadow:0 4px 20px rgba(29,43,85,0.05)}
+.eyebrow{font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--pink);margin-bottom:10px;text-align:center}
+.card-h2{font-size:clamp(20px,4vw,26px);font-weight:900;color:var(--navy);margin-bottom:10px;text-align:center}
+.card-h2 span{color:var(--pink)}
+.card-p{font-size:clamp(13px,2.5vw,15px);color:var(--muted);line-height:1.75;text-align:center;max-width:560px;margin:0 auto 28px}
+/* Phone mockup */
+.phone-wrap{display:flex;justify-content:center;margin:0 auto 8px}
+.phone-frame{width:min(320px,86vw);background:linear-gradient(160deg,#1D2B55,#0F1A3E);border-radius:36px;padding:14px;box-shadow:0 40px 80px rgba(29,43,85,0.35),0 0 0 2px rgba(255,255,255,0.06) inset}
+.phone-notch{width:70px;height:6px;background:rgba(255,255,255,0.25);border-radius:99px;margin:0 auto 10px}
+.phone-screen{background:var(--light);border-radius:24px;overflow:hidden;min-height:380px;font-size:12px}
+/* Steps */
+.story-line{display:flex;flex-direction:column;gap:0;margin-top:8px;position:relative}
+.story-line::before{content:"";position:absolute;left:19px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--pink),var(--navy));opacity:0.15}
+.story-item{display:flex;gap:16px;padding-bottom:24px;position:relative}
+.story-dot{width:40px;height:40px;border-radius:50%;flex-shrink:0;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 4px 12px rgba(29,43,85,0.2);position:relative;z-index:1}
+.story-title{font-size:14px;font-weight:900;color:var(--navy);margin-bottom:4px;padding-top:8px}
+.story-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.offer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:20px}
+.offer-tile{border-radius:14px;padding:18px 14px;border:1.5px solid #EAEDF5;transition:all 0.2s;position:relative;overflow:hidden}
+.offer-tile::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--c,var(--pink))}
+.offer-tile:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(29,43,85,0.1);border-color:var(--c,var(--pink))}
+.ot-emoji{font-size:26px;margin-bottom:8px}
+.ot-name{font-size:13px;font-weight:900;color:var(--navy)}
+.ot-desc{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5}
+.cta-card{background:linear-gradient(135deg,var(--navy),#2D3F7A);border-radius:20px;padding:clamp(28px,5vw,44px);text-align:center;margin-bottom:18px;position:relative;overflow:hidden}
+.cta-card::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,rgba(212,83,126,0.2) 0%,transparent 60%);pointer-events:none}
+.cta-card h2{color:#fff;font-size:clamp(20px,4vw,28px);font-weight:900;margin-bottom:8px;position:relative;z-index:1}
+.cta-card p{color:rgba(255,255,255,0.7);font-size:clamp(13px,2.5vw,15px);margin-bottom:22px;position:relative;z-index:1}
+.cta-btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;position:relative;z-index:1}
+.btn-primary{font-family:"Nunito",sans-serif;font-size:14px;font-weight:900;padding:13px 28px;border-radius:99px;background:var(--pink);border:none;color:#fff;cursor:pointer;transition:all 0.2s;box-shadow:0 6px 20px rgba(212,83,126,0.4)}
+.btn-primary:hover{background:var(--pink2);transform:translateY(-2px)}
+.btn-ghost{font-family:"Nunito",sans-serif;font-size:14px;font-weight:900;padding:13px 28px;border-radius:99px;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.3);color:#fff;cursor:pointer;transition:all 0.2s}
+.btn-ghost:hover{background:rgba(255,255,255,0.18);border-color:#fff}
+footer{background:var(--navy);padding:clamp(28px,5vw,44px) clamp(16px,5vw,48px)}
+.footer-inner{max-width:900px;margin:0 auto}
+.footer-top{display:flex;flex-wrap:wrap;gap:24px;justify-content:space-between;align-items:flex-start;margin-bottom:22px}
+.footer-logo{font-size:20px;font-weight:900;color:#fff}
+.footer-logo span{color:var(--gold)}
+.footer-tagline{font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px}
+.footer-links{display:flex;flex-wrap:wrap;gap:6px}
+.footer-link{font-size:13px;font-weight:700;color:rgba(255,255,255,0.55);padding:6px 12px;border-radius:8px;cursor:pointer;transition:all 0.15s}
+.footer-link:hover{color:#fff;background:rgba(255,255,255,0.08)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.1);padding-top:16px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:12px;color:rgba(255,255,255,0.3)}
+.footer-bottom a{color:rgba(255,255,255,0.45)}
+.footer-bottom a:hover{color:#fff}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity 0.55s ease,transform 0.55s ease}
+.reveal.visible{opacity:1;transform:none}
+@media(max-width:768px){.nav-links{display:none}.ham{display:flex}.offer-grid{grid-template-columns:1fr 1fr}}
+</style>
+<style></style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">WordWise<span>PH</span></a>
+  <div class="nav-links">
+    <button class="nav-link" onclick="location.href='index.html#games'">Games</button>
+    <button class="nav-link" onclick="location.href='index.html#features'">Features</button>
+    <button class="nav-link" onclick="location.href='index.html#pricing'">Pricing</button>
+    <button class="nav-cta" onclick="location.href='app.html'">Play Free →</button>
+  </div>
+  <div class="ham" onclick="toggleMob()" id="ham"><span></span><span></span><span></span></div>
+</nav>
+<div class="mob-menu" id="mob-menu">
+  <div class="mob-link" onclick="location.href='index.html#games'">🎮 Games</div>
+  <div class="mob-link" onclick="location.href='index.html#features'">✨ Features</div>
+  <div class="mob-link" onclick="location.href='index.html#pricing'">💳 Pricing</div>
+  <div class="mob-link" style="background:var(--pink);color:#fff;border-radius:12px;text-align:center" onclick="location.href='app.html'">🚀 Play for Free</div>
+</div>
+<section class="hero">
+  <div class="hero-icon">📊</div>
+  <div class="hero-eyebrow">✨ Parent Dashboard</div>
+  <h1>Know exactly how<br><span>your child is doing.</span></h1>
+  <p class="hero-sub">A clear, simple dashboard showing your child's scores, perfect rounds, recent activity, and Kids Corner progress — all in one place.</p>
+</section>
+<main>
+  <div class="card reveal">
+    <div class="eyebrow">See It In Action</div>
+    <div class="card-h2">What it <span>looks like</span></div>
+    <div class="phone-wrap">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+<div style="background:linear-gradient(135deg,#C0392B,#791F1F);padding:14px;text-align:center;color:#fff">
+  <div style="font-size:14px;font-weight:900">📊 Juan Jr.'s Progress</div>
+  <div style="font-size:9px;font-weight:700;opacity:0.85;margin-top:2px">This week's summary</div>
+</div>
+<div style="padding:12px">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px">
+    <div style="background:#F4F6FF;border-radius:10px;padding:8px;text-align:center;border:1.5px solid #E8EAF0">
+      <div style="font-size:14px;font-weight:900;color:#D4537E">24</div>
+      <div style="font-size:7px;color:#888780;font-weight:700">Games</div>
+    </div>
+    <div style="background:#F4F6FF;border-radius:10px;padding:8px;text-align:center;border:1.5px solid #E8EAF0">
+      <div style="font-size:14px;font-weight:900;color:#10B981">18</div>
+      <div style="font-size:7px;color:#888780;font-weight:700">Best Score</div>
+    </div>
+    <div style="background:#F4F6FF;border-radius:10px;padding:8px;text-align:center;border:1.5px solid #E8EAF0">
+      <div style="font-size:14px;font-weight:900;color:#FAC775">6</div>
+      <div style="font-size:7px;color:#888780;font-weight:700">Perfect</div>
+    </div>
+  </div>
+  <div style="font-size:8px;font-weight:800;color:#888780;margin-bottom:6px">RECENT ACTIVITY</div>
+  <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #F0F0F0;font-size:8px">
+    <span style="font-weight:800;color:#1D2B55">⭐⭐⭐⭐⭐ Grammar Quiz</span>
+    <span style="color:#D4537E;font-weight:900">5/5</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #F0F0F0;font-size:8px">
+    <span style="font-weight:800;color:#1D2B55">⭐⭐⭐⭐💫 Shark Typing</span>
+    <span style="color:#D4537E;font-weight:900">32pts</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:8px">
+    <span style="font-weight:800;color:#1D2B55">⭐⭐⭐💫💫 Letter Tracer</span>
+    <span style="color:#D4537E;font-weight:900">kids-abc</span>
+  </div>
+  <div style="margin-top:10px;background:linear-gradient(135deg,#FFF0F7,#FFF8E8);border-radius:10px;padding:8px;display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:8px;font-weight:800;color:#1D2B55">🌟 Kids Corner</span>
+    <span style="font-size:9px;font-weight:900;color:#10B981">9/15 games</span>
+  </div>
+</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card reveal">
+    <div class="eyebrow">How It Works</div>
+    <div class="card-h2">Simple as <span>1-2-3</span></div>
+    <div class="story-line"><div class="story-item">
+      <div class="story-dot">1</div>
+      <div><div class="story-title">Log in as parent</div><div class="story-desc">Use your own parent account — separate from your child's login — to access the dashboard.</div></div>
+    </div><div class="story-item">
+      <div class="story-dot">2</div>
+      <div><div class="story-title">Link your child's account</div><div class="story-desc">Enter your child's username once to connect their progress to your view.</div></div>
+    </div><div class="story-item">
+      <div class="story-dot">3</div>
+      <div><div class="story-title">Check in anytime</div><div class="story-desc">See games played, best scores, perfect rounds, and Kids Corner completion — updated in real time.</div></div>
+    </div></div>
+  </div>
+
+  <div class="card reveal">
+    <div class="eyebrow">Why It Matters</div>
+    <div class="card-h2">Built for <span>real families</span></div>
+    <div class="offer-grid"><div class="offer-tile" style="--c:#C0392B">
+      <div class="ot-emoji">📈</div><div class="ot-name">Real Progress</div><div class="ot-desc">See actual scores and improvement, not vague summaries.</div>
+    </div><div class="offer-tile" style="--c:#1D2B55">
+      <div class="ot-emoji">🕐</div><div class="ot-name">Recent Activity</div><div class="ot-desc">A live feed of exactly what your child just played.</div>
+    </div><div class="offer-tile" style="--c:#FF6B9D">
+      <div class="ot-emoji">🌟</div><div class="ot-name">Kids Corner Tracker</div><div class="ot-desc">See how many of the 15 mini-games your child has completed.</div>
+    </div><div class="offer-tile" style="--c:#7F77DD">
+      <div class="ot-emoji">👨‍👩‍👧</div><div class="ot-name">Multiple Children</div><div class="ot-desc">With a Family Plan, monitor up to 3 kids side by side.</div>
+    </div></div>
+  </div>
+
+  <div class="cta-card reveal">
+    <h2>See your child's progress today</h2>
+    <p>Create a parent account and link your child to start tracking right away.</p>
+    <div class="cta-btns">
+      <button class="btn-primary" onclick="location.href='app.html'">🚀 Play Free Now</button>
+      <button class="btn-ghost" onclick="location.href='index.html#features'">See All Features</button>
+    </div>
+  </div>
+</main>
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div><div class="footer-logo">WordWise<span>PH</span></div><div class="footer-tagline">English learning for every child 🌍</div></div>
+      <div class="footer-links">
+        <span class="footer-link" onclick="location.href='index.html'">Home</span>
+        <span class="footer-link" onclick="location.href='index.html#games'">Games</span>
+        <span class="footer-link" onclick="location.href='index.html#pricing'">Pricing</span>
+        <span class="footer-link" onclick="location.href='about.html'">About</span>
+        <a class="footer-link" href="https://t.me/wordwiseph_support_bot" target="_blank">Support</a>
+        <a class="footer-link" href="privacy.html">Privacy</a>
+        <a class="footer-link" href="terms.html">Terms</a>
+        <a class="footer-link" href="mailto:darcant01@gmail.com">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 WordWise PH · Made with ❤️ for every child</span>
+      <span><a href="https://t.me/wordwiseph_support_bot" target="_blank">@wordwiseph_support_bot</a> · <a href="mailto:darcant01@gmail.com">darcant01@gmail.com</a></span>
+    </div>
+  </div>
+</footer>
+<script>
+function toggleMob(){document.getElementById("mob-menu").classList.toggle("open")}
+document.addEventListener("click",e=>{const m=document.getElementById("mob-menu");const h=document.getElementById("ham");if(!m.contains(e.target)&&!h.contains(e.target))m.classList.remove("open")});
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add("visible")})},{threshold:0.1});
+document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
+window.addEventListener("scroll",()=>{document.querySelector("nav").style.boxShadow=window.scrollY>20?"0 4px 24px rgba(0,0,0,0.25)":"none"});
+</script>
+</body>
+</html>
