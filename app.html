@@ -800,7 +800,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <div style="background:linear-gradient(135deg,#10B981,#059669);border-radius:16px;padding:16px;margin-bottom:16px;text-align:center;color:#fff">
           <div style="font-size:28px;margin-bottom:6px">💰</div>
           <div style="font-size:16px;font-weight:900;margin-bottom:4px">Top 5 Win Real Cash!</div>
-          <div style="font-size:12px;font-weight:700;opacity:0.9">Play all 7 games on 3+ different days to qualify. Ranked by total points.</div>
+          <div style="font-size:12px;font-weight:700;opacity:0.9">Play all 7 games on 5+ different days to qualify. Ranked by total points.</div>
           <div id="lb-weekly-countdown" style="margin-top:10px;display:inline-block;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:99px;padding:5px 16px;font-size:12px;font-weight:900"></div>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:14px">
@@ -814,7 +814,7 @@ body{font-family:'Nunito',sans-serif;background:#FFF8F0;min-height:100vh}
         <div style="background:linear-gradient(135deg,#FF6B9D,#FFB347);border-radius:16px;padding:16px;margin-bottom:16px;text-align:center;color:#fff">
           <div style="font-size:28px;margin-bottom:6px">💰</div>
           <div style="font-size:16px;font-weight:900;margin-bottom:4px">Kids Corner Top 5 Win Cash!</div>
-          <div style="font-size:12px;font-weight:700;opacity:0.9">Play all 15 games on 3+ different days to qualify. Ranked by total points.</div>
+          <div style="font-size:12px;font-weight:700;opacity:0.9">Play all 15 games on 5+ different days to qualify. Ranked by total points.</div>
           <div id="lb-kids-weekly-countdown" style="margin-top:10px;display:inline-block;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:99px;padding:5px 16px;font-size:12px;font-weight:900"></div>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:14px">
@@ -1377,7 +1377,7 @@ async function api(data){
         if(r.created_at)byUser[u].days.add(String(r.created_at).split('T')[0]);
       });
       const KIDS_TOTAL=15;
-      const DAYS_REQUIRED=3;
+      const DAYS_REQUIRED=5;
       let mapped=Object.keys(byUser).map(u=>{
         const rec=byUser[u];
         const gk=Object.keys(rec.games);
@@ -1411,7 +1411,7 @@ async function api(data){
         if(r.created_at)byUser[u].days.add(String(r.created_at).split('T')[0]);
       });
       const KIDS_TOTAL=15;
-      const DAYS_REQUIRED=3;
+      const DAYS_REQUIRED=5;
       const ranked=Object.keys(byUser).map(u=>{
         const rec=byUser[u];
         const gk=Object.keys(rec.games);
@@ -1420,7 +1420,7 @@ async function api(data){
       }).filter(r=>r.gamesPlayed>=KIDS_TOTAL && r.daysPlayed>=DAYS_REQUIRED)
         .sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
       const mine=ranked.find(r=>r.username===data.username);
-      if(!mine)return {success:false,error:'You were not in last week\'s Kids Corner Top 5 (must play all 15 games on at least 3 different days). Keep playing!'};
+      if(!mine)return {success:false,error:'You were not in last week\'s Kids Corner Top 5 (must play all 15 games on at least 5 different days). Keep playing!'};
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes_kids').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[100,75,50,25,10];
       const prize=prizes[mine.rank-1]||0;
@@ -1468,7 +1468,7 @@ async function api(data){
         if(r.created_at)byUser[u].days.add(String(r.created_at).split('T')[0]);
       });
       const MAIN_TOTAL=7;
-      const DAYS_REQUIRED=3;
+      const DAYS_REQUIRED=5;
       let mapped=Object.keys(byUser).map(u=>{
         const rec=byUser[u];
         const gk=Object.keys(rec.games);
@@ -1514,7 +1514,7 @@ async function api(data){
         if(r.created_at)byUser[u].days.add(String(r.created_at).split('T')[0]);
       });
       const MAIN_TOTAL=7;
-      const DAYS_REQUIRED=3;
+      const DAYS_REQUIRED=5;
       const ranked=Object.keys(byUser).map(u=>{
         const rec=byUser[u];
         const gk=Object.keys(rec.games);
@@ -1523,7 +1523,7 @@ async function api(data){
       }).filter(r=>r.gamesPlayed>=MAIN_TOTAL && r.daysPlayed>=DAYS_REQUIRED)
         .sort((a,b)=>b.total-a.total).slice(0,5).map((r,i)=>({...r, rank:i+1}));
       const mine=ranked.find(r=>r.username===data.username);
-      if(!mine)return {success:false,error:'You were not in last week\'s Top 5 (must play all 7 games on at least 3 different days). Better luck this week!'};
+      if(!mine)return {success:false,error:'You were not in last week\'s Top 5 (must play all 7 games on at least 5 different days). Better luck this week!'};
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[200,150,100,75,50];
       const prize=prizes[mine.rank-1]||0;
@@ -2901,7 +2901,7 @@ async function loadKidsWeeklyChampions(period){
   }
   el.innerHTML=res.champions.map(r=>{
     const need=res.requiredGames||15;
-    const needDays=res.requiredDays||3;
+    const needDays=res.requiredDays||5;
     const qualified=r.gamesPlayed>=need && r.daysPlayed>=needDays;
     const qBadge=period==='current'
       ?(qualified?'<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">✅ Qualified</span>'
@@ -3059,7 +3059,7 @@ async function loadWeeklyChampions(period){
   }
   el.innerHTML=res.champions.map(r=>{
     const need=res.requiredGames||7;
-    const needDays=res.requiredDays||3;
+    const needDays=res.requiredDays||5;
     const qualified=r.gamesPlayed>=need && r.daysPlayed>=needDays;
     const qBadge=period==='current'
       ?(qualified?'<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">✅ Qualified</span>'
