@@ -2901,10 +2901,11 @@ async function loadKidsWeeklyChampions(period){
   }
   el.innerHTML=res.champions.map(r=>{
     const need=res.requiredGames||15;
-    const qualified=r.gamesPlayed>=need;
+    const needDays=res.requiredDays||3;
+    const qualified=r.gamesPlayed>=need && r.daysPlayed>=needDays;
     const qBadge=period==='current'
       ?(qualified?'<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">✅ Qualified</span>'
-                 :'<span style="background:#FEF3C7;color:#92600A;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">🔒 '+r.gamesPlayed+'/'+need+'</span>')
+                 :'<span style="background:#FEF3C7;color:#92600A;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">🔒 '+r.gamesPlayed+'/'+need+' games, '+r.daysPlayed+'/'+needDays+' days</span>')
       :'';
     return `
     <div class="lbrow ${r.rank===1?'gold':r.rank===2?'silver':r.rank===3?'bronze':''}">
@@ -3058,10 +3059,11 @@ async function loadWeeklyChampions(period){
   }
   el.innerHTML=res.champions.map(r=>{
     const need=res.requiredGames||7;
-    const qualified=r.gamesPlayed>=need;
+    const needDays=res.requiredDays||3;
+    const qualified=r.gamesPlayed>=need && r.daysPlayed>=needDays;
     const qBadge=period==='current'
       ?(qualified?'<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">✅ Qualified</span>'
-                 :'<span style="background:#FEF3C7;color:#92600A;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">🔒 '+r.gamesPlayed+'/'+need+'</span>')
+                 :'<span style="background:#FEF3C7;color:#92600A;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">🔒 '+r.gamesPlayed+'/'+need+' games, '+r.daysPlayed+'/'+needDays+' days</span>')
       :'';
     return `
     <div class="lbrow ${r.rank===1?'gold':r.rank===2?'silver':r.rank===3?'bronze':''}">
