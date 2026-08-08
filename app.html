@@ -1391,6 +1391,13 @@ async function api(data){
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes_kids').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[100,75,50,25,10];
       ranked.forEach(r=>r.prize=prizes[r.rank-1]||0);
+      if(data.period==='last' && ranked.length){
+        const usernames=ranked.map(r=>r.username);
+        const {data:claims}=await SB.from('weekly_rewards').select('username,status').eq('week_start',rangeStart.toISOString().split('T')[0]).eq('category','kids').in('username',usernames);
+        const statusByUser={};
+        (claims||[]).forEach(cl=>{statusByUser[cl.username]=cl.status;});
+        ranked.forEach(r=>r.claimStatus=statusByUser[r.username]||'none');
+      }
       return {success:true, champions:ranked, weekStart:rangeStart.toISOString().split('T')[0], requiredGames:KIDS_TOTAL, requiredDays:DAYS_REQUIRED, period:data.period||'current'};
     }
     if(a==='claimKidsWeeklyReward'){
@@ -1483,6 +1490,13 @@ async function api(data){
       const {data:pz}=await SB.from('settings').select('value').eq('key','weekly_prizes').limit(1);
       const prizes=pz&&pz.length?JSON.parse(pz[0].value):[200,150,100,75,50];
       ranked.forEach(r=>r.prize=prizes[r.rank-1]||0);
+      if(data.period==='last' && ranked.length){
+        const usernames=ranked.map(r=>r.username);
+        const {data:claims}=await SB.from('weekly_rewards').select('username,status').eq('week_start',rangeStart.toISOString().split('T')[0]).eq('category','main').in('username',usernames);
+        const statusByUser={};
+        (claims||[]).forEach(cl=>{statusByUser[cl.username]=cl.status;});
+        ranked.forEach(r=>r.claimStatus=statusByUser[r.username]||'none');
+      }
       return {success:true, champions:ranked, weekStart:rangeStart.toISOString().split('T')[0], requiredGames:MAIN_TOTAL, requiredDays:DAYS_REQUIRED, period:data.period||'current'};
     }
     if(a==='claimWeeklyReward'){
