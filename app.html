@@ -2891,18 +2891,26 @@ async function loadKidsWeeklyChampions(period){
     el.innerHTML='<div class="lb-empty"><div style="font-size:40px;margin-bottom:12px">🌟</div><div style="font-size:16px;font-weight:900;color:var(--navy);margin-bottom:8px">'+(period==='last'?'No Kids Winners Last Week':'No Kids Champions Yet This Week!')+'</div><div style="font-size:13px;font-weight:700;color:#888780;line-height:1.7">'+(period==='last'?'Nobody played all 15 games last week.':'To appear here, play <strong style="color:var(--navy)">ALL 15 Kids Corner games</strong> this week!')+'</div></div>';
     return;
   }
-  el.innerHTML=res.champions.map(r=>`
+  el.innerHTML=res.champions.map(r=>{
+    const need=res.requiredGames||15;
+    const qualified=r.gamesPlayed>=need;
+    const qBadge=period==='current'
+      ?(qualified?'<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">✅ Qualified</span>'
+                 :'<span style="background:#FEF3C7;color:#92600A;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">🔒 '+r.gamesPlayed+'/'+need+'</span>')
+      :'';
+    return `
     <div class="lbrow ${r.rank===1?'gold':r.rank===2?'silver':r.rank===3?'bronze':''}">
       <div class="lbmedal">${medals[r.rank-1]}</div>
       <div class="lbinfo">
         <div class="lbname">${r.name}<span class="lbbdg ${r.type}">${r.type==='kid'?'Kid':r.type==='adult'?'Adult':'Guest'}</span></div>
-        <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">${r.gamesPlayed} games played</div>
+        <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">${r.gamesPlayed} games played${qBadge}</div>
       </div>
       <div class="lbright">
         <span class="lb-score-display" style="font-size:clamp(16px,3.5vw,22px);color:#10B981">₱${r.prize}</span>
         <div class="lbdate">${r.total} pts</div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   if(period==='current'){
     if(claimEl)claimEl.innerHTML='<div style="background:#FFF0F7;border-radius:14px;padding:14px;text-align:center;font-size:12px;font-weight:700;color:#6B7280">🔒 Rankings are still live and can change. Claiming opens once this week ends (every Monday) — check "🏆 Claim Last Week\'s Prize" then!</div>';
     return;
@@ -3040,18 +3048,26 @@ async function loadWeeklyChampions(period){
     el.innerHTML='<div class="lb-empty"><div style="font-size:40px;margin-bottom:12px">💰</div><div style="font-size:16px;font-weight:900;color:var(--navy);margin-bottom:8px">'+(period==='last'?'No Winners Last Week':'No Players Yet This Week!')+'</div><div style="font-size:13px;font-weight:700;color:#888780;line-height:1.7">'+(period==='last'?'Nobody played <strong style="color:var(--navy)">all 7 games</strong> last week to qualify.':'Play any of the 7 Brainy Games to enter the Top 5!')+'</div></div>';
     return;
   }
-  el.innerHTML=res.champions.map(r=>`
+  el.innerHTML=res.champions.map(r=>{
+    const need=res.requiredGames||7;
+    const qualified=r.gamesPlayed>=need;
+    const qBadge=period==='current'
+      ?(qualified?'<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">✅ Qualified</span>'
+                 :'<span style="background:#FEF3C7;color:#92600A;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:6px">🔒 '+r.gamesPlayed+'/'+need+'</span>')
+      :'';
+    return `
     <div class="lbrow ${r.rank===1?'gold':r.rank===2?'silver':r.rank===3?'bronze':''}">
       <div class="lbmedal">${medals[r.rank-1]}</div>
       <div class="lbinfo">
         <div class="lbname">${r.name}<span class="lbbdg ${r.type}">${r.type==='kid'?'Kid':r.type==='adult'?'Adult':'Guest'}</span></div>
-        <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">${r.gamesPlayed} games played</div>
+        <div style="font-size:11px;color:#888780;font-weight:700;margin-top:3px">${r.gamesPlayed} games played${qBadge}</div>
       </div>
       <div class="lbright">
         <span class="lb-score-display" style="font-size:clamp(16px,3.5vw,22px);color:#10B981">₱${r.prize}</span>
         <div class="lbdate">${r.total} pts</div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   // Live standings: no claiming allowed yet — show a lock note instead
   if(period==='current'){
     if(claimEl)claimEl.innerHTML='<div style="background:#F4F6FF;border-radius:14px;padding:14px;text-align:center;font-size:12px;font-weight:700;color:#6B7280">🔒 Rankings are still live and can change. Claiming opens once this week ends (every Monday) — check "🏆 Claim Last Week\'s Prize" then!</div>';
